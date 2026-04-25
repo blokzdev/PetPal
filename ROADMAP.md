@@ -2,7 +2,7 @@
 
 Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-**Current phase: Phase 2 — Agent Loop & Chat MVP (in progress; next task 2.2). Phase 1 + 2 device verification batched per DECISIONS row 21.**
+**Current phase: Phase 2 — COMPLETE. Phase 1 + 2 on-device verification (per DECISIONS row 21) is the prerequisite for Phase 3.**
 
 ---
 
@@ -73,7 +73,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.11 Export: zip `wiki/<pet>/` → Android share sheet
 - [x] 2.12 `CloudSyncAdapter` interface stub committed (no implementation; Phase 5 decides backend)
 - [x] 2.13 Integration test: full happy-path chat → entry written → retrievable
-- [ ] 2.14 Phase wrap-up commit + summary
+- [x] 2.14 Phase wrap-up commit + summary
 
 **On-device verification:** install fresh, onboard, add Milo, chat "Milo ate chicken yesterday and got itchy paws," verify a food/allergy entry appears in the wiki browser, export and confirm zip arrives in another app.
 
