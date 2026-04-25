@@ -312,7 +312,7 @@ For phases that introduce new runtime behavior (data, networking, scheduled task
 
 ### Installable release builds for on-device verification
 
-The CI workflow's `release-apk` job runs `flutter build apk --release --split-per-abi` (ARM only — x86_64 is dropped per DECISIONS row 23). It is gated to push-to-`main` and manual `workflow_dispatch` to control CI minute burn (see §17). Two artifacts upload with 7-day retention:
+The CI workflow's `release-apk` job runs `flutter build apk --release --split-per-abi` (ARM only — x86_64 is dropped per DECISIONS row 23). It is gated to push-to-`main` and manual `workflow_dispatch` to control CI minute burn (see §17). Two artifacts upload with **2-day retention**, and **each new run prunes the prior matching artifacts before uploading** (keep-only-latest, DECISIONS row 24) — so the *Artifacts* section on a finished run only ever shows the freshest pair, and storage stays well under the 500 MB free-tier cap. The 2-day retention is a safety net in case the prune step ever fails silently; the canonical lifetime of an APK artifact is "until the next successful build."
 
 | Artifact name | ABI | Use this when |
 |---|---|---|
@@ -372,7 +372,7 @@ Headroom matters. The CI is shaped to stay well clear of both ceilings:
 - **`flutter` job (analyze + test)** runs on every push to `main` / `claude/**` and on PRs. Fast (~1–2 min with the Flutter SDK cache). Burn rate ≈ negligible even at heavy commit volume.
 - **`release-apk` job** runs **only** on push-to-`main` and manual `workflow_dispatch` (DECISIONS row 23). Working branches don't auto-build APKs. A typical release build is ~5–10 min; manually triggering once or twice a day for verification stays under 300 min/month.
 - **APK splits are ARM-only.** Dropping x86_64 cuts artifact storage roughly 1/3 and saves ~1 minute per run. Emulator users build locally.
-- **Artifact retention is 7 days.** Two ARM APKs at ~100 MB combined × ~3 active runs ≈ 300 MB resident — under the 500 MB cap with margin for the Flutter build cache.
+- **Keep-only-latest artifact pruning** (DECISIONS row 24). Each `release-apk` run deletes the prior `petpal-release-arm64-v8a` and `petpal-release-armeabi-v7a` artifacts via `actions/github-script` before uploading the new pair, so steady-state storage is just one pair (~100 MB), not N runs × ~100 MB. Retention is set to **2 days** as a safety net in case the prune step silently no-ops.
 - **`subosito/flutter-action@v2` SDK cache (`cache: true`)** is enabled on both jobs. First cache miss costs ~2 min for the SDK download; every run after restores in seconds.
 
 If burn approaches the cap, the lever is to drop `release-apk`'s push-to-main trigger and rely on `workflow_dispatch` only.

@@ -41,6 +41,11 @@ jobs:
       (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: flutter
     runs-on: ubuntu-latest
+    # actions: write is needed by the prune step below to delete prior
+    # artifacts. contents: read covers actions/checkout.
+    permissions:
+      contents: read
+      actions: write
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +82,53 @@ jobs:
           mv app-armeabi-v7a-release.apk petpal-release-armeabi-v7a.apk
           ls -la *.apk
 
+      # Keep-only-latest (DECISIONS row 24): delete prior artifacts with
+      # the same names so each new run replaces the old build instead of
+      # accumulating. Runs after the build succeeds so a failed build
+      # leaves the previous APK intact for the user. retention-days on
+      # the uploads below is a safety net in case this prune step ever
+      # silently no-ops.
+      - name: Prune previous APK artifacts (keep-only-latest)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const targetNames = new Set([
+              'petpal-release-arm64-v8a',
+              'petpal-release-armeabi-v7a',
+            ]);
+            const iter = github.paginate.iterator(
+              github.rest.actions.listArtifactsForRepo,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              },
+            );
+            let deleted = 0;
+            for await (const page of iter) {
+              for (const artifact of page.data) {
+                if (!targetNames.has(artifact.name)) continue;
+                if (artifact.expired) continue;
+                core.info(
+                  `deleting artifact #${artifact.id} ` +
+                  `(${artifact.name}, ${artifact.size_in_bytes} bytes)`
+                );
+                await github.rest.actions.deleteArtifact({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  artifact_id: artifact.id,
+                });
+                deleted += 1;
+              }
+            }
+            core.info(`pruned ${deleted} previous APK artifact(s)`);
+
       - name: Upload arm64-v8a APK (most modern phones)
         uses: actions/upload-artifact@v4
         with:
           name: petpal-release-arm64-v8a
           path: build/app/outputs/flutter-apk/petpal-release-arm64-v8a.apk
-          retention-days: 7
+          retention-days: 2
           if-no-files-found: error
 
       - name: Upload armeabi-v7a APK (older 32-bit ARM phones)
@@ -90,5 +136,5 @@ jobs:
         with:
           name: petpal-release-armeabi-v7a
           path: build/app/outputs/flutter-apk/petpal-release-armeabi-v7a.apk
-          retention-days: 7
+          retention-days: 2
           if-no-files-found: error
