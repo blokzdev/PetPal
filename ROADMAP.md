@@ -2,7 +2,7 @@
 
 Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-**Current phase: Phase 1 — COMPLETE. Verify on-device, then start Phase 2.**
+**Current phase: Phase 2 — Agent Loop & Chat MVP (in progress; next task 2.2). Phase 1 + 2 device verification batched per DECISIONS row 21.**
 
 ---
 
@@ -60,7 +60,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 **Goal:** end-of-phase = MVP. One pet, `SOUL.md`, chat that reads and writes the wiki, wiki browser, export.
 **Definition of done:** add Milo → 3-turn chat that writes ≥2 entries → entries visible in wiki browser → export-zip received via Android share sheet.
 
-- [ ] 2.1 Onboarding: welcome screen, API key entry, privacy disclosure (LLM calls leave the device)
+- [x] 2.1 Onboarding: welcome screen, API key entry, privacy disclosure (LLM calls leave the device)
 - [ ] 2.2 Add-pet flow: name, species, breed, DOB → seeds `SOUL.md`
 - [ ] 2.3 Chat screen: message list, composer, streaming token rendering
 - [ ] 2.4 Multi-turn loop in `AgentLoop`: turn → tool-call(s) → tool-result(s) → continue
