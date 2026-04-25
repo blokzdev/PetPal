@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 
+import '../../harness/retrieval/embedding_worker.dart';
 import '../db/database.dart';
 import '../wiki_io.dart';
 import '../wiki_slug.dart';
@@ -18,12 +19,17 @@ import '../wiki_slug.dart';
 /// per file, prune rows whose files no longer exist. Idempotent — files
 /// whose body hash hasn't changed are skipped.
 class WikiRepo {
-  WikiRepo({required AppDatabase db, required WikiIo wiki})
-      : _db = db,
-        _wiki = wiki;
+  WikiRepo({
+    required AppDatabase db,
+    required WikiIo wiki,
+    EmbeddingWorker? embeddings,
+  })  : _db = db,
+        _wiki = wiki,
+        _embeddings = embeddings;
 
   final AppDatabase _db;
   final WikiIo _wiki;
+  final EmbeddingWorker? _embeddings;
 
   /// Write or overwrite an entry. The path is computed as
   /// `wiki/<petId>/<type>/<YYYY-MM-DD>-<slug>.md`. Returns the entry's id.
@@ -101,7 +107,7 @@ class WikiRepo {
   }) async {
     final hash = _hash(body);
 
-    return _db.transaction(() async {
+    final id = await _db.transaction(() async {
       if (!skipFileWrite) {
         await _wiki.writeAtomic(path, body);
       }
@@ -110,7 +116,7 @@ class WikiRepo {
           .getSingleOrNull();
 
       if (existing == null) {
-        final id = await _db.into(_db.entries).insert(
+        final newId = await _db.into(_db.entries).insert(
               EntriesCompanion.insert(
                 petId: petId,
                 path: path,
@@ -122,9 +128,9 @@ class WikiRepo {
             );
         await _db.customStatement(
           'INSERT INTO entries_fts5 (rowid, title, body) VALUES (?, ?, ?)',
-          [id, title, body],
+          [newId, title, body],
         );
-        return id;
+        return newId;
       } else {
         await (_db.update(_db.entries)
               ..where((e) => e.id.equals(existing.id)))
@@ -143,6 +149,12 @@ class WikiRepo {
         return existing.id;
       }
     });
+
+    // Embedding is queued *outside* the txn so a slow/failing model in 1.12
+    // doesn't roll back the file + index. The entry is durable; the
+    // embedding catches up on the next rebuildIndex if it fails here.
+    await _embeddings?.enqueue(entryId: id, body: body);
+    return id;
   }
 }
 
