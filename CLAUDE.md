@@ -310,6 +310,30 @@ Report the results in the phase wrap-up summary. If any step fails, the phase is
 
 For phases that introduce new runtime behavior (data, networking, scheduled tasks, billing), also explicitly flag in the wrap-up that **on-device verification is recommended and cannot be substituted** by these checks. Phase 0 (pure scaffold) is the only phase that can defer device testing.
 
+### Installable release builds for on-device verification
+
+The CI workflow's `release-apk` job runs `flutter build apk --release --split-per-abi` on every push to `main` and `claude/**` (and via `workflow_dispatch`). It uploads three artifacts with 7-day retention:
+
+| Artifact name | ABI | Use this when |
+|---|---|---|
+| `petpal-release-arm64-v8a` | arm64-v8a | **Default for any phone made roughly post-2017.** Pixel, Galaxy, OnePlus, Xiaomi — almost certainly arm64-v8a. |
+| `petpal-release-armeabi-v7a` | armeabi-v7a | Older / budget 32-bit ARM phones. Verify with `adb shell getprop ro.product.cpu.abi` if unsure. |
+| `petpal-release-x86_64` | x86_64 | Most Android emulators (AVD, Genymotion). Not for physical phones. |
+
+**To install on a phone:**
+
+1. **Find the artifact.** GitHub → repository → Actions → click the latest green run on your branch → scroll to the *Artifacts* section at the bottom → download the matching `petpal-release-<abi>` zip.
+2. **Unzip** on your computer. The zip contains one file: `petpal-release-<abi>.apk`.
+3. **Get the APK to the phone.** Easiest paths:
+   - Email it to yourself, open the attachment on the phone.
+   - Drop it in Google Drive / Dropbox, open from the phone's app.
+   - USB transfer to the phone's `Downloads/` folder (`adb push` works too).
+4. **Enable installs from unknown sources for the file manager / browser you're opening from.** Settings → Apps → *the app you'll tap from* → Install unknown apps → toggle on. Android 8+ scopes this per-app, not globally.
+5. **Tap the APK** in the file manager. Android shows "App not from Play Store" + a generic warning. Tap *Install*.
+6. **First-run gotcha:** these builds are debug-signed (DECISIONS row 22). If you've installed a previous PetPal build with a different signing key, Android will refuse with "App not installed." Uninstall the old version first.
+
+The release build is meaningfully smaller than `flutter build apk --debug` (R8 minification + tree-shaking — debug ~262 MB, release per-ABI ~50 MB) so it's also closer to what users will eventually install from the Play Store.
+
 ---
 
 ## 15. Phased build plan
