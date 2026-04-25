@@ -60,7 +60,8 @@ class SessionBuilder {
       skillFragments: activeSkillFragments,
     );
 
-    final queryVector = await _embeddings.embed(userInput);
+    final queryVector =
+        await _embeddings.embed(userInput, kind: EmbeddingKind.query);
     final hits = await _retriever.search(
       petId: pet.id,
       queryText: userInput,

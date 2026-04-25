@@ -1,0 +1,10 @@
+# Treat ML model artifacts and native shared libraries as binary so Git
+# doesn't try to text-diff them. If the repo size becomes unwieldy these
+# are the candidates to move to git-lfs.
+*.onnx binary
+*.so binary
+*.tflite binary
+
+# Generated Drift output files — committed but auto-generated; mark
+# linguist-generated so GitHub doesn't count them as hand-written code.
+*.g.dart linguist-generated=true

@@ -58,7 +58,7 @@ void registerWikiTools(
     (input) async {
       final q = input['query']! as String;
       final k = (input['k'] as num?)?.toInt() ?? 6;
-      final vec = await embeddings.embed(q);
+      final vec = await embeddings.embed(q, kind: EmbeddingKind.query);
       final hits = await retriever.search(
         petId: activePetId(),
         queryText: q,

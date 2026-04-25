@@ -17,7 +17,10 @@ class _RecordingProvider implements EmbeddingProvider {
   final List<String> calls = [];
 
   @override
-  Future<List<double>> embed(String text) async {
+  Future<List<double>> embed(
+    String text, {
+    EmbeddingKind kind = EmbeddingKind.document,
+  }) async {
     calls.add(text);
     return List<double>.filled(dim, 0.5);
   }

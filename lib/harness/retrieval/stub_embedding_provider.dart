@@ -16,7 +16,10 @@ class StubEmbeddingProvider implements EmbeddingProvider {
   final int dim;
 
   @override
-  Future<List<double>> embed(String text) async {
+  Future<List<double>> embed(
+    String text, {
+    EmbeddingKind kind = EmbeddingKind.document,
+  }) async {
     // Walk the SHA-256 digest cyclically to fill `dim` floats in [-1, 1].
     final bytes = sha256.convert(utf8.encode(text)).bytes;
     final v = List<double>.filled(dim, 0);

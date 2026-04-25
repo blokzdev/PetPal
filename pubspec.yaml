@@ -42,9 +42,13 @@ dependencies:
   sqlite3: ^3.3.1
   crypto: ^3.0.7
   http: ^1.6.0
+  flutter_onnxruntime: ^1.7.0
+  dart_wordpiece: ^1.2.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -67,10 +71,11 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+    # Snowflake arctic-embed-xs INT8 ONNX model + WordPiece vocab.
+    # ~23 MB committed; bundled into the APK so embeddings run fully
+    # on-device, no network. See DECISIONS row 20.
+    - assets/models/arctic-embed-xs/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
