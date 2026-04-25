@@ -34,7 +34,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 **Definition of done:** a hidden dev screen creates a pet, writes a markdown note, and both keyword (FTS5) and semantic (vector) search return that note.
 
 - [x] 1.1 Drift schema: `pets`, `entries`, `entries_fts5`, `embeddings`, `sessions`, `messages`, `reminders`, `skills_installed` + initial migration
-- [ ] 1.2 `PetRepo` (CRUD pets, seed `SOUL.md`)
+- [x] 1.2 `PetRepo` (CRUD pets, seed `SOUL.md`)
 - [ ] 1.3 `wiki_io.dart`: atomic write, read, list-by-pet, slug rules, path helpers under `path_provider` doc dir
 - [ ] 1.4 `WikiRepo`: write-through to file + FTS5 + entries row; rebuild-index from files on startup
 - [ ] 1.5 Wire `sqlite-vec` loadable extension via FFI on Android; verify `vec_distance_l2` executes
