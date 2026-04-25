@@ -1,0 +1,24 @@
+# DECISIONS
+
+Append-only log. One row per non-obvious choice. Edit only by **adding a new row** that supersedes an old one — never rewrite history.
+
+**Categories to log:** storage, agent, scheduling, monetization, sync, ui, privacy, build.
+**Reversal rule:** add a new row with the new decision and put the old row's `#` in `Supersedes`.
+
+| #  | Date       | Category    | Decision                                                                 | Rationale                                                                                                                              | Supersedes |
+|----|------------|-------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|------------|
+| 1  | 2026-04-25 | storage     | Markdown files are the source of truth; SQLite is a rebuildable index.   | User-portable, diffable, exportable. Aligns with harness principle of externalized state. Index can always be rebuilt from files.       | —          |
+| 2  | 2026-04-25 | storage     | Drift over raw sqflite.                                                  | Type-safe schema, migrations, FTS5 helpers, Riverpod-friendly streams.                                                                  | —          |
+| 3  | 2026-04-25 | storage     | FTS5 **and** sqlite-vec from Phase 1 (no deferral).                      | User decision. Avoids retrieval rebuild later; accepts sqlite-vec FFI bring-up cost upfront.                                            | —          |
+| 4  | 2026-04-25 | storage     | Wiki stays as plain markdown files (not a git repo).                     | Simpler. Keeps cloud-sync choice independent of wiki backing.                                                                           | —          |
+| 5  | 2026-04-25 | agent       | Red-flag screener runs as deterministic code before every LLM call.      | LLMs sometimes soften or miss safety rules. A regex/keyword table is auditable and testable. System prompt reinforces; code enforces.   | —          |
+| 6  | 2026-04-25 | agent       | Prompt-cache `SOUL.md` and matched skill fragments in `SessionBuilder`.  | Both are stable across a session; prompt caching gives material cost reduction on long chats.                                           | —          |
+| 7  | 2026-04-25 | agent       | Skills load progressively — only fragments whose triggers match.         | Keeps context budgets sane; makes attribution explicit.                                                                                 | —          |
+| 8  | 2026-04-25 | agent       | MVP at end of Phase 2 = 1 pet, SOUL.md, chat, wiki R/W, export.          | User decision. Tightest viable demo; everything else moves to Phase 3+.                                                                 | —          |
+| 9  | 2026-04-25 | scheduling  | Use AlarmManager + Notifications **and** WorkManager.                    | AlarmManager is needed for exact-time reminders; WorkManager for condition-gated work (embedding batches, future sync).                 | —          |
+| 10 | 2026-04-25 | scheduling  | Default reminders to deterministic mode; synthesis only when needed.     | Zero-token, predictable, cheap. Synthesis is reserved for cases where summarization adds real value (weekly digest).                    | —          |
+| 11 | 2026-04-25 | sync        | Cloud sync backend decision deferred to start of Phase 5.                | User decision. `CloudSyncAdapter` interface lands in Phase 2 so the choice is swappable.                                                | —          |
+| 12 | 2026-04-25 | privacy     | Be explicit that "local-first" ≠ "local-LLM."                            | Files are local; LLM calls leave the device. Onboarding and Data Safety form must say this plainly.                                     | —          |
+| 13 | 2026-04-25 | build       | Flutter, Android-first, min SDK 24.                                      | One codebase, iOS-ready later; SDK 24 covers the active Android base while keeping APIs current.                                        | —          |
+| 14 | 2026-04-25 | ui          | Riverpod for state; go_router for routing.                               | Async repositories compose naturally with Riverpod; declarative routing keeps deep links tractable.                                     | —          |
+| 15 | 2026-04-25 | agent       | Persona file is named `SOUL.md`.                                         | Marketing-aligned with the moat narrative; aware some users will raise eyebrows. Logged so the choice is reconsiderable.                | —          |
