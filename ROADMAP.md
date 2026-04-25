@@ -45,7 +45,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 1.10 Anthropic API client: streaming, tool-use, **prompt caching** on system blocks; key from `flutter_secure_storage`
 - [x] 1.11 `SessionBuilder`: assemble system prompt from identity + `SOUL.md` + retrieved context
 - [x] 1.12 Wire real embedding model (Anthropic or local) behind the worker interface from 1.6
-- [ ] 1.13 Hidden dev screen: create pet "Milo", write a note, run keyword + semantic search, show results
+- [x] 1.13 Hidden dev screen: create pet "Milo", write a note, run keyword + semantic search, show results
 - [ ] 1.14 Unit tests: `WikiRepo` round-trip, FTS5 sync, retrieval dedup
 - [ ] 1.15 Phase wrap-up commit + summary
 
