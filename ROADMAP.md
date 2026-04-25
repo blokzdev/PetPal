@@ -71,7 +71,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.9 Pet switcher: schema supports many, UI gates to 1 (free-tier rule, even though no paywall yet)
 - [x] 2.10 Error surfaces: API failure, rate-limit, offline — clear, retryable UI states
 - [x] 2.11 Export: zip `wiki/<pet>/` → Android share sheet
-- [ ] 2.12 `CloudSyncAdapter` interface stub committed (no implementation; Phase 5 decides backend)
+- [x] 2.12 `CloudSyncAdapter` interface stub committed (no implementation; Phase 5 decides backend)
 - [ ] 2.13 Integration test: full happy-path chat → entry written → retrievable
 - [ ] 2.14 Phase wrap-up commit + summary
 
