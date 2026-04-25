@@ -5,6 +5,7 @@ import '../../harness/agent/agent_loop.dart';
 import '../../harness/agent/tool_dispatcher.dart';
 import '../../harness/session_builder.dart';
 import '../providers.dart';
+import 'chat_error.dart';
 import 'chat_state.dart';
 
 /// Drives one chat session through the full agent harness:
@@ -28,6 +29,7 @@ class ChatNotifier extends Notifier<ChatState> {
       streamingAssistant: '',
       activeTools: const [],
       clearError: true,
+      clearLastFailedInput: true,
     );
 
     AgentLoop loop;
@@ -45,7 +47,11 @@ class ChatNotifier extends Notifier<ChatState> {
         state = state.copyWith(
           sending: false,
           clearStreamingAssistant: true,
-          error: 'Active pet not found.',
+          error: const ChatError(
+            category: ChatErrorCategory.generic,
+            message: 'Active pet not found.',
+          ),
+          lastFailedInput: trimmed,
         );
         return;
       }
@@ -54,7 +60,11 @@ class ChatNotifier extends Notifier<ChatState> {
       state = state.copyWith(
         sending: false,
         clearStreamingAssistant: true,
-        error: 'Setup failed: ${_humanError(e)}',
+        error: ChatError(
+          category: ChatErrorCategory.generic,
+          message: 'Setup failed: ${_truncate(e.toString())}',
+        ),
+        lastFailedInput: trimmed,
       );
       return;
     }
@@ -115,15 +125,27 @@ class ChatNotifier extends Notifier<ChatState> {
         sending: false,
         clearStreamingAssistant: true,
         activeTools: const [],
-        error: _humanError(e),
+        error: categorizeChatError(e),
+        lastFailedInput: trimmed,
       );
     }
   }
 
-  String _humanError(Object e) {
-    final s = e.toString();
-    return s.length > 240 ? '${s.substring(0, 240)}…' : s;
+  /// Re-run the last failed turn. Pops the user message that the failed
+  /// send appended to history (so it isn't duplicated), then calls
+  /// [send] with the same text. No-op if there's nothing to retry.
+  Future<void> retry() async {
+    final input = state.lastFailedInput;
+    if (input == null || state.sending) return;
+    // The failed turn already appended the user message via AgentLoop's
+    // internal history construction — but only inside the loop's local
+    // copy. Our [history] is updated only on AgentLoopDone, so on a
+    // failure path it's still pre-failure. No popping needed.
+    await send(input);
   }
+
+  String _truncate(String s) =>
+      s.length > 200 ? '${s.substring(0, 200)}…' : s;
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
 import '../chat/chat_state.dart';
 import '../providers.dart';
@@ -78,7 +79,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             ),
             if (state.activeTools.isNotEmpty)
               _ToolPills(pills: state.activeTools),
-            if (state.error != null) _ErrorBanner(message: state.error!),
+            if (state.error != null)
+              _ErrorBanner(
+                error: state.error!,
+                canRetry: !state.sending && state.lastFailedInput != null,
+                onRetry: () => ref.read(chatProvider.notifier).retry(),
+              ),
             _Composer(
               controller: _input,
               sending: state.sending,
@@ -273,8 +279,29 @@ class _Composer extends StatelessWidget {
 }
 
 class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.message});
-  final String message;
+  const _ErrorBanner({
+    required this.error,
+    required this.canRetry,
+    required this.onRetry,
+  });
+  final ChatError error;
+  final bool canRetry;
+  final VoidCallback onRetry;
+
+  IconData _iconFor(ChatErrorCategory c) {
+    switch (c) {
+      case ChatErrorCategory.auth:
+        return Icons.key_off;
+      case ChatErrorCategory.rateLimit:
+        return Icons.hourglass_empty;
+      case ChatErrorCategory.offline:
+        return Icons.signal_wifi_off;
+      case ChatErrorCategory.server:
+        return Icons.cloud_off;
+      case ChatErrorCategory.generic:
+        return Icons.error_outline;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -282,10 +309,24 @@ class _ErrorBanner extends StatelessWidget {
     return Container(
       width: double.infinity,
       color: scheme.errorContainer,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        message,
-        style: TextStyle(color: scheme.onErrorContainer),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(_iconFor(error.category), color: scheme.onErrorContainer),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              error.message,
+              style: TextStyle(color: scheme.onErrorContainer),
+            ),
+          ),
+          if (canRetry &&
+              error.category != ChatErrorCategory.auth) ...[
+            const SizedBox(width: 8),
+            TextButton(onPressed: onRetry, child: const Text('Retry')),
+          ],
+        ],
       ),
     );
   }

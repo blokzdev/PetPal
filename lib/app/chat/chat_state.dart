@@ -1,4 +1,5 @@
 import '../../harness/agent/messages.dart' as llm;
+import 'chat_error.dart';
 
 final _contextPrefix = RegExp(
   r'^<context>.*?</context>\s*',
@@ -50,13 +51,19 @@ class ChatState {
     this.activeTools = const [],
     this.sending = false,
     this.error,
+    this.lastFailedInput,
   });
 
   final List<llm.Message> history;
   final String? streamingAssistant;
   final List<ToolPill> activeTools;
   final bool sending;
-  final String? error;
+  final ChatError? error;
+
+  /// The user input that triggered the last failed turn — populated when
+  /// [error] is non-null, cleared on the next successful send. The
+  /// retry button on the chat surface uses this.
+  final String? lastFailedInput;
 
   /// Project the LLM-shape [history] to the user-visible chat messages —
   /// flatten text content per turn, drop tool-only turns. SessionBuilder
@@ -83,9 +90,11 @@ class ChatState {
     String? streamingAssistant,
     List<ToolPill>? activeTools,
     bool? sending,
-    String? error,
+    ChatError? error,
+    String? lastFailedInput,
     bool clearStreamingAssistant = false,
     bool clearError = false,
+    bool clearLastFailedInput = false,
   }) {
     return ChatState(
       history: history ?? this.history,
@@ -95,6 +104,9 @@ class ChatState {
       activeTools: activeTools ?? this.activeTools,
       sending: sending ?? this.sending,
       error: clearError ? null : (error ?? this.error),
+      lastFailedInput: clearLastFailedInput
+          ? null
+          : (lastFailedInput ?? this.lastFailedInput),
     );
   }
 }

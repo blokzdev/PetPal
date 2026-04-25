@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -160,8 +162,8 @@ void main() {
     // Force-navigate to /pets/add (the empty-state CTA is hidden when a
     // pet exists, but a deep-link or future pet switcher could land
     // here).
-    BuildContext deeplinkCtx = tester.element(find.text('Milo'));
-    GoRouter.of(deeplinkCtx).push('/pets/add');
+    final deeplinkCtx = tester.element(find.text('Milo'));
+    unawaited(GoRouter.of(deeplinkCtx).push('/pets/add'));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('You already have a pet'), findsOneWidget);
