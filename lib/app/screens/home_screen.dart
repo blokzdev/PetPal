@@ -76,7 +76,8 @@ class _Greeting extends ConsumerWidget {
     final text = Theme.of(context).textTheme;
     // Free tier (DECISIONS row 8) — chat with the most recently-created pet.
     final pet = pets.last;
-    return Column(
+    return SingleChildScrollView(
+      child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.pets, size: 72, color: scheme.primary),
@@ -112,6 +113,12 @@ class _Greeting extends ConsumerWidget {
           icon: const Icon(Icons.extension_outlined),
           label: const Text('Skills'),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => GoRouter.of(context).push('/settings'),
+          icon: const Icon(Icons.settings_outlined),
+          label: const Text('Settings'),
+        ),
         if (kDebugMode) ...[
           const SizedBox(height: 16),
           OutlinedButton.icon(
@@ -121,6 +128,7 @@ class _Greeting extends ConsumerWidget {
           ),
         ],
       ],
+      ),
     );
   }
 }

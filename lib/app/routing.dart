@@ -8,6 +8,7 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/settings_screen.dart';
 import 'screens/skill_browser_screen.dart';
 import 'screens/soul_editor_screen.dart';
 import 'screens/wiki_browser_screen.dart';
@@ -57,6 +58,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/skills',
         builder: (context, state) => const SkillBrowserScreen(),
+      ),
+      GoRoute(
+        path: '/settings',
+        builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: '/wiki/entry',

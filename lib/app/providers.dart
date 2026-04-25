@@ -24,8 +24,10 @@ import '../harness/skills/enabled_filtering_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_manifest.dart';
 import '../harness/skills/skill_source.dart';
+import '../harness/synthesis/weekly_digest.dart';
 import '../harness/tools/wiki_tools.dart';
 import '../platform/api_key_storage.dart';
+import '../platform/settings_storage.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
 
@@ -304,5 +306,55 @@ final sessionBuilderProvider =
     retriever: retriever,
     embeddings: embeddings,
     skills: skills,
+  );
+});
+
+// ─── Settings ──────────────────────────────────────────────────────────────
+
+const _weeklyDigestKey = 'weekly_digest_enabled';
+
+/// Singleton [SettingsStorage]. Override in `main()` with the
+/// SharedPreferences-backed impl; widget tests use an in-memory fake.
+final settingsStorageProvider = Provider<SettingsStorage>((ref) {
+  throw UnimplementedError(
+    'settingsStorageProvider must be overridden in ProviderScope',
+  );
+});
+
+/// Whether the weekly synthesis-mode digest is enabled. Defaults to
+/// **off** — Pro-tier feature per CLAUDE.md §8, the user opts in.
+final weeklyDigestEnabledProvider =
+    AsyncNotifierProvider<WeeklyDigestEnabledNotifier, bool>(
+  WeeklyDigestEnabledNotifier.new,
+);
+
+class WeeklyDigestEnabledNotifier extends AsyncNotifier<bool> {
+  @override
+  Future<bool> build() async {
+    final stored =
+        await ref.read(settingsStorageProvider).getBool(_weeklyDigestKey);
+    return stored ?? false;
+  }
+
+  Future<void> setEnabled(bool enabled) async {
+    await ref
+        .read(settingsStorageProvider)
+        .setBool(_weeklyDigestKey, enabled);
+    state = AsyncData(enabled);
+  }
+}
+
+/// [WeeklyDigestRunner] composed from the live data + LLM stack.
+final weeklyDigestRunnerProvider =
+    FutureProvider<WeeklyDigestRunner>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final wikiRepo = await ref.watch(wikiRepoProvider.future);
+  final llm = ref.watch(llmClientProvider);
+  return WeeklyDigestRunner(
+    db: db,
+    wiki: wiki,
+    wikiRepo: wikiRepo,
+    llm: llm,
   );
 });
