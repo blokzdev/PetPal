@@ -2,7 +2,7 @@
 
 Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-**Current phase: Phase 0 — COMPLETE. Verify on-device, then start Phase 1.**
+**Current phase: Phase 1 — Core Harness (in progress; next task 1.2).**
 
 ---
 
@@ -33,7 +33,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 **Goal:** the harness exists end-to-end without a UI: schema, file I/O, retrieval, agent-loop skeleton, tool dispatcher, Anthropic client.
 **Definition of done:** a hidden dev screen creates a pet, writes a markdown note, and both keyword (FTS5) and semantic (vector) search return that note.
 
-- [ ] 1.1 Drift schema: `pets`, `entries`, `entries_fts5`, `embeddings`, `sessions`, `messages`, `reminders`, `skills_installed` + initial migration
+- [x] 1.1 Drift schema: `pets`, `entries`, `entries_fts5`, `embeddings`, `sessions`, `messages`, `reminders`, `skills_installed` + initial migration
 - [ ] 1.2 `PetRepo` (CRUD pets, seed `SOUL.md`)
 - [ ] 1.3 `wiki_io.dart`: atomic write, read, list-by-pet, slug rules, path helpers under `path_provider` doc dir
 - [ ] 1.4 `WikiRepo`: write-through to file + FTS5 + entries row; rebuild-index from files on startup
