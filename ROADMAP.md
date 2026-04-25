@@ -72,7 +72,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.10 Error surfaces: API failure, rate-limit, offline — clear, retryable UI states
 - [x] 2.11 Export: zip `wiki/<pet>/` → Android share sheet
 - [x] 2.12 `CloudSyncAdapter` interface stub committed (no implementation; Phase 5 decides backend)
-- [ ] 2.13 Integration test: full happy-path chat → entry written → retrievable
+- [x] 2.13 Integration test: full happy-path chat → entry written → retrievable
 - [ ] 2.14 Phase wrap-up commit + summary
 
 **On-device verification:** install fresh, onboard, add Milo, chat "Milo ate chicken yesterday and got itchy paws," verify a food/allergy entry appears in the wiki browser, export and confirm zip arrives in another app.
