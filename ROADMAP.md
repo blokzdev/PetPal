@@ -18,7 +18,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 0.5 Add `analysis_options.yaml` (lints), `.editorconfig`, tighten `.gitignore`
 - [x] 0.6 Placeholder Home screen + Theme + Router (one route, one widget)
 - [x] 0.7 Android manifest: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`
-- [ ] 0.8 Release signing config stub in `android/app/build.gradle` (no key file yet)
+- [x] 0.8 Release signing config stub in `android/app/build.gradle` (no key file yet)
 - [ ] 0.9 GitHub Actions: `flutter analyze` + `flutter test` on push and PR
 - [ ] 0.10 Phase wrap-up commit: `chore: phase 0 complete`; write phase-end summary
 
