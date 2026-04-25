@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# PetPal-specific
+# Local override of secrets / API keys that escape secure_storage during dev.
+.env
+.env.local
+# Per-developer Android signing keys (release keystore lives outside the repo).
+android/key.properties
+android/app/upload-keystore.jks
