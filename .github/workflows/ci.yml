@@ -31,10 +31,14 @@ jobs:
 
   release-apk:
     name: release APK (split per ABI)
-    # Skip on PRs — APK artifacts on PRs are noisy and burn CI minutes.
-    # Push to main / claude/** + manual dispatch produce installable
-    # builds for on-device verification (DECISIONS row 21).
-    if: github.event_name != 'pull_request'
+    # Cost-controlled trigger (DECISIONS row 23):
+    # - workflow_dispatch (manual, including from GitHub mobile)
+    # - push to main only — `claude/**` working branches don't burn
+    #   minutes on every commit; the developer triggers manually when
+    #   they need an installable build.
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: flutter
     runs-on: ubuntu-latest
     steps:
@@ -54,18 +58,23 @@ jobs:
       - name: flutter pub get
         run: flutter pub get
 
-      # Release signing falls back to the debug keystore when
-      # android/key.properties is absent (DECISIONS row 22). Phase 6
-      # generates the real upload keystore.
-      - name: flutter build apk --release --split-per-abi
-        run: flutter build apk --release --split-per-abi
+      # ARM-only split: target-platform restricts to the two ABIs that
+      # cover physical Android phones. x86_64 (emulator-only) is dropped
+      # to halve build time and artifact storage — see DECISIONS row 23.
+      # Release signing falls back to the debug keystore until Phase 6
+      # generates a real upload keystore (DECISIONS row 22).
+      - name: flutter build apk --release --split-per-abi (arm64 + arm32 only)
+        run: |
+          flutter build apk \
+            --release \
+            --target-platform android-arm,android-arm64 \
+            --split-per-abi
 
       - name: Stage APKs with friendly filenames
         run: |
           cd build/app/outputs/flutter-apk
           mv app-arm64-v8a-release.apk petpal-release-arm64-v8a.apk
           mv app-armeabi-v7a-release.apk petpal-release-armeabi-v7a.apk
-          mv app-x86_64-release.apk petpal-release-x86_64.apk
           ls -la *.apk
 
       - name: Upload arm64-v8a APK (most modern phones)
@@ -81,13 +90,5 @@ jobs:
         with:
           name: petpal-release-armeabi-v7a
           path: build/app/outputs/flutter-apk/petpal-release-armeabi-v7a.apk
-          retention-days: 7
-          if-no-files-found: error
-
-      - name: Upload x86_64 APK (most Android emulators)
-        uses: actions/upload-artifact@v4
-        with:
-          name: petpal-release-x86_64
-          path: build/app/outputs/flutter-apk/petpal-release-x86_64.apk
           retention-days: 7
           if-no-files-found: error

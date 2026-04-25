@@ -312,17 +312,23 @@ For phases that introduce new runtime behavior (data, networking, scheduled task
 
 ### Installable release builds for on-device verification
 
-The CI workflow's `release-apk` job runs `flutter build apk --release --split-per-abi` on every push to `main` and `claude/**` (and via `workflow_dispatch`). It uploads three artifacts with 7-day retention:
+The CI workflow's `release-apk` job runs `flutter build apk --release --split-per-abi` (ARM only — x86_64 is dropped per DECISIONS row 23). It is gated to push-to-`main` and manual `workflow_dispatch` to control CI minute burn (see §17). Two artifacts upload with 7-day retention:
 
 | Artifact name | ABI | Use this when |
 |---|---|---|
 | `petpal-release-arm64-v8a` | arm64-v8a | **Default for any phone made roughly post-2017.** Pixel, Galaxy, OnePlus, Xiaomi — almost certainly arm64-v8a. |
 | `petpal-release-armeabi-v7a` | armeabi-v7a | Older / budget 32-bit ARM phones. Verify with `adb shell getprop ro.product.cpu.abi` if unsure. |
-| `petpal-release-x86_64` | x86_64 | Most Android emulators (AVD, Genymotion). Not for physical phones. |
+
+x86_64 (Android emulators) is no longer auto-built. Run `flutter build apk --release` locally if you need it.
+
+**To trigger a build manually (recommended for `claude/**` working branches):**
+
+- **From the GitHub web UI:** repository → *Actions* tab → pick the *ci* workflow in the left sidebar → *Run workflow* dropdown on the right → select the branch → *Run workflow*.
+- **From the GitHub mobile app:** open the repo → tap the menu (three dots top-right on iOS, or the *Actions* tab) → *Actions* → *ci* workflow → tap *Run workflow* → select the branch → tap *Run workflow*. The build appears in the run list a few seconds later. Mobile lacks artifact download — switch to a desktop browser when the run finishes to grab the APK.
 
 **To install on a phone:**
 
-1. **Find the artifact.** GitHub → repository → Actions → click the latest green run on your branch → scroll to the *Artifacts* section at the bottom → download the matching `petpal-release-<abi>` zip.
+1. **Find the artifact.** GitHub → repository → Actions → click the latest green run on the branch → scroll to the *Artifacts* section at the bottom → download the matching `petpal-release-<abi>` zip.
 2. **Unzip** on your computer. The zip contains one file: `petpal-release-<abi>.apk`.
 3. **Get the APK to the phone.** Easiest paths:
    - Email it to yourself, open the attachment on the phone.
@@ -351,3 +357,22 @@ See `ROADMAP.md`. Six phases: Phase 0 (scaffold) → Phase 6 (Play Store). MVP a
 - No silent re-planning. No auto-advancing phases.
 - No new dependencies without a `DECISIONS.md` entry.
 - No "while I'm here" refactors. Stay on the current task.
+
+---
+
+## 17. CI cost budget
+
+GitHub Actions free-tier (private repo) caps:
+
+- **2,000 minutes / month** of Linux runner time.
+- **500 MB** total artifact + cache storage at any point.
+
+Headroom matters. The CI is shaped to stay well clear of both ceilings:
+
+- **`flutter` job (analyze + test)** runs on every push to `main` / `claude/**` and on PRs. Fast (~1–2 min with the Flutter SDK cache). Burn rate ≈ negligible even at heavy commit volume.
+- **`release-apk` job** runs **only** on push-to-`main` and manual `workflow_dispatch` (DECISIONS row 23). Working branches don't auto-build APKs. A typical release build is ~5–10 min; manually triggering once or twice a day for verification stays under 300 min/month.
+- **APK splits are ARM-only.** Dropping x86_64 cuts artifact storage roughly 1/3 and saves ~1 minute per run. Emulator users build locally.
+- **Artifact retention is 7 days.** Two ARM APKs at ~100 MB combined × ~3 active runs ≈ 300 MB resident — under the 500 MB cap with margin for the Flutter build cache.
+- **`subosito/flutter-action@v2` SDK cache (`cache: true`)** is enabled on both jobs. First cache miss costs ~2 min for the SDK download; every run after restores in seconds.
+
+If burn approaches the cap, the lever is to drop `release-apk`'s push-to-main trigger and rely on `workflow_dispatch` only.
