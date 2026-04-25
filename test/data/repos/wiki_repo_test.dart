@@ -206,5 +206,48 @@ void main() {
       expect(rows, hasLength(1));
       expect(rows.first.path, 'wiki/$petId/vet/2026-01-12-checkup.md');
     });
+
+    test('rebuilds the entire index from files alone — the rebuildable '
+        'index invariant from DECISIONS row 1', () async {
+      // Seed three entries through the repo (file + entries row + FTS5).
+      await repo.writeEntry(
+        petId: petId,
+        type: 'food',
+        title: 'Carrot trial',
+        body: 'Milo loves frozen carrots.',
+        ts: DateTime(2026, 4, 25),
+      );
+      await repo.writeEntry(
+        petId: petId,
+        type: 'behavior',
+        title: 'Skateboard fear',
+        body: 'Milo bolts when skateboards roll past.',
+        ts: DateTime(2026, 4, 26),
+      );
+      await repo.writeEntry(
+        petId: petId,
+        type: 'vet',
+        title: 'Annual checkup',
+        body: 'Vitals normal.',
+        ts: DateTime(2026, 4, 27),
+      );
+
+      // Wipe both the entries table AND the FTS5 mirror, simulating a
+      // fresh-install rebuild with the markdown files still on disk.
+      await db.delete(db.entries).go();
+      await db.customStatement('DELETE FROM entries_fts5');
+      expect(await db.select(db.entries).get(), isEmpty);
+
+      await repo.rebuildIndex(petId);
+
+      final rows = await db.select(db.entries).get();
+      expect(rows, hasLength(3));
+      expect(rows.map((r) => r.type).toSet(), {'food', 'behavior', 'vet'});
+
+      final ftsHits = await db.customSelect(
+        '''SELECT rowid FROM entries_fts5 WHERE entries_fts5 MATCH 'carrot* OR skateboard* OR vital*' ''',
+      ).get();
+      expect(ftsHits, hasLength(3));
+    });
   });
 }

@@ -46,7 +46,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 1.11 `SessionBuilder`: assemble system prompt from identity + `SOUL.md` + retrieved context
 - [x] 1.12 Wire real embedding model (Anthropic or local) behind the worker interface from 1.6
 - [x] 1.13 Hidden dev screen: create pet "Milo", write a note, run keyword + semantic search, show results
-- [ ] 1.14 Unit tests: `WikiRepo` round-trip, FTS5 sync, retrieval dedup
+- [x] 1.14 Unit tests: `WikiRepo` round-trip, FTS5 sync, retrieval dedup
 - [ ] 1.15 Phase wrap-up commit + summary
 
 **On-device verification:** open dev screen → create Milo → write "Milo loves frozen carrots" → keyword search "carrot" returns it → semantic search "what treats does my dog like" returns it.

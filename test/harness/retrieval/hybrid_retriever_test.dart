@@ -134,6 +134,10 @@ void main() {
     expect(ids.toSet().length, ids.length, reason: 'no duplicates');
     // Carrot entry hit by both signals should fuse to top rank.
     expect(hits.first.title, 'Carrot trial');
+    // FTS5 snippet must survive dedup — a vector hit on the same entry
+    // mustn't blank it out.
+    expect(hits.first.snippet, isNotNull);
+    expect(hits.first.snippet, contains('carrots'));
   });
 
   test('empty query and null vector return no hits', () async {
