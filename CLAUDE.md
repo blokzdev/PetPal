@@ -35,6 +35,13 @@ Two layers, separated rigorously:
 
 **Rule:** features live in the harness when they are agent-visible (tools, retrieval, system prompt). They live in the application when they are only user-visible (theming, screens, paywall flow).
 
+**Species-agnostic by design.** The harness has no built-in awareness of dogs, cats, or any specific animal. Species-specific behaviour enters through exactly two seams:
+
+1. **Onboarding templates** seed `SOUL.md` with sensible per-species defaults (frontmatter keys, vet-contact prompt copy, weight units, common allergens). Picking "Cat" during add-pet does not change a single byte of harness code — it only changes the markdown the harness sees.
+2. **Skill packs** (Phase 3) carry a `species:` field in their manifest frontmatter. The skill loader filters available skills by the active pet's species before checking triggers, so a dog-only skill never injects fragments into a cat session.
+
+The same agent loop, the same retrieval, the same red-flag screener serves a parakeet and a Great Dane. Everything else is data.
+
 ---
 
 ## 4. Architecture diagram
@@ -173,11 +180,14 @@ Choose deterministic by default. Reach for synthesis only when the value depends
 id: puppy
 name: Puppy Care
 version: 1
+species: [dog]                    # filter — see "Species filtering" below
 triggers: ["puppy", "teething", "house training", "socialization"]
 loads: ["overview.md", "house-training.md", "socialization.md"]
 requires_pro: false
 ---
 ```
+
+**Species filtering.** The `species:` list is the first gate: `SkillLoader` skips any skill whose list doesn't include the active pet's species (read from `SOUL.md` frontmatter). A skill with `species: [dog, cat]` matches both; an empty or omitted `species:` is treated as "any species" so universal skills stay easy to author. Trigger matching only runs against the species-filtered subset. This is the harness's only species-aware code path — see §3.
 
 **Progressive loading.** When the user input matches one or more triggers, only the matched fragments are injected into the next turn — never the whole skill. This keeps context budgets sane and makes attribution straightforward.
 

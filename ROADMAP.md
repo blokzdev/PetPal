@@ -83,20 +83,21 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 
 ## Phase 3 — Skills & Synthesis
 
-**Goal:** installable skill packs with progressive loading; weekly synthesis-mode digest.
-**Definition of done:** install built-in "Puppy" skill → puppy-relevant questions show clear behavioral shift in answers → after a week of entries, a weekly digest entry appears in the wiki.
+**Goal:** installable skill packs with progressive loading + species filtering; species-aware onboarding templates; weekly synthesis-mode digest.
+**Definition of done:** install built-in "Puppy" skill → puppy-relevant questions show clear behavioral shift in answers → after a week of entries, a weekly digest entry appears in the wiki → adding a non-dog pet (e.g. cat) routes through a species-appropriate onboarding template and never sees dog-only skills as available.
 
-- [ ] 3.1 Skill manifest parser (YAML frontmatter)
-- [ ] 3.2 `SkillLoader`: scan installed skills, match triggers, return matched fragments
+- [ ] 3.1 Skill manifest parser (YAML frontmatter, including `species:` filter list — empty/omitted = any)
+- [ ] 3.2 `SkillLoader`: scan installed skills, filter by active pet's species, match triggers, return matched fragments
 - [ ] 3.3 Inject matched fragments into next turn via `SessionBuilder` (prompt-cached)
-- [ ] 3.4 Bundle built-in "Puppy" skill as an asset under `assets/skills/puppy/`
-- [ ] 3.5 Skill browser screen: installed / available, enable/disable
-- [ ] 3.6 Synthesis-mode scheduled task: weekly per-pet digest written as a wiki entry
-- [ ] 3.7 Settings toggle for weekly digest
-- [ ] 3.8 Tests: trigger matching, fragment selection, digest entry shape
-- [ ] 3.9 Phase wrap-up commit + summary
+- [ ] 3.4 Onboarding templates: ship 6–8 species seeders (`dog`, `cat`, `bird`, `rabbit`, `reptile`, `fish`, `small-mammal`, `exotic`) under `assets/onboarding/`. Each is a `SOUL.md` skeleton with species-appropriate frontmatter keys + welcome prose. Add-pet flow picks the template by species choice.
+- [ ] 3.5 Bundle 2–3 launch skill packs under `assets/skills/`: `puppy` (`species: [dog]`), `senior-dog` (`species: [dog]`), `new-cat` (`species: [cat]`). Each follows the manifest shape from CLAUDE.md §9.
+- [ ] 3.6 Skill browser screen: installed / available, enable/disable, species-filtered to the active pet
+- [ ] 3.7 Synthesis-mode scheduled task: weekly per-pet digest written as a wiki entry
+- [ ] 3.8 Settings toggle for weekly digest
+- [ ] 3.9 Tests: species filtering, trigger matching, fragment selection, onboarding-template selection, digest entry shape
+- [ ] 3.10 Phase wrap-up commit + summary
 
-**On-device verification:** enable Puppy skill, ask "how do I house-train Milo," confirm response references skill content; wait or fast-forward to confirm weekly digest appears.
+**On-device verification:** add a dog pet → enable Puppy skill → ask "how do I house-train Milo," confirm response references skill content. Add a cat pet (multi-pet unlocks alongside the paywall in Phase 4, so this may need a manual schema poke for verification) → confirm dog-only skills are filtered out of the skill browser. Wait or fast-forward to confirm weekly digest appears.
 
 **STOP.**
 
