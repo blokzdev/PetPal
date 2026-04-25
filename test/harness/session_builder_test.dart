@@ -1,0 +1,170 @@
+import 'dart:io';
+
+import 'package:drift/native.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:petpal/data/db/database.dart';
+import 'package:petpal/data/db/sqlite_vec.dart';
+import 'package:petpal/data/repos/pet_repo.dart';
+import 'package:petpal/data/repos/wiki_repo.dart';
+import 'package:petpal/data/wiki_io_fs.dart';
+import 'package:petpal/harness/agent/messages.dart';
+import 'package:petpal/harness/retrieval/embedding_worker.dart';
+import 'package:petpal/harness/retrieval/hybrid_retriever.dart';
+import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
+import 'package:petpal/harness/session_builder.dart';
+
+void main() {
+  late Directory tempRoot;
+  late AppDatabase db;
+  late SessionBuilder builder;
+  late PetRepo petRepo;
+  late WikiRepo wikiRepo;
+
+  setUpAll(() {
+    registerSqliteVec(
+      extensionPath: '${Directory.current.path}/test/native/libvec0.so',
+    );
+  });
+
+  setUp(() async {
+    tempRoot = Directory.systemTemp.createTempSync('petpal_session_');
+    db = AppDatabase(NativeDatabase.memory());
+    final wiki = WikiIoFs(tempRoot);
+    const provider = StubEmbeddingProvider(dim: 16);
+    final worker = EmbeddingWorker(db: db, provider: provider);
+    wikiRepo = WikiRepo(db: db, wiki: wiki, embeddings: worker);
+    petRepo = PetRepo(db: db, wiki: wiki);
+    builder = SessionBuilder(
+      wiki: wiki,
+      retriever: HybridRetriever(db: db),
+      embeddings: provider,
+    );
+  });
+
+  tearDown(() async {
+    await db.close();
+    if (tempRoot.existsSync()) tempRoot.deleteSync(recursive: true);
+  });
+
+  test('system prompt contains identity, SOUL.md, output contract',
+      () async {
+    final id = await petRepo.createPet(
+      name: 'Milo',
+      species: 'dog',
+      dob: DateTime(2022, 6, 12),
+    );
+    final pet = (await petRepo.getPet(id))!;
+
+    final turn = await builder.compose(pet: pet, userInput: 'Hi');
+
+    expect(turn.systemPrompt, contains('PetPal'));
+    expect(turn.systemPrompt, contains('memory-first companion for Milo'));
+    expect(turn.systemPrompt, contains('never diagnose'));
+    expect(turn.systemPrompt, contains("Milo's identity"));
+    expect(turn.systemPrompt, contains('species: dog'));
+    expect(turn.systemPrompt, contains('dob: 2022-06-12'));
+    expect(turn.systemPrompt, contains('# Output contract'));
+    expect(turn.systemPrompt, contains('wiki/$id/'));
+  });
+
+  test('system prompt is byte-stable across turns with same inputs '
+      '(necessary for prompt caching)', () async {
+    final id = await petRepo.createPet(name: 'Milo');
+    final pet = (await petRepo.getPet(id))!;
+
+    final a = await builder.compose(pet: pet, userInput: 'first turn');
+    final b = await builder.compose(pet: pet, userInput: 'totally different');
+
+    expect(a.systemPrompt, b.systemPrompt);
+  });
+
+  test('augmentedUserInput includes retrieved hits when entries exist',
+      () async {
+    final id = await petRepo.createPet(name: 'Milo');
+    final pet = (await petRepo.getPet(id))!;
+    await wikiRepo.writeEntry(
+      petId: id,
+      type: 'food',
+      title: 'Carrot trial',
+      body: 'Milo loves frozen carrots and naps after.',
+      ts: DateTime(2026, 4, 25),
+    );
+
+    final turn = await builder.compose(
+      pet: pet,
+      userInput: 'What treats does Milo like?',
+    );
+
+    expect(turn.augmentedUserInput, contains('<context>'));
+    expect(turn.augmentedUserInput, contains('wiki/$id/food/'));
+    expect(turn.augmentedUserInput, contains('Carrot trial'));
+    expect(turn.augmentedUserInput, contains('What treats does Milo like?'));
+  });
+
+  test('augmentedUserInput is just the raw input when retrieval is empty',
+      () async {
+    final id = await petRepo.createPet(name: 'Milo');
+    final pet = (await petRepo.getPet(id))!;
+
+    final turn = await builder.compose(pet: pet, userInput: 'Hi');
+    expect(turn.augmentedUserInput, 'Hi');
+    expect(turn.augmentedUserInput, isNot(contains('<context>')));
+  });
+
+  test('skill fragments are injected into system prompt under '
+      '"Active skills"', () async {
+    final id = await petRepo.createPet(name: 'Milo');
+    final pet = (await petRepo.getPet(id))!;
+
+    final turn = await builder.compose(
+      pet: pet,
+      userInput: 'house training tips?',
+      activeSkillFragments: const [
+        '# Puppy Care\nCrate train; reward calmness; etc.',
+      ],
+    );
+
+    expect(turn.systemPrompt, contains('# Active skills'));
+    expect(turn.systemPrompt, contains('Puppy Care'));
+    expect(turn.systemPrompt, contains('Crate train'));
+  });
+
+  test('tools pass through unchanged for ToolDispatcher to consume',
+      () async {
+    final id = await petRepo.createPet(name: 'Milo');
+    final pet = (await petRepo.getPet(id))!;
+
+    const tools = [
+      ToolDefinition(
+        name: 'read_wiki',
+        description: 'Read wiki.',
+        inputSchema: {'type': 'object'},
+      ),
+    ];
+
+    final turn = await builder.compose(
+      pet: pet,
+      userInput: 'Hi',
+      tools: tools,
+    );
+    expect(turn.tools, tools);
+  });
+
+  test('missing SOUL.md does not crash; system prompt still has identity',
+      () async {
+    // Insert a pet directly into the DB without going through PetRepo, so
+    // no SOUL.md is seeded.
+    final id = await db.into(db.pets).insert(
+          PetsCompanion.insert(
+            name: 'Ghost',
+            createdAt: DateTime(2026, 4, 25),
+          ),
+        );
+    final pet = await (db.select(db.pets)..where((p) => p.id.equals(id)))
+        .getSingle();
+
+    final turn = await builder.compose(pet: pet, userInput: 'Hi');
+    expect(turn.systemPrompt, contains('memory-first companion for Ghost'));
+    expect(turn.systemPrompt, isNot(contains("Ghost's identity")));
+  });
+}

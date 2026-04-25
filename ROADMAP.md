@@ -43,7 +43,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 1.8 `AgentLoop` skeleton: turn struct, message history, tool-call parsing
 - [x] 1.9 `ToolDispatcher` with stubs for `read_wiki`, `search_wiki`, `write_wiki_entry`
 - [x] 1.10 Anthropic API client: streaming, tool-use, **prompt caching** on system blocks; key from `flutter_secure_storage`
-- [ ] 1.11 `SessionBuilder`: assemble system prompt from identity + `SOUL.md` + retrieved context
+- [x] 1.11 `SessionBuilder`: assemble system prompt from identity + `SOUL.md` + retrieved context
 - [ ] 1.12 Wire real embedding model (Anthropic or local) behind the worker interface from 1.6
 - [ ] 1.13 Hidden dev screen: create pet "Milo", write a note, run keyword + semantic search, show results
 - [ ] 1.14 Unit tests: `WikiRepo` round-trip, FTS5 sync, retrieval dedup

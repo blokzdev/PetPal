@@ -46,7 +46,8 @@ class HybridRetriever {
     List<double>? queryVector,
     int k = 10,
   }) async {
-    final ftsRows = queryText.trim().isEmpty
+    final ftsQuery = _sanitizeFtsQuery(queryText);
+    final ftsRows = ftsQuery.isEmpty
         ? const <QueryRow>[]
         : await _db.customSelect(
             '''
@@ -59,7 +60,7 @@ class HybridRetriever {
             LIMIT ?
             ''',
             variables: [
-              Variable<String>(queryText),
+              Variable<String>(ftsQuery),
               Variable<int>(petId),
               Variable<int>(k),
             ],
@@ -119,4 +120,21 @@ class HybridRetriever {
         ),
     ];
   }
+}
+
+/// Convert a free-form natural-language query into safe FTS5 syntax: lowercase
+/// the input, split on non-alphanumerics (Unicode-aware), then OR-join each
+/// token as a prefix match (`token*`). This neutralises FTS5 metacharacters
+/// (`?`, parens, `AND`/`OR`, `*`) that natural-language queries leak in, and
+/// uses OR + prefix so a question like "what treats does Milo like?" still
+/// matches an entry containing only "carrots" (the vector side picks up
+/// semantic gaps the lexical side misses).
+String _sanitizeFtsQuery(String input) {
+  final tokens = input
+      .toLowerCase()
+      .split(RegExp(r'[^\p{L}\p{N}]+', unicode: true))
+      .where((t) => t.isNotEmpty)
+      .toList();
+  if (tokens.isEmpty) return '';
+  return tokens.map((t) => '$t*').join(' OR ');
 }
