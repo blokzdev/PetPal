@@ -41,7 +41,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 1.6 Embedding worker: on entry write, queue embed job (interface only — model call stubbed)
 - [x] 1.7 Hybrid retrieval: FTS5 ∪ vector kNN, dedupe by `entry_id`, return ranked snippets
 - [x] 1.8 `AgentLoop` skeleton: turn struct, message history, tool-call parsing
-- [ ] 1.9 `ToolDispatcher` with stubs for `read_wiki`, `search_wiki`, `write_wiki_entry`
+- [x] 1.9 `ToolDispatcher` with stubs for `read_wiki`, `search_wiki`, `write_wiki_entry`
 - [ ] 1.10 Anthropic API client: streaming, tool-use, **prompt caching** on system blocks; key from `flutter_secure_storage`
 - [ ] 1.11 `SessionBuilder`: assemble system prompt from identity + `SOUL.md` + retrieved context
 - [ ] 1.12 Wire real embedding model (Anthropic or local) behind the worker interface from 1.6
