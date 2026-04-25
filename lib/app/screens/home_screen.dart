@@ -94,6 +94,12 @@ class _Greeting extends ConsumerWidget {
           icon: const Icon(Icons.chat_bubble),
           label: Text('Chat with ${pet.name}'),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => GoRouter.of(context).push('/wiki'),
+          icon: const Icon(Icons.menu_book_outlined),
+          label: const Text('Browse wiki'),
+        ),
         if (kDebugMode) ...[
           const SizedBox(height: 16),
           OutlinedButton.icon(

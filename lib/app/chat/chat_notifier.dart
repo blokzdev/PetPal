@@ -90,6 +90,9 @@ class ChatNotifier extends Notifier<ChatState> {
                   .where((p) => p.id != toolUseId)
                   .toList(),
             );
+            // Tools may have written entries / mutated SOUL.md; bust the
+            // wiki browser's cache so the next view fetches fresh.
+            ref.invalidate(wikiEntriesProvider);
           case AgentLoopDone(:final history):
             state = state.copyWith(
               history: history,

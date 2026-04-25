@@ -1,5 +1,4 @@
 import 'package:drift/native.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';

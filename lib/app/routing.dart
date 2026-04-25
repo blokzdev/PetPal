@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,6 +8,8 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/wiki_browser_screen.dart';
+import 'screens/wiki_entry_screen.dart';
 
 /// Provides the singleton [GoRouter]. Reads [isOnboardedProvider] so an
 /// onboarding-status change (saving an API key, or clearing it) reroutes
@@ -41,6 +43,22 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/chat',
         builder: (context, state) => const ChatScreen(),
+      ),
+      GoRoute(
+        path: '/wiki',
+        builder: (context, state) => const WikiBrowserScreen(),
+      ),
+      GoRoute(
+        path: '/wiki/entry',
+        builder: (context, state) {
+          final path = state.extra as String?;
+          if (path == null) {
+            return const Scaffold(
+              body: Center(child: Text('Missing entry path.')),
+            );
+          }
+          return WikiEntryScreen(path: path);
+        },
       ),
       // Phase 1 verification screen — exercises the full harness. Linked
       // from Home only in debug builds (see HomeScreen).

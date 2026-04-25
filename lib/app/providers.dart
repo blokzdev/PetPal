@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/connection.dart';
@@ -95,6 +96,20 @@ final petRepoProvider = FutureProvider<PetRepo>((ref) async {
 final petsProvider = FutureProvider<List<Pet>>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   return db.select(db.pets).get();
+});
+
+/// Active pet's wiki entries, newest first. Invalidated by
+/// `ref.invalidate(wikiEntriesProvider)` after chat-tool writes (or any
+/// other mutation) so the wiki browser refetches on next build.
+final wikiEntriesProvider = FutureProvider<List<Entry>>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final pets = await ref.watch(petsProvider.future);
+  if (pets.isEmpty) return const [];
+  final petId = pets.last.id;
+  return (db.select(db.entries)
+        ..where((e) => e.petId.equals(petId))
+        ..orderBy([(e) => OrderingTerm.desc(e.ts)]))
+      .get();
 });
 
 // ─── Embeddings + retrieval ────────────────────────────────────────────────
