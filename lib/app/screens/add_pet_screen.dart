@@ -72,6 +72,20 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     final dobLabel = _dob == null
         ? 'Date of birth (optional)'
         : 'Date of birth: ${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}';
+    // Free-tier rule (DECISIONS row 8): one pet maximum. Multi-pet
+    // unlocks alongside the paywall in Phase 4. Schema already supports
+    // many; this is a UI gate.
+    final petsAsync = ref.watch(petsProvider);
+    final atLimit = petsAsync.maybeWhen(
+      data: (pets) => pets.isNotEmpty,
+      orElse: () => false,
+    );
+    if (atLimit) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Add a pet')),
+        body: const _FreeTierLimit(),
+      );
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Add a pet')),
       body: SafeArea(
@@ -138,6 +152,45 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FreeTierLimit extends StatelessWidget {
+  const _FreeTierLimit();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Icon(Icons.pets, size: 56, color: scheme.primary),
+            const SizedBox(height: 16),
+            Text(
+              'You already have a pet on PetPal.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'The free tier supports one pet. Multi-pet support arrives '
+              'with the paid tier in a future update.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 32),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Back'),
+            ),
+          ],
         ),
       ),
     );

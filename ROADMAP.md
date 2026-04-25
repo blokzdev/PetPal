@@ -68,7 +68,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.6 `SessionBuilder` integration: per-turn retrieval, prompt-cached `SOUL.md`
 - [x] 2.7 Wiki browser: folder tree + markdown viewer, tap to open
 - [x] 2.8 `SOUL.md` editor: form for frontmatter, free-text for prose, save round-trips through `wiki_io`
-- [ ] 2.9 Pet switcher: schema supports many, UI gates to 1 (free-tier rule, even though no paywall yet)
+- [x] 2.9 Pet switcher: schema supports many, UI gates to 1 (free-tier rule, even though no paywall yet)
 - [ ] 2.10 Error surfaces: API failure, rate-limit, offline — clear, retryable UI states
 - [ ] 2.11 Export: zip `wiki/<pet>/` → Android share sheet
 - [ ] 2.12 `CloudSyncAdapter` interface stub committed (no implementation; Phase 5 decides backend)

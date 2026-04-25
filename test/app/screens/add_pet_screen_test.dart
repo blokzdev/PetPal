@@ -2,6 +2,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
@@ -136,5 +137,35 @@ void main() {
 
     // Home reflects the new pet
     expect(find.text('Milo'), findsOneWidget);
+  });
+
+  testWidgets('free-tier gate: AddPetScreen blocks a second pet '
+      '(DECISIONS row 8)', (tester) async {
+    // Pre-seed a pet so the free-tier limit is hit.
+    await db.into(db.pets).insert(
+          PetsCompanion.insert(
+            name: 'Milo',
+            createdAt: DateTime(2026, 4, 25),
+          ),
+        );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Force-navigate to /pets/add (the empty-state CTA is hidden when a
+    // pet exists, but a deep-link or future pet switcher could land
+    // here).
+    BuildContext deeplinkCtx = tester.element(find.text('Milo'));
+    GoRouter.of(deeplinkCtx).push('/pets/add');
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('You already have a pet'), findsOneWidget);
+    // No form fields rendered.
+    expect(find.widgetWithText(TextFormField, 'Name'), findsNothing);
   });
 }
