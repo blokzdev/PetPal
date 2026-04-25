@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'providers.dart';
+import 'screens/add_pet_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
@@ -31,6 +32,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
+      ),
+      GoRoute(
+        path: '/pets/add',
+        builder: (context, state) => const AddPetScreen(),
       ),
       // Phase 1 verification screen — exercises the full harness. Linked
       // from Home only in debug builds (see HomeScreen).
