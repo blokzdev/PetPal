@@ -5,7 +5,9 @@ import '../data/db/connection.dart';
 import '../data/db/database.dart';
 import '../data/onboarding_templates.dart';
 import '../data/repos/pet_repo.dart';
+import '../data/repos/skill_repo.dart';
 import '../data/repos/wiki_repo.dart';
+import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import '../data/wiki_io_fs.dart';
 import '../harness/agent/agent_loop.dart';
@@ -18,7 +20,9 @@ import '../harness/retrieval/hybrid_retriever.dart';
 import '../harness/retrieval/onnx_embedding_provider.dart';
 import '../harness/session_builder.dart';
 import '../harness/skills/asset_skill_source.dart';
+import '../harness/skills/enabled_filtering_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
+import '../harness/skills/skill_manifest.dart';
 import '../harness/skills/skill_source.dart';
 import '../harness/tools/wiki_tools.dart';
 import '../platform/api_key_storage.dart';
@@ -217,15 +221,73 @@ final agentLoopProvider = FutureProvider<AgentLoop>((ref) async {
   return AgentLoop(llm: llm, tools: tools);
 });
 
-/// Source of skills bundled with the app. Production: discover via
-/// `assets/skills/<id>/manifest.md` (Phase 3.5 ships puppy, senior-dog,
-/// new-cat). Tests inject in-memory or empty sources.
+/// Repo over the `skills_installed` table — enabled-state persistence.
+final skillRepoProvider = FutureProvider<SkillRepo>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return SkillRepo(db: db);
+});
+
+/// **Raw** discovery source for skills (no enabled filter applied).
+/// Production: discover via `assets/skills/<id>/manifest.md` (Phase 3.5
+/// ships puppy, senior-dog, new-cat). Tests inject in-memory or empty.
 final skillSourceProvider = Provider<SkillSource>((ref) {
   return const AssetSkillSource();
 });
 
-final skillLoaderProvider = Provider<SkillLoader>((ref) {
-  return SkillLoader(source: ref.watch(skillSourceProvider));
+/// The source [SkillLoader] consumes — wraps [skillSourceProvider] with
+/// the user's enable/disable preferences from [skillRepoProvider]. The
+/// browser screen reads the raw source directly so disabled skills
+/// stay visible (toggleable); the loader sees only the enabled ones.
+final filteredSkillSourceProvider =
+    FutureProvider<SkillSource>((ref) async {
+  final inner = ref.watch(skillSourceProvider);
+  final repo = await ref.watch(skillRepoProvider.future);
+  return EnabledFilteringSkillSource(inner: inner, repo: repo);
+});
+
+final skillLoaderProvider = FutureProvider<SkillLoader>((ref) async {
+  final source = await ref.watch(filteredSkillSourceProvider.future);
+  return SkillLoader(source: source);
+});
+
+/// Catalog entry for the skill browser: manifest + whether it's
+/// currently enabled. Pre-filtered to the active pet's species so the
+/// browser only shows relevant skills (CLAUDE.md §3 — onboarding
+/// templates and skill packs are the only species-aware paths).
+class SkillCatalogEntry {
+  const SkillCatalogEntry({required this.manifest, required this.enabled});
+  final SkillManifest manifest;
+  final bool enabled;
+}
+
+final skillCatalogProvider =
+    FutureProvider<List<SkillCatalogEntry>>((ref) async {
+  final source = ref.watch(skillSourceProvider);
+  final repo = await ref.watch(skillRepoProvider.future);
+  final pets = await ref.watch(petsProvider.future);
+  if (pets.isEmpty) return const [];
+  final wiki = await ref.watch(wikiIoProvider.future);
+  // Species lives in SOUL.md frontmatter (CLAUDE.md §3). Empty when
+  // SOUL.md is missing or the user hasn't filled in species — only
+  // universal skills survive that case.
+  String petSpecies = '';
+  try {
+    final soul = await wiki.read(wiki.soulPath(pets.last.id));
+    petSpecies = parseSoul(soul).frontmatter['species']?.toString() ?? '';
+  } catch (_) {
+    // No SOUL.md yet; petSpecies stays empty.
+  }
+
+  final disabled = await repo.disabledIds();
+  final entries = await source.list();
+  return [
+    for (final e in entries)
+      if (e.manifest.matchesSpecies(petSpecies))
+        SkillCatalogEntry(
+          manifest: e.manifest,
+          enabled: !disabled.contains(e.manifest.id),
+        ),
+  ];
 });
 
 /// [SessionBuilder] that composes per-turn inputs (cache-stable system
@@ -236,7 +298,7 @@ final sessionBuilderProvider =
   final wiki = await ref.watch(wikiIoProvider.future);
   final retriever = await ref.watch(hybridRetrieverProvider.future);
   final embeddings = await ref.watch(embeddingProviderProvider.future);
-  final skills = ref.watch(skillLoaderProvider);
+  final skills = await ref.watch(skillLoaderProvider.future);
   return SessionBuilder(
     wiki: wiki,
     retriever: retriever,

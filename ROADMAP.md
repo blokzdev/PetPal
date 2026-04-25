@@ -91,7 +91,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 3.3 Inject matched fragments into next turn via `SessionBuilder` (prompt-cached)
 - [x] 3.4 Onboarding templates: ship 6–8 species seeders (`dog`, `cat`, `bird`, `rabbit`, `reptile`, `fish`, `small-mammal`, `exotic`) under `assets/onboarding/`. Each is a `SOUL.md` skeleton with species-appropriate frontmatter keys + welcome prose. Add-pet flow picks the template by species choice.
 - [x] 3.5 Bundle 2–3 launch skill packs under `assets/skills/`: `puppy` (`species: [dog]`), `senior-dog` (`species: [dog]`), `new-cat` (`species: [cat]`). Each follows the manifest shape from CLAUDE.md §9.
-- [ ] 3.6 Skill browser screen: installed / available, enable/disable, species-filtered to the active pet
+- [x] 3.6 Skill browser screen: installed / available, enable/disable, species-filtered to the active pet
 - [ ] 3.7 Synthesis-mode scheduled task: weekly per-pet digest written as a wiki entry
 - [ ] 3.8 Settings toggle for weekly digest
 - [ ] 3.9 Tests: species filtering, trigger matching, fragment selection, onboarding-template selection, digest entry shape

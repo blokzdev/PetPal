@@ -7,6 +7,7 @@ import 'package:petpal/harness/agent/llm_client.dart';
 import 'package:petpal/harness/agent/tool_dispatcher.dart';
 import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
 import 'package:petpal/harness/skills/empty_skill_source.dart';
+import 'package:petpal/harness/skills/skill_source.dart';
 
 /// In-memory wiki for tests. Records writes; reads return what was written
 /// or '' for SOUL.md-on-first-read so SessionBuilder doesn't blow up before
@@ -56,6 +57,7 @@ Future<({
   required LlmClient llm,
   ToolDispatcher? tools,
   String petName = 'Milo',
+  SkillSource? skillSource,
 }) async {
   final db = AppDatabase(NativeDatabase.memory());
   final wiki = CapturingWikiIo();
@@ -85,8 +87,10 @@ Future<({
     llmClientProvider.overrideWithValue(llm),
     // Skip the asset-backed skill source — `flutter test` has no asset
     // bundle to scan. Tests that want to exercise specific skills
-    // override skillSourceProvider themselves.
-    skillSourceProvider.overrideWithValue(const EmptySkillSource()),
+    // pass `skillSource:` to this helper.
+    skillSourceProvider.overrideWithValue(
+      skillSource ?? const EmptySkillSource(),
+    ),
     if (tools != null)
       toolDispatcherProvider.overrideWith((ref) async => tools),
   ];
