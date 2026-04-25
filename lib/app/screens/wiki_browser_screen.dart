@@ -1,20 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../data/db/database.dart';
+import '../../data/wiki_export.dart';
 import '../providers.dart';
 
-class WikiBrowserScreen extends ConsumerWidget {
+class WikiBrowserScreen extends ConsumerStatefulWidget {
   const WikiBrowserScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<WikiBrowserScreen> createState() =>
+      _WikiBrowserScreenState();
+}
+
+class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
+  bool _exporting = false;
+
+  Future<void> _export() async {
+    setState(() => _exporting = true);
+    try {
+      final wiki = await ref.read(wikiIoProvider.future);
+      final activePetId = ref.read(activePetIdProvider);
+      final tempDir = await getTemporaryDirectory();
+      final zip = await exportPetWikiAsZip(
+        wiki: wiki,
+        petId: activePetId(),
+        outputDir: tempDir,
+      );
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(zip.path, mimeType: 'application/zip')],
+          subject: 'PetPal wiki export',
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Export failed: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final entriesAsync = ref.watch(wikiEntriesProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Wiki'),
         actions: [
+          IconButton(
+            tooltip: 'Export wiki',
+            onPressed: _exporting ? null : _export,
+            icon: _exporting
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.ios_share),
+          ),
           IconButton(
             tooltip: 'Refresh',
             onPressed: () => ref.invalidate(wikiEntriesProvider),
