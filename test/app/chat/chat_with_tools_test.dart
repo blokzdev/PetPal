@@ -13,6 +13,7 @@ import 'package:petpal/data/wiki_io_fs.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/messages.dart' as llm;
 import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
+import 'package:petpal/harness/skills/empty_skill_source.dart';
 
 import '../../_helpers/scripted_llm_client.dart';
 
@@ -80,6 +81,10 @@ void main() {
         embeddingProviderProvider.overrideWith(
           (ref) async => const StubEmbeddingProvider(dim: 16),
         ),
+        // No asset bundle in `flutter test` — fall back to an empty
+        // skill source so SessionBuilder doesn't try AssetSkillSource
+        // and crash. This test doesn't exercise skills.
+        skillSourceProvider.overrideWithValue(const EmptySkillSource()),
         llmClientProvider.overrideWithValue(llmClient),
       ],
     );

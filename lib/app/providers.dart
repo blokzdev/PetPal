@@ -17,7 +17,7 @@ import '../harness/retrieval/embedding_worker.dart';
 import '../harness/retrieval/hybrid_retriever.dart';
 import '../harness/retrieval/onnx_embedding_provider.dart';
 import '../harness/session_builder.dart';
-import '../harness/skills/empty_skill_source.dart';
+import '../harness/skills/asset_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_source.dart';
 import '../harness/tools/wiki_tools.dart';
@@ -217,11 +217,11 @@ final agentLoopProvider = FutureProvider<AgentLoop>((ref) async {
   return AgentLoop(llm: llm, tools: tools);
 });
 
-/// Source of skills bundled with the app. Default is [EmptySkillSource]
-/// until Phase 3.5 ships the asset-backed skill packs; tests inject
-/// their own.
+/// Source of skills bundled with the app. Production: discover via
+/// `assets/skills/<id>/manifest.md` (Phase 3.5 ships puppy, senior-dog,
+/// new-cat). Tests inject in-memory or empty sources.
 final skillSourceProvider = Provider<SkillSource>((ref) {
-  return const EmptySkillSource();
+  return const AssetSkillSource();
 });
 
 final skillLoaderProvider = Provider<SkillLoader>((ref) {

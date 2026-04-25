@@ -82,6 +82,13 @@ flutter:
     # Per-species SOUL.md seed templates (Phase 3 task 3.4). Picked
     # by the add-pet flow from the species dropdown.
     - assets/onboarding/
+    # Bundled launch skill packs (Phase 3 task 3.5). AssetSkillSource
+    # discovers each skill via AssetManifest; each skill is a
+    # subdirectory under assets/skills/<id>/ containing manifest.md
+    # and the fragment files listed in its `loads:`.
+    - assets/skills/puppy/
+    - assets/skills/senior-dog/
+    - assets/skills/new-cat/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
