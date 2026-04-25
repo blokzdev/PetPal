@@ -94,7 +94,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 3.6 Skill browser screen: installed / available, enable/disable, species-filtered to the active pet
 - [x] 3.7 Synthesis-mode scheduled task: weekly per-pet digest written as a wiki entry
 - [x] 3.8 Settings toggle for weekly digest
-- [ ] 3.9 Tests: species filtering, trigger matching, fragment selection, onboarding-template selection, digest entry shape
+- [x] 3.9 Tests: species filtering, trigger matching, fragment selection, onboarding-template selection, digest entry shape
 - [ ] 3.10 Phase wrap-up commit + summary
 
 **On-device verification:** add a dog pet → enable Puppy skill → ask "how do I house-train Milo," confirm response references skill content. Add a cat pet (multi-pet unlocks alongside the paywall in Phase 4, so this may need a manual schema poke for verification) → confirm dog-only skills are filtered out of the skill browser. Wait or fast-forward to confirm weekly digest appears.
