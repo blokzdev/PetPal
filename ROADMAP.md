@@ -2,7 +2,7 @@
 
 Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-**Current phase: Phase 0 (next session begins task 0.1).**
+**Current phase: Phase 0 — COMPLETE. Verify on-device, then start Phase 1.**
 
 ---
 
@@ -20,7 +20,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 0.7 Android manifest: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`
 - [x] 0.8 Release signing config stub in `android/app/build.gradle` (no key file yet)
 - [x] 0.9 GitHub Actions: `flutter analyze` + `flutter test` on push and PR
-- [ ] 0.10 Phase wrap-up commit: `chore: phase 0 complete`; write phase-end summary
+- [x] 0.10 Phase wrap-up commit: `chore: phase 0 complete`; write phase-end summary
 
 **On-device verification:** install debug APK, see Home screen, hot-reload works, `adb logcat` shows no errors.
 
