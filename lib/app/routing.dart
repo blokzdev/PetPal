@@ -8,6 +8,7 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/soul_editor_screen.dart';
 import 'screens/wiki_browser_screen.dart';
 import 'screens/wiki_entry_screen.dart';
 
@@ -47,6 +48,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/wiki',
         builder: (context, state) => const WikiBrowserScreen(),
+      ),
+      GoRoute(
+        path: '/soul',
+        builder: (context, state) => const SoulEditorScreen(),
       ),
       GoRoute(
         path: '/wiki/entry',

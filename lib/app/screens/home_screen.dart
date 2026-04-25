@@ -100,6 +100,12 @@ class _Greeting extends ConsumerWidget {
           icon: const Icon(Icons.menu_book_outlined),
           label: const Text('Browse wiki'),
         ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: () => GoRouter.of(context).push('/soul'),
+          icon: const Icon(Icons.person_outline),
+          label: const Text('Edit SOUL'),
+        ),
         if (kDebugMode) ...[
           const SizedBox(height: 16),
           OutlinedButton.icon(
