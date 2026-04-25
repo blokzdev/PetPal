@@ -88,8 +88,14 @@ class _Greeting extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
+        const SizedBox(height: 32),
+        FilledButton.icon(
+          onPressed: () => GoRouter.of(context).push('/chat'),
+          icon: const Icon(Icons.chat_bubble),
+          label: Text('Chat with ${pet.name}'),
+        ),
         if (kDebugMode) ...[
-          const SizedBox(height: 32),
+          const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () => GoRouter.of(context).push('/dev'),
             icon: const Icon(Icons.science_outlined),

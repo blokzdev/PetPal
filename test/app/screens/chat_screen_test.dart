@@ -1,0 +1,94 @@
+import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
+import 'package:flutter_test/flutter_test.dart';
+import 'package:petpal/app/providers.dart';
+import 'package:petpal/data/db/database.dart';
+import 'package:petpal/data/wiki_io.dart';
+import 'package:petpal/harness/agent/llm_stream_event.dart';
+import 'package:petpal/main.dart';
+
+import '../../_helpers/fake_api_key_storage.dart';
+import '../../_helpers/scripted_llm_client.dart';
+
+class _NoopWiki implements WikiIo {
+  @override
+  Future<void> writeAtomic(String relPath, String body) async {}
+  @override
+  Future<String> read(String relPath) async => '';
+  @override
+  Future<List<String>> listForPet(int petId) async => const [];
+  @override
+  String petDir(int petId) => 'wiki/$petId';
+  @override
+  String soulPath(int petId) => 'wiki/$petId/SOUL.md';
+}
+
+List<Override> _commonOverrides({required ScriptedLlmClient llm}) => [
+      apiKeyStorageProvider.overrideWithValue(
+        FakeApiKeyStorage(initial: 'sk-ant-test'),
+      ),
+      appDatabaseProvider.overrideWith((ref) async {
+        final db = AppDatabase(NativeDatabase.memory());
+        // Pre-populate with a pet so /chat can show "Milo" in the AppBar.
+        await db.into(db.pets).insert(
+              PetsCompanion.insert(
+                name: 'Milo',
+                createdAt: DateTime(2026, 4, 25),
+              ),
+            );
+        ref.onDispose(() async => db.close());
+        return db;
+      }),
+      wikiIoProvider.overrideWith((ref) async => _NoopWiki()),
+      llmClientProvider.overrideWithValue(llm),
+    ];
+
+void main() {
+  testWidgets(
+      'tapping send shows the user bubble and the streaming assistant '
+      'text, then finalises', (tester) async {
+    final llm = ScriptedLlmClient(
+      scripts: [
+        [
+          const StreamMessageStart(),
+          const StreamTextDelta('Got it. '),
+          const StreamTextDelta('Logging Milo’s carrot trial.'),
+          const StreamMessageStop(),
+        ],
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _commonOverrides(llm: llm),
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Home greets Milo and shows the chat CTA.
+    expect(find.text('Milo'), findsOneWidget);
+    await tester.tap(find.text('Chat with Milo'));
+    await tester.pumpAndSettle();
+
+    // Empty-state message before any send.
+    expect(
+      find.textContaining('Tell PetPal something'),
+      findsOneWidget,
+    );
+
+    // Type and send.
+    await tester.enterText(
+      find.byType(TextField),
+      'Milo loves frozen carrots',
+    );
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pumpAndSettle();
+
+    // User bubble + finalised assistant text.
+    expect(find.text('Milo loves frozen carrots'), findsOneWidget);
+    expect(find.text('Got it. Logging Milo’s carrot trial.'), findsOneWidget);
+  });
+}

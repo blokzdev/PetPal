@@ -1,3 +1,4 @@
+import 'llm_stream_event.dart';
 import 'messages.dart';
 
 /// Minimal contract the agent loop expects from the underlying LLM. The
@@ -10,6 +11,15 @@ abstract class LlmClient {
   /// [ContentBlock]s — typically text, optionally one or more
   /// [ToolUseBlock]s when the model decides to call tools.
   Future<Message> turn({
+    required String systemPrompt,
+    required List<Message> history,
+    List<ToolDefinition> tools = const [],
+  });
+
+  /// Streaming variant of [turn]. Emits [LlmStreamEvent]s as the model
+  /// generates the response. Phase 2.3 consumes text deltas for the chat
+  /// UI; later phases (2.4+) layer tool-use deltas on top.
+  Stream<LlmStreamEvent> streamTurn({
     required String systemPrompt,
     required List<Message> history,
     List<ToolDefinition> tools = const [],

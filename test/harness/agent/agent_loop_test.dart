@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/harness/agent/agent_loop.dart';
 import 'package:petpal/harness/agent/llm_client.dart';
+import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/messages.dart';
 
 class _ScriptedClient implements LlmClient {
@@ -17,6 +18,26 @@ class _ScriptedClient implements LlmClient {
   }) async {
     historiesSeen.add(List.of(history));
     return _turns.removeAt(0);
+  }
+
+  // streamTurn isn't exercised by AgentLoop tests, but the LlmClient
+  // contract requires it. Yield deltas reconstructed from the next scripted
+  // text block so streaming smoke tests against this fake still work.
+  @override
+  Stream<LlmStreamEvent> streamTurn({
+    required String systemPrompt,
+    required List<Message> history,
+    List<ToolDefinition> tools = const [],
+  }) async* {
+    final next = _turns.removeAt(0);
+    historiesSeen.add(List.of(history));
+    yield const StreamMessageStart();
+    for (final block in next.content) {
+      if (block is TextBlock) {
+        yield StreamTextDelta(block.text);
+      }
+    }
+    yield const StreamMessageStop(stopReason: 'end_turn');
   }
 }
 

@@ -5,6 +5,8 @@ import '../data/db/database.dart';
 import '../data/repos/pet_repo.dart';
 import '../data/wiki_io.dart';
 import '../data/wiki_io_fs.dart';
+import '../harness/agent/anthropic_client.dart';
+import '../harness/agent/llm_client.dart';
 import '../platform/api_key_storage.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
@@ -84,4 +86,23 @@ final petRepoProvider = FutureProvider<PetRepo>((ref) async {
 final petsProvider = FutureProvider<List<Pet>>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   return db.select(db.pets).get();
+});
+
+// ─── LLM client ─────────────────────────────────────────────────────────────
+
+/// Production [LlmClient] backed by [AnthropicClient]. Reads the API key
+/// from [apiKeyProvider]; when the key changes (rotation in Settings, or
+/// onboarding), the provider rebuilds and emits a fresh client. Tests
+/// override with a scripted fake.
+final llmClientProvider = Provider<LlmClient>((ref) {
+  final keyAsync = ref.watch(apiKeyProvider);
+  final key = keyAsync.maybeWhen(data: (k) => k, orElse: () => null);
+  if (key == null || key.isEmpty) {
+    throw StateError(
+      'No API key — onboarding incomplete. Cannot construct LlmClient.',
+    );
+  }
+  final client = AnthropicClient(apiKey: key);
+  ref.onDispose(client.close);
+  return client;
 });

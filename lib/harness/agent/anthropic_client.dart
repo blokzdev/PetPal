@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import 'llm_client.dart';
+import 'llm_stream_event.dart';
 import 'messages.dart';
 
 /// Default model. CLAUDE.md positions PetPal as a chat agent; Sonnet is the
@@ -149,6 +151,128 @@ class AnthropicClient implements LlmClient {
     return _decodeMessage(decoded);
   }
 
+  @override
+  Stream<LlmStreamEvent> streamTurn({
+    required String systemPrompt,
+    required List<Message> history,
+    List<ToolDefinition> tools = const [],
+  }) async* {
+    final body = <String, Object?>{
+      'model': model,
+      'max_tokens': maxTokens,
+      'stream': true,
+      'system': [
+        {
+          'type': 'text',
+          'text': systemPrompt,
+          'cache_control': {'type': 'ephemeral'},
+        },
+      ],
+      'messages': [for (final m in history) _encodeMessage(m)],
+      if (tools.isNotEmpty)
+        'tools': [
+          for (final t in tools)
+            {
+              'name': t.name,
+              'description': t.description,
+              'input_schema': t.inputSchema,
+            },
+        ],
+    };
+
+    final request = http.Request('POST', Uri.parse('$baseUrl/v1/messages'))
+      ..headers['Content-Type'] = 'application/json'
+      ..headers['x-api-key'] = _apiKey
+      ..headers['anthropic-version'] = _apiVersion
+      ..headers['accept'] = 'text/event-stream'
+      ..body = jsonEncode(body);
+
+    final streamed = await _http.send(request);
+    if (streamed.statusCode != 200) {
+      final errBody = await streamed.stream.bytesToString();
+      throw _errorFromBody(streamed.statusCode, errBody);
+    }
+
+    String? lastStopReason;
+    int? lastOutputTokens;
+
+    await for (final raw in streamed.stream
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())) {
+      // SSE frames are `data: {json}` lines, separated by blank lines.
+      // Anthropic also prefixes lines with `event: <name>` for routing,
+      // but the JSON payload always carries `type` so the event header is
+      // redundant — we key off `type` instead.
+      if (!raw.startsWith('data:')) continue;
+      final payload = raw.substring(5).trim();
+      if (payload.isEmpty || payload == '[DONE]') continue;
+
+      final Map<String, Object?> evt;
+      try {
+        final decoded = jsonDecode(payload);
+        if (decoded is! Map<String, Object?>) continue;
+        evt = decoded;
+      } catch (_) {
+        continue;
+      }
+
+      switch (evt['type']) {
+        case 'message_start':
+          // The opening message envelope carries input usage; surface in
+          // [_lastUsage] so cache-hit-rate dashboards still work for
+          // streaming turns.
+          final msg = evt['message'];
+          if (msg is Map<String, Object?>) {
+            final usage = msg['usage'];
+            if (usage is Map<String, Object?>) {
+              _lastUsage = AnthropicUsage.fromJson(usage);
+            }
+          }
+          yield const StreamMessageStart();
+
+        case 'content_block_delta':
+          final delta = evt['delta'];
+          if (delta is Map<String, Object?> &&
+              delta['type'] == 'text_delta') {
+            final text = delta['text'];
+            if (text is String && text.isNotEmpty) {
+              yield StreamTextDelta(text);
+            }
+          }
+        // Other delta types (input_json_delta for tool-use) get added in
+        // task 2.4.
+
+        case 'message_delta':
+          final delta = evt['delta'];
+          if (delta is Map<String, Object?>) {
+            final reason = delta['stop_reason'];
+            if (reason is String) lastStopReason = reason;
+          }
+          final usage = evt['usage'];
+          if (usage is Map<String, Object?>) {
+            final out = usage['output_tokens'];
+            if (out is num) lastOutputTokens = out.toInt();
+          }
+
+        case 'message_stop':
+          yield StreamMessageStop(
+            stopReason: lastStopReason,
+            outputTokens: lastOutputTokens,
+          );
+
+        case 'error':
+          final err = evt['error'];
+          if (err is Map<String, Object?>) {
+            throw AnthropicApiException(
+              statusCode: 200,
+              message: (err['message'] as String?) ?? 'stream error',
+              errorType: err['type'] as String?,
+            );
+          }
+      }
+    }
+  }
+
   void close() => _http.close();
 
   // ---- encoding -----------------------------------------------------------
@@ -216,11 +340,14 @@ class AnthropicClient implements LlmClient {
     }
   }
 
-  AnthropicApiException _errorFromResponse(http.Response response) {
-    String message = response.body;
+  AnthropicApiException _errorFromResponse(http.Response response) =>
+      _errorFromBody(response.statusCode, response.body);
+
+  AnthropicApiException _errorFromBody(int statusCode, String rawBody) {
+    String message = rawBody;
     String? errorType;
     try {
-      final decoded = jsonDecode(response.body);
+      final decoded = jsonDecode(rawBody);
       if (decoded is Map<String, Object?>) {
         final error = decoded['error'];
         if (error is Map<String, Object?>) {
@@ -232,7 +359,7 @@ class AnthropicClient implements LlmClient {
       // Body wasn't JSON — keep the raw body as the message.
     }
     return AnthropicApiException(
-      statusCode: response.statusCode,
+      statusCode: statusCode,
       message: message,
       errorType: errorType,
     );
