@@ -1,25 +1,28 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../harness/agent/llm_client.dart';
-import '../../harness/agent/llm_stream_event.dart';
-import '../../harness/agent/messages.dart' as llm;
+import '../../harness/agent/agent_loop.dart';
+import '../../harness/agent/tool_dispatcher.dart';
 import '../providers.dart';
 import 'chat_state.dart';
 
-/// Drives one chat session: appends the user turn, streams the assistant
-/// response, and finalises it on `message_stop`.
+/// Drives one chat session through the full agent harness:
+/// - appends the user turn to the LLM-shape history
+/// - opens [AgentLoop.streamRun]
+/// - accumulates text deltas into the in-flight buffer
+/// - tracks active tool calls between `tool_use` and `tool_result`
+/// - finalises history on `AgentLoopDone`
 ///
-/// 2.3 scope: text-only streaming with a placeholder system prompt. Tool
-/// calls and SessionBuilder integration land in 2.4 and 2.6.
+/// SessionBuilder integration (real system prompt with SOUL.md +
+/// retrieved snippets) lands in 2.6 — for now, we use a placeholder
+/// system prompt and pass tool definitions straight through.
 class ChatNotifier extends Notifier<ChatState> {
-  // Placeholder until SessionBuilder lands in 2.6. The real prompt will
-  // include identity + SOUL.md (cached) and the per-turn user message
-  // will carry retrieved snippets in <context> tags (DECISIONS row 19).
   static const _placeholderSystemPrompt =
       'You are PetPal, a memory-first companion for the user’s pet. '
       'You help the owner track their pet’s life and know when to call '
-      'the vet. You never diagnose. Keep replies conversational and '
-      'concise.';
+      'the vet. You never diagnose. Use the wiki tools to record what '
+      'the user tells you (write_wiki_entry, update_soul) and to look '
+      'things up (search_wiki, read_wiki). Cite entry paths when you '
+      'reference facts. Keep replies conversational and concise.';
 
   @override
   ChatState build() => const ChatState();
@@ -28,84 +31,78 @@ class ChatNotifier extends Notifier<ChatState> {
     final trimmed = userText.trim();
     if (trimmed.isEmpty || state.sending) return;
 
-    final userMessages = [
-      ...state.messages,
-      ChatMessage.user(trimmed),
-    ];
     state = state.copyWith(
-      messages: userMessages,
-      streamingAssistant: '',
       sending: true,
+      streamingAssistant: '',
+      activeTools: const [],
       clearError: true,
     );
 
-    LlmClient client;
+    AgentLoop loop;
+    ToolDispatcher tools;
     try {
-      client = ref.read(llmClientProvider);
+      loop = await ref.read(agentLoopProvider.future);
+      tools = await ref.read(toolDispatcherProvider.future);
     } catch (e) {
       state = state.copyWith(
         sending: false,
         clearStreamingAssistant: true,
-        error: 'No API key configured.',
+        error: 'Setup failed: ${_humanError(e)}',
       );
       return;
     }
 
     try {
-      final history = [
-        for (final m in userMessages) _toLlmMessage(m),
-      ];
-      final stream = client.streamTurn(
+      await for (final event in loop.streamRun(
         systemPrompt: _placeholderSystemPrompt,
-        history: history,
-      );
-
-      var done = false;
-      await for (final event in stream) {
+        userInput: trimmed,
+        priorHistory: state.history,
+        tools: tools.definitions.toList(),
+      )) {
         switch (event) {
-          case StreamTextDelta(:final text):
+          case AgentTextDelta(:final text):
             state = state.copyWith(
               streamingAssistant: (state.streamingAssistant ?? '') + text,
             );
-          case StreamMessageStop():
-            _finalize();
-            done = true;
-          // Tool-use stream events arrive once the AgentLoop wires tools in
-          // 2.5; ChatNotifier ignores them here because 2.3's path is
-          // text-only direct streaming. The real wiring switches this
-          // notifier to consume AgentLoop.streamRun events instead.
-          default:
-            break;
+          case AgentToolUse(:final id, :final name, :final input):
+            state = state.copyWith(
+              activeTools: [
+                ...state.activeTools,
+                ToolPill(id: id, name: name, input: input),
+              ],
+            );
+          case AgentToolResult(:final toolUseId):
+            state = state.copyWith(
+              activeTools: state.activeTools
+                  .where((p) => p.id != toolUseId)
+                  .toList(),
+            );
+          case AgentLoopDone(:final history):
+            state = state.copyWith(
+              history: history,
+              clearStreamingAssistant: true,
+              activeTools: const [],
+              sending: false,
+            );
+            return;
         }
       }
-      if (!done) _finalize();
+      // Stream ended without a Done event (shouldn't happen, but be
+      // defensive).
+      state = state.copyWith(
+        sending: false,
+        clearStreamingAssistant: true,
+        activeTools: const [],
+      );
     } catch (e) {
       state = state.copyWith(
         sending: false,
         clearStreamingAssistant: true,
+        activeTools: const [],
         error: _humanError(e),
       );
     }
   }
-
-  void _finalize() {
-    final draft = state.streamingAssistant ?? '';
-    final finalMessages = draft.isEmpty
-        ? state.messages
-        : [...state.messages, ChatMessage.assistant(draft)];
-    state = state.copyWith(
-      messages: finalMessages,
-      sending: false,
-      clearStreamingAssistant: true,
-    );
-  }
-
-  llm.Message _toLlmMessage(ChatMessage m) => llm.Message(
-        role: m.role == ChatRole.user
-            ? llm.Message.userRole
-            : llm.Message.assistantRole,
-        content: [llm.TextBlock(m.text)],
-      );
 
   String _humanError(Object e) {
     final s = e.toString();

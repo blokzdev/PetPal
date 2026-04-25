@@ -178,9 +178,56 @@ void main() {
       expect(search.content, contains('Carrot trial'));
     });
 
-    test('the three canonical tools are registered', () {
+    test('the four canonical tools are registered', () {
       final names = dispatcher.definitions.map((d) => d.name).toSet();
-      expect(names, {'read_wiki', 'search_wiki', 'write_wiki_entry'});
+      expect(names, {
+        'read_wiki',
+        'search_wiki',
+        'write_wiki_entry',
+        'update_soul',
+      });
+    });
+
+    test('update_soul merges the patch into SOUL.md and preserves body',
+        () async {
+      // Seed a SOUL.md via the IO layer so the file exists before we patch.
+      const soulPath = 'wiki/$petId/SOUL.md';
+      await WikiIoFs(tempRoot).writeAtomic(
+        soulPath,
+        '---\n'
+        'species: dog\n'
+        'breed: mixed\n'
+        'allergies: []\n'
+        '---\n'
+        '\n'
+        '# Milo\n'
+        'A rescue mutt.\n',
+      );
+
+      final result = await dispatcher.handle(const ToolUseBlock(
+        id: 'tu_u',
+        name: 'update_soul',
+        input: {
+          'patch': {
+            'weight_kg': 14.2,
+            'allergies': ['chicken'],
+            'vet_contact': 'Dr. Patel',
+          },
+        },
+      ));
+      expect(result.isError, isFalse);
+      expect(result.content, contains('updated_keys'));
+
+      final updated = await WikiIoFs(tempRoot).read(soulPath);
+      expect(updated, contains('weight_kg: 14.2'));
+      expect(updated, contains('allergies: [chicken]'));
+      expect(updated, contains('vet_contact: '));
+      // Untouched scalars survive.
+      expect(updated, contains('species: dog'));
+      expect(updated, contains('breed: mixed'));
+      // Body preserved.
+      expect(updated, contains('# Milo'));
+      expect(updated, contains('A rescue mutt.'));
     });
   });
 }

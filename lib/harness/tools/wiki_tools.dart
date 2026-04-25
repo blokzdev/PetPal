@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../../data/repos/wiki_repo.dart';
+import '../../data/soul_file.dart';
 import '../../data/wiki_io.dart';
 import '../agent/messages.dart';
 import '../agent/tool_dispatcher.dart';
@@ -120,6 +121,45 @@ void registerWikiTools(
         ts: ts,
       );
       return jsonEncode({'entry_id': id, 'path': path});
+    },
+  );
+
+  dispatcher.register(
+    const ToolDefinition(
+      name: 'update_soul',
+      description: 'Merge a frontmatter patch into the active pet\'s '
+          'SOUL.md. Lists in the patch replace existing lists; scalars '
+          'overwrite. Use for facts the owner mentions in chat — '
+          'allergies, weight, vet contact, meds, temperament tags.',
+      inputSchema: {
+        'type': 'object',
+        'properties': {
+          'patch': {
+            'type': 'object',
+            'description':
+                'Frontmatter keys to merge. Recognised keys: species, '
+                'breed, dob (ISO YYYY-MM-DD), weight_kg, allergies, '
+                'meds, vet_contact, temperament.',
+          },
+        },
+        'required': ['patch'],
+      },
+    ),
+    (input) async {
+      final patch = input['patch'];
+      if (patch is! Map<String, Object?>) {
+        throw ArgumentError('update_soul: `patch` must be an object.');
+      }
+      final path = wiki.soulPath(activePetId());
+      final existing = await wiki.read(path);
+      final parsed = parseSoul(existing);
+      final merged = mergeFrontmatter(parsed.frontmatter, patch);
+      final next = serializeSoul(frontmatter: merged, body: parsed.body);
+      await wiki.writeAtomic(path, next);
+      return jsonEncode({
+        'updated_keys': patch.keys.toList(),
+        'path': path,
+      });
     },
   );
 }

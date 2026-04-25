@@ -1,3 +1,5 @@
+import '../../harness/agent/messages.dart' as llm;
+
 enum ChatRole { user, assistant }
 
 class ChatMessage {
@@ -9,39 +11,76 @@ class ChatMessage {
   final String text;
 }
 
+/// Transient pill rendered while a tool call is in flight. Cleared on the
+/// matching tool result.
+class ToolPill {
+  const ToolPill({
+    required this.id,
+    required this.name,
+    required this.input,
+  });
+  final String id;
+  final String name;
+  final Map<String, Object?> input;
+}
+
 /// State surface the chat screen reads.
 ///
-/// [messages] is the committed history (each turn finalises into one
-/// entry). [streamingAssistant] is non-null while a response is
-/// arriving; the UI renders it as a trailing pending bubble until
-/// `message_stop` flips it back to null and pushes the finished text
-/// onto [messages].
+/// [history] is the canonical LLM-shape conversation (the AgentLoop's
+/// final history). [streamingAssistant] holds the in-flight assistant
+/// text while tokens arrive. [activeTools] tracks tool calls between
+/// `tool_use` and `tool_result`.
+///
+/// The UI renders [uiMessages] (text-only projection of [history]) plus
+/// the streaming buffer and any active tool pills.
 class ChatState {
   const ChatState({
-    this.messages = const [],
+    this.history = const [],
     this.streamingAssistant,
+    this.activeTools = const [],
     this.sending = false,
     this.error,
   });
 
-  final List<ChatMessage> messages;
+  final List<llm.Message> history;
   final String? streamingAssistant;
+  final List<ToolPill> activeTools;
   final bool sending;
   final String? error;
 
+  /// Project the LLM-shape [history] to the user-visible chat messages —
+  /// flatten text content per turn, drop tool-only turns.
+  Iterable<ChatMessage> get uiMessages sync* {
+    for (final m in history) {
+      final text = m.content
+          .whereType<llm.TextBlock>()
+          .map((b) => b.text)
+          .join();
+      if (text.isEmpty) continue;
+      yield ChatMessage(
+        role: m.role == llm.Message.userRole
+            ? ChatRole.user
+            : ChatRole.assistant,
+        text: text,
+      );
+    }
+  }
+
   ChatState copyWith({
-    List<ChatMessage>? messages,
+    List<llm.Message>? history,
     String? streamingAssistant,
+    List<ToolPill>? activeTools,
     bool? sending,
     String? error,
     bool clearStreamingAssistant = false,
     bool clearError = false,
   }) {
     return ChatState(
-      messages: messages ?? this.messages,
+      history: history ?? this.history,
       streamingAssistant: clearStreamingAssistant
           ? null
           : (streamingAssistant ?? this.streamingAssistant),
+      activeTools: activeTools ?? this.activeTools,
       sending: sending ?? this.sending,
       error: clearError ? null : (error ?? this.error),
     );

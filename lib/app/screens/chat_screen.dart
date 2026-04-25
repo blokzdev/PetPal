@@ -61,20 +61,23 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       }
     });
 
+    final ui = state.uiMessages.toList();
     return Scaffold(
       appBar: AppBar(title: Text(petName)),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: state.messages.isEmpty &&
-                      state.streamingAssistant == null
+              child: ui.isEmpty && state.streamingAssistant == null
                   ? const _EmptyChat()
                   : _MessageList(
                       controller: _scrollController,
-                      state: state,
+                      messages: ui,
+                      streamingAssistant: state.streamingAssistant,
                     ),
             ),
+            if (state.activeTools.isNotEmpty)
+              _ToolPills(pills: state.activeTools),
             if (state.error != null) _ErrorBanner(message: state.error!),
             _Composer(
               controller: _input,
@@ -115,15 +118,20 @@ class _EmptyChat extends StatelessWidget {
 }
 
 class _MessageList extends StatelessWidget {
-  const _MessageList({required this.controller, required this.state});
+  const _MessageList({
+    required this.controller,
+    required this.messages,
+    required this.streamingAssistant,
+  });
   final ScrollController controller;
-  final ChatState state;
+  final List<ChatMessage> messages;
+  final String? streamingAssistant;
 
   @override
   Widget build(BuildContext context) {
-    final draft = state.streamingAssistant;
+    final draft = streamingAssistant;
     final hasDraft = draft != null;
-    final total = state.messages.length + (hasDraft ? 1 : 0);
+    final total = messages.length + (hasDraft ? 1 : 0);
     return ListView.builder(
       controller: controller,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
@@ -136,9 +144,41 @@ class _MessageList extends StatelessWidget {
             streaming: true,
           );
         }
-        final msg = state.messages[i];
+        final msg = messages[i];
         return _Bubble(role: msg.role, text: msg.text);
       },
+    );
+  }
+}
+
+class _ToolPills extends StatelessWidget {
+  const _ToolPills({required this.pills});
+  final List<ToolPill> pills;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 4,
+        children: [
+          for (final pill in pills)
+            Chip(
+              avatar: const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+              label: Text('calling ${pill.name}…'),
+              labelStyle: TextStyle(color: scheme.onSurfaceVariant),
+              backgroundColor: scheme.surfaceContainerHigh,
+              visualDensity: VisualDensity.compact,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+            ),
+        ],
+      ),
     );
   }
 }

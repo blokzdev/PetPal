@@ -3,10 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/db/connection.dart';
 import '../data/db/database.dart';
 import '../data/repos/pet_repo.dart';
+import '../data/repos/wiki_repo.dart';
 import '../data/wiki_io.dart';
 import '../data/wiki_io_fs.dart';
+import '../harness/agent/agent_loop.dart';
 import '../harness/agent/anthropic_client.dart';
 import '../harness/agent/llm_client.dart';
+import '../harness/agent/tool_dispatcher.dart';
+import '../harness/retrieval/embedding_provider.dart';
+import '../harness/retrieval/embedding_worker.dart';
+import '../harness/retrieval/hybrid_retriever.dart';
+import '../harness/retrieval/onnx_embedding_provider.dart';
+import '../harness/tools/wiki_tools.dart';
 import '../platform/api_key_storage.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
@@ -88,7 +96,53 @@ final petsProvider = FutureProvider<List<Pet>>((ref) async {
   return db.select(db.pets).get();
 });
 
-// ─── LLM client ─────────────────────────────────────────────────────────────
+// ─── Embeddings + retrieval ────────────────────────────────────────────────
+
+/// Production [EmbeddingProvider] (Snowflake arctic-embed-xs ONNX). Tests
+/// override with [StubEmbeddingProvider] — flutter_onnxruntime's native
+/// plugin doesn't load in `flutter test`.
+final embeddingProviderProvider = FutureProvider<EmbeddingProvider>((ref) {
+  return OnnxEmbeddingProvider.fromAssets();
+});
+
+final embeddingWorkerProvider = FutureProvider<EmbeddingWorker>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final provider = await ref.watch(embeddingProviderProvider.future);
+  return EmbeddingWorker(db: db, provider: provider);
+});
+
+final wikiRepoProvider = FutureProvider<WikiRepo>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final worker = await ref.watch(embeddingWorkerProvider.future);
+  return WikiRepo(db: db, wiki: wiki, embeddings: worker);
+});
+
+final hybridRetrieverProvider = FutureProvider<HybridRetriever>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return HybridRetriever(db: db);
+});
+
+/// Returns a callback resolving to the active pet's id at call time.
+/// Free-tier rule (DECISIONS row 8): the most recently-created pet is
+/// active; multi-pet UI lands in 2.9.
+final activePetIdProvider = Provider<int Function()>((ref) {
+  return () {
+    final petsAsync = ref.read(petsProvider);
+    final pets = petsAsync.maybeWhen(
+      data: (p) => p,
+      orElse: () => const <Pet>[],
+    );
+    if (pets.isEmpty) {
+      throw StateError(
+        'No active pet — UI should have routed to /pets/add before chat.',
+      );
+    }
+    return pets.last.id;
+  };
+});
+
+// ─── LLM client + agent loop ───────────────────────────────────────────────
 
 /// Production [LlmClient] backed by [AnthropicClient]. Reads the API key
 /// from [apiKeyProvider]; when the key changes (rotation in Settings, or
@@ -105,4 +159,34 @@ final llmClientProvider = Provider<LlmClient>((ref) {
   final client = AnthropicClient(apiKey: key);
   ref.onDispose(client.close);
   return client;
+});
+
+/// Live [ToolDispatcher] with the four canonical wiki tools registered
+/// against the production repos and IO.
+final toolDispatcherProvider =
+    FutureProvider<ToolDispatcher>((ref) async {
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final repo = await ref.watch(wikiRepoProvider.future);
+  final retriever = await ref.watch(hybridRetrieverProvider.future);
+  final embeddings = await ref.watch(embeddingProviderProvider.future);
+  final activePetId = ref.watch(activePetIdProvider);
+
+  final dispatcher = ToolDispatcher();
+  registerWikiTools(
+    dispatcher,
+    wiki: wiki,
+    repo: repo,
+    retriever: retriever,
+    embeddings: embeddings,
+    activePetId: activePetId,
+  );
+  return dispatcher;
+});
+
+/// Live [AgentLoop] wrapping the LLM client and tool dispatcher. The
+/// chat surface drives `streamRun` against this provider.
+final agentLoopProvider = FutureProvider<AgentLoop>((ref) async {
+  final llm = ref.watch(llmClientProvider);
+  final tools = await ref.watch(toolDispatcherProvider.future);
+  return AgentLoop(llm: llm, tools: tools);
 });

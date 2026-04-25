@@ -64,7 +64,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.2 Add-pet flow: name, species, breed, DOB → seeds `SOUL.md`
 - [x] 2.3 Chat screen: message list, composer, streaming token rendering
 - [x] 2.4 Multi-turn loop in `AgentLoop`: turn → tool-call(s) → tool-result(s) → continue
-- [ ] 2.5 Wire tools live: `read_wiki`, `search_wiki`, `write_wiki_entry`, `update_soul`
+- [x] 2.5 Wire tools live: `read_wiki`, `search_wiki`, `write_wiki_entry`, `update_soul`
 - [ ] 2.6 `SessionBuilder` integration: per-turn retrieval, prompt-cached `SOUL.md`
 - [ ] 2.7 Wiki browser: folder tree + markdown viewer, tap to open
 - [ ] 2.8 `SOUL.md` editor: form for frontmatter, free-text for prose, save round-trips through `wiki_io`

@@ -7,6 +7,7 @@ import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
+import 'package:petpal/harness/agent/tool_dispatcher.dart';
 import 'package:petpal/main.dart';
 
 import '../../_helpers/fake_api_key_storage.dart';
@@ -43,6 +44,10 @@ List<Override> _commonOverrides({required ScriptedLlmClient llm}) => [
       }),
       wikiIoProvider.overrideWith((ref) async => _NoopWiki()),
       llmClientProvider.overrideWithValue(llm),
+      // Empty tool dispatcher — text-only streaming, no tool calls.
+      toolDispatcherProvider.overrideWith(
+        (ref) async => ToolDispatcher(),
+      ),
     ];
 
 void main() {
@@ -55,6 +60,7 @@ void main() {
           const StreamMessageStart(),
           const StreamTextDelta('Got it. '),
           const StreamTextDelta('Logging Milo’s carrot trial.'),
+          const StreamContentBlockStop(index: 0),
           const StreamMessageStop(),
         ],
       ],
