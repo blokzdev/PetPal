@@ -233,6 +233,7 @@ Reminders, skills, paywall, sync are explicitly **not** in MVP.
 |---|---|
 | Flutter | Single codebase, iOS-ready later, Riverpod ecosystem |
 | Drift (over sqflite) | Type-safe schema, migrations, FTS5 helpers |
+| sqlite3 (3.x, direct) | Bundles libsqlite3 on Android; replaces EOL `sqlite3_flutter_libs` |
 | sqlite-vec | Vector search via loadable extension; FTS5+vec hybrid from Phase 1 |
 | Anthropic API | Claude Sonnet/Opus; prompt caching for `SOUL.md` + skills |
 | Riverpod | Async repositories, providers compose with the harness cleanly |

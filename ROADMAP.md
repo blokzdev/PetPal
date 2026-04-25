@@ -14,7 +14,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 0.1 Confirm and commit `CLAUDE.md`, `ROADMAP.md`, `DECISIONS.md` (this commit)
 - [x] 0.2 `flutter create` with org id, package name, min SDK 24, null-safety on
 - [x] 0.3 Establish folder structure (`lib/harness/`, `lib/data/`, `lib/app/`, `lib/platform/`, `lib/models/`)
-- [ ] 0.4 Add core deps: `drift`, `sqlite3_flutter_libs`, `path_provider`, `flutter_riverpod`, `go_router`, `flutter_secure_storage`
+- [x] 0.4 Add core deps: `drift`, `sqlite3` (3.x), `path_provider`, `flutter_riverpod`, `go_router`, `flutter_secure_storage` (+ `drift_dev`, `build_runner` dev)
 - [ ] 0.5 Add `analysis_options.yaml` (lints), `.editorconfig`, tighten `.gitignore`
 - [ ] 0.6 Placeholder Home screen + Theme + Router (one route, one widget)
 - [ ] 0.7 Android manifest: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`
