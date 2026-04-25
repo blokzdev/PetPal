@@ -298,6 +298,18 @@ integration_test/
 - `ROADMAP.md` updated.
 - If the choice was non-obvious: `DECISIONS.md` updated.
 
+### Phase-end self-verification pass
+
+At each phase boundary, before reporting the phase complete, run all three:
+
+1. `flutter analyze` — must be clean.
+2. `flutter test` — must pass.
+3. `flutter build apk --debug` — must produce an APK; report the path and size.
+
+Report the results in the phase wrap-up summary. If any step fails, the phase is **not** complete — stop and fix before reporting.
+
+For phases that introduce new runtime behavior (data, networking, scheduled tasks, billing), also explicitly flag in the wrap-up that **on-device verification is recommended and cannot be substituted** by these checks. Phase 0 (pure scaffold) is the only phase that can defer device testing.
+
 ---
 
 ## 15. Phased build plan
