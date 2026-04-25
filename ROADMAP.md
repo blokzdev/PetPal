@@ -2,7 +2,7 @@
 
 Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-**Current phase: Phase 2 — COMPLETE. Phase 1 + 2 on-device verification (per DECISIONS row 21) is the prerequisite for Phase 3.**
+**Current phase: Phase 3 — Skills & Synthesis (in progress; next task 3.2).**
 
 ---
 
@@ -86,7 +86,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 **Goal:** installable skill packs with progressive loading + species filtering; species-aware onboarding templates; weekly synthesis-mode digest.
 **Definition of done:** install built-in "Puppy" skill → puppy-relevant questions show clear behavioral shift in answers → after a week of entries, a weekly digest entry appears in the wiki → adding a non-dog pet (e.g. cat) routes through a species-appropriate onboarding template and never sees dog-only skills as available.
 
-- [ ] 3.1 Skill manifest parser (YAML frontmatter, including `species:` filter list — empty/omitted = any)
+- [x] 3.1 Skill manifest parser (YAML frontmatter, including `species:` filter list — empty/omitted = any)
 - [ ] 3.2 `SkillLoader`: scan installed skills, filter by active pet's species, match triggers, return matched fragments
 - [ ] 3.3 Inject matched fragments into next turn via `SessionBuilder` (prompt-cached)
 - [ ] 3.4 Onboarding templates: ship 6–8 species seeders (`dog`, `cat`, `bird`, `rabbit`, `reptile`, `fish`, `small-mammal`, `exotic`) under `assets/onboarding/`. Each is a `SOUL.md` skeleton with species-appropriate frontmatter keys + welcome prose. Add-pet flow picks the template by species choice.
