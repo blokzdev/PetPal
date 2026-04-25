@@ -230,17 +230,42 @@ class AnthropicClient implements LlmClient {
           }
           yield const StreamMessageStart();
 
+        case 'content_block_start':
+          final index = (evt['index'] as num?)?.toInt() ?? 0;
+          final block = evt['content_block'];
+          if (block is Map<String, Object?> &&
+              block['type'] == 'tool_use') {
+            yield StreamToolUseStart(
+              index: index,
+              id: block['id'] as String? ?? '',
+              name: block['name'] as String? ?? '',
+            );
+          }
+
         case 'content_block_delta':
+          final index = (evt['index'] as num?)?.toInt() ?? 0;
           final delta = evt['delta'];
-          if (delta is Map<String, Object?> &&
-              delta['type'] == 'text_delta') {
-            final text = delta['text'];
-            if (text is String && text.isNotEmpty) {
-              yield StreamTextDelta(text);
+          if (delta is Map<String, Object?>) {
+            switch (delta['type']) {
+              case 'text_delta':
+                final text = delta['text'];
+                if (text is String && text.isNotEmpty) {
+                  yield StreamTextDelta(text);
+                }
+              case 'input_json_delta':
+                final partial = delta['partial_json'];
+                if (partial is String) {
+                  yield StreamToolUseInputDelta(
+                    index: index,
+                    partialJson: partial,
+                  );
+                }
             }
           }
-        // Other delta types (input_json_delta for tool-use) get added in
-        // task 2.4.
+
+        case 'content_block_stop':
+          final index = (evt['index'] as num?)?.toInt() ?? 0;
+          yield StreamContentBlockStop(index: index);
 
         case 'message_delta':
           final delta = evt['delta'];

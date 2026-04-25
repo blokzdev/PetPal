@@ -1,7 +1,9 @@
-/// Events emitted by [LlmClient.streamTurn]. Phase 2.3 only consumes
-/// [StreamTextDelta] (chat token rendering) and [StreamMessageStop] (turn
-/// finalisation); tool-use deltas land in 2.4 alongside the multi-turn
-/// AgentLoop.
+/// Events emitted by [LlmClient.streamTurn] as a single LLM turn unfolds.
+///
+/// Phase 2.3 surfaced text deltas only. Phase 2.4 adds tool-use deltas
+/// so the streaming agent loop can detect and dispatch tool calls inside
+/// a streamed turn — the chat UI surfaces tool invocations to the user
+/// as the model decides on them.
 sealed class LlmStreamEvent {
   const LlmStreamEvent();
 }
@@ -19,8 +21,40 @@ class StreamTextDelta extends LlmStreamEvent {
   final String text;
 }
 
+/// Server began streaming a `tool_use` content block. The tool's [name]
+/// and [id] are known up front; the JSON input arrives in subsequent
+/// [StreamToolUseInputDelta]s.
+class StreamToolUseStart extends LlmStreamEvent {
+  const StreamToolUseStart({
+    required this.index,
+    required this.id,
+    required this.name,
+  });
+  final int index;
+  final String id;
+  final String name;
+}
+
+/// A fragment of the JSON-encoded `input` for a tool call. Concatenate the
+/// [partialJson] of every delta with the same [index] to recover the full
+/// JSON object once the tool block stops.
+class StreamToolUseInputDelta extends LlmStreamEvent {
+  const StreamToolUseInputDelta({
+    required this.index,
+    required this.partialJson,
+  });
+  final int index;
+  final String partialJson;
+}
+
+/// A content block (text or tool_use) finished streaming.
+class StreamContentBlockStop extends LlmStreamEvent {
+  const StreamContentBlockStop({required this.index});
+  final int index;
+}
+
 /// Server finalised the assistant message. Carries final token usage
-/// when the API includes it on `message_delta` / `message_stop`.
+/// and the stop reason.
 class StreamMessageStop extends LlmStreamEvent {
   const StreamMessageStop({
     this.stopReason,

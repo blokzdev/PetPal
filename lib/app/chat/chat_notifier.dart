@@ -63,9 +63,6 @@ class ChatNotifier extends Notifier<ChatState> {
       var done = false;
       await for (final event in stream) {
         switch (event) {
-          case StreamMessageStart():
-            // Already in streaming state from `send`; nothing to do.
-            break;
           case StreamTextDelta(:final text):
             state = state.copyWith(
               streamingAssistant: (state.streamingAssistant ?? '') + text,
@@ -73,6 +70,12 @@ class ChatNotifier extends Notifier<ChatState> {
           case StreamMessageStop():
             _finalize();
             done = true;
+          // Tool-use stream events arrive once the AgentLoop wires tools in
+          // 2.5; ChatNotifier ignores them here because 2.3's path is
+          // text-only direct streaming. The real wiring switches this
+          // notifier to consume AgentLoop.streamRun events instead.
+          default:
+            break;
         }
       }
       if (!done) _finalize();

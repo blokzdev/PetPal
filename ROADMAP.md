@@ -63,7 +63,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 - [x] 2.1 Onboarding: welcome screen, API key entry, privacy disclosure (LLM calls leave the device)
 - [x] 2.2 Add-pet flow: name, species, breed, DOB → seeds `SOUL.md`
 - [x] 2.3 Chat screen: message list, composer, streaming token rendering
-- [ ] 2.4 Multi-turn loop in `AgentLoop`: turn → tool-call(s) → tool-result(s) → continue
+- [x] 2.4 Multi-turn loop in `AgentLoop`: turn → tool-call(s) → tool-result(s) → continue
 - [ ] 2.5 Wire tools live: `read_wiki`, `search_wiki`, `write_wiki_entry`, `update_soul`
 - [ ] 2.6 `SessionBuilder` integration: per-turn retrieval, prompt-cached `SOUL.md`
 - [ ] 2.7 Wiki browser: folder tree + markdown viewer, tap to open
