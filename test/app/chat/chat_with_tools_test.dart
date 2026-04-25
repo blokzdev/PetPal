@@ -12,7 +12,6 @@ import 'package:petpal/data/repos/wiki_repo.dart' show parseEntryPath;
 import 'package:petpal/data/wiki_io_fs.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/messages.dart' as llm;
-import 'package:petpal/harness/retrieval/embedding_provider.dart';
 import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
 
 import '../../_helpers/scripted_llm_client.dart';

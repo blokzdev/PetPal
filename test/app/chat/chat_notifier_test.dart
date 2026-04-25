@@ -3,26 +3,36 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/chat/chat_notifier.dart';
 import 'package:petpal/app/chat/chat_state.dart';
 import 'package:petpal/app/providers.dart';
+import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
+import 'package:petpal/harness/agent/messages.dart';
 import 'package:petpal/harness/agent/tool_dispatcher.dart';
 
 import '../../_helpers/scripted_llm_client.dart';
-
-ProviderContainer _container({
-  required ScriptedLlmClient llm,
-  ToolDispatcher? tools,
-}) {
-  return ProviderContainer(
-    overrides: [
-      llmClientProvider.overrideWithValue(llm),
-      toolDispatcherProvider.overrideWith(
-        (ref) async => tools ?? ToolDispatcher(),
-      ),
-    ],
-  );
-}
+import '../../_helpers/test_provider_scope.dart';
+import 'dart:io';
 
 void main() {
+  setUpAll(() {
+    registerSqliteVec(
+      extensionPath: '${Directory.current.path}/test/native/libvec0.so',
+    );
+  });
+
+  Future<ProviderContainer> makeContainer({
+    required ScriptedLlmClient llm,
+  }) async {
+    final stack = await buildChatTestStack(
+      llm: llm,
+      tools: ToolDispatcher(),
+    );
+    final container = ProviderContainer(overrides: stack.overrides);
+    addTearDown(container.dispose);
+    // Resolve petsProvider so activePetIdProvider can read it later.
+    await container.read(petsProvider.future);
+    return container;
+  }
+
   test('send appends user turn, accumulates deltas, finalises history',
       () async {
     final llm = ScriptedLlmClient(
@@ -36,9 +46,7 @@ void main() {
         ],
       ],
     );
-
-    final container = _container(llm: llm);
-    addTearDown(container.dispose);
+    final container = await makeContainer(llm: llm);
 
     expect(container.read(chatProvider).history, isEmpty);
 
@@ -60,10 +68,8 @@ void main() {
   test('error during stream surfaces error and clears the streaming draft',
       () async {
     final llm = ScriptedLlmClient(scripts: const []);
-    final container = _container(llm: llm);
-    addTearDown(container.dispose);
+    final container = await makeContainer(llm: llm);
 
-    // Empty scripts → streamTurn throws StateError.
     await container.read(chatProvider.notifier).send('hi');
     final state = container.read(chatProvider);
 
@@ -75,8 +81,7 @@ void main() {
 
   test('blank or whitespace-only input is a no-op', () async {
     final llm = ScriptedLlmClient(scripts: const []);
-    final container = _container(llm: llm);
-    addTearDown(container.dispose);
+    final container = await makeContainer(llm: llm);
 
     await container.read(chatProvider.notifier).send('   ');
     expect(container.read(chatProvider).history, isEmpty);
@@ -96,9 +101,7 @@ void main() {
       ],
       pacingDelay: const Duration(milliseconds: 1),
     );
-
-    final container = _container(llm: llm);
-    addTearDown(container.dispose);
+    final container = await makeContainer(llm: llm);
 
     final snapshots = <String?>[];
     final sub = container.listen<ChatState>(
@@ -111,5 +114,43 @@ void main() {
 
     expect(snapshots.where((s) => s == 'part 1 ').isNotEmpty, isTrue);
     expect(snapshots.last, isNull);
+  });
+
+  test('SessionBuilder system prompt + augmented user input reaches the '
+      'LLM (cached system prompt holds SOUL.md, retrieved context goes in '
+      'the user message — DECISIONS row 19)', () async {
+    final llm = ScriptedLlmClient(
+      scripts: [
+        [
+          const StreamMessageStart(),
+          const StreamTextDelta('ack'),
+          const StreamContentBlockStop(index: 0),
+          const StreamMessageStop(),
+        ],
+      ],
+    );
+    final container = await makeContainer(llm: llm);
+
+    await container.read(chatProvider.notifier).send('what does Milo eat?');
+
+    // The history the LLM saw on its only turn should be 1 user message
+    // (no prior history). The assistant turn isn't in `historiesSeen` —
+    // it's the response.
+    expect(llm.historiesSeen, hasLength(1));
+    final priorHistory = llm.historiesSeen.single;
+    expect(priorHistory, hasLength(1));
+    final userText = priorHistory.single.content
+        .whereType<TextBlock>()
+        .map((b) => b.text)
+        .join();
+    // augmented input keeps the original question even if no <context>
+    // tag was prepended (no retrieval hits).
+    expect(userText, contains('what does Milo eat?'));
+
+    // UI projection still shows the original text without any context
+    // tags (the regex stripper handles it whether or not retrieval
+    // happened).
+    final ui = container.read(chatProvider).uiMessages.toList();
+    expect(ui[0].text, 'what does Milo eat?');
   });
 }

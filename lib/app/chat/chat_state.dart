@@ -1,5 +1,15 @@
 import '../../harness/agent/messages.dart' as llm;
 
+final _contextPrefix = RegExp(
+  r'^<context>.*?</context>\s*',
+  dotAll: true,
+);
+
+String _stripContext(String text) {
+  final m = _contextPrefix.firstMatch(text);
+  return m == null ? text : text.substring(m.end);
+}
+
 enum ChatRole { user, assistant }
 
 class ChatMessage {
@@ -49,7 +59,10 @@ class ChatState {
   final String? error;
 
   /// Project the LLM-shape [history] to the user-visible chat messages —
-  /// flatten text content per turn, drop tool-only turns.
+  /// flatten text content per turn, drop tool-only turns. SessionBuilder
+  /// wraps the user's typed input in `<context>…</context>` tags before
+  /// it's sent to the model; strip those for display so the user sees
+  /// what they typed.
   Iterable<ChatMessage> get uiMessages sync* {
     for (final m in history) {
       final text = m.content
@@ -57,11 +70,10 @@ class ChatState {
           .map((b) => b.text)
           .join();
       if (text.isEmpty) continue;
+      final isUser = m.role == llm.Message.userRole;
       yield ChatMessage(
-        role: m.role == llm.Message.userRole
-            ? ChatRole.user
-            : ChatRole.assistant,
-        text: text,
+        role: isUser ? ChatRole.user : ChatRole.assistant,
+        text: isUser ? _stripContext(text) : text,
       );
     }
   }

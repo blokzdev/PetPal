@@ -1,29 +1,21 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/db/database.dart';
 import '../../harness/agent/agent_loop.dart';
 import '../../harness/agent/tool_dispatcher.dart';
+import '../../harness/session_builder.dart';
 import '../providers.dart';
 import 'chat_state.dart';
 
 /// Drives one chat session through the full agent harness:
-/// - appends the user turn to the LLM-shape history
-/// - opens [AgentLoop.streamRun]
+/// - resolves the active pet from [activePetIdProvider] / [petRepoProvider]
+/// - asks [SessionBuilder] for a cache-stable system prompt + retrieval-
+///   augmented user input (DECISIONS row 19)
+/// - opens [AgentLoop.streamRun] with that composed turn
 /// - accumulates text deltas into the in-flight buffer
 /// - tracks active tool calls between `tool_use` and `tool_result`
 /// - finalises history on `AgentLoopDone`
-///
-/// SessionBuilder integration (real system prompt with SOUL.md +
-/// retrieved snippets) lands in 2.6 — for now, we use a placeholder
-/// system prompt and pass tool definitions straight through.
 class ChatNotifier extends Notifier<ChatState> {
-  static const _placeholderSystemPrompt =
-      'You are PetPal, a memory-first companion for the user’s pet. '
-      'You help the owner track their pet’s life and know when to call '
-      'the vet. You never diagnose. Use the wiki tools to record what '
-      'the user tells you (write_wiki_entry, update_soul) and to look '
-      'things up (search_wiki, read_wiki). Cite entry paths when you '
-      'reference facts. Keep replies conversational and concise.';
-
   @override
   ChatState build() => const ChatState();
 
@@ -40,9 +32,24 @@ class ChatNotifier extends Notifier<ChatState> {
 
     AgentLoop loop;
     ToolDispatcher tools;
+    SessionBuilder sessionBuilder;
+    Pet pet;
     try {
       loop = await ref.read(agentLoopProvider.future);
       tools = await ref.read(toolDispatcherProvider.future);
+      sessionBuilder = await ref.read(sessionBuilderProvider.future);
+      final petRepo = await ref.read(petRepoProvider.future);
+      final activePetId = ref.read(activePetIdProvider);
+      final fetched = await petRepo.getPet(activePetId());
+      if (fetched == null) {
+        state = state.copyWith(
+          sending: false,
+          clearStreamingAssistant: true,
+          error: 'Active pet not found.',
+        );
+        return;
+      }
+      pet = fetched;
     } catch (e) {
       state = state.copyWith(
         sending: false,
@@ -53,11 +60,17 @@ class ChatNotifier extends Notifier<ChatState> {
     }
 
     try {
-      await for (final event in loop.streamRun(
-        systemPrompt: _placeholderSystemPrompt,
+      final composed = await sessionBuilder.compose(
+        pet: pet,
         userInput: trimmed,
-        priorHistory: state.history,
         tools: tools.definitions.toList(),
+      );
+
+      await for (final event in loop.streamRun(
+        systemPrompt: composed.systemPrompt,
+        userInput: composed.augmentedUserInput,
+        priorHistory: state.history,
+        tools: composed.tools,
       )) {
         switch (event) {
           case AgentTextDelta(:final text):

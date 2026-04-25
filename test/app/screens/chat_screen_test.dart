@@ -5,19 +5,26 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
+import 'dart:io';
+
+import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/tool_dispatcher.dart';
+import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
 import 'package:petpal/main.dart';
 
 import '../../_helpers/fake_api_key_storage.dart';
 import '../../_helpers/scripted_llm_client.dart';
 
 class _NoopWiki implements WikiIo {
+  // Returns a minimal SOUL.md for any read so SessionBuilder can compose
+  // a turn without throwing.
   @override
   Future<void> writeAtomic(String relPath, String body) async {}
   @override
-  Future<String> read(String relPath) async => '';
+  Future<String> read(String relPath) async =>
+      '---\nspecies: dog\n---\n\n# Milo\n';
   @override
   Future<List<String>> listForPet(int petId) async => const [];
   @override
@@ -43,6 +50,9 @@ List<Override> _commonOverrides({required ScriptedLlmClient llm}) => [
         return db;
       }),
       wikiIoProvider.overrideWith((ref) async => _NoopWiki()),
+      embeddingProviderProvider.overrideWith(
+        (ref) async => const StubEmbeddingProvider(dim: 16),
+      ),
       llmClientProvider.overrideWithValue(llm),
       // Empty tool dispatcher — text-only streaming, no tool calls.
       toolDispatcherProvider.overrideWith(
@@ -51,6 +61,12 @@ List<Override> _commonOverrides({required ScriptedLlmClient llm}) => [
     ];
 
 void main() {
+  setUpAll(() {
+    registerSqliteVec(
+      extensionPath: '${Directory.current.path}/test/native/libvec0.so',
+    );
+  });
+
   testWidgets(
       'tapping send shows the user bubble and the streaming assistant '
       'text, then finalises', (tester) async {

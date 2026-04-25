@@ -14,6 +14,7 @@ import '../harness/retrieval/embedding_provider.dart';
 import '../harness/retrieval/embedding_worker.dart';
 import '../harness/retrieval/hybrid_retriever.dart';
 import '../harness/retrieval/onnx_embedding_provider.dart';
+import '../harness/session_builder.dart';
 import '../harness/tools/wiki_tools.dart';
 import '../platform/api_key_storage.dart';
 
@@ -189,4 +190,19 @@ final agentLoopProvider = FutureProvider<AgentLoop>((ref) async {
   final llm = ref.watch(llmClientProvider);
   final tools = await ref.watch(toolDispatcherProvider.future);
   return AgentLoop(llm: llm, tools: tools);
+});
+
+/// [SessionBuilder] that composes per-turn inputs (cache-stable system
+/// prompt + retrieval-augmented user message). Backed by the live
+/// retrieval and embedding stack.
+final sessionBuilderProvider =
+    FutureProvider<SessionBuilder>((ref) async {
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final retriever = await ref.watch(hybridRetrieverProvider.future);
+  final embeddings = await ref.watch(embeddingProviderProvider.future);
+  return SessionBuilder(
+    wiki: wiki,
+    retriever: retriever,
+    embeddings: embeddings,
+  );
 });
