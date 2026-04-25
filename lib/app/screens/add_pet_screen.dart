@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/onboarding_templates.dart';
 import '../providers.dart';
 
-/// First add-pet flow (Phase 2 task 2.2). Collects the four fields the MVP
-/// onboarding promises — name, species, breed, DOB — then calls
-/// `PetRepo.createPet`, which seeds the `SOUL.md` skeleton on disk.
+/// Add-pet flow. Phase 2.2 collected name/species/breed/DOB; Phase 3.4
+/// upgrades species to a dropdown of 8 (per DECISIONS row 25), each
+/// loading a species-specific `SOUL.md` template from
+/// `assets/onboarding/`. The harness stays species-agnostic — the pick
+/// only changes the markdown the agent sees.
 class AddPetScreen extends ConsumerStatefulWidget {
   const AddPetScreen({super.key});
 
@@ -17,8 +20,8 @@ class AddPetScreen extends ConsumerStatefulWidget {
 class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
-  final _species = TextEditingController(text: 'dog');
   final _breed = TextEditingController();
+  Species _species = Species.dog;
   DateTime? _dob;
   bool _saving = false;
   String? _saveError;
@@ -26,7 +29,6 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   @override
   void dispose() {
     _name.dispose();
-    _species.dispose();
     _breed.dispose();
     super.dispose();
   }
@@ -50,11 +52,20 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     });
     try {
       final repo = await ref.read(petRepoProvider.future);
+      final templates = ref.read(onboardingTemplatesProvider);
+      final breed = _breed.text.trim().isEmpty ? null : _breed.text.trim();
+      final seedSoul = await templates.seedSoulFor(
+        species: _species,
+        name: _name.text.trim(),
+        breed: breed,
+        dob: _dob,
+      );
       await repo.createPet(
         name: _name.text.trim(),
-        species: _species.text.trim().isEmpty ? null : _species.text.trim(),
-        breed: _breed.text.trim().isEmpty ? null : _breed.text.trim(),
+        species: _species.id,
+        breed: breed,
         dob: _dob,
+        seedSoul: seedSoul,
       );
       ref.invalidate(petsProvider);
       if (mounted) context.go('/');
@@ -107,13 +118,19 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                       v == null || v.trim().isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
-                  controller: _species,
+                DropdownButtonFormField<Species>(
+                  initialValue: _species,
                   decoration: const InputDecoration(
                     labelText: 'Species',
-                    hintText: 'dog, cat, …',
                     border: OutlineInputBorder(),
                   ),
+                  items: [
+                    for (final s in Species.values)
+                      DropdownMenuItem(value: s, child: Text(s.label)),
+                  ],
+                  onChanged: (s) {
+                    if (s != null) setState(() => _species = s);
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

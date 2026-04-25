@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../data/db/connection.dart';
 import '../data/db/database.dart';
+import '../data/onboarding_templates.dart';
 import '../data/repos/pet_repo.dart';
 import '../data/repos/wiki_repo.dart';
 import '../data/wiki_io.dart';
@@ -83,6 +84,12 @@ final appDatabaseProvider = FutureProvider<AppDatabase>((ref) async {
 /// Tests override with a [WikiIoFs] anchored at a temp dir.
 final wikiIoProvider = FutureProvider<WikiIo>((ref) async {
   return WikiIoFs.openDefault();
+});
+
+/// Source of per-species `SOUL.md` seed templates loaded from
+/// `assets/onboarding/<species>.md`. Tests inject [InMemoryOnboardingTemplates].
+final onboardingTemplatesProvider = Provider<OnboardingTemplates>((ref) {
+  return const AssetOnboardingTemplates();
 });
 
 final petRepoProvider = FutureProvider<PetRepo>((ref) async {

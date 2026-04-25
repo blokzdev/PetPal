@@ -4,6 +4,13 @@ import '../wiki_io.dart';
 /// CRUD for pets. Owns SOUL.md seeding on creation: every new pet gets a
 /// SOUL.md skeleton at `wiki/<petId>/SOUL.md` so the agent has a place to
 /// merge frontmatter via update_soul (Phase 2+).
+///
+/// Phase 3.4 introduces species-specific seed templates loaded from
+/// `assets/onboarding/<species>.md`. The add-pet flow renders the
+/// template via [OnboardingTemplates] and passes the rendered SOUL via
+/// the optional [seedSoul] parameter on [createPet]. When [seedSoul] is
+/// omitted, [createPet] falls back to the inline generic skeleton (kept
+/// for tests that don't want to plumb a templates source).
 class PetRepo {
   PetRepo({
     required AppDatabase db,
@@ -22,14 +29,19 @@ class PetRepo {
     String? species,
     String? breed,
     DateTime? dob,
+    String? seedSoul,
   }) async {
     final id = await _db.into(_db.pets).insert(
           PetsCompanion.insert(name: name, createdAt: _now()),
         );
-    await _wiki.writeAtomic(
-      _wiki.soulPath(id),
-      _seedSoul(name: name, species: species, breed: breed, dob: dob),
-    );
+    final body = seedSoul ??
+        _genericSeedSoul(
+          name: name,
+          species: species,
+          breed: breed,
+          dob: dob,
+        );
+    await _wiki.writeAtomic(_wiki.soulPath(id), body);
     return id;
   }
 
@@ -47,7 +59,7 @@ class PetRepo {
   }
 }
 
-String _seedSoul({
+String _genericSeedSoul({
   required String name,
   String? species,
   String? breed,

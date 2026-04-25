@@ -79,6 +79,9 @@ flutter:
     # ~23 MB committed; bundled into the APK so embeddings run fully
     # on-device, no network. See DECISIONS row 20.
     - assets/models/arctic-embed-xs/
+    # Per-species SOUL.md seed templates (Phase 3 task 3.4). Picked
+    # by the add-pet flow from the species dropdown.
+    - assets/onboarding/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

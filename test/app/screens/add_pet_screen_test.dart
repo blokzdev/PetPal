@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
+import 'package:petpal/data/onboarding_templates.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/main.dart';
 
@@ -46,6 +47,15 @@ ProviderContainer _setupOverrides({
         return db;
       }),
       wikiIoProvider.overrideWith((ref) async => wiki),
+      // Inject an in-memory onboarding-template source covering every
+      // species, so the AddPetScreen save path doesn't try to hit
+      // rootBundle (no asset bundle in widget tests).
+      onboardingTemplatesProvider.overrideWithValue(
+        InMemoryOnboardingTemplates({
+          for (final s in Species.values)
+            s: '---\nspecies: ${s.id}\nbreed: {breed}\n---\n# {name}\n',
+        }),
+      ),
     ],
   );
 }
@@ -114,10 +124,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Name'),
       'Milo',
     );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Species'),
-      'dog',
-    );
+    // Species dropdown defaults to "Dog" (Phase 3.4); no need to tap.
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Breed (optional)'),
       'mixed',
@@ -130,7 +137,7 @@ void main() {
     expect(pets, hasLength(1));
     expect(pets.first.name, 'Milo');
 
-    // SOUL.md was seeded
+    // SOUL.md was seeded from the dog template
     final soul = wiki.writes['wiki/${pets.first.id}/SOUL.md'];
     expect(soul, isNotNull);
     expect(soul!, contains('# Milo'));
