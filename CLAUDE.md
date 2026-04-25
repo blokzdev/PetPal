@@ -310,11 +310,13 @@ integration_test/
 
 ### Phase-end self-verification pass
 
-At each phase boundary, before reporting the phase complete, run all three:
+At each phase boundary, before reporting the phase complete, run all three with the **exact CI invocations** and check the exit codes — never eyeball-grep truncated output (DECISIONS row 26):
 
-1. `flutter analyze` — must be clean.
-2. `flutter test` — must pass.
+1. `flutter analyze --fatal-infos; echo "exit=$?"` — exit must be 0. Plain `flutter analyze` is not enough; CI runs with `--fatal-infos`, which promotes info-level lints to failures.
+2. `flutter test --reporter expanded; echo "exit=$?"` — exit must be 0. Don't pipe to `tail`; the failure summary can fall above the cut.
 3. `flutter build apk --debug` — must produce an APK; report the path and size.
+
+After every task too, not just phase boundaries: `flutter analyze --fatal-infos` and `flutter test` should be run with full output visible, and the exit code checked.
 
 Report the results in the phase wrap-up summary. If any step fails, the phase is **not** complete — stop and fix before reporting.
 
