@@ -12,7 +12,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 **Definition of done:** debug APK installs on device, shows a placeholder Home screen, no crashes; `flutter analyze` is clean; CI passes on `main` and the working branch.
 
 - [x] 0.1 Confirm and commit `CLAUDE.md`, `ROADMAP.md`, `DECISIONS.md` (this commit)
-- [ ] 0.2 `flutter create` with org id, package name, min SDK 24, null-safety on
+- [x] 0.2 `flutter create` with org id, package name, min SDK 24, null-safety on
 - [ ] 0.3 Establish folder structure (`lib/harness/`, `lib/data/`, `lib/app/`, `lib/platform/`, `lib/models/`)
 - [ ] 0.4 Add core deps: `drift`, `sqlite3_flutter_libs`, `path_provider`, `flutter_riverpod`, `go_router`, `flutter_secure_storage`
 - [ ] 0.5 Add `analysis_options.yaml` (lints), `.editorconfig`, tighten `.gitignore`
