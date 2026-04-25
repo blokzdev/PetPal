@@ -1,6 +1,18 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- PetPal permissions -->
+    <!-- Notifications: Phase 4 reminders fire local notifications (Android 13+ requires runtime grant). -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Exact alarms: deterministic-mode reminders need precise wall-clock firing. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <!-- USE_EXACT_ALARM is the post-Android 13 alternative; declared so the AlarmManager API works without user grant on supported devices. -->
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
+    <!-- Re-arm pending reminders after device reboot. -->
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Internet: Anthropic API + future cloud sync. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
-        android:label="petpal"
+        android:label="PetPal"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
