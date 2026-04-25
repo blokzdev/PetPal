@@ -1,8 +1,10 @@
 import '../data/db/database.dart';
+import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import 'agent/messages.dart';
 import 'retrieval/embedding_provider.dart';
 import 'retrieval/hybrid_retriever.dart';
+import 'skills/skill_loader.dart';
 
 /// One turn's worth of input, ready for [AgentLoop.run]. The system prompt
 /// is the cache-stable half; the augmented user input is the per-turn,
@@ -12,6 +14,7 @@ class ComposedTurn {
     required this.systemPrompt,
     required this.augmentedUserInput,
     required this.tools,
+    required this.matchedSkills,
   });
 
   /// Identity + SOUL.md + active skill fragments + output contract. Stable
@@ -25,6 +28,11 @@ class ComposedTurn {
   final String augmentedUserInput;
 
   final List<ToolDefinition> tools;
+
+  /// Skill ids whose fragments contributed to [systemPrompt]. Surface
+  /// for the chat UI ("informed by the Puppy skill") and for tests
+  /// asserting that the right skills fired.
+  final List<String> matchedSkills;
 }
 
 /// Composes the per-turn inputs to [AgentLoop.run] from durable state
@@ -38,26 +46,40 @@ class SessionBuilder {
     required WikiIo wiki,
     required HybridRetriever retriever,
     required EmbeddingProvider embeddings,
+    required SkillLoader skills,
   })  : _wiki = wiki,
         _retriever = retriever,
-        _embeddings = embeddings;
+        _embeddings = embeddings,
+        _skills = skills;
 
   final WikiIo _wiki;
   final HybridRetriever _retriever;
   final EmbeddingProvider _embeddings;
+  final SkillLoader _skills;
 
   Future<ComposedTurn> compose({
     required Pet pet,
     required String userInput,
     int retrievalK = 6,
-    List<String> activeSkillFragments = const [],
     List<ToolDefinition> tools = const [],
   }) async {
     final soul = await _readSoulOrEmpty(pet.id);
+    // Species lives in SOUL.md frontmatter (CLAUDE.md §3 — the only
+    // species-aware code path). Empty string when SOUL is missing or
+    // the user hasn't filled species in yet; that surfaces only
+    // universal skills (those with empty species lists).
+    final petSpecies =
+        parseSoul(soul).frontmatter['species']?.toString().trim() ?? '';
+
+    final matched = await _skills.match(
+      petSpecies: petSpecies,
+      userInput: userInput,
+    );
+
     final systemPrompt = _buildSystemPrompt(
       pet: pet,
       soul: soul,
-      skillFragments: activeSkillFragments,
+      skillFragments: [for (final m in matched) m.text],
     );
 
     final queryVector =
@@ -77,6 +99,9 @@ class SessionBuilder {
       systemPrompt: systemPrompt,
       augmentedUserInput: augmented,
       tools: tools,
+      matchedSkills: <String>{
+        for (final m in matched) m.skillId,
+      }.toList(),
     );
   }
 

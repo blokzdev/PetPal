@@ -88,7 +88,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 
 - [x] 3.1 Skill manifest parser (YAML frontmatter, including `species:` filter list — empty/omitted = any)
 - [x] 3.2 `SkillLoader`: scan installed skills, filter by active pet's species, match triggers, return matched fragments
-- [ ] 3.3 Inject matched fragments into next turn via `SessionBuilder` (prompt-cached)
+- [x] 3.3 Inject matched fragments into next turn via `SessionBuilder` (prompt-cached)
 - [ ] 3.4 Onboarding templates: ship 6–8 species seeders (`dog`, `cat`, `bird`, `rabbit`, `reptile`, `fish`, `small-mammal`, `exotic`) under `assets/onboarding/`. Each is a `SOUL.md` skeleton with species-appropriate frontmatter keys + welcome prose. Add-pet flow picks the template by species choice.
 - [ ] 3.5 Bundle 2–3 launch skill packs under `assets/skills/`: `puppy` (`species: [dog]`), `senior-dog` (`species: [dog]`), `new-cat` (`species: [cat]`). Each follows the manifest shape from CLAUDE.md §9.
 - [ ] 3.6 Skill browser screen: installed / available, enable/disable, species-filtered to the active pet

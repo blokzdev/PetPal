@@ -23,6 +23,8 @@ import 'package:petpal/harness/retrieval/embedding_provider.dart';
 import 'package:petpal/harness/retrieval/embedding_worker.dart';
 import 'package:petpal/harness/retrieval/hybrid_retriever.dart';
 import 'package:petpal/harness/session_builder.dart';
+import 'package:petpal/harness/skills/empty_skill_source.dart';
+import 'package:petpal/harness/skills/skill_loader.dart';
 import 'package:petpal/harness/tools/wiki_tools.dart';
 
 /// Records every embed() call's text + kind so the test can assert on them.
@@ -94,6 +96,7 @@ void main() {
       wiki: wiki,
       retriever: HybridRetriever(db: db),
       embeddings: provider,
+      skills: SkillLoader(source: const EmptySkillSource()),
     );
 
     await builder.compose(pet: pet, userInput: 'what treats does Milo like?');

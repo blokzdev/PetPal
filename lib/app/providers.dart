@@ -16,6 +16,9 @@ import '../harness/retrieval/embedding_worker.dart';
 import '../harness/retrieval/hybrid_retriever.dart';
 import '../harness/retrieval/onnx_embedding_provider.dart';
 import '../harness/session_builder.dart';
+import '../harness/skills/empty_skill_source.dart';
+import '../harness/skills/skill_loader.dart';
+import '../harness/skills/skill_source.dart';
 import '../harness/tools/wiki_tools.dart';
 import '../platform/api_key_storage.dart';
 
@@ -207,17 +210,30 @@ final agentLoopProvider = FutureProvider<AgentLoop>((ref) async {
   return AgentLoop(llm: llm, tools: tools);
 });
 
+/// Source of skills bundled with the app. Default is [EmptySkillSource]
+/// until Phase 3.5 ships the asset-backed skill packs; tests inject
+/// their own.
+final skillSourceProvider = Provider<SkillSource>((ref) {
+  return const EmptySkillSource();
+});
+
+final skillLoaderProvider = Provider<SkillLoader>((ref) {
+  return SkillLoader(source: ref.watch(skillSourceProvider));
+});
+
 /// [SessionBuilder] that composes per-turn inputs (cache-stable system
 /// prompt + retrieval-augmented user message). Backed by the live
-/// retrieval and embedding stack.
+/// retrieval, embedding, and skill stacks.
 final sessionBuilderProvider =
     FutureProvider<SessionBuilder>((ref) async {
   final wiki = await ref.watch(wikiIoProvider.future);
   final retriever = await ref.watch(hybridRetrieverProvider.future);
   final embeddings = await ref.watch(embeddingProviderProvider.future);
+  final skills = ref.watch(skillLoaderProvider);
   return SessionBuilder(
     wiki: wiki,
     retriever: retriever,
     embeddings: embeddings,
+    skills: skills,
   );
 });

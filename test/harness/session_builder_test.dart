@@ -12,11 +12,17 @@ import 'package:petpal/harness/retrieval/embedding_worker.dart';
 import 'package:petpal/harness/retrieval/hybrid_retriever.dart';
 import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
 import 'package:petpal/harness/session_builder.dart';
+import 'package:petpal/harness/skills/empty_skill_source.dart';
+import 'package:petpal/harness/skills/skill_loader.dart';
+import 'package:petpal/harness/skills/skill_manifest.dart';
+import 'package:petpal/harness/skills/skill_source.dart';
 
 void main() {
   late Directory tempRoot;
   late AppDatabase db;
   late SessionBuilder builder;
+  late WikiIoFs wiki;
+  late StubEmbeddingProvider provider;
   late PetRepo petRepo;
   late WikiRepo wikiRepo;
 
@@ -26,19 +32,23 @@ void main() {
     );
   });
 
+  // Helper: build a SessionBuilder with optional SkillLoader override.
+  SessionBuilder makeBuilder({SkillLoader? skills}) => SessionBuilder(
+        wiki: wiki,
+        retriever: HybridRetriever(db: db),
+        embeddings: provider,
+        skills: skills ?? SkillLoader(source: const EmptySkillSource()),
+      );
+
   setUp(() async {
     tempRoot = Directory.systemTemp.createTempSync('petpal_session_');
     db = AppDatabase(NativeDatabase.memory());
-    final wiki = WikiIoFs(tempRoot);
-    const provider = StubEmbeddingProvider(dim: 16);
+    wiki = WikiIoFs(tempRoot);
+    provider = const StubEmbeddingProvider(dim: 16);
     final worker = EmbeddingWorker(db: db, provider: provider);
     wikiRepo = WikiRepo(db: db, wiki: wiki, embeddings: worker);
     petRepo = PetRepo(db: db, wiki: wiki);
-    builder = SessionBuilder(
-      wiki: wiki,
-      retriever: HybridRetriever(db: db),
-      embeddings: provider,
-    );
+    builder = makeBuilder();
   });
 
   tearDown(() async {
@@ -111,22 +121,71 @@ void main() {
     expect(turn.augmentedUserInput, isNot(contains('<context>')));
   });
 
-  test('skill fragments are injected into system prompt under '
-      '"Active skills"', () async {
-    final id = await petRepo.createPet(name: 'Milo');
+  test('skill fragments matched by SkillLoader are injected into the '
+      'system prompt under "Active skills"', () async {
+    final id = await petRepo.createPet(name: 'Milo', species: 'dog');
     final pet = (await petRepo.getPet(id))!;
 
-    final turn = await builder.compose(
+    final puppyBuilder = makeBuilder(
+      skills: SkillLoader(
+        source: _StaticSkillSource(
+          manifest: const SkillManifest(
+            id: 'puppy',
+            name: 'Puppy Care',
+            version: 1,
+            species: ['dog'],
+            triggers: ['house training', 'puppy'],
+            loads: ['overview.md'],
+            requiresPro: false,
+          ),
+          fragments: const {
+            'overview.md': '# Puppy Care\nCrate train; reward calmness; etc.',
+          },
+        ),
+      ),
+    );
+
+    final turn = await puppyBuilder.compose(
       pet: pet,
       userInput: 'house training tips?',
-      activeSkillFragments: const [
-        '# Puppy Care\nCrate train; reward calmness; etc.',
-      ],
     );
 
     expect(turn.systemPrompt, contains('# Active skills'));
     expect(turn.systemPrompt, contains('Puppy Care'));
     expect(turn.systemPrompt, contains('Crate train'));
+    expect(turn.matchedSkills, ['puppy']);
+  });
+
+  test('skills with non-matching species are filtered out of the system '
+      'prompt (CLAUDE.md §3 — only species-aware code path)', () async {
+    final id = await petRepo.createPet(name: 'Whiskers', species: 'cat');
+    final pet = (await petRepo.getPet(id))!;
+
+    final dogOnlyBuilder = makeBuilder(
+      skills: SkillLoader(
+        source: _StaticSkillSource(
+          manifest: const SkillManifest(
+            id: 'puppy',
+            name: 'Puppy Care',
+            version: 1,
+            species: ['dog'],
+            triggers: ['puppy'],
+            loads: ['overview.md'],
+            requiresPro: false,
+          ),
+          fragments: const {'overview.md': 'puppy advice'},
+        ),
+      ),
+    );
+
+    final turn = await dogOnlyBuilder.compose(
+      pet: pet,
+      userInput: 'tell me about my puppy',
+    );
+
+    expect(turn.systemPrompt, isNot(contains('# Active skills')));
+    expect(turn.systemPrompt, isNot(contains('puppy advice')));
+    expect(turn.matchedSkills, isEmpty);
   });
 
   test('tools pass through unchanged for ToolDispatcher to consume',
@@ -167,4 +226,18 @@ void main() {
     expect(turn.systemPrompt, contains('memory-first companion for Ghost'));
     expect(turn.systemPrompt, isNot(contains("Ghost's identity")));
   });
+}
+
+class _StaticSkillSource implements SkillSource {
+  _StaticSkillSource({required this.manifest, required this.fragments});
+  final SkillManifest manifest;
+  final Map<String, String> fragments;
+
+  @override
+  Future<List<SkillSourceEntry>> list() async => [
+        SkillSourceEntry(
+          manifest: manifest,
+          readFragment: (name) async => fragments[name]!,
+        ),
+      ];
 }
