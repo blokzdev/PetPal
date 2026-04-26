@@ -1,3 +1,4 @@
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -5,7 +6,12 @@ import 'app/providers.dart';
 import 'app/routing.dart';
 import 'app/theme.dart';
 import 'platform/api_key_storage.dart';
+import 'platform/notifications_service.dart';
+import 'platform/scheduler_bootstrap.dart';
+import 'platform/scheduler_bootstrap_registry.dart';
+import 'platform/scheduler_log.dart';
 import 'platform/settings_storage.dart';
+import 'platform/work_scheduler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,6 +26,20 @@ Future<void> main() async {
   // toggle from 3.8). Pre-opened in main() so providers can read it
   // synchronously after the first build.
   final settings = await SharedPrefsSettingsStorage.open();
+
+  // Phase 4 scheduling stack init. Order matters:
+  //   1. Notifications channel (so the alarm callback's `show()` works
+  //      even if the user opens an alarm-fired flow before re-opening
+  //      the app).
+  //   2. AlarmManager + WorkManager dispatchers — so the alarm/work
+  //      callbacks can find their isolate-side bootstrap.
+  //   3. Register `bootstrapAndFire` in the bootstrap registry. The
+  //      alarm/work callbacks resolve this lazily at fire time.
+  await NotificationsService().initialize();
+  await AndroidAlarmManager.initialize();
+  await WorkScheduler().initialize();
+  setSchedulerBootstrap(bootstrapAndFire);
+  schedulerLog('app_init', fields: {});
 
   runApp(
     ProviderScope(

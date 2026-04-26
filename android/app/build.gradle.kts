@@ -60,6 +60,16 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+            // Phase 6 will flip minifyEnabled = true. The keep rules in
+            // proguard-rules.pro are wired now (Phase 4) so Workmanager,
+            // AlarmManager, and notification-plugin callbacks survive
+            // shrinkage when that switch lands. Wiring the file early
+            // costs nothing and avoids Phase 6 debugging surprises
+            // (DECISIONS row 30).
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }
