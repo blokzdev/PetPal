@@ -109,6 +109,12 @@ class _Greeting extends ConsumerWidget {
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
+          onPressed: () => GoRouter.of(context).push('/reminders'),
+          icon: const Icon(Icons.alarm_outlined),
+          label: const Text('Reminders'),
+        ),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
           onPressed: () => GoRouter.of(context).push('/skills'),
           icon: const Icon(Icons.extension_outlined),
           label: const Text('Care guides'),

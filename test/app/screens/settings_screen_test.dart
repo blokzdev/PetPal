@@ -41,6 +41,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home → Settings.
+    // Adding the Reminders button (task 4.10) pushed Settings below the
+    // viewport in the test harness — scroll it in before tapping.
+    await tester.ensureVisible(find.text('Settings'));
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
@@ -83,6 +86,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // Adding the Reminders button (task 4.10) pushed Settings below the
+    // viewport in the test harness — scroll it in before tapping.
+    await tester.ensureVisible(find.text('Settings'));
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 

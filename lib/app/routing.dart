@@ -8,6 +8,7 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/skill_browser_screen.dart';
 import 'screens/soul_editor_screen.dart';
@@ -62,6 +63,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: '/reminders',
+        builder: (context, state) => const RemindersScreen(),
       ),
       GoRoute(
         path: '/wiki/entry',
