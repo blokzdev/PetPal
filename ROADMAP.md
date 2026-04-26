@@ -140,7 +140,7 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → platform → agent + UI**, so harness pieces ship behind unit tests before platform engines couple them to a real device. Architecture locked in DECISIONS rows 28 (four-mode taxonomy) and 29 (red-flag screener design).
 
 - [x] 4.0 Architecture lockdown: DECISIONS rows 28+29; CLAUDE.md §8 (four-row mode table) + §10 (fixture coverage rule + chat-input scope); VOICE.md §6 (badge styling); this ROADMAP re-sequence
-- [ ] 4.1 Red-flag rule table — `lib/harness/guardrails/red_flags.dart` covering the 11 categories with case-insensitive word-bounded regexes; multi-symptom AND groups for `lethargy_anorexia`
+- [x] 4.1 Red-flag rule table — `lib/harness/guardrails/red_flags.dart` covering the 11 categories with case-insensitive word-bounded regexes; multi-symptom AND groups for `lethargy_anorexia`
 - [ ] 4.2 `RedFlagScreener` + AgentLoop integration — pre-screen every chat turn before the LLM call; `SessionBuilder.composeTurn` accepts `redFlag` and appends a one-shot escalation directive after the Output-contract block
 - [ ] 4.3 UI badge on flagged assistant bubbles — `ChatMessage.escalated` + `escalatedCategory` propagated through `ChatNotifier`; subdued scrollback styling per VOICE.md §6
 - [ ] 4.4 `ScheduleMode` enum + `ReminderRepo` — sealed-style enum at `lib/harness/scheduling/schedule_mode.dart` with `parse`/`serialise`; Drift CRUD over the existing `reminders` table
