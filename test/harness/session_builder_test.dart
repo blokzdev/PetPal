@@ -226,6 +226,72 @@ void main() {
     expect(turn.systemPrompt, contains('memory-first companion for Ghost'));
     expect(turn.systemPrompt, isNot(contains("Ghost's identity")));
   });
+
+  group('red-flag screener integration (CLAUDE.md §10)', () {
+    test('non-urgent input → no escalation directive, ComposedTurn.redFlag is null',
+        () async {
+      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final pet = (await petRepo.getPet(id))!;
+      final turn = await builder.compose(
+        pet: pet,
+        userInput: 'Milo had a great walk today.',
+      );
+      expect(turn.redFlag, isNull);
+      expect(turn.systemPrompt, isNot(contains('Escalation directive')));
+      expect(
+        turn.systemPrompt,
+        isNot(contains('please call your vet or an emergency animal hospital')),
+      );
+    });
+
+    test(
+        'flagged input → directive appears in system prompt and ComposedTurn '
+        'carries the match', () async {
+      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final pet = (await petRepo.getPet(id))!;
+      final turn = await builder.compose(
+        pet: pet,
+        userInput: 'I noticed blood in his stool this morning.',
+      );
+
+      expect(turn.redFlag, isNotNull);
+      expect(turn.redFlag!.category.id, 'blood_in_stool');
+
+      // Directive heading is present.
+      expect(turn.systemPrompt, contains('# Escalation directive (this turn only)'));
+      // Verbatim escalation copy from VOICE.md §6 example 10 / CLAUDE.md §10.
+      expect(
+        turn.systemPrompt,
+        contains(
+          'This sounds urgent — please call your vet or an emergency animal '
+          'hospital now. PetPal is software, not a vet. I can help you write '
+          "down what's happening so it's ready when you call.",
+        ),
+      );
+      // Category id in the directive for audit-trail purposes.
+      expect(turn.systemPrompt, contains('category: blood_in_stool'));
+    });
+
+    test(
+        'output contract always includes the screener-backup instruction so '
+        'the model catches misses even when the regex table did not fire',
+        () async {
+      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final pet = (await petRepo.getPet(id))!;
+      final turn = await builder.compose(
+        pet: pet,
+        userInput: 'just a normal question',
+      );
+      expect(turn.redFlag, isNull);
+      // Backup instruction is part of the canonical Output contract.
+      expect(
+        turn.systemPrompt,
+        contains(
+          'open with the vet-escalation preamble',
+        ),
+      );
+    });
+  });
 }
 
 class _StaticSkillSource implements SkillSource {

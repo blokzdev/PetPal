@@ -2,6 +2,7 @@ import '../data/db/database.dart';
 import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import 'agent/messages.dart';
+import 'guardrails/red_flag_screener.dart';
 import 'retrieval/embedding_provider.dart';
 import 'retrieval/hybrid_retriever.dart';
 import 'skills/skill_loader.dart';
@@ -15,11 +16,15 @@ class ComposedTurn {
     required this.augmentedUserInput,
     required this.tools,
     required this.matchedSkills,
+    this.redFlag,
   });
 
-  /// Identity + SOUL.md + active skill fragments + output contract. Stable
-  /// across turns for the same pet+skills, so [AnthropicClient]'s
+  /// Identity + SOUL.md + active skill fragments + output contract +
+  /// (when flagged) a one-shot escalation directive. Stable across
+  /// turns for the same pet+skills+screener-state, so [AnthropicClient]'s
   /// `cache_control: ephemeral` marker on this block accrues hits.
+  /// Note: a flagged turn breaks the cache for that turn only — the
+  /// next unflagged turn returns to the canonical prefix.
   final String systemPrompt;
 
   /// The user's message with retrieved wiki snippets prepended as context.
@@ -33,6 +38,11 @@ class ComposedTurn {
   /// for the chat UI ("informed by the Puppy skill") and for tests
   /// asserting that the right skills fired.
   final List<String> matchedSkills;
+
+  /// Non-null iff [RedFlagScreener] flagged this turn. The chat surface
+  /// uses it to attach the vet-escalation badge to the assistant
+  /// message that comes back, and tests assert on it directly.
+  final RedFlagMatch? redFlag;
 }
 
 /// Composes the per-turn inputs to [AgentLoop.run] from durable state
@@ -47,15 +57,18 @@ class SessionBuilder {
     required HybridRetriever retriever,
     required EmbeddingProvider embeddings,
     required SkillLoader skills,
+    RedFlagScreener? screener,
   })  : _wiki = wiki,
         _retriever = retriever,
         _embeddings = embeddings,
-        _skills = skills;
+        _skills = skills,
+        _screener = screener ?? RedFlagScreener();
 
   final WikiIo _wiki;
   final HybridRetriever _retriever;
   final EmbeddingProvider _embeddings;
   final SkillLoader _skills;
+  final RedFlagScreener _screener;
 
   Future<ComposedTurn> compose({
     required Pet pet,
@@ -63,6 +76,10 @@ class SessionBuilder {
     int retrievalK = 6,
     List<ToolDefinition> tools = const [],
   }) async {
+    // Pre-screen the raw chat input BEFORE retrieval/augmentation —
+    // CLAUDE.md §10 limits the screener to chat input only.
+    final redFlag = _screener.screen(userInput);
+
     final soul = await _readSoulOrEmpty(pet.id);
     // Species lives in SOUL.md frontmatter (CLAUDE.md §3 — the only
     // species-aware code path). Empty string when SOUL is missing or
@@ -80,6 +97,7 @@ class SessionBuilder {
       pet: pet,
       soul: soul,
       skillFragments: [for (final m in matched) m.text],
+      redFlag: redFlag,
     );
 
     final queryVector =
@@ -102,6 +120,7 @@ class SessionBuilder {
       matchedSkills: <String>{
         for (final m in matched) m.skillId,
       }.toList(),
+      redFlag: redFlag,
     );
   }
 
@@ -120,6 +139,7 @@ class SessionBuilder {
     required Pet pet,
     required String soul,
     required List<String> skillFragments,
+    RedFlagMatch? redFlag,
   }) {
     final buf = StringBuffer()
       ..writeln(
@@ -157,7 +177,19 @@ class SessionBuilder {
       )
       ..writeln(
         '- Cite entry paths like `wiki/${pet.id}/...` when referencing facts.',
+      )
+      ..writeln(
+        '- If the user reports any urgent symptom you recognise that the '
+        'screener may have missed, open with the vet-escalation preamble '
+        '(see VOICE.md §6) before any other content.',
       );
+
+    if (redFlag != null) {
+      buf
+        ..writeln()
+        ..writeln(escalationDirective(redFlag));
+    }
+
     return buf.toString();
   }
 
