@@ -119,7 +119,7 @@ void main() {
     test('rejects unknown mode with ArgumentError (DECISIONS row 28)',
         () async {
       final block = await dispatcher.handle(
-        ToolUseBlock(id: 't', name: 'schedule_reminder', input: const {
+        const ToolUseBlock(id: 't', name: 'schedule_reminder', input: {
           'kind': 'flea_treatment',
           'when_iso': '2026-05-26T09:00:00',
           'mode': 'deterministic',
@@ -168,7 +168,7 @@ void main() {
         'when_iso': '2026-05-26T09:00:00',
       });
       final result = await dispatcher.handle(
-        ToolUseBlock(id: 't', name: 'list_reminders', input: const {}),
+        const ToolUseBlock(id: 't', name: 'list_reminders', input: {}),
       );
       final list = jsonDecode(result.content) as List<dynamic>;
       expect(list, hasLength(2));
@@ -207,7 +207,7 @@ void main() {
 
     test('rejects non-array symptoms input with ArgumentError', () async {
       final block = await dispatcher.handle(
-        ToolUseBlock(id: 't', name: 'red_flag_check', input: const {
+        const ToolUseBlock(id: 't', name: 'red_flag_check', input: {
           'symptoms': 'just one string',
         }),
       );
