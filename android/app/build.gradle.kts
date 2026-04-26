@@ -26,6 +26,13 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications 17.x uses java.time APIs (timezone
+        // scheduling) which require core library desugaring on min SDK
+        // 24. Without this, `flutter build apk` fails with
+        // "Dependency ':flutter_local_notifications' requires core
+        // library desugaring to be enabled for :app." See
+        // https://developer.android.com/studio/write/java8-support.html
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -76,4 +83,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // Companion to `isCoreLibraryDesugaringEnabled = true` above.
+    // Latest stable as of 2026-04 — bump in lockstep with the AGP
+    // version Phase 6 settles on.
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }

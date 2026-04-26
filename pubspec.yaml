@@ -59,7 +59,7 @@ dependencies:
   #   (task 4.7) and Android 13+ POST_NOTIFICATIONS runtime grant.
   flutter_local_notifications: ^17.2.4
   android_alarm_manager_plus: ^4.0.7
-  workmanager: ^0.5.2
+  workmanager: ^0.9.0+3
   permission_handler: ^11.3.1
 
 dev_dependencies:
