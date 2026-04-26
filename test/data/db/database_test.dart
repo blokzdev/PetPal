@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/data/db/database.dart';
@@ -85,30 +84,30 @@ void main() {
     expect(hits.first.read<int>('rowid'), 1);
   });
 
-  test('reminder mode column accepts deterministic and synthesis', () async {
+  test(
+      'reminder mode column accepts every mode in the four-mode taxonomy '
+      '(CLAUDE.md §8, DECISIONS row 28)', () async {
     final petId = await db.into(db.pets).insert(
           PetsCompanion.insert(
             name: 'Milo',
             createdAt: DateTime(2026, 4, 25),
           ),
         );
-    await db.into(db.reminders).insert(
-          RemindersCompanion.insert(
-            petId: petId,
-            kind: 'flea',
-            whenTs: DateTime(2026, 5, 15),
-            mode: 'deterministic',
-          ),
-        );
-    await db.into(db.reminders).insert(
-          RemindersCompanion.insert(
-            petId: petId,
-            kind: 'weekly_digest',
-            whenTs: DateTime(2026, 5, 2),
-            mode: 'synthesis',
-            payload: const Value('{"window":"7d"}'),
-          ),
-        );
-    expect(await db.select(db.reminders).get(), hasLength(2));
+    for (final mode in const [
+      'notification',
+      'script',
+      'synthesis',
+      'synthesisNotify',
+    ]) {
+      await db.into(db.reminders).insert(
+            RemindersCompanion.insert(
+              petId: petId,
+              kind: 'sample_$mode',
+              whenTs: DateTime(2026, 5, 15),
+              mode: mode,
+            ),
+          );
+    }
+    expect(await db.select(db.reminders).get(), hasLength(4));
   });
 }

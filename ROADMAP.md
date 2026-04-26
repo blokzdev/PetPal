@@ -143,7 +143,7 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 - [x] 4.1 Red-flag rule table — `lib/harness/guardrails/red_flags.dart` covering the 11 categories with case-insensitive word-bounded regexes; multi-symptom AND groups for `lethargy_anorexia`
 - [x] 4.2 `RedFlagScreener` + AgentLoop integration — pre-screen every chat turn before the LLM call; `SessionBuilder.composeTurn` accepts `redFlag` and appends a one-shot escalation directive after the Output-contract block
 - [x] 4.3 UI badge on flagged assistant bubbles — `ChatMessage.escalated` + `escalatedCategory` propagated through `ChatNotifier`; subdued scrollback styling per VOICE.md §6
-- [ ] 4.4 `ScheduleMode` enum + `ReminderRepo` — sealed-style enum at `lib/harness/scheduling/schedule_mode.dart` with `parse`/`serialise`; Drift CRUD over the existing `reminders` table
+- [x] 4.4 `ScheduleMode` enum + `ReminderRepo` — sealed-style enum at `lib/harness/scheduling/schedule_mode.dart` with `parse`/`serialise`; Drift CRUD over the existing `reminders` table
 - [ ] 4.5 `ReminderDispatcher` + add platform deps — pure-Dart dispatcher routes by mode to pluggable engines; add `flutter_local_notifications`, `android_alarm_manager_plus`, `workmanager`, `permission_handler` to `pubspec.yaml`; DECISIONS row 30
 - [ ] 4.6 Platform engines — `lib/platform/notifications.dart`, `lib/platform/alarm_scheduler.dart`, `lib/platform/work_scheduler.dart`; verify AndroidManifest permissions are in place; add ProGuard keep rule for WorkmanagerCallbackDispatcher
 - [ ] 4.7 Battery-optimization exemption prompt — first-schedule one-shot prompt; persisted in `SharedPreferences`; static copy (global modal)

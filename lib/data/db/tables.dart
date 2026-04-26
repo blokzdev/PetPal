@@ -55,9 +55,11 @@ class Messages extends Table {
   DateTimeColumn get ts => dateTime()();
 }
 
-/// Reminders — scheduled notifications. `mode` is 'deterministic' (zero-token,
-/// templated) or 'synthesis' (Pro-tier; LLM-generated content). `payload` is
-/// JSON-encoded mode-specific data.
+/// Reminders — scheduled tasks. `mode` is one of `notification` |
+/// `script` | `synthesis` | `synthesisNotify` per CLAUDE.md §8 / DECISIONS
+/// row 28's four-mode taxonomy. `payload` is JSON-encoded mode-specific
+/// data (e.g. `{"templateId":"flea","vars":{"pet_name":"Loki"}}` for a
+/// notification reminder).
 class Reminders extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get petId => integer()
