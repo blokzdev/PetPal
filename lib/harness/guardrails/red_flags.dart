@@ -115,7 +115,8 @@ final List<RedFlagPattern> redFlagPatterns = [
     triggers: [
       _ci(r'\bseizure(s|d)?\b'),
       _ci(r'\bseizing\b'),
-      _ci(r'\bconvuls(ion|ions|ing|ed)\b'),
+      _ci(r'\bseized\b'),
+      _ci(r'\bconvuls(ion|ions|ing|ed|es|e)\b'),
       _ci(r'\bhad\s+a\s+fit\b'),
       _ci(r'\bepileptic\s+(episode|fit|attack)\b'),
     ],
