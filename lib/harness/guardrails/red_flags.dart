@@ -81,7 +81,7 @@ final List<RedFlagPattern> redFlagPatterns = [
       _ci(r'\bblood\w*\s+in\s+(?:his\s+|her\s+|the\s+|a\s+)?(stool|poop|feces|faeces|diarrhea|diarrhoea)\b'),
       _ci(r'\bbloody\s+(stool|poop|diarrhe[ae])\b'),
       _ci(r'\b(red|dark|black|bloody|tarry)\s+(stool|poop|feces|faeces|diarrhea|diarrhoea)\b'),
-      _ci(r'\b(stool|poop|feces|faeces|diarrhea|diarrhoea)\s+(is|looks|seems|appears)\s+(red|dark|black|bloody|tarry)\b'),
+      _ci(r'\b(stool|poop|feces|faeces|diarrhea|diarrhoea)\s+(is|are|looks|look|seems|seem|appear|appears)\s+(red|dark|black|bloody|tarry)\b'),
       _ci(r'\bmelena\b'),
     ],
   ),
@@ -92,7 +92,7 @@ final List<RedFlagPattern> redFlagPatterns = [
     triggers: [
       _ci(r'\bblood\w*\s+in\s+(?:his\s+|her\s+|the\s+|a\s+)?(vomit|throw[- ]?up|puke)\b'),
       _ci(r'\bvomit\w*\s+blood\b'),
-      _ci(r'\b(throwing|threw|throw)\s+up\s+blood\b'),
+      _ci(r'\b(throwing|threw|throw|throws)\s+up\s+blood\b'),
       _ci(r'\bcoughing\s+up\s+blood\b'),
       _ci(r'\bhematemesis\b'),
     ],
