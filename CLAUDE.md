@@ -236,7 +236,9 @@ Every red-flag category ships with **≥30 positive phrasings + ≥20 negative p
 
 ---
 
-## 11. MVP screen list (delivered by end of Phase 2)
+## 11. MVP screen list (delivered by end of Phase 2) vs shipped v1
+
+The **MVP** screen list — delivered by end of Phase 2 — is the architectural floor:
 
 1. Onboarding (welcome, API key entry, privacy disclosure)
 2. Add pet (name, species, breed, DOB → seeds `SOUL.md`)
@@ -245,7 +247,9 @@ Every red-flag category ships with **≥30 positive phrasings + ≥20 negative p
 5. Wiki browser + markdown viewer
 6. Settings (API key, export wiki as zip)
 
-Reminders, skills, paywall, sync are explicitly **not** in MVP.
+Reminders, skills, paywall, sync are explicitly **not** in MVP. Reminders shipped in Phase 4; skills shipped in Phase 3; paywall + sync land in Phase 7.
+
+The **shipped v1** is not the MVP. Per DECISIONS row 34 we restructured after Phase 4: MVP architecture stays, but the v1 the user installs from the Play Store includes the Phase 5 design system + Phase 6 feature depth (photo timeline, multimodal chat, vet-visit structured entries + auto-follow-up reminders, weight/symptom trend charts, smarter weekly summary). The harness was past MVP-grade; the surface needed to catch up before monetization. Don't conflate "MVP done" with "ready to ship".
 
 ---
 
@@ -380,7 +384,7 @@ The release build is meaningfully smaller than `flutter build apk --debug` (R8 m
 
 ## 15. Phased build plan
 
-See `ROADMAP.md`. Six phases: Phase 0 (scaffold) → Phase 6 (Play Store). MVP at end of Phase 2.
+See `ROADMAP.md`. Eight phases: Phase 0 (scaffold) → Phase 8 (Play Store). MVP architecture at end of Phase 2; shipped v1 at end of Phase 6 (including the Phase 5 design system + Phase 6 feature depth); paywall + sync in Phase 7. The original plan was six phases — DECISIONS row 34 captures the post-Phase-4 restructure that inserted Phase 5 (Product Polish & Visual Identity) and Phase 6 (Feature Depth & AI Capabilities) before the original monetization phase (now Phase 7).
 
 ---
 

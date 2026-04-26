@@ -1,6 +1,8 @@
 # PetPal Roadmap
 
-Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
+Eight phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
+
+The original plan was six phases (Phase 0 scaffold → Phase 5 monetization → Phase 6 launch). After Phase 4 we restructured: the harness is past MVP-grade (873 tests, three-layer memory, scheduling, 11-category guardrails, species-aware skills), but the app's experiential surface is still MVP-quality. Monetizing barebones UI on top of world-class architecture inverts the value perception. So we inserted **Phase 5 (Product Polish & Visual Identity)** and **Phase 6 (Feature Depth & AI Capabilities)** before monetization. The original Phase 5 became Phase 7; the original Phase 6 became Phase 8. See DECISIONS row 34 for the rationale.
 
 **Current phase: Phase 4 — COMPLETE pending on-device verification (REQUIRED before Phase 5).**
 
@@ -167,44 +169,111 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 
 ---
 
-## Phase 5 — Monetization, Cloud Sync, Polish
+## Phase 5 — Product Polish & Visual Identity
 
-**Goal:** Pro subscription, one expert-pack IAP, cloud sync chosen and implemented, accessibility pass.
-**Definition of done:** subscribe with a Play tester account → install on a second device → wiki syncs.
+**Goal:** an app that looks and feels like it deserves a Play Store slot, even though feature-equivalent to current state. Build a design system (tokens + components) that Phase 6 will reuse — not just polish individual screens. Ship the locked design choices: Soft modern palette (sage primary, coral accent, warm off-white background, graphite ink), Inter body + Source Serif 4 journal accent, journal-+-paw adaptive icon. See DECISIONS row 35 for the locked design system.
+**Definition of done:** every existing screen renders through the new design system; adaptive launcher icon + splash visible on a fresh install; onboarding leads with the product story, not the API key entry; every list screen has a teaching empty state; no `CircularProgressIndicator` left in `lib/app/screens/`; the three hero moments (memory saved, per-pet home greeting, weekly summary appearance) feel disproportionately polished.
 
-- [ ] 5.1 Tier service (free: 1 pet, 30-day memory window) and gating checks
-- [ ] 5.2 `in_app_purchase` integration: monthly + annual subs
-- [ ] 5.3 One expert-pack IAP wired (e.g., "Senior Dog")
-- [ ] 5.4 Paywall screens + restore-purchases
-- [ ] 5.5 **Cloud sync backend decision** (Supabase vs git-remote vs BYOC object store) — append to `DECISIONS.md`
-- [ ] 5.6 Implement `CloudSyncAdapter` against the chosen backend
-- [ ] 5.7 Conflict resolution: last-writer-wins with `.conflict.md` fallback
-- [ ] 5.8 Settings: data export, data delete, privacy info screen
-- [ ] 5.9 Accessibility pass: contrast, screen reader labels, text scaling, touch-target sizes
-- [ ] 5.10 Opt-in crash analytics (lightweight)
-- [ ] 5.11 Phase wrap-up commit + summary
+- [ ] 5.1 Design system tokens — `lib/app/design/` package: `ColorScheme` seeded from sage `#5C8A7A` with manual surface-tint overrides (avoid M3 lavender drift), typography theme wiring Inter + Source Serif 4 via `google_fonts`, spacing scale (`Spacing.xs/s/m/l/xl`), elevation tokens, corner radii, motion durations. Replaces `lib/app/theme.dart:1-15`. Adds `google_fonts` to `pubspec.yaml` (DECISIONS row required).
+- [ ] 5.2 Component primitives — `PetButton`, `PetCard`, `PetEmptyState` (illustration + heading + body + CTA slot), `PetSkeleton`, `PetSectionHeader`, `PetIcon`. Sit on top of 5.1.
+- [ ] 5.3 App icon (adaptive) — `flutter_launcher_icons` config: foreground = journal-+-paw mark in graphite (`#2D3436`), background = warm off-white (`#F7F5F2`). Adaptive icon for Android 8+. Source asset `assets/branding/icon-foreground.png`.
+- [ ] 5.4 Splash screen — `flutter_native_splash` config: warm off-white background, journal-+-paw mark centered. No animation in v1.
+- [ ] 5.5 Onboarding redesign — replace 3-page config wizard (`lib/app/screens/onboarding_screen.dart:62-91`). New flow: emotional welcome (what PetPal does) → privacy disclosure (existing four bullets, copy refreshed) → API key as utility, not the welcome.
+- [ ] 5.6 Empty states — wire `PetEmptyState` to journal browser, reminders, care guides, chat. Each teaches what goes there.
+- [ ] 5.7 Loading & feedback — replace `CircularProgressIndicator` with `PetSkeleton` on lists; haptics on save-memory / complete-reminder / schedule-reminder via `HapticFeedback.lightImpact`; `AnimatedSwitcher` on home greeting state change.
+- [ ] 5.8 Hero moment — memory saved. When `write_wiki_entry` fires: tool pill settling micro-animation + "Saved a memory about Loki" snackbar that taps to the entry + haptic.
+- [ ] 5.9 Hero moment — per-pet home greeting. Pet name + warm gradient + typography (Phase 6 adds the photo). Cold-start moment polish.
+- [ ] 5.10 Hero moment — weekly summary appearance. Weekly digest entries get a distinct card treatment in the journal browser, visually different from regular entries.
+- [ ] 5.11 Per-screen polish audit — walk every screen in `lib/app/screens/`. Home button stack (`home_screen.dart:79-139`) becomes a card grid; chat composer gets visual lift; settings rows get section dividers; SOUL editor gets a distinct Profile-fields-vs-About-Loki visual hierarchy.
+- [ ] 5.12 Microcopy pass — every button label, error message, empty-state copy, confirmation dialog walked against VOICE.md §1–§6. Tightened for shipping. Update string fixtures.
+- [ ] 5.13 Skill pack content expansion — author 3 packs under `assets/skills/`: `reactive-dog` (`species: [dog]`), `senior-cat` (`species: [cat]`), `multi-cat` (`species: [cat]`). Markdown only; loader already supports.
+- [ ] 5.14 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**.
 
-**On-device verification:** subscribe with tester account on device A → install on device B → confirm wiki syncs; trigger a conflict and confirm `.conflict.md` is created.
+**On-device verification (REQUIRED):**
+1. Cold launch → adaptive launcher icon visible on home screen + branded splash → arrives on the redesigned welcome page (not API key entry).
+2. Walk through onboarding → confirm story-first welcome, privacy disclosure, API key framed as utility.
+3. Open every screen → confirm new design system applied (palette, typography, no stray Material defaults).
+4. Save a memory → confirm hero moment fires (snackbar + haptic + animation).
+5. Open journal browser the morning after a weekly digest fires → confirm distinct card treatment.
+6. Confirm three hero moments feel disproportionately polished vs the rest of the app.
 
 **STOP.**
 
 ---
 
-## Phase 6 — Play Store Prep & Launch
+## Phase 6 — Feature Depth & AI Capabilities
+
+**Goal:** take the app from "personal AI agent for pets, basic" to "personal AI agent for pets, sophisticated." Foundation → expansion: storage + display surface first, then capability features that consume them. Multimodal input is constrained to "describes what it sees, never diagnoses" per the medical-safety guardrails in DECISIONS row 29 + PRODUCT.md "What PetPal is NOT".
+**Definition of done:** "I'd pay $7.99/mo for this" is a credible reaction. Photos are first-class wiki entries with a timeline view; vet visits have structured frontmatter that auto-creates follow-up reminders; weight + recurring-symptom charts surface on the profile; weekly summary surfaces trends and anomalies, not just a recap.
+
+- [ ] 6.1 Photo storage layer — per CLAUDE.md §5, photos are `wiki/<pet_id>/photos/<id>.jpg + <id>.md`. Implement `WikiRepo` extension to write image bytes + sidecar markdown atomically. Storage budget cap (warn at 500 MB per pet, hard limit 1 GB v1). FTS5 indexes the sidecar caption.
+- [ ] 6.2 Pet profile photo — single photo on the SOUL profile, used in home greeting + chat appbar. Validates the storage layer with smallest UI surface.
+- [ ] 6.3 Photo timeline screen — `/photos` route, time-ordered grid of every photo across the pet's wiki. Tap → entry. Reuses Phase 5 design system.
+- [ ] 6.4 Multimodal chat input — photo upload to chat. **Constrained: PetPal describes what it sees, never diagnoses.** Vision request via Anthropic API; response runs through the existing `RedFlagScreener`. New tool `attach_photo` registered alongside existing chat tools. New DECISIONS row capturing the constraint explicitly.
+- [ ] 6.5 Vet-visit structured entry type — new entry kind `wiki/<pet>/vet/YYYY-MM-DD-<slug>.md` with structured frontmatter (`vet_name`, `reason`, `diagnosis`, `prescriptions: []`, `follow_up_date`). Form-driven creator UI; freeform fallback for non-vet entries.
+- [ ] 6.6 Auto-follow-up reminders — when a vet-visit entry has `follow_up_date`, auto-create a `notification`-mode reminder. Reuses existing scheduling stack.
+- [ ] 6.7 Weight + symptom trend charts — add `fl_chart` dep (DECISIONS row required). Charts: weight time-series, recurring-symptom frequency. Surface on the SOUL profile.
+- [ ] 6.8 Smarter weekly summary — upgrade `lib/harness/synthesis/weekly_digest.dart` to surface trends, anomalies, gentle observations ("Loki's weight has trended down for 3 weeks"). New synthesis prompt; no new infrastructure.
+- [ ] 6.9 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**.
+
+**Cuts (deferred to v1.1 or Phase 7):**
+- *Multi-pet UI improvements* → Phase 7 (free tier = 1 pet per DECISIONS row 8; multi-pet UI is Pro-only, belongs alongside the paywall).
+- *Onboarding intelligence (auto-populate from photos/voice)* → v1.1 (vision-based species/breed inference is locked OUT by DECISIONS row 25; voice transcription adds new dependency).
+- *Medication tracking* → v1.1 (significant data model — durations, doses, side effects, course-end prompts; overlaps with reminders).
+- *Caregiver/family sharing preview* → v1.1 (PDF export work delays shipping; not core to the compounding-memory thesis).
+- *Improved chat (reactions, edit/delete, threading)* → v1.1 (edit/delete contradicts "memory persists"; threading over-engineered; search is genuinely useful — defer with the rest, revisit in v1.1).
+
+**On-device verification (REQUIRED):**
+1. Add a profile photo to a pet → confirm it renders on home greeting + chat appbar.
+2. Take/upload a photo from chat ("here's Loki's paw") → confirm PetPal describes what it sees and does not diagnose; confirm the response runs through the red-flag screener.
+3. Create a vet-visit structured entry with a `follow_up_date` → confirm a reminder appears in `/reminders` automatically.
+4. Open the photo timeline → confirm time-ordered grid + tap-to-entry.
+5. Open the SOUL profile after several weight log entries → confirm chart renders.
+6. Wait or fast-forward to a weekly digest → confirm it surfaces trends/anomalies, not just a recap.
+
+**STOP.**
+
+---
+
+## Phase 7 — Monetization, Cloud Sync, Multi-Pet UI
+
+**Goal:** Pro subscription, one expert-pack IAP, cloud sync chosen and implemented, multi-pet UI behind the paywall, accessibility pass. (Renamed from old Phase 5: dropped redundant "Polish" — Phase 5 covers that — added "Multi-Pet UI" since multi-pet moves here from the Phase 6 candidate list.)
+**Definition of done:** subscribe with a Play tester account → install on a second device → wiki syncs; multi-pet works for Pro users; accessibility pass clean.
+
+- [ ] 7.1 Tier service (free: 1 pet, 30-day memory window) and gating checks
+- [ ] 7.2 `in_app_purchase` integration: monthly + annual subs
+- [ ] 7.3 One expert-pack IAP wired (e.g., "Senior Dog")
+- [ ] 7.4 Paywall screens + restore-purchases
+- [ ] 7.5 Multi-pet UI improvements — pet switcher widget, cross-pet timeline, family-wide reminders. Lives behind the Pro paywall. (Moved from the original Phase 6 candidate list per DECISIONS row 34.)
+- [ ] 7.6 **Cloud sync backend decision** (Supabase vs git-remote vs BYOC object store) — append to `DECISIONS.md`
+- [ ] 7.7 Implement `CloudSyncAdapter` against the chosen backend
+- [ ] 7.8 Conflict resolution: last-writer-wins with `.conflict.md` fallback
+- [ ] 7.9 Settings: data export, data delete, privacy info screen
+- [ ] 7.10 Accessibility pass: contrast, screen reader labels, text scaling, touch-target sizes
+- [ ] 7.11 Opt-in crash analytics (lightweight)
+- [ ] 7.12 Phase wrap-up commit + summary
+
+**On-device verification:** subscribe with tester account on device A → install on device B → confirm wiki syncs; add a second pet and confirm pet switcher works; trigger a conflict and confirm `.conflict.md` is created.
+
+**STOP.**
+
+---
+
+## Phase 8 — Play Store Prep & Launch
 
 **Goal:** signed AAB on internal testing track, store listing approved.
 **Definition of done:** install via Play internal track on a fresh device; sandboxed billing flow works end-to-end.
 
-- [ ] 6.1 Adaptive icon + splash
-- [ ] 6.2 Privacy policy hosted; Data Safety form drafted (LLM calls leaving the device disclosed)
-- [ ] 6.3 Store listing copy + 1 phone + 1 7" tablet screenshot set
-- [ ] 6.4 Release keystore generated; Play App Signing enrolled
-- [ ] 6.5 R8/ProGuard rules verified for Drift and Anthropic SDK
-- [ ] 6.6 `flutter build appbundle --release`
-- [ ] 6.7 Upload AAB to internal testing track
-- [ ] 6.8 Triage Play pre-launch report
-- [ ] 6.9 Closed testing checklist + invite list
-- [ ] 6.10 Phase wrap-up commit + summary
+- [ ] 8.1 Verify Phase 5 adaptive icon + splash meet Play Store asset requirements (sizes, safe-zones, dark-mode preview); regenerate any missing densities
+- [ ] 8.2 Privacy policy hosted; Data Safety form drafted (LLM calls leaving the device disclosed)
+- [ ] 8.3 Store listing copy + 1 phone + 1 7" tablet screenshot set
+- [ ] 8.4 Release keystore generated; Play App Signing enrolled (replaces the debug-signing fallback from DECISIONS row 22)
+- [ ] 8.5 R8/ProGuard rules verified for Drift, Anthropic SDK, and the Phase 4 scheduling stack
+- [ ] 8.6 `flutter build appbundle --release`
+- [ ] 8.7 Upload AAB to internal testing track
+- [ ] 8.8 Triage Play pre-launch report
+- [ ] 8.9 Closed testing checklist + invite list
+- [ ] 8.10 Phase wrap-up commit + summary
 
 **On-device verification:** install via Play internal track on a fresh device, run sandboxed billing flow.
 
