@@ -103,6 +103,11 @@ flutter:
     - assets/skills/puppy/
     - assets/skills/senior-dog/
     - assets/skills/new-cat/
+    # Phase 4 reminder notification templates (task 4.8). One YAML
+    # per canonical kind: flea_treatment, heartworm_dose, vaccine_due,
+    # weight_check. Each declares `title:` and `body:`; body may
+    # interpolate {pet_name}.
+    - assets/reminders/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
