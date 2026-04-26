@@ -5,6 +5,7 @@ import '../data/db/connection.dart';
 import '../data/db/database.dart';
 import '../data/onboarding_templates.dart';
 import '../data/repos/pet_repo.dart';
+import '../data/repos/reminder_repo.dart';
 import '../data/repos/skill_repo.dart';
 import '../data/repos/wiki_repo.dart';
 import '../data/soul_file.dart';
@@ -14,10 +15,14 @@ import '../harness/agent/agent_loop.dart';
 import '../harness/agent/anthropic_client.dart';
 import '../harness/agent/llm_client.dart';
 import '../harness/agent/tool_dispatcher.dart';
+import '../harness/guardrails/red_flag_screener.dart';
 import '../harness/retrieval/embedding_provider.dart';
 import '../harness/retrieval/embedding_worker.dart';
 import '../harness/retrieval/hybrid_retriever.dart';
 import '../harness/retrieval/onnx_embedding_provider.dart';
+import '../harness/scheduling/notification_template.dart';
+import '../harness/scheduling/reminder_scheduler.dart';
+import '../harness/scheduling/reminder_service.dart';
 import '../harness/session_builder.dart';
 import '../harness/skills/asset_skill_source.dart';
 import '../harness/skills/enabled_filtering_skill_source.dart';
@@ -25,9 +30,13 @@ import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_manifest.dart';
 import '../harness/skills/skill_source.dart';
 import '../harness/synthesis/weekly_digest.dart';
+import '../harness/tools/scheduling_tools.dart';
 import '../harness/tools/wiki_tools.dart';
+import '../platform/alarm_scheduler.dart';
 import '../platform/api_key_storage.dart';
+import '../platform/schedule_health.dart';
 import '../platform/settings_storage.dart';
+import '../platform/work_scheduler.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
 
@@ -193,8 +202,64 @@ final llmClientProvider = Provider<LlmClient>((ref) {
   return client;
 });
 
-/// Live [ToolDispatcher] with the four canonical wiki tools registered
-/// against the production repos and IO.
+/// Production [AlarmScheduler] / [WorkScheduler] / [ReminderScheduler] —
+/// each constructs its plugin bindings lazily so the providers are
+/// safe to instantiate in `flutter test` (no plugin call until you
+/// actually arm a reminder, which tests don't do).
+final alarmSchedulerProvider =
+    Provider<AlarmScheduler>((ref) => AlarmScheduler());
+
+final workSchedulerProvider =
+    Provider<WorkScheduler>((ref) => WorkScheduler());
+
+final reminderSchedulerProvider = Provider<ReminderScheduler>((ref) {
+  return ReminderScheduler(
+    alarms: ref.watch(alarmSchedulerProvider),
+    work: ref.watch(workSchedulerProvider),
+  );
+});
+
+final reminderRepoProvider = FutureProvider<ReminderRepo>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return ReminderRepo(db: db);
+});
+
+/// Production notification-template loader (asset-backed). Tests can
+/// override with [InMemoryNotificationTemplates].
+final notificationTemplatesProvider = Provider<NotificationTemplates>(
+  (ref) => const AssetNotificationTemplates(),
+);
+
+/// Production red-flag screener using the canonical pattern table.
+/// Singleton — the table is immutable across the session.
+final redFlagScreenerProvider =
+    Provider<RedFlagScreener>((ref) => RedFlagScreener());
+
+/// Read-only schedule-health snapshot service. Used by the reminders
+/// screen banner (4.10) and the battery-exemption prompt (4.7).
+final scheduleHealthServiceProvider = Provider<ScheduleHealthService>(
+  (ref) => const PlatformScheduleHealthService(),
+);
+
+/// Top-level facade over reminder create/cancel/list. Wraps repo +
+/// scheduler + template renderer so callers (tools + UI) don't have
+/// to wire those individually.
+final reminderServiceProvider = FutureProvider<ReminderService>((ref) async {
+  final repo = await ref.watch(reminderRepoProvider.future);
+  final scheduler = ref.watch(reminderSchedulerProvider);
+  final templates = ref.watch(notificationTemplatesProvider);
+  final petRepo = await ref.watch(petRepoProvider.future);
+  return ReminderService(
+    repo: repo,
+    scheduler: scheduler,
+    templates: templates,
+    petNameLookup: (id) async => (await petRepo.getPet(id))?.name,
+  );
+});
+
+/// Live [ToolDispatcher] with the canonical wiki tools + the Phase 4
+/// scheduling/safety tools (`schedule_reminder`, `list_reminders`,
+/// `red_flag_check`) registered against the production services.
 final toolDispatcherProvider =
     FutureProvider<ToolDispatcher>((ref) async {
   final wiki = await ref.watch(wikiIoProvider.future);
@@ -202,6 +267,8 @@ final toolDispatcherProvider =
   final retriever = await ref.watch(hybridRetrieverProvider.future);
   final embeddings = await ref.watch(embeddingProviderProvider.future);
   final activePetId = ref.watch(activePetIdProvider);
+  final reminders = await ref.watch(reminderServiceProvider.future);
+  final screener = ref.watch(redFlagScreenerProvider);
 
   final dispatcher = ToolDispatcher();
   registerWikiTools(
@@ -210,6 +277,12 @@ final toolDispatcherProvider =
     repo: repo,
     retriever: retriever,
     embeddings: embeddings,
+    activePetId: activePetId,
+  );
+  registerSchedulingTools(
+    dispatcher,
+    reminders: reminders,
+    screener: screener,
     activePetId: activePetId,
   );
   return dispatcher;

@@ -205,7 +205,7 @@ final List<RedFlagPattern> redFlagPatterns = [
     aiSummary: 'Lethargy and loss of appetite reported together',
     all: [
       _ci(r"\b(lethargic|listless|exhausted|very\s+tired|extremely\s+tired|won'?t\s+(get\s+up|move|stand|come\s+out))\b"),
-      _ci(r"\b(won'?t\s+eat|not\s+eating|no\s+appetite|refus(ing|es)\s+food|anorexi(a|c)|hasn'?t\s+eaten)\b"),
+      _ci(r"\b(won'?t\s+eat|not\s+eating|no\s+appetite|refus(ing|es|e|ed)\s+(to\s+eat|food)|anorexi(a|c)|hasn'?t\s+eaten)\b"),
     ],
   ),
 ];
