@@ -75,6 +75,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       controller: _scrollController,
                       messages: ui,
                       streamingAssistant: state.streamingAssistant,
+                      streamingEscalation: state.streamingEscalation,
                     ),
             ),
             if (state.activeTools.isNotEmpty)
@@ -132,10 +133,12 @@ class _MessageList extends StatelessWidget {
     required this.controller,
     required this.messages,
     required this.streamingAssistant,
+    required this.streamingEscalation,
   });
   final ScrollController controller;
   final List<ChatMessage> messages;
   final String? streamingAssistant;
+  final String? streamingEscalation;
 
   @override
   Widget build(BuildContext context) {
@@ -152,10 +155,15 @@ class _MessageList extends StatelessWidget {
             role: ChatRole.assistant,
             text: draft.isEmpty ? '…' : draft,
             streaming: true,
+            escalatedCategory: streamingEscalation,
           );
         }
         final msg = messages[i];
-        return _Bubble(role: msg.role, text: msg.text);
+        return _Bubble(
+          role: msg.role,
+          text: msg.text,
+          escalatedCategory: msg.escalatedCategory,
+        );
       },
     );
   }
@@ -227,15 +235,23 @@ class _Bubble extends StatelessWidget {
     required this.role,
     required this.text,
     this.streaming = false,
+    this.escalatedCategory,
   });
   final ChatRole role;
   final String text;
   final bool streaming;
 
+  /// Non-null on assistant bubbles produced under a flagged user turn.
+  /// Renders the subdued vet-escalation marker per VOICE.md §6 — the
+  /// preamble inside [text] is the prominent alert; the badge is the
+  /// scrollback marker that survives forever (DECISIONS row 29).
+  final String? escalatedCategory;
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final isUser = role == ChatRole.user;
+    final isFlagged = !isUser && escalatedCategory != null;
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -250,12 +266,39 @@ class _Bubble extends StatelessWidget {
                 isUser ? scheme.primaryContainer : scheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(14),
           ),
-          child: Text(
-            text,
-            style: TextStyle(
-              color: isUser ? scheme.onPrimaryContainer : scheme.onSurface,
-              fontStyle: streaming ? FontStyle.italic : FontStyle.normal,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isFlagged) ...[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.warning_amber_rounded,
+                      size: 14,
+                      color: scheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      'PetPal flagged this as urgent',
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                            fontWeight: FontWeight.w500,
+                          ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+              ],
+              Text(
+                text,
+                style: TextStyle(
+                  color: isUser ? scheme.onPrimaryContainer : scheme.onSurface,
+                  fontStyle: streaming ? FontStyle.italic : FontStyle.normal,
+                ),
+              ),
+            ],
           ),
         ),
       ),

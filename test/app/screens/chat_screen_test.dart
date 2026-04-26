@@ -117,5 +117,50 @@ void main() {
     // User bubble + finalised assistant text.
     expect(find.text('Milo loves frozen carrots'), findsOneWidget);
     expect(find.text('Got it. Logging Milo’s carrot trial.'), findsOneWidget);
+
+    // Non-flagged turn → no escalation badge.
+    expect(find.text('PetPal flagged this as urgent'), findsNothing);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+  });
+
+  testWidgets(
+      'flagged user turn renders the vet-escalation badge on the assistant '
+      'bubble and persists in scrollback (VOICE.md §6, DECISIONS row 29)',
+      (tester) async {
+    final llm = ScriptedLlmClient(
+      scripts: [
+        [
+          const StreamMessageStart(),
+          const StreamTextDelta(
+              'This sounds urgent — please call your vet now.'),
+          const StreamContentBlockStop(index: 0),
+          const StreamMessageStop(),
+        ],
+      ],
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: _commonOverrides(llm: llm),
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chat with Milo'));
+    await tester.pumpAndSettle();
+
+    // Type a phrase that the screener flags as blood_in_stool.
+    await tester.enterText(
+      find.byType(TextField),
+      'I noticed blood in his stool this morning',
+    );
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pumpAndSettle();
+
+    // Both the muted scrollback marker text and the warning icon must
+    // attach to the assistant bubble.
+    expect(find.text('PetPal flagged this as urgent'), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
   });
 }

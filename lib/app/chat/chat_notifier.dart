@@ -76,6 +76,21 @@ class ChatNotifier extends Notifier<ChatState> {
         tools: tools.definitions.toList(),
       );
 
+      // The user message we're about to send lands at this index in the
+      // committed history (AgentLoop appends prior history + new user
+      // message). When the screener flags this turn, that index goes
+      // into escalatedTurns so all assistant messages produced by this
+      // turn render the badge in scrollback.
+      final newUserMessageIndex = state.history.length;
+
+      // Surface the escalation on the streaming bubble immediately so
+      // the badge renders live, not just after AgentLoopDone commits.
+      if (composed.redFlag != null) {
+        state = state.copyWith(
+          streamingEscalation: composed.redFlag!.category.id,
+        );
+      }
+
       await for (final event in loop.streamRun(
         systemPrompt: composed.systemPrompt,
         userInput: composed.augmentedUserInput,
@@ -104,11 +119,19 @@ class ChatNotifier extends Notifier<ChatState> {
             // wiki browser's cache so the next view fetches fresh.
             ref.invalidate(wikiEntriesProvider);
           case AgentLoopDone(:final history):
+            final escalations = composed.redFlag != null
+                ? {
+                    ...state.escalatedTurns,
+                    newUserMessageIndex: composed.redFlag!.category.id,
+                  }
+                : state.escalatedTurns;
             state = state.copyWith(
               history: history,
               clearStreamingAssistant: true,
+              clearStreamingEscalation: true,
               activeTools: const [],
               sending: false,
+              escalatedTurns: escalations,
             );
             return;
         }
@@ -118,12 +141,14 @@ class ChatNotifier extends Notifier<ChatState> {
       state = state.copyWith(
         sending: false,
         clearStreamingAssistant: true,
+        clearStreamingEscalation: true,
         activeTools: const [],
       );
     } catch (e) {
       state = state.copyWith(
         sending: false,
         clearStreamingAssistant: true,
+        clearStreamingEscalation: true,
         activeTools: const [],
         error: categorizeChatError(e),
         lastFailedInput: trimmed,
