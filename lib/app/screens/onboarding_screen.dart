@@ -113,14 +113,15 @@ class _WelcomePage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            'A memory agent for your pet.',
+            "PetPal remembers your pet's life so you don't have to.",
             textAlign: TextAlign.center,
             style: text.titleMedium?.copyWith(color: scheme.onSurfaceVariant),
           ),
           const SizedBox(height: 24),
           Text(
-            'Track your pet’s life — vet visits, weight, food trials, '
-            'behavior notes — and know when to call the vet.',
+            'Vet visits, weight, food trials, behavior notes — all in '
+            'one place. And PetPal will tell you when something looks '
+            'serious enough to call the vet.',
             textAlign: TextAlign.center,
             style: text.bodyMedium,
           ),
@@ -147,21 +148,22 @@ class _PrivacyPage extends StatelessWidget {
           Text('Your data, your device.', style: text.headlineSmall),
           const SizedBox(height: 16),
           const _Bullet(
-            'Your pet’s wiki — vet visits, weight, notes, photos — '
-            'stays on this device. PetPal does not back it up to a server.',
+            "Your pet's journal — vet visits, weight, notes, photos — "
+            'stays on this phone. PetPal does not copy it to a server.',
           ),
           const _Bullet(
-            'Search runs on-device. Embeddings and keyword indexing use a '
-            'local model bundled with the app.',
+            'Searching your journal happens on the phone, with a '
+            'small model bundled into the app.',
           ),
           const _Bullet(
-            'Chat sends your conversation and the most relevant wiki '
-            'snippets to Anthropic’s Claude API using your own API '
-            'key. That call leaves the device.',
+            'When you ask PetPal something, it sends your message and '
+            'the relevant memories about your pet to Anthropic’s '
+            'Claude — the AI behind PetPal — using your own API key. '
+            'That’s the only thing that leaves the phone.',
           ),
           const _Bullet(
             'PetPal is not a vet and does not diagnose. If something '
-            'looks urgent, the app will tell you to call your vet.',
+            'looks urgent, PetPal will tell you to call your vet.',
           ),
           const Spacer(),
           Center(

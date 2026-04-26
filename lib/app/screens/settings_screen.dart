@@ -3,10 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
 
-/// App-wide settings. Phase 3.8 ships the weekly-digest toggle plus a
-/// "Run digest now" button so on-device verification can exercise the
+/// App-wide settings. Phase 3.8 ships the weekly-summary toggle plus a
+/// "Generate now" button so on-device verification can exercise the
 /// synthesis runner without waiting a week. WorkManager-backed
 /// scheduling lands in Phase 4.
+///
+/// Settings is a global screen → no pet-name interpolation in titles or
+/// section labels (VOICE.md §5). Synthesis/digest is internal vocabulary;
+/// the user sees "Weekly summary".
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -29,7 +33,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         if (!mounted) return;
         setState(() {
           _running = false;
-          _runMessage = 'No pet to digest.';
+          _runMessage = 'Add a pet first.';
         });
         return;
       }
@@ -41,7 +45,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         _running = false;
         _runMessage = result.skipped
             ? 'Skipped: ${result.reason ?? 'no reason given'}'
-            : 'Wrote digest at ${result.entryPath}';
+            : "Saved this week's summary.";
       });
     } catch (e) {
       if (!mounted) return;
@@ -60,14 +64,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       body: SafeArea(
         child: ListView(
           children: [
-            const _SectionHeader(label: 'Synthesis'),
+            const _SectionHeader(label: 'Weekly summary'),
             digestAsync.when(
               data: (enabled) => SwitchListTile(
-                title: const Text('Weekly digest'),
+                title: const Text('Weekly summary'),
                 subtitle: const Text(
-                  'A summary entry written to the wiki every week, '
-                  'using the LLM to synthesise recent notes. Pro-tier; '
-                  'off by default.',
+                  "Every Sunday, PetPal writes a recap of your pet's "
+                  'week — what happened, what changed, what to watch. '
+                  'Pro.',
                 ),
                 value: enabled,
                 onChanged: (next) async {
@@ -77,20 +81,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 },
               ),
               loading: () => const ListTile(
-                title: Text('Weekly digest'),
+                title: Text('Weekly summary'),
                 subtitle: Text('Loading…'),
               ),
               error: (e, _) => ListTile(
-                title: const Text('Weekly digest'),
+                title: const Text('Weekly summary'),
                 subtitle: Text('Could not read setting: $e'),
               ),
             ),
             ListTile(
-              title: const Text('Run weekly digest now'),
+              title: const Text("Generate this week's summary now"),
               subtitle: Text(
                 _runMessage ??
-                    'Run synthesis against the active pet immediately. '
-                        'Useful for verification.',
+                    "Generate your pet's summary right now, instead of "
+                        'waiting for Sunday.',
               ),
               trailing: _running
                   ? const SizedBox(

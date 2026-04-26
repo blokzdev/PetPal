@@ -103,6 +103,35 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 
 ---
 
+## Phase 3.5 — Product Voice & Vocabulary
+
+**Goal:** lock the product story (PRODUCT.md), the user-facing voice (VOICE.md), and a public README before any more user-visible surface area lands. Migrate every UI string from internal architecture vocabulary (SOUL/wiki/skill/agent/synthesis) to the user-facing one (Profile/Journal/Care guide/PetPal/Weekly summary). Adopt the pet-name interpolation rule as a permanent design constraint.
+
+**Definition of done:** PRODUCT.md, VOICE.md, README.md committed. Every screen in `lib/app/screens/` and every onboarding asset under `assets/onboarding/` reads in user voice. Tool pills show the friendly translation (`saving a memory…`), never the raw tool name. DECISIONS row 27 captures both the internal/external split and the interpolation rule. Self-verify clean.
+
+- [x] 3.5.1 Write `PRODUCT.md` (Y-Combinator-style positioning: vision, target users, what PetPal is NOT, two-year horizon)
+- [x] 3.5.2 Write `VOICE.md` (tone, AI framing, vocabulary translation table, forbidden tokens, before/after examples, pet-name interpolation rule)
+- [x] 3.5.3 Replace the default Flutter scaffold `README.md` with a product-led intro that links the SemaClaw and Externalization arXiv references for the harness-engineering thesis
+- [x] 3.5.4 Migrate `home_screen.dart` (Open journal / Edit profile / Care guides; greeting tagline interpolates the active pet's name)
+- [x] 3.5.5 Migrate `wiki_browser_screen.dart` ("Loki's journal" app bar; "Export journal" tooltip; per-pet empty-state copy; drop the internal entry path from the tile subtitle)
+- [x] 3.5.6 Migrate `wiki_entry_screen.dart` ("Journal unavailable" error)
+- [x] 3.5.7 Migrate `soul_editor_screen.dart` ("Loki's profile" app bar; "About Loki" body field; per-pet hint copy)
+- [x] 3.5.8 Migrate `skill_browser_screen.dart` ("Care guides" app bar; species-aware empty-state copy stays static — global screen)
+- [x] 3.5.9 Migrate `settings_screen.dart` ("Weekly summary" section + switch + run-now action; static copy — global screen)
+- [x] 3.5.10 Migrate `onboarding_screen.dart` (welcome subtitle + the four privacy bullets, with a single in-context AI mention per VOICE.md §2)
+- [x] 3.5.11 Migrate `add_pet_screen.dart` (free-tier limit message — static, action surface not per-pet destination)
+- [x] 3.5.12 Migrate `chat_screen.dart` (per-pet empty state interpolates the name; tool pills route through `_humanizeToolName(name, petName)` covering every harness tool from CLAUDE.md §7)
+- [x] 3.5.13 Migrate the four affected onboarding templates: `dog.md`, `cat.md`, `bird.md`, `exotic.md` (wiki → journal; SOUL → profile; frontmatter → fields)
+- [x] 3.5.14 Update tests asserting on changed strings: `widget_test.dart`, `wiki_browser_test.dart`, `skill_browser_test.dart`, `soul_editor_test.dart`, `settings_screen_test.dart`, `onboarding_screen_test.dart`, `chat_screen_test.dart`, `happy_path_test.dart`
+- [x] 3.5.15 Append DECISIONS row 27 capturing both the internal/external vocabulary split and the pet-name interpolation rule as permanent design rules
+- [x] 3.5.16 Phase wrap-up commit + summary; hard stop before Phase 4
+
+**On-device verification:** not required — this phase changes copy, asset markdown, and pure-Dart string helpers only. No new runtime behaviour, no new data, no new networking, no new permissions. Existing Phase 1 + 2 device verification (DECISIONS row 21) covers the underlying surfaces.
+
+**STOP.**
+
+---
+
 ## Phase 4 — Scheduling & Medical Guardrails
 
 **Goal:** zero-token reminders fire on time; red-flag detection runs in code before every LLM call.

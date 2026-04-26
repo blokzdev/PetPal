@@ -78,8 +78,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Home → Skills.
-    await tester.tap(find.text('Skills'));
+    // Home → Care guides.
+    await tester.tap(find.text('Care guides'));
     await tester.pumpAndSettle();
 
     expect(find.text('Puppy'), findsOneWidget);

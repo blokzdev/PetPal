@@ -19,7 +19,7 @@ void main() {
     );
   });
 
-  testWidgets('weekly digest toggle starts off, persists when flipped on',
+  testWidgets('weekly summary toggle starts off, persists when flipped on',
       (tester) async {
     final settings = InMemorySettingsStorage();
     final stack = await buildChatTestStack(
@@ -45,16 +45,16 @@ void main() {
     await tester.pumpAndSettle();
 
     final firstSwitch = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Weekly digest'),
+      find.widgetWithText(SwitchListTile, 'Weekly summary'),
     );
     expect(firstSwitch.value, isFalse,
-        reason: 'weekly digest should default to off (Pro-tier)');
+        reason: 'weekly summary should default to off (Pro-tier)');
 
-    await tester.tap(find.widgetWithText(SwitchListTile, 'Weekly digest'));
+    await tester.tap(find.widgetWithText(SwitchListTile, 'Weekly summary'));
     await tester.pumpAndSettle();
 
     final afterToggle = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Weekly digest'),
+      find.widgetWithText(SwitchListTile, 'Weekly summary'),
     );
     expect(afterToggle.value, isTrue);
 
@@ -87,7 +87,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final s = tester.widget<SwitchListTile>(
-      find.widgetWithText(SwitchListTile, 'Weekly digest'),
+      find.widgetWithText(SwitchListTile, 'Weekly summary'),
     );
     expect(s.value, isTrue);
   });

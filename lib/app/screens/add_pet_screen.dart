@@ -10,6 +10,9 @@ import '../providers.dart';
 /// loading a species-specific `SOUL.md` template from
 /// `assets/onboarding/`. The harness stays species-agnostic — the pick
 /// only changes the markdown the agent sees.
+///
+/// Add-pet is a global action (not a per-pet destination) so the limit
+/// copy stays static — no name interpolation (VOICE.md §5).
 class AddPetScreen extends ConsumerStatefulWidget {
   const AddPetScreen({super.key});
 
@@ -191,14 +194,14 @@ class _FreeTierLimit extends StatelessWidget {
             Icon(Icons.pets, size: 56, color: scheme.primary),
             const SizedBox(height: 16),
             Text(
-              'You already have a pet on PetPal.',
+              'You already have a pet on the free plan.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
-              'The free tier supports one pet. Multi-pet support arrives '
-              'with the paid tier in a future update.',
+              'Adding a second pet is part of Pro, coming in a future '
+              'update.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),

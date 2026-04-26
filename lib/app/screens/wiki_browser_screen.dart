@@ -33,7 +33,7 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
       await SharePlus.instance.share(
         ShareParams(
           files: [XFile(zip.path, mimeType: 'application/zip')],
-          subject: 'PetPal wiki export',
+          subject: 'PetPal journal export',
         ),
       );
     } catch (e) {
@@ -49,12 +49,20 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
   @override
   Widget build(BuildContext context) {
     final entriesAsync = ref.watch(wikiEntriesProvider);
+    // Per-pet destination → interpolate the active pet's name into the
+    // app bar title (VOICE.md §5).
+    final petsAsync = ref.watch(petsProvider);
+    final petName = petsAsync.maybeWhen(
+      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      orElse: () => null,
+    );
+    final title = petName == null ? 'Journal' : "$petName's journal";
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wiki'),
+        title: Text(title),
         actions: [
           IconButton(
-            tooltip: 'Export wiki',
+            tooltip: 'Export journal',
             onPressed: _exporting ? null : _export,
             icon: _exporting
                 ? const SizedBox(
@@ -75,23 +83,32 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
         data: (entries) =>
             entries.isEmpty ? const _Empty() : _Tree(entries: entries),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Could not load wiki: $e')),
+        error: (e, _) => Center(child: Text('Could not load journal: $e')),
       ),
     );
   }
 }
 
-class _Empty extends StatelessWidget {
+class _Empty extends ConsumerWidget {
   const _Empty();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final petsAsync = ref.watch(petsProvider);
+    final petName = petsAsync.maybeWhen(
+      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      orElse: () => null,
+    );
+    final body = petName == null
+        ? "No memories yet. Tell PetPal what's been happening and "
+            "they'll start showing up here."
+        : 'No memories about $petName yet. Tell PetPal what\'s been '
+            "happening and they'll start showing up here.";
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'No entries yet. Chat with PetPal and it will start writing '
-          'notes here.',
+          body,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
@@ -159,7 +176,7 @@ class _EntryTile extends StatelessWidget {
     return ListTile(
       title: Text(entry.title),
       subtitle: Text(
-        '$iso · ${entry.path}',
+        iso,
         style: Theme.of(context).textTheme.bodySmall,
       ),
       trailing: const Icon(Icons.chevron_right),

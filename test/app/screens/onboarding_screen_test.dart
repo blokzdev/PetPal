@@ -54,7 +54,7 @@ void main() {
 
     // Page 2: privacy disclosure
     expect(find.text('Your data, your device.'), findsOneWidget);
-    expect(find.textContaining('leaves the device'), findsOneWidget);
+    expect(find.textContaining('leaves the phone'), findsOneWidget);
     await tester.tap(find.text('Continue'));
     await tester.pumpAndSettle();
 

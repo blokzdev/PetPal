@@ -70,7 +70,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           children: [
             Expanded(
               child: ui.isEmpty && state.streamingAssistant == null
-                  ? const _EmptyChat()
+                  ? _EmptyChat(petName: petName)
                   : _MessageList(
                       controller: _scrollController,
                       messages: ui,
@@ -78,7 +78,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                     ),
             ),
             if (state.activeTools.isNotEmpty)
-              _ToolPills(pills: state.activeTools),
+              _ToolPills(pills: state.activeTools, petName: petName),
             if (state.error != null)
               _ErrorBanner(
                 error: state.error!,
@@ -98,11 +98,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 }
 
 class _EmptyChat extends StatelessWidget {
-  const _EmptyChat();
+  const _EmptyChat({required this.petName});
+  final String petName;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final body = petName == 'PetPal'
+        ? 'Tell PetPal something about your pet to get started.'
+        : "Tell PetPal what's been happening with $petName.";
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -112,7 +116,7 @@ class _EmptyChat extends StatelessWidget {
             Icon(Icons.chat_bubble_outline, size: 56, color: scheme.primary),
             const SizedBox(height: 12),
             Text(
-              'Tell PetPal something about your pet to get started.',
+              body,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
@@ -158,8 +162,9 @@ class _MessageList extends StatelessWidget {
 }
 
 class _ToolPills extends StatelessWidget {
-  const _ToolPills({required this.pills});
+  const _ToolPills({required this.pills, required this.petName});
   final List<ToolPill> pills;
+  final String petName;
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +182,7 @@ class _ToolPills extends StatelessWidget {
                 height: 14,
                 child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              label: Text('calling ${pill.name}…'),
+              label: Text('${_humanizeToolName(pill.name, petName)}…'),
               labelStyle: TextStyle(color: scheme.onSurfaceVariant),
               backgroundColor: scheme.surfaceContainerHigh,
               visualDensity: VisualDensity.compact,
@@ -186,6 +191,34 @@ class _ToolPills extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+/// User-facing translation of harness tool names (VOICE.md §3 table).
+/// The user must never see raw `read_wiki` etc. on a pill.
+String _humanizeToolName(String name, String petName) {
+  final hasName = petName.isNotEmpty && petName != 'PetPal';
+  switch (name) {
+    case 'read_wiki':
+      return hasName ? "checking $petName's journal" : 'checking the journal';
+    case 'search_wiki':
+      return hasName ? "searching $petName's journal" : 'searching the journal';
+    case 'write_wiki_entry':
+      return 'saving a memory';
+    case 'update_soul':
+      return hasName ? "updating $petName's profile" : 'updating the profile';
+    case 'schedule_reminder':
+      return 'setting a reminder';
+    case 'log_weight':
+      return hasName ? "logging $petName's weight" : 'logging weight';
+    case 'list_reminders':
+      return 'checking reminders';
+    case 'red_flag_check':
+      return 'checking for red flags';
+    case 'load_skill':
+      return 'loading a care guide';
+    default:
+      return 'thinking';
   }
 }
 

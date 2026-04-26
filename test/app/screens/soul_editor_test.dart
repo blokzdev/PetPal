@@ -56,7 +56,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Edit SOUL'));
+    await tester.tap(find.text('Edit profile'));
     await tester.pumpAndSettle();
 
     // Form populates from the parsed frontmatter. Field order:

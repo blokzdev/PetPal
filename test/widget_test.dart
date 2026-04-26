@@ -48,7 +48,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('PetPal'), findsNWidgets(2));
-    expect(find.text('A memory agent for your pet.'), findsOneWidget);
+    expect(
+      find.text("PetPal remembers your pet's life so you don't have to."),
+      findsOneWidget,
+    );
     expect(find.text('Add your pet'), findsOneWidget);
   });
 

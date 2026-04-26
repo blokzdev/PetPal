@@ -99,9 +99,10 @@ void main() {
     await tester.tap(find.text('Chat with Milo'));
     await tester.pumpAndSettle();
 
-    // Empty-state message before any send.
+    // Empty-state message before any send. Per VOICE.md §5 the chat
+    // empty-state interpolates the pet name.
     expect(
-      find.textContaining('Tell PetPal something'),
+      find.textContaining("what's been happening with Milo"),
       findsOneWidget,
     );
 

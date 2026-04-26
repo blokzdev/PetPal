@@ -126,14 +126,22 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Per-pet destination → interpolate name into the app bar
+    // (VOICE.md §5). Falls back to "Profile" if no pet is loaded yet.
+    final petsAsync = ref.watch(petsProvider);
+    final petName = petsAsync.maybeWhen(
+      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      orElse: () => null,
+    );
+    final title = petName == null ? 'Profile' : "$petName's profile";
     if (!_loaded) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Edit SOUL')),
+        appBar: AppBar(title: Text(title)),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit SOUL')),
+      appBar: AppBar(title: Text(title)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
@@ -172,15 +180,21 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
                 label: 'Temperament tags (comma-separated)',
               ),
               const SizedBox(height: 24),
-              Text('Body', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                petName == null ? 'About this pet' : 'About $petName',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               TextField(
                 controller: _body,
                 minLines: 6,
                 maxLines: 20,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '# Pet name\n\nFree-text prose…',
+                decoration: InputDecoration(
+                  border: const OutlineInputBorder(),
+                  hintText: petName == null
+                      ? 'What do you want PetPal to remember?'
+                      : 'What do you want PetPal to remember about '
+                          '$petName?',
                 ),
               ),
               const SizedBox(height: 24),

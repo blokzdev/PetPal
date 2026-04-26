@@ -67,8 +67,8 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Land on Home → Browse wiki.
-    await tester.tap(find.text('Browse wiki'));
+    // Land on Home → Open journal.
+    await tester.tap(find.text('Open journal'));
     await tester.pumpAndSettle();
 
     // Group headers + entry titles.
@@ -104,9 +104,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Browse wiki'));
+    await tester.tap(find.text('Open journal'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('No entries yet'), findsOneWidget);
+    expect(find.textContaining('No memories'), findsOneWidget);
   });
 }

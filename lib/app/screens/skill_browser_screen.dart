@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
 
-/// Skill browser. Shows every bundled skill applicable to the active
-/// pet's species, with an enable/disable toggle per row. Species filter
-/// is enforced here so a cat owner doesn't see a "Senior Dog Care"
-/// skill they can never use (CLAUDE.md §3 — only species-aware path).
+/// Care guides browser. Shows every bundled guide applicable to the
+/// active pet's species, with an enable/disable toggle per row.
+/// Species filter is enforced here so a cat owner doesn't see a "Senior
+/// Dog Care" guide they could never use (CLAUDE.md §3 — only
+/// species-aware path). Global screen → no pet name in the app bar
+/// (VOICE.md §5).
 class SkillBrowserScreen extends ConsumerWidget {
   const SkillBrowserScreen({super.key});
 
@@ -14,12 +16,13 @@ class SkillBrowserScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final catalogAsync = ref.watch(skillCatalogProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Skills')),
+      appBar: AppBar(title: const Text('Care guides')),
       body: catalogAsync.when(
         data: (entries) =>
             entries.isEmpty ? const _Empty() : _SkillList(entries: entries),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Could not load skills: $e')),
+        error: (e, _) =>
+            Center(child: Text('Could not load care guides: $e')),
       ),
     );
   }
@@ -34,8 +37,7 @@ class _Empty extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Text(
-          'No skills available for this pet. Skills are filtered to '
-          "your pet's species.",
+          "No care guides for your pet's species yet — we're adding more.",
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
@@ -58,7 +60,8 @@ class _SkillList extends ConsumerWidget {
         return SwitchListTile(
           title: Text(e.manifest.name),
           subtitle: Text(
-            'Triggers: ${e.manifest.triggers.take(3).join(", ")}'
+            'Activates when you mention '
+            '${e.manifest.triggers.take(3).join(", ")}'
             '${e.manifest.triggers.length > 3 ? "…" : ""}',
             style: Theme.of(context).textTheme.bodySmall,
           ),

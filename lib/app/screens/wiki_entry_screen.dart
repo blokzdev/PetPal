@@ -32,7 +32,7 @@ class WikiEntryScreen extends ConsumerWidget {
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Wiki unavailable: $e')),
+        error: (e, _) => Center(child: Text('Journal unavailable: $e')),
       ),
     );
   }

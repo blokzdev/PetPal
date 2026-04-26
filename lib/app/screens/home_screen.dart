@@ -43,7 +43,7 @@ class _EmptyState extends StatelessWidget {
         Text('PetPal', style: text.headlineMedium),
         const SizedBox(height: 8),
         Text(
-          'A memory agent for your pet.',
+          "PetPal remembers your pet's life so you don't have to.",
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
@@ -85,7 +85,7 @@ class _Greeting extends ConsumerWidget {
         Text(pet.name as String, style: text.headlineMedium),
         const SizedBox(height: 8),
         Text(
-          'A memory agent for your pet.',
+          "PetPal remembers ${pet.name}'s life so you don't have to.",
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
@@ -99,19 +99,19 @@ class _Greeting extends ConsumerWidget {
         OutlinedButton.icon(
           onPressed: () => GoRouter.of(context).push('/wiki'),
           icon: const Icon(Icons.menu_book_outlined),
-          label: const Text('Browse wiki'),
+          label: const Text('Open journal'),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: () => GoRouter.of(context).push('/soul'),
           icon: const Icon(Icons.person_outline),
-          label: const Text('Edit SOUL'),
+          label: const Text('Edit profile'),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(
           onPressed: () => GoRouter.of(context).push('/skills'),
           icon: const Icon(Icons.extension_outlined),
-          label: const Text('Skills'),
+          label: const Text('Care guides'),
         ),
         const SizedBox(height: 12),
         OutlinedButton.icon(

@@ -12,4 +12,4 @@ temperament: []
 # {name}
 {name} is a dog. Tell PetPal about {name} — vet visits, food trials,
 behavior notes, and anything that helps PetPal answer questions about
-{name} later. The wiki grows from there.
+{name} later. The journal grows from there.
