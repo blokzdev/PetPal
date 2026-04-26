@@ -164,10 +164,18 @@ New tools require a `DECISIONS.md` entry and a unit test.
 
 ## 8. Scheduled-task modes
 
-- **Deterministic mode (zero-token).** A reminder fires from a stored template. No LLM call. Example: "Flea treatment due for Milo." Used for routine reminders.
-- **Synthesis mode (LLM call).** A scheduled background turn produces an LLM-generated wiki entry. Example: weekly digest summarizing the week's notes. Pro-tier gated and user-toggleable.
+PetPal follows SemaClaw §3.6's four-mode scheduled-task taxonomy. Mode is stored as a string in the `reminders.mode` text column. The agent's `schedule_reminder` tool defaults to `notification` when mode is unspecified.
 
-Choose deterministic by default. Reach for synthesis only when the value depends on summarization the user can't pre-template.
+| Mode               | LLM tokens | User-visible at fire? | Engine                                       | Canonical example |
+|--------------------|------------|------------------------|----------------------------------------------|-------------------|
+| `notification`     | 0          | Yes — system notification | AlarmManager + flutter_local_notifications | "Flea treatment due Friday for Loki" |
+| `script`           | 0          | No — silent side effect | WorkManager → registered Dart task          | Monthly weight-chart roll-up; vacuum stale FTS rows |
+| `synthesis`        | LLM call   | No — writes a journal entry | WorkManager → SynthesisRunner               | Weekly summary entry under `wiki/<id>/digest/` |
+| `synthesisNotify`  | LLM call   | Yes — notification post-fire | WorkManager → SynthesisRunner → notification | "Loki's weekly summary is ready" (Pro tier) |
+
+Choose `notification` by default. Reach for `script` when the work is data-only and shouldn't interrupt the user. Reach for `synthesis` when the value depends on summarization that can't be pre-templated. `synthesisNotify` is reserved for Phase 5+ Pro features and is currently a stubbed dispatcher branch.
+
+The taxonomy is locked in DECISIONS row 28.
 
 ---
 
@@ -212,15 +220,19 @@ Guardrails are **code, not prompts**. The system prompt reinforces; the determin
 
 ### Pre-response screener
 
-- Runs on every user turn before the LLM call.
-- Regex/keyword table over the input.
-- On match: the system prompt for that turn is augmented with a mandatory escalation directive, and the UI shows a "vet escalation" badge on the response.
+- Runs on every user **chat turn** before the LLM call. **Scope is chat input only** — wiki-entry text the user composes directly is never screened, since wiki entries are legitimately retrospective (a vet visit recorded after the fact may name urgent symptoms that are no longer urgent). Phase 6+ may extend the screener to photo captions; Phase 4 does not.
+- Regex/keyword table over the input. Case-insensitive, word-bounded, false-positive-tolerant per the design lock in DECISIONS row 29.
+- On match: the system prompt for that turn is augmented with a mandatory escalation directive (one-shot, this turn only), and the UI shows a "vet escalation" badge on the assistant response. The badge is **subdued in scrollback** (small icon + muted color) but the live preamble itself is the prominent alert. The badge persists forever — it's a historical record, not a current-state indicator.
 
-### Escalation copy (canonical)
+### Escalation copy (canonical, locked)
 
-> This sounds urgent — please contact your vet or an emergency animal hospital now. I can help you note what's happening so you have it ready when you call.
+> This sounds urgent — please call your vet or an emergency animal hospital now. PetPal is software, not a vet. I can help you write down what's happening so it's ready when you call.
 
-The agent then offers to log the symptoms and timing as a wiki entry.
+This copy is mirrored in VOICE.md §6 example 10. The agent then offers to log the symptoms and timing as a wiki entry.
+
+### Coverage rule
+
+Every red-flag category ships with **≥30 positive phrasings + ≥20 negative phrasings** in `test/harness/guardrails/red_flags_fixture.dart`. New patterns require new fixtures in the same commit. The defense-in-depth model (code primary, prompt backup, user-visible audit) is locked in DECISIONS row 29.
 
 ---
 

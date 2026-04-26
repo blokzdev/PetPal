@@ -206,6 +206,16 @@ shells stay static.**
               animal hospital now. PetPal is software, not a vet. I can
               help you write down what's happening so it's ready when
               you call."
+
+    Badge styling on the flagged assistant bubble:
+      Live (the turn that just finished): the preamble itself is the
+        alert — no separate badge or banner is needed. The bubble is
+        the alert.
+      Scrollback (historical): a small `Icons.warning_amber_rounded`
+        icon on the bubble + muted "PetPal flagged this as urgent"
+        subtitle. Persists forever — it is a historical record, not a
+        current-state indicator. Survives any future edit-message or
+        mark-resolved feature (Phase 5+).
 ```
 
 ## 7. Process

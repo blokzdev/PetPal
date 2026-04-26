@@ -134,22 +134,34 @@ Six phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a 
 
 ## Phase 4 — Scheduling & Medical Guardrails
 
-**Goal:** zero-token reminders fire on time; red-flag detection runs in code before every LLM call.
-**Definition of done:** set a flea-treatment reminder for tomorrow → it fires while the app is killed → typing "Milo has blood in stool" yields a vet-escalation preamble before any other content.
+**Goal:** zero-token reminders fire on time across all four scheduled-task modes (CLAUDE.md §8); red-flag detection runs in code before every chat turn.
+**Definition of done:** set a flea-treatment reminder for tomorrow → it fires while the app is killed → typing "Milo has blood in stool" yields the verbatim vet-escalation preamble before any other content + a subdued scrollback badge on the assistant bubble.
 
-- [ ] 4.1 `Reminder` schema is already in Drift (Phase 1) — add CRUD UI
-- [ ] 4.2 Wire `android_alarm_manager_plus` + `flutter_local_notifications` for exact-time
-- [ ] 4.3 Wire `workmanager` for condition-gated work (embedding batches, future sync)
-- [ ] 4.4 `schedule_reminder` tool exposed to the agent
-- [ ] 4.5 Deterministic reminder templates (flea, heartworm, vaccine due, weight check)
-- [ ] 4.6 Red-flag rule table in `harness/guardrails/red_flags.dart` (regex/keyword)
-- [ ] 4.7 Pre-response screener: runs before every LLM call; on match, augments system prompt with mandatory escalation directive
-- [ ] 4.8 Escalation copy + UI badge on flagged responses
-- [ ] 4.9 Battery-optimization exemption prompt on first reminder schedule
-- [ ] 4.10 Tests: red-flag detection coverage on a fixture corpus; reminder fire time accuracy
-- [ ] 4.11 Phase wrap-up commit + summary
+Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → platform → agent + UI**, so harness pieces ship behind unit tests before platform engines couple them to a real device. Architecture locked in DECISIONS rows 28 (four-mode taxonomy) and 29 (red-flag screener design).
 
-**On-device verification:** schedule a reminder, force-stop the app, confirm it fires; type a red-flag phrase, confirm escalation appears first.
+- [x] 4.0 Architecture lockdown: DECISIONS rows 28+29; CLAUDE.md §8 (four-row mode table) + §10 (fixture coverage rule + chat-input scope); VOICE.md §6 (badge styling); this ROADMAP re-sequence
+- [ ] 4.1 Red-flag rule table — `lib/harness/guardrails/red_flags.dart` covering the 11 categories with case-insensitive word-bounded regexes; multi-symptom AND groups for `lethargy_anorexia`
+- [ ] 4.2 `RedFlagScreener` + AgentLoop integration — pre-screen every chat turn before the LLM call; `SessionBuilder.composeTurn` accepts `redFlag` and appends a one-shot escalation directive after the Output-contract block
+- [ ] 4.3 UI badge on flagged assistant bubbles — `ChatMessage.escalated` + `escalatedCategory` propagated through `ChatNotifier`; subdued scrollback styling per VOICE.md §6
+- [ ] 4.4 `ScheduleMode` enum + `ReminderRepo` — sealed-style enum at `lib/harness/scheduling/schedule_mode.dart` with `parse`/`serialise`; Drift CRUD over the existing `reminders` table
+- [ ] 4.5 `ReminderDispatcher` + add platform deps — pure-Dart dispatcher routes by mode to pluggable engines; add `flutter_local_notifications`, `android_alarm_manager_plus`, `workmanager`, `permission_handler` to `pubspec.yaml`; DECISIONS row 30
+- [ ] 4.6 Platform engines — `lib/platform/notifications.dart`, `lib/platform/alarm_scheduler.dart`, `lib/platform/work_scheduler.dart`; verify AndroidManifest permissions are in place; add ProGuard keep rule for WorkmanagerCallbackDispatcher
+- [ ] 4.7 Battery-optimization exemption prompt — first-schedule one-shot prompt; persisted in `SharedPreferences`; static copy (global modal)
+- [ ] 4.8 Deterministic notification templates + species-aware default cadences — four canonical kinds (flea +30d, heartworm +30d, vaccine +365d, weight check +14d). Defaults apply to dog/cat only; non-mammal species (bird/reptile/fish/exotic) surface a "no default — please set a date" state since cadences vary wildly. Vaccine create UI shows a one-line note: "Confirm timing with your vet — vaccine schedules vary by region, age, and individual health."
+- [ ] 4.9 Agent tool registrations — `schedule_reminder`, `list_reminders`, `red_flag_check` registered in `tool_dispatcher.dart`; default mode = `notification`; reject unknown modes
+- [ ] 4.10 Reminders CRUD UI — `/reminders` route + per-pet "Loki's reminders" screen; "Reminders" outlined button on the home greeting card; route is top-level for Phase 4 (Phase 5 multi-pet may re-parent it — DECISIONS row 28)
+- [ ] 4.11 Tests round-out — red-flag fixture (≥30 pos + ≥20 neg per category), `ReminderRepo` CRUD, `ScheduleMode` round-trip, `ReminderDispatcher` routing with fakes, tool happy paths, AgentLoop screener integration, badge widget test
+- [ ] 4.12 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**
+
+**On-device verification (REQUIRED — cannot be substituted by `flutter test`):**
+1. Type "Loki had blood in his stool last night" → confirm verbatim preamble + warning badge on the assistant bubble.
+2. Type "Loki seems lethargic and won't eat" → confirm the multi-symptom AND pattern fires.
+3. Type a deliberately-similar non-emergency phrase ("Loki had a great chocolate-coloured fur trim today") → confirm the screener does NOT fire.
+4. Schedule a flea reminder for tomorrow 9am → confirm battery-exemption prompt shows once on first creation.
+5. Force-stop the app → confirm the reminder fires at 9am.
+6. Reboot the phone, schedule a +5min reminder → confirm BOOT_COMPLETED re-arm fires it.
+7. From chat: "remind me to give Loki his heartworm tomorrow at 8am" → confirm `schedule_reminder` tool pill renders + reminder appears in the list + fires.
+8. Disable PetPal's notification permission in system settings → fire a reminder → confirm graceful degradation (no crash, row still marks fired).
 
 **STOP.**
 
