@@ -162,10 +162,11 @@ final List<RedFlagPattern> redFlagPatterns = [
     aiSummary: 'Laboured or distressed breathing reported',
     triggers: [
       _ci(r'\blabou?red\s+breathing\b'),
+      _ci(r'\bbreathing\s+(is|seems|looks)\s+labou?red\b'),
       _ci(r'\b(trouble|difficulty|hard|struggling)\s+(to\s+)?breath(e|ing)\b'),
       _ci(r"\b(can'?t|cannot)\s+breathe\b"),
       _ci(r'\bgasping\s+(for\s+)?(air|breath)\b'),
-      _ci(r'\bopen[- ]?mouth\s+breathing\b'),
+      _ci(r'\bopen[- ]?mouth\s+(breathing|panting)\b'),
       _ci(r'\bcyanot(ic|ic|ic-?looking)\b'),
       _ci(r'\b(blue|purple)\s+tongue\b'),
       _ci(r'\bwheez(ing|y)\s+(badly|severely|hard)\b'),
