@@ -150,7 +150,7 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 - [x] 4.8 Deterministic notification templates + species-aware default cadences — four canonical kinds (flea +30d, heartworm +30d, vaccine +365d, weight check +14d). Defaults apply to dog/cat/rabbit/small-mammal; bird/reptile/fish/exotic surface a "no default — please set a date" state. Vaccine UI carries the canonical `vaccineUiNote` constant.
 - [x] 4.9 Agent tool registrations — `schedule_reminder`, `list_reminders`, `red_flag_check` via `registerSchedulingTools` (default mode = `notification`; rejects unknown modes per DECISIONS row 28); also `lib/harness/scheduling/reminder_service.dart` facade over create+arm+cancel+list
 - [x] 4.10 Reminders CRUD UI — `/reminders` route + per-pet "Loki's reminders" screen; FAB to add; swipe-to-delete; three calm health banners (battery, exact alarm, notifications); kind picker with species-aware default cadences and `vaccineUiNote`; first-save battery-exemption prompt
-- [ ] 4.11 Tests round-out — red-flag fixture (≥30 pos + ≥20 neg per category), `ReminderRepo` CRUD, `ScheduleMode` round-trip, `ReminderDispatcher` routing with fakes, tool happy paths, AgentLoop screener integration, badge widget test
+- [x] 4.11 Tests round-out — red-flag fixture (≥30 pos + ≥20 neg per category, all 11 categories landed across six commits), `ReminderRepo` CRUD, `ScheduleMode` round-trip, `ReminderDispatcher` routing with fakes, tool happy paths, AgentLoop screener integration, badge widget test
 - [ ] 4.12 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**
 
 **On-device verification (REQUIRED — cannot be substituted by `flutter test`):**
