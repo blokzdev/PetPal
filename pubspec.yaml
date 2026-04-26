@@ -48,6 +48,19 @@ dependencies:
   archive: ^4.0.9
   share_plus: ^12.0.2
   shared_preferences: ^2.5.5
+  # Phase 4 scheduling stack (DECISIONS rows 28, 30):
+  # - notifications: surfaces notification reminders + post-fire
+  #   announcements for synthesisNotify mode.
+  # - exact-time alarms: AlarmManager wakes the app for `notification`
+  #   mode reminders even while the app is killed.
+  # - background work: WorkManager runs script + synthesis tasks
+  #   condition-gated (battery, network).
+  # - permission_handler: battery-optimisation exemption prompt
+  #   (task 4.7) and Android 13+ POST_NOTIFICATIONS runtime grant.
+  flutter_local_notifications: ^17.2.4
+  android_alarm_manager_plus: ^4.0.7
+  workmanager: ^0.5.2
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
