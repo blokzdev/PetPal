@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <!-- Re-arm pending reminders after device reboot. -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <!-- Required by android_alarm_manager_plus to wake the device for
+         exact-time alarms. The plugin acquires a partial wakelock in
+         AlarmBroadcastReceiver before invoking the Dart callback. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- Internet: Anthropic API + future cloud sync. -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
@@ -42,6 +46,33 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- android_alarm_manager_plus 4.0.x platform glue. The plugin
+             classes live in `dev.fluttercommunity.plus.androidalarmmanager.*`;
+             they're contributed by the plugin's AAR but the consumer app
+             must declare them in the merged manifest so AlarmManager and
+             PackageManager can resolve them. Without these declarations,
+             `oneShotAt(rescheduleOnReboot: true)` crashes with
+             "Component class … RebootBroadcastReceiver does not exist
+             in dev.blokz.petpal" — the Phase 4 hotfix DECISIONS row 33. -->
+        <service
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmService"
+            android:exported="false"
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
+        <receiver
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.AlarmBroadcastReceiver"
+            android:exported="false"/>
+        <!-- The reboot receiver ships disabled; the plugin enables it
+             at runtime via PackageManager.setComponentEnabledSetting
+             when a reminder schedules with rescheduleOnReboot=true. -->
+        <receiver
+            android:name="dev.fluttercommunity.plus.androidalarmmanager.RebootBroadcastReceiver"
+            android:enabled="false"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

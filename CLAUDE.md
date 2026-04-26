@@ -312,6 +312,18 @@ integration_test/
 - **Plan needs to change → propose, wait for approval, then edit `ROADMAP.md`.** Never silently re-plan.
 - **End of phase → hard stop.** Summarize: what changed, what to verify on the Android device, what's next. Do not auto-start the next phase.
 
+### Plugin-bump checklist (DECISIONS row 33)
+
+Every pubspec version bump on a native Android plugin runs through this checklist **in the same commit** as the bump. `flutter analyze` and `flutter test` stub the platform binding, so a missing manifest entry is invisible until a user pushes the relevant button on a real device.
+
+1. Read the new version's `example/android/app/src/main/AndroidManifest.xml` and `README.md` from `~/.pub-cache/hosted/pub.dev/<plugin>-<version>/`.
+2. Diff the example manifest against `android/app/src/main/AndroidManifest.xml` — note any new permissions, services, receivers, or providers.
+3. Patch our manifest with the missing pieces, with a comment pointing at the plugin and the canonical `dev.fluttercommunity.*` (or equivalent) class name.
+4. Update `test/platform/android_manifest_test.dart` invariants so the new components are asserted; the next regression cannot land silently.
+5. Only then ship the bump.
+
+The Phase 4 hotfix added the three `android_alarm_manager_plus` components after the bug shipped — the rule above exists so that pattern doesn't repeat.
+
 ### Definition of done (per task)
 
 - Code compiles, `flutter analyze` clean.
