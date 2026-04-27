@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
@@ -7,6 +8,7 @@ import '../chat/chat_state.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/journal_bloom.dart';
 import '../widgets/pet_empty_state.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -20,11 +22,40 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _input = TextEditingController();
   final _scrollController = ScrollController();
 
+  /// Monotonic id of the bloom currently mounted, or null if no bloom
+  /// is visible. Drives the Stack overlay; bumps on each successful
+  /// `write_wiki_entry` so back-to-back saves restart the animation
+  /// rather than ignoring later events. The bloom widget itself is
+  /// keyed on this id so a fresh AnimationController instantiates
+  /// each time. (Task 5.9 — bubble→journal bloom hero.)
+  int? _activeBloomId;
+
   @override
   void dispose() {
     _input.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  /// Fire the 5.9 hero choreography — bubble→journal bloom + snackbar.
+  /// Called from `ref.listen` when `recentMemorySave?.id` increments.
+  void _runMemorySavedHero(MemorySavedEvent event, String petName) {
+    setState(() => _activeBloomId = event.id);
+    final hasName = petName.isNotEmpty && petName != 'PetPal';
+    final message = hasName
+        ? "Saved to $petName's journal"
+        : "Saved to your pet's journal";
+    appSnackBar(
+      context,
+      message,
+      action: SnackBarAction(
+        label: 'View',
+        onPressed: () => GoRouter.of(context).push(
+          '/wiki/entry',
+          extra: event.path,
+        ),
+      ),
+    );
   }
 
   void _send() {
@@ -63,30 +94,62 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           }
         });
       }
+      // Task 5.9 — fire the memory-saved hero on transitions of
+      // `recentMemorySave?.id`. The chat notifier increments the id
+      // on every successful write_wiki_entry, so back-to-back saves
+      // each get their own bloom + snackbar.
+      final prevId = prev?.recentMemorySave?.id ?? 0;
+      final nextEvent = next.recentMemorySave;
+      if (nextEvent != null && nextEvent.id > prevId) {
+        _runMemorySavedHero(nextEvent, petName);
+      }
     });
 
     final ui = state.uiMessages.toList();
+    final messagePane = ui.isEmpty && state.streamingAssistant == null
+        ? EmptyChatForTesting(
+            petName: petName,
+            onSuggest: (prompt) {
+              _input.text = prompt;
+              _input.selection = TextSelection.fromPosition(
+                TextPosition(offset: _input.text.length),
+              );
+            },
+          )
+        : _MessageList(
+            controller: _scrollController,
+            messages: ui,
+            streamingAssistant: state.streamingAssistant,
+            streamingEscalation: state.streamingEscalation,
+          );
     return AppScaffold(
       title: petName,
       body: Column(
         children: [
           Expanded(
-            child: ui.isEmpty && state.streamingAssistant == null
-                ? EmptyChatForTesting(
-                    petName: petName,
-                    onSuggest: (prompt) {
-                      _input.text = prompt;
-                      _input.selection = TextSelection.fromPosition(
-                        TextPosition(offset: _input.text.length),
-                      );
-                    },
-                  )
-                : _MessageList(
-                    controller: _scrollController,
-                    messages: ui,
-                    streamingAssistant: state.streamingAssistant,
-                    streamingEscalation: state.streamingEscalation,
+            // Stack the message list and the bloom overlay. The bloom
+            // sits Bottom-Center, ~56dp above the bottom edge so it
+            // appears to rise from the most-recent assistant bubble's
+            // top edge (typical bubble height) rather than from the
+            // composer.
+            child: Stack(
+              alignment: Alignment.bottomCenter,
+              children: [
+                messagePane,
+                if (_activeBloomId != null)
+                  Positioned(
+                    bottom: 56,
+                    child: JournalBloom(
+                      key: ValueKey('bloom-$_activeBloomId'),
+                      onComplete: () {
+                        if (mounted) {
+                          setState(() => _activeBloomId = null);
+                        }
+                      },
+                    ),
                   ),
+              ],
+            ),
           ),
           if (state.activeTools.isNotEmpty)
             _ToolPills(pills: state.activeTools, petName: petName),

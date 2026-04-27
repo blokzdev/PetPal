@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/providers.dart';
+import 'package:petpal/app/widgets/journal_bloom.dart';
 import 'package:petpal/data/db/database.dart';
 import 'dart:io';
 
@@ -17,6 +18,7 @@ import 'package:petpal/main.dart';
 
 import '../../_helpers/fake_api_key_storage.dart';
 import '../../_helpers/scripted_llm_client.dart';
+import '../../_helpers/test_provider_scope.dart';
 
 class _NoopWiki implements WikiIo {
   // Returns a minimal SOUL.md for any read so SessionBuilder can compose
@@ -161,5 +163,90 @@ void main() {
     // attach to the assistant bubble.
     expect(find.text('PetPal flagged this as urgent'), findsOneWidget);
     expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+  });
+
+  // ------------------------------------------------------------------
+  // Task 5.9 — memory-saved hero choreography. End-to-end: scripted
+  // LLM issues write_wiki_entry → real wiki tools register the entry
+  // → chat notifier emits a MemorySavedEvent → chat surface fires the
+  // bloom + snackbar. Asserts: snackbar copy is "Saved to Milo's
+  // journal" (locked phrasing); JournalBloom widget mounts; the
+  // snackbar's View action navigates to /wiki/entry.
+  // ------------------------------------------------------------------
+  testWidgets(
+      'successful write_wiki_entry runs the 5.9 hero — JournalBloom '
+      'mounts and the snackbar reads "Saved to Milo\'s journal"',
+      (tester) async {
+    final llm = ScriptedLlmClient(scripts: [
+      [
+        const StreamMessageStart(),
+        const StreamToolUseStart(
+          index: 0,
+          id: 'tu_w',
+          name: 'write_wiki_entry',
+        ),
+        const StreamToolUseInputDelta(
+          index: 0,
+          partialJson: '{"type":"food","title":"Carrot trial",'
+              '"body":"Milo loves frozen carrots.","date":"2026-04-25"}',
+        ),
+        const StreamContentBlockStop(index: 0),
+        const StreamMessageStop(stopReason: 'tool_use'),
+      ],
+      [
+        const StreamMessageStart(),
+        const StreamTextDelta('Logged the carrot trial.'),
+        const StreamContentBlockStop(index: 0),
+        const StreamMessageStop(),
+      ],
+    ]);
+
+    // buildChatTestStack leaves toolDispatcherProvider unoverridden,
+    // so the production registration runs (write_wiki_entry → real
+    // CapturingWikiIo). The pet "Milo" is seeded with species=dog.
+    final stack = await buildChatTestStack(llm: llm);
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          ...stack.overrides,
+        ],
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Chat with Milo'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byType(TextField),
+      'Milo loves frozen carrots — please log it.',
+    );
+    await tester.tap(find.byIcon(Icons.send));
+    // Don't pumpAndSettle past the bloom's 500ms animation — assert
+    // the snackbar + bloom are visible mid-animation. One pump moves
+    // through the tool round-trip; a couple more pumps catch the
+    // post-frame snackbar showing.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    // Snackbar copy — locked phrasing per the task-5.9 user pick.
+    expect(find.text("Saved to Milo's journal"), findsOneWidget);
+    // Bloom widget mounted on top of the chat thread.
+    expect(find.byType(JournalBloom), findsOneWidget);
+    // Snackbar's deep-link action.
+    expect(find.widgetWithText(SnackBarAction, 'View'), findsOneWidget);
+
+    // Wait the bloom out so the test doesn't tear down with an
+    // active animation controller.
+    await tester.pumpAndSettle(const Duration(milliseconds: 600));
+
+    // Bloom dismounts itself when the controller hits AnimationStatus.completed.
+    expect(find.byType(JournalBloom), findsNothing);
   });
 }

@@ -48,6 +48,32 @@ class ToolPill {
   final Map<String, Object?> input;
 }
 
+/// Signal payload emitted when `write_wiki_entry` completes successfully.
+/// The chat surface reads transitions of this field (via Riverpod
+/// `ref.listen`) to fire the 5.9 hero choreography — bloom over the
+/// last assistant bubble + "Saved to {pet}'s journal" snackbar that
+/// taps to the entry. The monotonic [id] lets listeners distinguish
+/// successive saves within one session even when [path] repeats
+/// (re-saves of the same entry would otherwise look state-equivalent).
+class MemorySavedEvent {
+  const MemorySavedEvent({
+    required this.id,
+    required this.path,
+    required this.title,
+  });
+
+  /// Monotonic per-session counter. Increments by one on each emit.
+  final int id;
+
+  /// Wiki entry path (`wiki/<pet>/<type>/<slug>.md`) — used as the
+  /// snackbar action's destination via go_router's `/wiki/entry`.
+  final String path;
+
+  /// Title block from the tool input. Used for the snackbar's
+  /// implicit semantic context (read-aloud / a11y).
+  final String title;
+}
+
 /// State surface the chat screen reads.
 ///
 /// [history] is the canonical LLM-shape conversation (the AgentLoop's
@@ -67,6 +93,7 @@ class ChatState {
     this.lastFailedInput,
     this.escalatedTurns = const {},
     this.streamingEscalation,
+    this.recentMemorySave,
   });
 
   final List<llm.Message> history;
@@ -91,6 +118,14 @@ class ChatState {
   /// shows up live, not only after the turn commits). Cleared when the
   /// stream finishes.
   final String? streamingEscalation;
+
+  /// Most recent successful `write_wiki_entry` result, monotonically
+  /// versioned. Listeners on [chatProvider] detect transitions of
+  /// `recentMemorySave?.id` to drive the 5.9 hero moment (bubble bloom
+  /// + snackbar). Null until the first save lands; never cleared
+  /// thereafter (the field is a signal of "the most recent thing,"
+  /// not a current-state flag).
+  final MemorySavedEvent? recentMemorySave;
 
   /// Project the LLM-shape [history] to the user-visible chat messages —
   /// flatten text content per turn, drop tool-only turns. SessionBuilder
@@ -130,6 +165,7 @@ class ChatState {
     String? lastFailedInput,
     Map<int, String>? escalatedTurns,
     String? streamingEscalation,
+    MemorySavedEvent? recentMemorySave,
     bool clearStreamingAssistant = false,
     bool clearError = false,
     bool clearLastFailedInput = false,
@@ -150,6 +186,7 @@ class ChatState {
       streamingEscalation: clearStreamingEscalation
           ? null
           : (streamingEscalation ?? this.streamingEscalation),
+      recentMemorySave: recentMemorySave ?? this.recentMemorySave,
     );
   }
 }

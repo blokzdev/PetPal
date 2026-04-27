@@ -128,6 +128,16 @@ void main() {
     final body = await WikiIoFs(tempRoot).read(entries.first.path);
     expect(body, contains('frozen carrots'));
 
+    // 5.9 — recentMemorySave signal carries the entry path so the
+    // chat surface's snackbar can deep-link to /wiki/entry. The id
+    // monotonically increments per save (1 here for the single
+    // save). The path matches what the tool actually wrote to disk.
+    expect(state.recentMemorySave, isNotNull,
+        reason: 'memory-saved signal must emit on a successful write');
+    expect(state.recentMemorySave!.id, 1);
+    expect(state.recentMemorySave!.path, entries.first.path);
+    expect(state.recentMemorySave!.title, 'Carrot trial');
+
     // History has user + assistant(tool_use) + user(tool_result) +
     // assistant(text). UI projection drops the tool-only turns.
     expect(state.history.length, 4);

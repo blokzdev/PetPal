@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/database.dart';
@@ -110,7 +112,7 @@ class ChatNotifier extends Notifier<ChatState> {
                 ToolPill(id: id, name: name, input: input),
               ],
             );
-          case AgentToolResult(:final toolUseId, :final isError):
+          case AgentToolResult(:final toolUseId, :final content, :final isError):
             // Capture the originating pill BEFORE removing it so we
             // know which tool just completed (the result event itself
             // carries only the use-id, not the tool name — see
@@ -132,6 +134,37 @@ class ChatNotifier extends Notifier<ChatState> {
             // (snackbar + tool-pill settle animation) lands in 5.9.
             if (!isError && completedPill.name == 'write_wiki_entry') {
               ref.read(hapticsProvider).light();
+              // Task 5.9 — emit the memory-saved signal. The chat
+              // surface reads transitions of `recentMemorySave?.id`
+              // via `ref.listen` and runs the bubble→journal bloom +
+              // snackbar choreography. The id increments per save so
+              // a re-save of the same path still re-fires.
+              //
+              // The path lives in the tool result content (JSON-
+              // encoded `{entry_id, path}` per wiki_tools.dart) — not
+              // in the user-facing input — so we parse it from there.
+              final title = completedPill.input['title'] as String? ?? 'memory';
+              String? path;
+              try {
+                final decoded = jsonDecode(content);
+                if (decoded is Map<String, Object?>) {
+                  path = decoded['path'] as String?;
+                }
+              } on FormatException {
+                // Tool result wasn't JSON (older fixtures or future
+                // tools that return plain text). Skip the signal —
+                // haptic still fires above; we just can't deep-link.
+              }
+              if (path != null) {
+                final nextId = (state.recentMemorySave?.id ?? 0) + 1;
+                state = state.copyWith(
+                  recentMemorySave: MemorySavedEvent(
+                    id: nextId,
+                    path: path,
+                    title: title,
+                  ),
+                );
+              }
             }
           case AgentLoopDone(:final history):
             final escalations = composed.redFlag != null
