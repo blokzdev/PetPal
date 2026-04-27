@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 /// App-wide settings. Phase 3.8 ships the weekly-summary toggle plus a
 /// "Generate now" button so on-device verification can exercise the
@@ -59,54 +60,52 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final digestAsync = ref.watch(weeklyDigestEnabledProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
-      body: SafeArea(
-        child: ListView(
-          children: [
-            const _SectionHeader(label: 'Weekly summary'),
-            digestAsync.when(
-              data: (enabled) => SwitchListTile(
-                title: const Text('Weekly summary'),
-                subtitle: const Text(
-                  "Every Sunday, PetPal writes a recap of your pet's "
-                  'week — what happened, what changed, what to watch. '
-                  'Pro.',
-                ),
-                value: enabled,
-                onChanged: (next) async {
-                  await ref
-                      .read(weeklyDigestEnabledProvider.notifier)
-                      .setEnabled(next);
-                },
+    return AppScaffold(
+      title: 'Settings',
+      body: ListView(
+        children: [
+          const _SectionHeader(label: 'Weekly summary'),
+          digestAsync.when(
+            data: (enabled) => SwitchListTile(
+              title: const Text('Weekly summary'),
+              subtitle: const Text(
+                "Every Sunday, PetPal writes a recap of your pet's "
+                'week — what happened, what changed, what to watch. '
+                'Pro.',
               ),
-              loading: () => const ListTile(
-                title: Text('Weekly summary'),
-                subtitle: Text('Loading…'),
-              ),
-              error: (e, _) => ListTile(
-                title: const Text('Weekly summary'),
-                subtitle: Text('Could not read setting: $e'),
-              ),
+              value: enabled,
+              onChanged: (next) async {
+                await ref
+                    .read(weeklyDigestEnabledProvider.notifier)
+                    .setEnabled(next);
+              },
             ),
-            ListTile(
-              title: const Text("Generate this week's summary now"),
-              subtitle: Text(
-                _runMessage ??
-                    "Generate your pet's summary right now, instead of "
-                        'waiting for Sunday.',
-              ),
-              trailing: _running
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.play_arrow),
-              onTap: _running ? null : _runDigest,
+            loading: () => const ListTile(
+              title: Text('Weekly summary'),
+              subtitle: Text('Loading…'),
             ),
-          ],
-        ),
+            error: (e, _) => ListTile(
+              title: const Text('Weekly summary'),
+              subtitle: Text('Could not read setting: $e'),
+            ),
+          ),
+          ListTile(
+            title: const Text("Generate this week's summary now"),
+            subtitle: Text(
+              _runMessage ??
+                  "Generate your pet's summary right now, instead of "
+                      'waiting for Sunday.',
+            ),
+            trailing: _running
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.play_arrow),
+            onTap: _running ? null : _runDigest,
+          ),
+        ],
       ),
     );
   }

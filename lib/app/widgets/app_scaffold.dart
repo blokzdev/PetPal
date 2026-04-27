@@ -1,0 +1,256 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../design/design.dart';
+import 'pet_button.dart';
+import 'pet_empty_state.dart';
+import 'pet_skeleton.dart';
+
+/// Shared layout chassis for every screen in `lib/app/screens/`.
+///
+/// Replaces the `Scaffold(appBar: AppBar(title: Text(...)), body:
+/// SafeArea(...))` boilerplate that 9 screens repeated before task 5.5.
+/// Three constructors:
+///
+/// - [AppScaffold] — the basic case. `AppScaffold(title: 'Settings',
+///   body: ...)` is the common path.
+/// - [AppScaffold.hero] — exposes a hero builder that renders a tall
+///   surface immediately below the app bar, before the body. Used by
+///   `home_screen` for the per-pet greeting (anticipating 5.10's hero
+///   moment); Phase 6 will populate the hero with a per-pet photo +
+///   warm gradient.
+/// - [AppScaffold.async] — Riverpod-aware. Takes an [AsyncValue<T>] and
+///   a `data` builder; default `loading` is a vertical stack of
+///   [PetSkeleton.line] rows; default `error` is a [PetEmptyState] with
+///   a retry button. Tasks 5.7 (empty states) and 5.8 (loading
+///   feedback) consume this — most screens just swap their existing
+///   `Scaffold(... asyncValue.when(...))` for `AppScaffold.async(...)`.
+///
+/// All variants accept an optional [petAccent] color. When supplied,
+/// the AppBar background is blended 8% toward the accent — a subtle
+/// tint that lets Phase 6's photo-driven per-pet palette pull through
+/// without further screen edits. Phase 5 leaves [petAccent] null
+/// everywhere; the threading exists so Phase 6 has somewhere to plug
+/// the photo-derived accent into. Subtler than re-skinning the whole
+/// app bar, intentionally.
+///
+/// SnackBars dispatch through [appSnackBar] (top-level helper at the
+/// bottom of this file). The dispatch helper uses
+/// [ScaffoldMessenger.of] and lets the design-system [SnackBarThemeData]
+/// (DECISIONS row 38: floating, pill-shape, `Motion.medium` enter/exit)
+/// do all the styling.
+class AppScaffold extends StatelessWidget {
+  const AppScaffold({
+    super.key,
+    required this.title,
+    required this.body,
+    this.actions,
+    this.floatingActionButton,
+    this.petAccent,
+    this.titleWidget,
+  })  : _heroBuilder = null,
+        _heroHeight = null;
+
+  /// Hero variant — renders a tall surface immediately below the app
+  /// bar, before the body. Used by home_screen for the per-pet greeting
+  /// (5.10). The hero is a fixed-height region (default 120 dp); use
+  /// [heroHeight] to override.
+  const AppScaffold.hero({
+    super.key,
+    required this.title,
+    required Widget Function(BuildContext) heroBuilder,
+    required this.body,
+    this.actions,
+    this.floatingActionButton,
+    this.petAccent,
+    this.titleWidget,
+    double heroHeight = 120,
+  })  : _heroBuilder = heroBuilder,
+        _heroHeight = heroHeight;
+
+  /// Riverpod-aware variant. Renders the body through
+  /// [AsyncValue.when], with [PetSkeleton]-backed loading and
+  /// [PetEmptyState]-backed error rendering as defaults.
+  ///
+  /// `data` is required. `loading`, `error`, and `onRetry` are optional
+  /// — the defaults are usually correct.
+  static Widget async<T>({
+    Key? key,
+    required String title,
+    required AsyncValue<T> value,
+    required Widget Function(BuildContext, T) data,
+    Widget Function(BuildContext)? loading,
+    Widget Function(BuildContext, Object error, StackTrace? stack)? error,
+    VoidCallback? onRetry,
+    List<Widget>? actions,
+    Widget? floatingActionButton,
+    Color? petAccent,
+    Widget? titleWidget,
+  }) {
+    return _AsyncAppScaffold<T>(
+      key: key,
+      title: title,
+      value: value,
+      dataBuilder: data,
+      loadingBuilder: loading,
+      errorBuilder: error,
+      onRetry: onRetry,
+      actions: actions,
+      floatingActionButton: floatingActionButton,
+      petAccent: petAccent,
+      titleWidget: titleWidget,
+    );
+  }
+
+  final String title;
+  final Widget body;
+  final List<Widget>? actions;
+  final Widget? floatingActionButton;
+
+  /// Optional accent threaded from a pet (Phase 6: derived from the
+  /// pet's photo). Phase 5 leaves this null on every callsite; the
+  /// threading is a Phase 6 hook that doesn't require further screen
+  /// edits when populated. When non-null, the app bar background is
+  /// blended 8% toward [petAccent].
+  final Color? petAccent;
+
+  /// Override the default `Text(title)` with a custom widget — used by
+  /// screens that want a serif title via [JournalText.title] or a
+  /// multiline app-bar title.
+  final Widget? titleWidget;
+
+  final Widget Function(BuildContext)? _heroBuilder;
+  final double? _heroHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final appBarBackground = petAccent == null
+        ? null
+        : Color.lerp(scheme.surface, petAccent, 0.08);
+
+    final hero = _heroBuilder;
+    final body = hero == null
+        ? this.body
+        : Column(
+            children: [
+              SizedBox(
+                height: _heroHeight,
+                width: double.infinity,
+                child: hero(context),
+              ),
+              Expanded(child: this.body),
+            ],
+          );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: titleWidget ?? Text(title),
+        actions: actions,
+        backgroundColor: appBarBackground,
+      ),
+      body: SafeArea(child: body),
+      floatingActionButton: floatingActionButton,
+    );
+  }
+}
+
+/// Internal implementation behind [AppScaffold.async]. Wraps an
+/// [AppScaffold] whose body switches on [AsyncValue.when], with
+/// design-system defaults for loading and error.
+class _AsyncAppScaffold<T> extends StatelessWidget {
+  const _AsyncAppScaffold({
+    super.key,
+    required this.title,
+    required this.value,
+    required this.dataBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
+    this.onRetry,
+    this.actions,
+    this.floatingActionButton,
+    this.petAccent,
+    this.titleWidget,
+  });
+
+  final String title;
+  final AsyncValue<T> value;
+  final Widget Function(BuildContext, T) dataBuilder;
+  final Widget Function(BuildContext)? loadingBuilder;
+  final Widget Function(BuildContext, Object error, StackTrace? stack)?
+      errorBuilder;
+  final VoidCallback? onRetry;
+  final List<Widget>? actions;
+  final Widget? floatingActionButton;
+  final Color? petAccent;
+  final Widget? titleWidget;
+
+  @override
+  Widget build(BuildContext context) {
+    return AppScaffold(
+      title: title,
+      titleWidget: titleWidget,
+      actions: actions,
+      floatingActionButton: floatingActionButton,
+      petAccent: petAccent,
+      body: value.when(
+        data: (d) => dataBuilder(context, d),
+        loading: () => loadingBuilder?.call(context) ?? _defaultLoading(),
+        error: (e, st) =>
+            errorBuilder?.call(context, e, st) ?? _defaultError(context, e),
+      ),
+    );
+  }
+
+  /// Default loading: a calm vertical stack of skeleton lines. Reads as
+  /// "list incoming" without the visual weight of a centered spinner.
+  Widget _defaultLoading() {
+    return ListView.separated(
+      padding: Insets.l,
+      itemCount: 6,
+      separatorBuilder: (_, _) => const SizedBox(height: Spacing.m),
+      itemBuilder: (_, i) => PetSkeleton.line(
+        // Vary the bar widths slightly so the skeleton reads as text-
+        // like rather than a row of identical bars.
+        width: 320 - (i.isEven ? 0 : 60).toDouble(),
+        height: 18,
+      ),
+    );
+  }
+
+  /// Default error: a [PetEmptyState] with the underlying error message
+  /// in the body and a retry CTA wired to [onRetry] (or a no-op when the
+  /// caller didn't supply one — the empty state still reads as "the
+  /// data didn't arrive" without the affordance to retry).
+  Widget _defaultError(BuildContext context, Object error) {
+    return PetEmptyState(
+      icon: Icons.error_outline,
+      heading: "Couldn't load this",
+      body: '$error',
+      action: onRetry == null
+          ? null
+          : PetButton(label: 'Try again', onPressed: onRetry),
+    );
+  }
+}
+
+/// Top-level snackbar dispatcher. Consistent floating-snackbar
+/// treatment across screens — the design-system [SnackBarThemeData]
+/// styles the surface; this helper just keeps the dispatch site short.
+///
+/// Use `appSnackBar(context, 'Saved a memory about Loki')` instead of
+/// `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: ...))`.
+ScaffoldFeatureController<SnackBar, SnackBarClosedReason> appSnackBar(
+  BuildContext context,
+  String message, {
+  SnackBarAction? action,
+  Duration duration = const Duration(seconds: 4),
+}) {
+  return ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      action: action,
+      duration: duration,
+    ),
+  );
+}

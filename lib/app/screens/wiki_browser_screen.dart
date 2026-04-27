@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../data/db/database.dart';
 import '../../data/wiki_export.dart';
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 class WikiBrowserScreen extends ConsumerStatefulWidget {
   const WikiBrowserScreen({super.key});
@@ -38,9 +39,7 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Export failed: $e')),
-      );
+      appSnackBar(context, 'Export failed: $e');
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -57,28 +56,26 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
       orElse: () => null,
     );
     final title = petName == null ? 'Journal' : "$petName's journal";
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: [
-          IconButton(
-            tooltip: 'Export journal',
-            onPressed: _exporting ? null : _export,
-            icon: _exporting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.ios_share),
-          ),
-          IconButton(
-            tooltip: 'Refresh',
-            onPressed: () => ref.invalidate(wikiEntriesProvider),
-            icon: const Icon(Icons.refresh),
-          ),
-        ],
-      ),
+    return AppScaffold(
+      title: title,
+      actions: [
+        IconButton(
+          tooltip: 'Export journal',
+          onPressed: _exporting ? null : _export,
+          icon: _exporting
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.ios_share),
+        ),
+        IconButton(
+          tooltip: 'Refresh',
+          onPressed: () => ref.invalidate(wikiEntriesProvider),
+          icon: const Icon(Icons.refresh),
+        ),
+      ],
       body: entriesAsync.when(
         data: (entries) =>
             entries.isEmpty ? const _Empty() : _Tree(entries: entries),

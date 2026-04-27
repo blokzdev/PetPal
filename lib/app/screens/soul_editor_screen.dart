@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/soul_file.dart';
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 /// Editor for the active pet's SOUL.md. The frontmatter shape is fixed
 /// (CLAUDE.md §5): species, breed, dob, weight_kg, allergies, meds,
@@ -135,17 +136,16 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
     );
     final title = petName == null ? 'Profile' : "$petName's profile";
     if (!_loaded) {
-      return Scaffold(
-        appBar: AppBar(title: Text(title)),
+      return AppScaffold(
+        title: title,
         body: const Center(child: CircularProgressIndicator()),
       );
     }
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return AppScaffold(
+      title: title,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _Field(controller: _species, label: 'Species'),
@@ -218,7 +218,6 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

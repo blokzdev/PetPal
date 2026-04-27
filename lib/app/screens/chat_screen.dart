@@ -5,6 +5,7 @@ import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
 import '../chat/chat_state.dart';
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -63,36 +64,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     });
 
     final ui = state.uiMessages.toList();
-    return Scaffold(
-      appBar: AppBar(title: Text(petName)),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: ui.isEmpty && state.streamingAssistant == null
-                  ? _EmptyChat(petName: petName)
-                  : _MessageList(
-                      controller: _scrollController,
-                      messages: ui,
-                      streamingAssistant: state.streamingAssistant,
-                      streamingEscalation: state.streamingEscalation,
-                    ),
+    return AppScaffold(
+      title: petName,
+      body: Column(
+        children: [
+          Expanded(
+            child: ui.isEmpty && state.streamingAssistant == null
+                ? _EmptyChat(petName: petName)
+                : _MessageList(
+                    controller: _scrollController,
+                    messages: ui,
+                    streamingAssistant: state.streamingAssistant,
+                    streamingEscalation: state.streamingEscalation,
+                  ),
+          ),
+          if (state.activeTools.isNotEmpty)
+            _ToolPills(pills: state.activeTools, petName: petName),
+          if (state.error != null)
+            _ErrorBanner(
+              error: state.error!,
+              canRetry: !state.sending && state.lastFailedInput != null,
+              onRetry: () => ref.read(chatProvider.notifier).retry(),
             ),
-            if (state.activeTools.isNotEmpty)
-              _ToolPills(pills: state.activeTools, petName: petName),
-            if (state.error != null)
-              _ErrorBanner(
-                error: state.error!,
-                canRetry: !state.sending && state.lastFailedInput != null,
-                onRetry: () => ref.read(chatProvider.notifier).retry(),
-              ),
-            _Composer(
-              controller: _input,
-              sending: state.sending,
-              onSend: _send,
-            ),
-          ],
-        ),
+          _Composer(
+            controller: _input,
+            sending: state.sending,
+            onSend: _send,
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import '../../data/repos/reminder_repo.dart';
 import '../../data/soul_file.dart';
 import '../../harness/scheduling/reminder_kinds.dart';
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 import '../widgets/battery_exemption_prompt.dart';
 
 /// Reminders CRUD screen — per-pet destination, so the app bar
@@ -28,8 +29,8 @@ class RemindersScreen extends ConsumerWidget {
     );
     final title = petName == null ? 'Reminders' : "$petName's reminders";
 
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
+    return AppScaffold(
+      title: title,
       body: petsAsync.when(
         data: (pets) => pets.isEmpty
             ? const _NoPet()
@@ -395,12 +396,11 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
     final cadenceUnknown = _activeSpecies != null &&
         defaultCadenceFor(kind: _kind, species: _activeSpecies!) == null;
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add reminder')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return AppScaffold(
+      title: 'Add reminder',
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<ReminderKind>(
@@ -469,7 +469,6 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

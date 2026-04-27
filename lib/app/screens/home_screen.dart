@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -11,8 +12,8 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pets = ref.watch(petsProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('PetPal')),
+    return AppScaffold(
+      title: 'PetPal',
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),

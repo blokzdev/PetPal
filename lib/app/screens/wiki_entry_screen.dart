@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 class WikiEntryScreen extends ConsumerWidget {
   const WikiEntryScreen({super.key, required this.path});
@@ -10,8 +11,8 @@ class WikiEntryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final wikiAsync = ref.watch(wikiIoProvider);
-    return Scaffold(
-      appBar: AppBar(title: Text(path.split('/').last)),
+    return AppScaffold(
+      title: path.split('/').last,
       body: wikiAsync.when(
         data: (wiki) => FutureBuilder<String>(
           future: wiki.read(path),

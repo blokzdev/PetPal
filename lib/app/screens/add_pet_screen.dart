@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../data/onboarding_templates.dart';
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 /// Add-pet flow. Phase 2.2 collected name/species/breed/DOB; Phase 3.4
 /// upgrades species to a dropdown of 8 (per DECISIONS row 25), each
@@ -95,82 +96,80 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       orElse: () => false,
     );
     if (atLimit) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Add a pet')),
-        body: const _FreeTierLimit(),
+      return const AppScaffold(
+        title: 'Add a pet',
+        body: _FreeTierLimit(),
       );
     }
-    return Scaffold(
-      appBar: AppBar(title: const Text('Add a pet')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                TextFormField(
-                  controller: _name,
-                  decoration: const InputDecoration(
-                    labelText: 'Name',
-                    border: OutlineInputBorder(),
-                  ),
-                  textCapitalization: TextCapitalization.words,
-                  validator: (v) =>
-                      v == null || v.trim().isEmpty ? 'Required' : null,
+    return AppScaffold(
+      title: 'Add a pet',
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextFormField(
+                controller: _name,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<Species>(
-                  initialValue: _species,
-                  decoration: const InputDecoration(
-                    labelText: 'Species',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: [
-                    for (final s in Species.values)
-                      DropdownMenuItem(value: s, child: Text(s.label)),
-                  ],
-                  onChanged: (s) {
-                    if (s != null) setState(() => _species = s);
-                  },
+                textCapitalization: TextCapitalization.words,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<Species>(
+                initialValue: _species,
+                decoration: const InputDecoration(
+                  labelText: 'Species',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _breed,
-                  decoration: const InputDecoration(
-                    labelText: 'Breed (optional)',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                OutlinedButton.icon(
-                  onPressed: _pickDob,
-                  icon: const Icon(Icons.calendar_today),
-                  label: Text(dobLabel),
-                ),
-                const SizedBox(height: 24),
-                if (_saveError != null) ...[
-                  Text(
-                    _saveError!,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                items: [
+                  for (final s in Species.values)
+                    DropdownMenuItem(value: s, child: Text(s.label)),
                 ],
-                FilledButton(
-                  onPressed: _saving ? null : _save,
-                  child: _saving
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Save'),
+                onChanged: (s) {
+                  if (s != null) setState(() => _species = s);
+                },
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _breed,
+                decoration: const InputDecoration(
+                  labelText: 'Breed (optional)',
+                  border: OutlineInputBorder(),
                 ),
+              ),
+              const SizedBox(height: 16),
+              OutlinedButton.icon(
+                onPressed: _pickDob,
+                icon: const Icon(Icons.calendar_today),
+                label: Text(dobLabel),
+              ),
+              const SizedBox(height: 24),
+              if (_saveError != null) ...[
+                Text(
+                  _saveError!,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+                const SizedBox(height: 12),
               ],
-            ),
+              FilledButton(
+                onPressed: _saving ? null : _save,
+                child: _saving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text('Save'),
+              ),
+            ],
           ),
         ),
       ),
@@ -184,34 +183,32 @@ class _FreeTierLimit extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(Icons.pets, size: 56, color: scheme.primary),
-            const SizedBox(height: 16),
-            Text(
-              'You already have a pet on the free plan.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Adding a second pet is part of Pro, coming in a future '
-              'update.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 32),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Back'),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Icon(Icons.pets, size: 56, color: scheme.primary),
+          const SizedBox(height: 16),
+          Text(
+            'You already have a pet on the free plan.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Adding a second pet is part of Pro, coming in a future '
+            'update.',
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          const SizedBox(height: 32),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Back'),
+          ),
+        ],
       ),
     );
   }

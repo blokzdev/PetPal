@@ -9,6 +9,7 @@ import '../../harness/retrieval/embedding_provider.dart';
 import '../../harness/retrieval/embedding_worker.dart';
 import '../../harness/retrieval/hybrid_retriever.dart';
 import '../../harness/retrieval/onnx_embedding_provider.dart';
+import '../widgets/app_scaffold.dart';
 
 /// Phase 1 verification screen — exercises the full harness end-to-end:
 /// create a pet, write seed notes, run hybrid keyword + semantic retrieval,
@@ -188,12 +189,11 @@ class _DevScreenState extends State<DevScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final canSearch = !_busy && _activePet != null;
-    return Scaffold(
-      appBar: AppBar(title: const Text('Harness · dev')),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    return AppScaffold(
+      title: 'Harness · dev',
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(_status, style: theme.textTheme.bodyMedium),
@@ -268,7 +268,6 @@ class _DevScreenState extends State<DevScreen> {
             ],
           ),
         ),
-      ),
     );
   }
 }

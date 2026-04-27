@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
+import '../widgets/app_scaffold.dart';
 
 /// Care guides browser. Shows every bundled guide applicable to the
 /// active pet's species, with an enable/disable toggle per row.
@@ -15,8 +16,8 @@ class SkillBrowserScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final catalogAsync = ref.watch(skillCatalogProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Care guides')),
+    return AppScaffold(
+      title: 'Care guides',
       body: catalogAsync.when(
         data: (entries) =>
             entries.isEmpty ? const _Empty() : _SkillList(entries: entries),
