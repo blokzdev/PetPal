@@ -67,7 +67,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Welcome to PetPal'), findsOneWidget);
+    // Task 5.6 redesign — narrative-led welcome. The tagline IS the
+    // headline; "Welcome to PetPal" is gone.
+    expect(
+      find.text("PetPal remembers your pet's life so you don't have to."),
+      findsOneWidget,
+    );
     expect(find.text('Get started'), findsOneWidget);
   });
 }

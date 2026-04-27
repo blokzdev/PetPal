@@ -129,6 +129,11 @@ flutter:
     # embeddings stack (DECISIONS row 20). SIL OFL license files
     # ship alongside.
     - assets/fonts/
+    # Phase 5 task 5.6 — onboarding welcome screen renders the
+    # journal-+-paw foreground PNG above the tagline. Same source
+    # asset that flutter_launcher_icons + flutter_native_splash
+    # consume; ships once, serves three callsites.
+    - assets/branding/
 
   # Custom fonts. Both families ship as variable TTFs covering every
   # weight from Thin (100) through Black (900); weight selection at

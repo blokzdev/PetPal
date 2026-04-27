@@ -2,12 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design/design.dart';
 import '../providers.dart';
 
-/// First-run onboarding: welcome → privacy disclosure → API key entry.
-/// Three pages in a swipe-friendly [PageView]; a forward arrow on each
-/// page advances to the next, the final page persists the API key and
-/// the router's redirect kicks the user back to `/`.
+/// First-run onboarding — task 5.6 redesign.
+///
+/// Three pages in a swipe-friendly [PageView]: narrative-led welcome,
+/// sectioned plain-English privacy disclosure, then a small
+/// "one-last-thing" Anthropic API key step framed as a utility, not as
+/// the welcome itself. The directional choices were locked by the user
+/// in the task 5.6 design questions; the picks: narrative-led welcome,
+/// sectioned plain-English privacy, "One last thing — your Anthropic
+/// key" framing.
+///
+/// Phase 5 reality (DECISIONS row 36 follow-up): the privacy
+/// disclosure describes the BYOK-only path because PetPal's
+/// LLM-call proxy doesn't ship until Phase 7. When the proxy lands,
+/// a Phase 7 task will refresh this copy to match VOICE.md §6
+/// example 15's proxy-default narrative — until then, "your API
+/// key, direct to Anthropic" is the honest framing.
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -82,7 +95,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
             ),
             _PageIndicator(page: _page, count: 3),
-            const SizedBox(height: 16),
+            const SizedBox(height: Spacing.m),
           ],
         ),
       ),
@@ -90,82 +103,146 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 }
 
+/// Welcome — narrative-led. The journal-+-paw mark sits above a
+/// serif tagline (PetPal's serif is reserved for journal-flavored
+/// surfaces; using it on the welcome reinforces the journal-as-moat
+/// thesis the app is built around). Body copy lists three concrete
+/// memory-types (vet visits, weight, missed food) instead of abstract
+/// value props — concrete-over-abstract per VOICE.md §1.
 class _WelcomePage extends StatelessWidget {
   const _WelcomePage({required this.onContinue});
   final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.l),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.pets, size: 96, color: scheme.primary),
-          const SizedBox(height: 24),
-          Text(
-            'Welcome to PetPal',
-            textAlign: TextAlign.center,
-            style: text.headlineMedium,
+          // Journal-+-paw mark, centered. The PNG already has the
+          // medium stroke weight + leaf/eye silhouette locked in 5.3.
+          // ColorFiltered isn't needed — the foreground PNG already
+          // ships in graphite, which reads correctly on the warm
+          // off-white scaffold background.
+          //
+          // Sized at 144 dp on the welcome surface — large enough to
+          // read as a brand mark, not so large it dominates and
+          // crowds out the tagline.
+          Center(
+            child: Image.asset(
+              'assets/branding/icon-foreground.png',
+              width: 144,
+              height: 144,
+              // The dark-variant asset exists at icon-foreground-dark.png
+              // and gets used by the splash on dark mode; here the mark
+              // sits on the surface tone (off-white in light, warm
+              // graphite in dark), so we want a theme-aware color
+              // filter that maps the graphite-on-transparent source
+              // asset to onSurface in either mode.
+              color: scheme.onSurface,
+            ),
           ),
-          const SizedBox(height: 12),
+          Gaps.l,
           Text(
             "PetPal remembers your pet's life so you don't have to.",
             textAlign: TextAlign.center,
-            style: text.titleMedium?.copyWith(color: scheme.onSurfaceVariant),
+            style: JournalText.weeklySummaryTitle(color: scheme.onSurface),
           ),
-          const SizedBox(height: 24),
+          Gaps.l,
           Text(
-            'Vet visits, weight, food trials, behavior notes — all in '
-            'one place. And PetPal will tell you when something looks '
+            "Vet visits. Weight. The food they didn't eat. PetPal "
+            'keeps the thread — and tells you when something looks '
             'serious enough to call the vet.',
             textAlign: TextAlign.center,
-            style: text.bodyMedium,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.45,
+            ),
           ),
-          const SizedBox(height: 32),
-          FilledButton(onPressed: onContinue, child: const Text('Get started')),
+          Gaps.xl,
+          FilledButton(
+            onPressed: onContinue,
+            child: const Text('Get started'),
+          ),
         ],
       ),
     );
   }
 }
 
+/// Privacy — sectioned plain-English. Two sub-headers ("Your pet's
+/// journal." / "When you chat.") with 1-2 sentence prose under each,
+/// plus a one-line not-a-vet footer. Scannable AND conversational —
+/// closer in spirit to VOICE.md §6 ex 15's voice while preserving
+/// enough structure that a privacy-conscious user can skim.
+///
+/// Phase 5 framing: chat goes direct to Anthropic via the user's
+/// API key. This is honest about what ships now (BYOK-only). Phase 7
+/// will rewrite this copy when the LLM proxy lands and a free-tier
+/// 200-msg/mo path becomes the default; until then, "your key,
+/// direct to Anthropic, nothing else leaves" is the truthful story.
 class _PrivacyPage extends StatelessWidget {
   const _PrivacyPage({required this.onContinue});
   final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final headlineStyle = theme.textTheme.headlineSmall;
+    final sectionLabelStyle = theme.textTheme.titleMedium?.copyWith(
+      fontWeight: FontWeight.w600,
+    );
+    final bodyStyle = theme.textTheme.bodyLarge?.copyWith(
+      color: scheme.onSurfaceVariant,
+      height: 1.4,
+    );
+    final footerStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: scheme.onSurfaceVariant,
+      fontStyle: FontStyle.italic,
+      height: 1.4,
+    );
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.l,
+        vertical: Spacing.m,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Your data, your device.', style: text.headlineSmall),
-          const SizedBox(height: 16),
-          const _Bullet(
-            "Your pet's journal — vet visits, weight, notes, photos — "
-            'stays on this phone. PetPal does not copy it to a server.',
+          Gaps.m,
+          Text('Your data, your device.', style: headlineStyle),
+          Gaps.l,
+          Text("Your pet's journal.", style: sectionLabelStyle),
+          Gaps.s,
+          Text(
+            "Stays on this phone. PetPal doesn't copy it to a server.",
+            style: bodyStyle,
           ),
-          const _Bullet(
-            'Searching your journal happens on the phone, with a '
-            'small model bundled into the app.',
-          ),
-          const _Bullet(
-            'When you ask PetPal something, it sends your message and '
-            'the relevant memories about your pet to Anthropic’s '
-            'Claude — the AI behind PetPal — using your own API key. '
-            'That’s the only thing that leaves the phone.',
-          ),
-          const _Bullet(
-            'PetPal is not a vet and does not diagnose. If something '
-            'looks urgent, PetPal will tell you to call your vet.',
+          Gaps.l,
+          Text('When you chat.', style: sectionLabelStyle),
+          Gaps.s,
+          Text(
+            'Your message and the relevant memories about your pet '
+            "go to Anthropic's Claude using your API key. Nothing "
+            'else leaves the phone.',
+            style: bodyStyle,
           ),
           const Spacer(),
+          // Footer: not-a-vet disclaimer. Italic to read as a
+          // softer, footer-tone reminder rather than another
+          // body-copy bullet.
+          Text(
+            'PetPal is software, not a vet — if something looks '
+            'urgent, PetPal will tell you to call yours.',
+            style: footerStyle,
+          ),
+          Gaps.l,
           Center(
             child: FilledButton(
               onPressed: onContinue,
@@ -178,6 +255,11 @@ class _PrivacyPage extends StatelessWidget {
   }
 }
 
+/// API key — "One last thing" utility framing. The title telegraphs
+/// "this is small wiring before we begin", not "welcome to setup".
+/// Body explains Anthropic + Claude in two sentences, then the
+/// console.anthropic.com path. CTA is "Save and continue" — verb
+/// + forward motion, not a brand-name like "Connect to Anthropic".
 class _ApiKeyPage extends StatelessWidget {
   const _ApiKeyPage({
     required this.controller,
@@ -192,20 +274,32 @@ class _ApiKeyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.l,
+        vertical: Spacing.m,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Connect to Anthropic', style: text.headlineSmall),
-          const SizedBox(height: 16),
+          Gaps.m,
           Text(
-            'PetPal uses Claude via your own Anthropic API key. '
-            'Generate one at console.anthropic.com → Settings → API Keys.',
-            style: text.bodyMedium,
+            'One last thing — your Anthropic key.',
+            style: theme.textTheme.headlineSmall,
           ),
-          const SizedBox(height: 24),
+          Gaps.m,
+          Text(
+            'PetPal runs on Claude, made by Anthropic. You\'ll need '
+            'a key from them to chat. Get one at '
+            'console.anthropic.com → Settings → API Keys.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: scheme.onSurfaceVariant,
+              height: 1.4,
+            ),
+          ),
+          Gaps.l,
           TextField(
             controller: controller,
             obscureText: true,
@@ -214,16 +308,17 @@ class _ApiKeyPage extends StatelessWidget {
             decoration: InputDecoration(
               labelText: 'API key',
               hintText: 'sk-ant-…',
-              border: const OutlineInputBorder(),
               errorText: error,
             ),
             onSubmitted: (_) => onSubmit(),
           ),
-          const SizedBox(height: 8),
+          Gaps.s,
           Text(
-            'Stored encrypted on this device only. You can change or '
+            'Stored encrypted on this phone only. You can change or '
             'remove it later in Settings.',
-            style: text.bodySmall,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
           ),
           const Spacer(),
           FilledButton(
@@ -242,28 +337,9 @@ class _ApiKeyPage extends StatelessWidget {
   }
 }
 
-class _Bullet extends StatelessWidget {
-  const _Bullet(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 6, right: 8),
-            child: Icon(Icons.circle, size: 6),
-          ),
-          Expanded(child: Text(text)),
-        ],
-      ),
-    );
-  }
-}
-
+/// Three soft dots indicating progress through the PageView. Active
+/// dot is wider than inactive and uses the primary color; inactive
+/// dots use a muted onSurface tone.
 class _PageIndicator extends StatelessWidget {
   const _PageIndicator({required this.page, required this.count});
   final int page;
@@ -276,15 +352,17 @@ class _PageIndicator extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(count, (i) {
         final active = i == page;
-        return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: active ? 16 : 8,
+        return AnimatedContainer(
+          duration: Motion.short,
+          curve: Motion.standardCurve,
+          margin: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+          width: active ? 20 : 8,
           height: 8,
           decoration: BoxDecoration(
             color: active
                 ? scheme.primary
                 : scheme.onSurfaceVariant.withValues(alpha: 0.3),
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: Corners.xs,
           ),
         );
       }),
