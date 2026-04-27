@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/db/database.dart';
 import '../../data/wiki_export.dart';
+import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/pet_button.dart';
@@ -82,7 +83,7 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
       onRetry: () => ref.invalidate(wikiEntriesProvider),
       data: (context, entries) => entries.isEmpty
           ? JournalEmptyForTesting(petName: petName)
-          : _Tree(entries: entries),
+          : _Tree(entries: entries, petName: petName),
     );
   }
 }
@@ -125,8 +126,9 @@ class JournalEmptyForTesting extends StatelessWidget {
 }
 
 class _Tree extends StatelessWidget {
-  const _Tree({required this.entries});
+  const _Tree({required this.entries, required this.petName});
   final List<Entry> entries;
+  final String? petName;
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +142,10 @@ class _Tree extends StatelessWidget {
         for (final type in sortedTypes) ...[
           _TypeHeader(type: type, count: byType[type]!.length),
           for (final entry in byType[type]!)
-            _EntryTile(entry: entry),
+            if (entry.type == 'digest')
+              _DigestCard(entry: entry, petName: petName)
+            else
+              _EntryTile(entry: entry),
         ],
       ],
     );
@@ -190,6 +195,112 @@ class _EntryTile extends StatelessWidget {
       onTap: () => GoRouter.of(context).push(
         '/wiki/entry',
         extra: entry.path,
+      ),
+    );
+  }
+}
+
+/// Editorial card treatment for `type == 'digest'` entries — task 5.11
+/// (user-locked: editorial register + "{pet}'s week" copy). The third
+/// hero moment after 5.9 (memory-saved bloom) and 5.10 (per-pet home
+/// greeting). Coheres with the family by leaning on the Source Serif 4
+/// accent — 5.7's narrative empty state and 5.10's display-class name
+/// also signal "this is journal, not utility."
+///
+/// Layout:
+///   - Outer Material card in surfaceContainer (one tint above the list
+///     surface) so the digest cluster reads as elevated copy without a
+///     hard border. Margins match the surrounding ListTile rhythm.
+///   - Top: small uppercase letter-spaced kicker ("WEEKLY DIGEST") in
+///     onSurfaceVariant — magazine convention.
+///   - Middle: title in Source Serif 4 via JournalText.weeklySummaryTitle
+///     (the dedicated 5.1 token, sized one notch larger than per-entry
+///     titles), name-interpolated. Reads as warm but not saccharine.
+///   - Bottom: the date range derived from `entry.ts` (end-of-week per
+///     WeeklyDigestRunner) minus six days for the window start, rendered
+///     in bodyMedium onSurfaceVariant.
+///
+/// No body preview. The journal browser stays cheap (no per-row
+/// wiki_io.read calls) and tapping the card opens the entry viewer
+/// where the full markdown renders.
+class _DigestCard extends StatelessWidget {
+  const _DigestCard({required this.entry, required this.petName});
+  final Entry entry;
+  final String? petName;
+
+  static const _monthAbbrev = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  String _formatRange(DateTime end) {
+    final start = end.subtract(const Duration(days: 6));
+    final startMonth = _monthAbbrev[start.month - 1];
+    final endMonth = _monthAbbrev[end.month - 1];
+    if (start.month == end.month) {
+      return '$startMonth ${start.day}–${end.day}';
+    }
+    return '$startMonth ${start.day} – $endMonth ${end.day}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final subject = (petName == null || petName!.isEmpty)
+        ? 'This'
+        : "$petName's";
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.m,
+        vertical: Spacing.s,
+      ),
+      child: Material(
+        type: MaterialType.card,
+        color: scheme.surfaceContainer,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Radii.m),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => GoRouter.of(context).push(
+            '/wiki/entry',
+            extra: entry.path,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: Spacing.l,
+              vertical: Spacing.l,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'WEEKLY DIGEST',
+                  style: text.labelSmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                    letterSpacing: 1.4,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  '$subject week',
+                  style: JournalText.weeklySummaryTitle(
+                    color: scheme.onSurface,
+                  ),
+                ),
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  _formatRange(entry.ts),
+                  style: text.bodyMedium?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
