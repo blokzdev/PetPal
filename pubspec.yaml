@@ -76,6 +76,14 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   drift_dev: ^2.32.1
   build_runner: ^2.14.1
+  # Phase 5 task 5.3 — adaptive launcher icon generation. Reads the
+  # `flutter_launcher_icons:` block at the bottom of this file and
+  # writes per-density `mipmap-*/ic_launcher.png` plus the
+  # `mipmap-anydpi-v26/ic_launcher.xml` adaptive icon descriptor.
+  # Run with: `dart run flutter_launcher_icons`. Source assets are
+  # produced by `tools/generate_icon.py` and live under
+  # `assets/branding/`.
+  flutter_launcher_icons: ^0.14.4
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -160,3 +168,31 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+# Phase 5 task 5.3 — adaptive launcher icon configuration.
+# Source assets are emitted by `python3 tools/generate_icon.py` into
+# assets/branding/. To regenerate platform icons after editing the
+# generator, run:
+#
+#   python3 tools/generate_icon.py
+#   dart run flutter_launcher_icons
+#
+# Generated outputs live under android/app/src/main/res/mipmap-*/.
+# DECISIONS row 35 locks the visual direction (warm off-white
+# background `#F7F5F2`, graphite `#2D3436` foreground); row 38
+# follow-up locks the medium stroke weight + open-journal-with-paw
+# composition.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  # Legacy non-adaptive icon (Android 7.x — pre-API-26). Composited
+  # PNG with the warm off-white background baked in so the mark
+  # reads correctly on launchers that don't honour adaptive XML.
+  image_path: "assets/branding/icon-legacy.png"
+  # Adaptive icon (Android 8.0+). Foreground is the transparent-bg
+  # journal-+-paw mark; background is the warm off-white tile,
+  # supplied as a hex color so we don't need a separate background
+  # asset.
+  adaptive_icon_foreground: "assets/branding/icon-foreground.png"
+  adaptive_icon_background: "#F7F5F2"
+  min_sdk_android: 24

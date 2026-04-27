@@ -176,7 +176,7 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 
 - [x] 5.1 Design system tokens — `lib/app/design/` package: `ColorScheme` seeded from sage `#5C8A7A` with manual surface-tint overrides (avoid M3 lavender drift), typography theme wiring Inter + Source Serif 4 via `google_fonts`, spacing scale (`Spacing.xs/s/m/l/xl`), elevation tokens, corner radii, motion durations. Replaces `lib/app/theme.dart:1-15`. Adds `google_fonts` to `pubspec.yaml` (DECISIONS row required).
 - [x] 5.2 Component primitives — `PetButton`, `PetCard`, `PetEmptyState` (illustration + heading + body + CTA slot), `PetSkeleton`, `PetSectionHeader`, `PetIcon`. Sit on top of 5.1.
-- [ ] 5.3 App icon (adaptive) — `flutter_launcher_icons` config: foreground = journal-+-paw mark in graphite (`#2D3436`), background = warm off-white (`#F7F5F2`). Adaptive icon for Android 8+. Source asset `assets/branding/icon-foreground.png`.
+- [x] 5.3 App icon (adaptive) — `flutter_launcher_icons` config: foreground = journal-+-paw mark in graphite (`#2D3436`), background = warm off-white (`#F7F5F2`). Adaptive icon for Android 8+. Source asset `assets/branding/icon-foreground.png`.
 - [ ] 5.4 Splash screen — `flutter_native_splash` config: warm off-white background, journal-+-paw mark centered. No animation in v1.
 - [ ] 5.5 Onboarding redesign — replace 3-page config wizard (`lib/app/screens/onboarding_screen.dart:62-91`). New flow: emotional welcome (what PetPal does) → privacy disclosure (existing four bullets, copy refreshed) → API key as utility, not the welcome.
 - [ ] 5.6 Empty states — wire `PetEmptyState` to journal browser, reminders, care guides, chat. Each teaches what goes there.
