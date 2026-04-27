@@ -108,6 +108,32 @@ flutter:
     # weight_check. Each declares `title:` and `body:`; body may
     # interpolate {pet_name}.
     - assets/reminders/
+    # Phase 5 task 5.1 — bundled variable fonts (DECISIONS row 38):
+    # Inter (UI body) + Source Serif 4 (journal accent). Bundled
+    # rather than runtime-fetched via google_fonts so first launch
+    # is visually correct offline, consistent with the offline-first
+    # embeddings stack (DECISIONS row 20). SIL OFL license files
+    # ship alongside.
+    - assets/fonts/
+
+  # Custom fonts. Both families ship as variable TTFs covering every
+  # weight from Thin (100) through Black (900); weight selection at
+  # runtime uses TextStyle.fontVariations (`wght` axis) — see
+  # lib/app/design/typography.dart. The static `weight:` slots below
+  # exist so platform components that read fontWeight from the theme
+  # still resolve to a registered slot; the variable axis renders the
+  # actual rendered weight.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-VariableFont.ttf
+        - asset: assets/fonts/Inter-Italic-VariableFont.ttf
+          style: italic
+    - family: SourceSerif4
+      fonts:
+        - asset: assets/fonts/SourceSerif4-VariableFont.ttf
+        - asset: assets/fonts/SourceSerif4-Italic-VariableFont.ttf
+          style: italic
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

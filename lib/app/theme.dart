@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
 
-ThemeData buildLightTheme() => ThemeData(
-      colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4F7CFF)),
-      useMaterial3: true,
-    );
+import 'design/design.dart';
 
-ThemeData buildDarkTheme() => ThemeData(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF4F7CFF),
-        brightness: Brightness.dark,
-      ),
-      useMaterial3: true,
-    );
+/// Public theme entry points. Implementations live in
+/// `lib/app/design/` — this file is the stable import surface for
+/// `main.dart` and any future test/widget callsite.
+ThemeData buildLightTheme() => buildPetPalLightTheme();
+
+ThemeData buildDarkTheme() => buildPetPalDarkTheme();
