@@ -30,7 +30,7 @@ ThemeData _build(ColorScheme scheme) {
     ),
     cardTheme: CardThemeData(
       elevation: Elevation.low,
-      shape: RoundedRectangleBorder(borderRadius: Corners.m),
+      shape: const RoundedRectangleBorder(borderRadius: Corners.m),
       color: scheme.surfaceContainer,
       surfaceTintColor: scheme.surfaceTint,
       margin: const EdgeInsets.all(Spacing.s),
@@ -92,11 +92,11 @@ ThemeData _build(ColorScheme scheme) {
         horizontal: Spacing.m,
         vertical: Spacing.s + Spacing.xs,
       ),
-      border: OutlineInputBorder(
+      border: const OutlineInputBorder(
         borderRadius: Corners.s,
         borderSide: BorderSide.none,
       ),
-      enabledBorder: OutlineInputBorder(
+      enabledBorder: const OutlineInputBorder(
         borderRadius: Corners.s,
         borderSide: BorderSide.none,
       ),
@@ -112,14 +112,14 @@ ThemeData _build(ColorScheme scheme) {
     dialogTheme: DialogThemeData(
       backgroundColor: scheme.surfaceContainerHigh,
       elevation: Elevation.medium,
-      shape: RoundedRectangleBorder(borderRadius: Corners.l),
+      shape: const RoundedRectangleBorder(borderRadius: Corners.l),
       surfaceTintColor: scheme.surfaceTint,
     ),
     snackBarTheme: SnackBarThemeData(
       backgroundColor: scheme.inverseSurface,
       contentTextStyle:
           textTheme.bodyMedium?.copyWith(color: scheme.onInverseSurface),
-      shape: RoundedRectangleBorder(borderRadius: Corners.s),
+      shape: const RoundedRectangleBorder(borderRadius: Corners.s),
       behavior: SnackBarBehavior.floating,
       insetPadding: const EdgeInsets.all(Spacing.m),
     ),

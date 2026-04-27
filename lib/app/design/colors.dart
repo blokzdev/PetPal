@@ -49,10 +49,7 @@ abstract final class PetPalColors {
 /// `tertiary` (M3 reserves `secondary` for a derivative of the seed —
 /// putting coral on `tertiary` keeps it semantically "the accent").
 ColorScheme buildLightColorScheme() {
-  final base = ColorScheme.fromSeed(
-    seedColor: PetPalColors.sage,
-    brightness: Brightness.light,
-  );
+  final base = ColorScheme.fromSeed(seedColor: PetPalColors.sage);
   return base.copyWith(
     primary: PetPalColors.sage,
     onPrimary: PetPalColors.warmOffWhite,

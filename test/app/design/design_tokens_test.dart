@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/design/design.dart';
@@ -191,11 +189,11 @@ void main() {
     test('button shape is StadiumBorder (pill) for the warmer character',
         () {
       final t = buildPetPalLightTheme();
-      final filledShape = t.filledButtonTheme.style?.shape
-          ?.resolve(<WidgetState>{}) as OutlinedBorder?;
+      final filledShape =
+          t.filledButtonTheme.style?.shape?.resolve(<WidgetState>{});
       expect(filledShape, isA<StadiumBorder>());
-      final outlinedShape = t.outlinedButtonTheme.style?.shape
-          ?.resolve(<WidgetState>{}) as OutlinedBorder?;
+      final outlinedShape =
+          t.outlinedButtonTheme.style?.shape?.resolve(<WidgetState>{});
       expect(outlinedShape, isA<StadiumBorder>());
     });
 

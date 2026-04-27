@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 /// Typography — Inter (UI body) + Source Serif 4 (journal accent on entry
