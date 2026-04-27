@@ -56,7 +56,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Edit profile'));
+    await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
 
     // Form populates from the parsed frontmatter. Field order:
@@ -75,5 +75,17 @@ void main() {
     // Body field carries the prose after the closing ---.
     expect(fieldText(8), contains('# Milo'));
     expect(fieldText(8), contains('A rescue mutt.'));
+
+    // Task 5.12 — SOUL editor groups frontmatter under 'Profile'
+    // and the prose body under 'About <pet>'. Both PetSectionHeaders
+    // render inside a single PetCard surface (user-locked: 'Single
+    // card with section divider').
+    expect(find.text('Profile'), findsWidgets,
+        reason: 'PetSectionHeader Profile must appear');
+    expect(find.text('About Milo'), findsOneWidget,
+        reason: 'PetSectionHeader About <pet> interpolates the name');
+    final cardCount = tester.widgetList(find.byType(Card)).length;
+    expect(cardCount, greaterThanOrEqualTo(1),
+        reason: 'form lives inside a PetCard surface');
   });
 }

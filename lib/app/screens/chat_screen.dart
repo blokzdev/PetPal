@@ -425,35 +425,63 @@ class _Composer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+    final scheme = Theme.of(context).colorScheme;
+    // Task 5.12 — visual lift on the composer. A surfaceContainer
+    // slab one tint above the chat thread, hairline divider on top
+    // (instead of a hard shadow — keeps the warm palette feeling
+    // unforced), Insets.m on horizontal+vertical padding so the
+    // touch target lifts off the chat. SafeArea on the bottom so
+    // the composer respects gesture-bar insets on Android 10+.
+    return Material(
+      color: scheme.surfaceContainer,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            child: TextField(
-              controller: controller,
-              minLines: 1,
-              maxLines: 5,
-              enabled: !sending,
-              textInputAction: TextInputAction.send,
-              decoration: const InputDecoration(
-                hintText: 'Tell PetPal what happened…',
-                border: OutlineInputBorder(),
-              ),
-              onSubmitted: (_) => sending ? null : onSend(),
-            ),
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: scheme.outlineVariant,
           ),
-          const SizedBox(width: 8),
-          IconButton.filled(
-            onPressed: sending ? null : onSend,
-            icon: sending
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.send),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.m,
+                Spacing.s,
+                Spacing.m,
+                Spacing.s,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: controller,
+                      minLines: 1,
+                      maxLines: 5,
+                      enabled: !sending,
+                      textInputAction: TextInputAction.send,
+                      decoration: const InputDecoration(
+                        hintText: 'Tell PetPal what happened…',
+                        border: OutlineInputBorder(),
+                      ),
+                      onSubmitted: (_) => sending ? null : onSend(),
+                    ),
+                  ),
+                  const SizedBox(width: Spacing.s),
+                  IconButton.filled(
+                    onPressed: sending ? null : onSend,
+                    icon: sending
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.send),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),

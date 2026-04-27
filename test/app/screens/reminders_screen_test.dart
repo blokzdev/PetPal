@@ -113,6 +113,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home → Reminders.
+    await tester.ensureVisible(find.text('Reminders'));
     await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
 
@@ -171,6 +172,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Reminders'));
     await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
 
@@ -222,6 +224,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Reminders'));
     await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
 
@@ -295,6 +298,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    await tester.ensureVisible(find.text('Reminders'));
     await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
 

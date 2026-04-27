@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/soul_file.dart';
+import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_card.dart';
+import '../widgets/pet_section_header.dart';
 
 /// Editor for the active pet's SOUL.md. The frontmatter shape is fixed
 /// (CLAUDE.md §5): species, breed, dob, weight_kg, allergies, meds,
@@ -141,83 +144,119 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+    final aboutLabel = petName == null ? 'About this pet' : 'About $petName';
     return AppScaffold(
       title: title,
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(Spacing.m),
         child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Field(controller: _species, label: 'Species'),
-              const SizedBox(height: 12),
-              _Field(controller: _breed, label: 'Breed'),
-              const SizedBox(height: 12),
-              _Field(
-                controller: _dob,
-                label: 'Date of birth (YYYY-MM-DD)',
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Single card surface with a SectionHeader divider between
+            // Profile (frontmatter) and About (prose) — task 5.12
+            // user-locked: 'Single card with section divider'. Lower
+            // visual weight than two stacked cards while still calling
+            // out the register split.
+            PetCard(
+              padding: const EdgeInsets.symmetric(
+                horizontal: Spacing.s,
+                vertical: Spacing.s,
               ),
-              const SizedBox(height: 12),
-              _Field(
-                controller: _weight,
-                label: 'Weight (kg)',
-                keyboardType: TextInputType.number,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const PetSectionHeader(title: 'Profile'),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: Spacing.s,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _Field(controller: _species, label: 'Species'),
+                        const SizedBox(height: Spacing.s),
+                        _Field(controller: _breed, label: 'Breed'),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _dob,
+                          label: 'Date of birth (YYYY-MM-DD)',
+                        ),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _weight,
+                          label: 'Weight (kg)',
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _allergies,
+                          label: 'Allergies (comma-separated)',
+                        ),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _meds,
+                          label: 'Medications (comma-separated)',
+                        ),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _vetContact,
+                          label: 'Vet contact',
+                        ),
+                        const SizedBox(height: Spacing.s),
+                        _Field(
+                          controller: _temperament,
+                          label: 'Temperament tags (comma-separated)',
+                        ),
+                      ],
+                    ),
+                  ),
+                  PetSectionHeader(title: aboutLabel),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      Spacing.s,
+                      0,
+                      Spacing.s,
+                      Spacing.s,
+                    ),
+                    child: TextField(
+                      controller: _body,
+                      minLines: 6,
+                      maxLines: 20,
+                      decoration: InputDecoration(
+                        border: const OutlineInputBorder(),
+                        hintText: petName == null
+                            ? 'What do you want PetPal to remember?'
+                            : 'What do you want PetPal to remember '
+                                'about $petName?',
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 12),
-              _Field(
-                controller: _allergies,
-                label: 'Allergies (comma-separated)',
-              ),
-              const SizedBox(height: 12),
-              _Field(
-                controller: _meds,
-                label: 'Medications (comma-separated)',
-              ),
-              const SizedBox(height: 12),
-              _Field(controller: _vetContact, label: 'Vet contact'),
-              const SizedBox(height: 12),
-              _Field(
-                controller: _temperament,
-                label: 'Temperament tags (comma-separated)',
-              ),
-              const SizedBox(height: 24),
+            ),
+            const SizedBox(height: Spacing.l),
+            if (_saveError != null) ...[
               Text(
-                petName == null ? 'About this pet' : 'About $petName',
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _body,
-                minLines: 6,
-                maxLines: 20,
-                decoration: InputDecoration(
-                  border: const OutlineInputBorder(),
-                  hintText: petName == null
-                      ? 'What do you want PetPal to remember?'
-                      : 'What do you want PetPal to remember about '
-                          '$petName?',
+                _saveError!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.error,
                 ),
               ),
-              const SizedBox(height: 24),
-              if (_saveError != null) ...[
-                Text(
-                  _saveError!,
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                ),
-                const SizedBox(height: 12),
-              ],
-              FilledButton(
-                onPressed: _saving ? null : _save,
-                child: _saving
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Save'),
-              ),
+              const SizedBox(height: Spacing.s),
             ],
-          ),
+            FilledButton(
+              onPressed: _saving ? null : _save,
+              child: _saving
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Save'),
+            ),
+          ],
         ),
+      ),
     );
   }
 }

@@ -122,6 +122,28 @@ void main() {
     // Non-flagged turn → no escalation badge.
     expect(find.text('PetPal flagged this as urgent'), findsNothing);
     expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+
+    // Task 5.12 — composer has the visual lift: a Material slab in
+    // surfaceContainer wrapping the TextField + send IconButton,
+    // with a hairline Divider on its top edge separating it from
+    // the chat thread above. Asserted via a widget-predicate
+    // match (the IconButton.filled has its own primary-tinted
+    // Material, so walking up from Icons.send finds that one
+    // first; the composer's slab is the one painted in
+    // surfaceContainer).
+    final scheme = Theme.of(tester.element(find.byType(Scaffold).last))
+        .colorScheme;
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Material && w.color == scheme.surfaceContainer,
+      ),
+      findsOneWidget,
+      reason: 'composer slab uses surfaceContainer (5.12 lift)',
+    );
+    // Divider must exist between chat list and composer (sits as
+    // the first child of the composer's Column).
+    expect(find.byType(Divider), findsWidgets,
+        reason: 'hairline divider separates composer from thread');
   });
 
   testWidgets(

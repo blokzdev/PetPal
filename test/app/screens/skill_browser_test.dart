@@ -79,6 +79,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home → Care guides.
+    await tester.ensureVisible(find.text('Care guides'));
     await tester.tap(find.text('Care guides'));
     await tester.pumpAndSettle();
 

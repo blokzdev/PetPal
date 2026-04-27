@@ -53,6 +53,28 @@ void main() {
     expect(firstSwitch.value, isFalse,
         reason: 'weekly summary should default to off (Pro-tier)');
 
+    // Task 5.12 — section grouping migrated to PetSectionHeader +
+    // PetCard. The header text appears once (above the card); the
+    // SwitchListTile + the run-now ListTile both live inside a
+    // single Card surface (no surfaceContainerHigh band header).
+    expect(find.text('Weekly summary'), findsWidgets,
+        reason: 'PetSectionHeader title still reads "Weekly summary"');
+    expect(
+      find.ancestor(
+        of: find.widgetWithText(SwitchListTile, 'Weekly summary'),
+        matching: find.byType(Card),
+      ),
+      findsOneWidget,
+      reason: 'switch lives inside the section card (5.12)');
+    expect(
+      find.ancestor(
+        of: find.widgetWithText(
+            ListTile, "Generate this week's summary now"),
+        matching: find.byType(Card),
+      ),
+      findsOneWidget,
+      reason: 'run-now row shares the section card (5.12)');
+
     await tester.tap(find.widgetWithText(SwitchListTile, 'Weekly summary'));
     await tester.pumpAndSettle();
 

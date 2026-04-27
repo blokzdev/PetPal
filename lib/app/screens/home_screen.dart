@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -175,52 +176,113 @@ class _GreetingBody extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
-        const SizedBox(height: 32),
+        const SizedBox(height: Spacing.xl),
+        // Primary CTA — stays prominent above the destinations grid
+        // (5.12 user-locked intent: 'Chat with Loki' is the most-used
+        // home action and must remain above-the-fold).
         FilledButton.icon(
           onPressed: () => GoRouter.of(context).push('/chat'),
           icon: const Icon(Icons.chat_bubble),
           label: Text('Chat with ${pet.name}'),
         ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: () => GoRouter.of(context).push('/wiki'),
-          icon: const Icon(Icons.menu_book_outlined),
-          label: const Text('Open journal'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: () => GoRouter.of(context).push('/soul'),
-          icon: const Icon(Icons.person_outline),
-          label: const Text('Edit profile'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: () => GoRouter.of(context).push('/reminders'),
-          icon: const Icon(Icons.alarm_outlined),
-          label: const Text('Reminders'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: () => GoRouter.of(context).push('/skills'),
-          icon: const Icon(Icons.extension_outlined),
-          label: const Text('Care guides'),
-        ),
-        const SizedBox(height: 12),
-        OutlinedButton.icon(
-          onPressed: () => GoRouter.of(context).push('/settings'),
-          icon: const Icon(Icons.settings_outlined),
-          label: const Text('Settings'),
-        ),
-        if (kDebugMode) ...[
-          const SizedBox(height: 16),
-          OutlinedButton.icon(
-            onPressed: () => GoRouter.of(context).push('/dev'),
-            icon: const Icon(Icons.science_outlined),
-            label: const Text('Open harness · dev screen'),
-          ),
-        ],
+        const SizedBox(height: Spacing.l),
+        // Destinations grid — task 5.12 (user-locked: 2-column card
+        // grid below the CTA). Five tiles fill 2×3 with the last row
+        // half-empty; debug-only dev screen drops a sixth tile to
+        // square the grid in dev builds, but never in release.
+        const _DestinationsGrid(),
       ],
       ),
     );
   }
+}
+
+/// 2-column responsive card grid of nav destinations. Each tile is
+/// a [PetCardButton] (icon + label) routing through go_router. Layout
+/// uses GridView.count (not Wrap) so tiles size equally and tap
+/// targets stay predictable. The grid is shrink-wrapped + non-
+/// scrollable because the body already lives inside a
+/// SingleChildScrollView; nesting two scrollables here would steal
+/// flings from the outer scroll.
+class _DestinationsGrid extends StatelessWidget {
+  const _DestinationsGrid();
+
+  static const _items = <_Destination>[
+    _Destination(
+      label: 'Journal',
+      icon: Icons.menu_book_outlined,
+      route: '/wiki',
+    ),
+    _Destination(
+      label: 'Profile',
+      icon: Icons.person_outline,
+      route: '/soul',
+    ),
+    _Destination(
+      label: 'Reminders',
+      icon: Icons.alarm_outlined,
+      route: '/reminders',
+    ),
+    _Destination(
+      label: 'Care guides',
+      icon: Icons.extension_outlined,
+      route: '/skills',
+    ),
+    _Destination(
+      label: 'Settings',
+      icon: Icons.settings_outlined,
+      route: '/settings',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final items = [
+      ..._items,
+      if (kDebugMode)
+        const _Destination(
+          label: 'Dev',
+          icon: Icons.science_outlined,
+          route: '/dev',
+        ),
+    ];
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      mainAxisSpacing: Spacing.s,
+      crossAxisSpacing: Spacing.s,
+      childAspectRatio: 1.4,
+      children: [
+        for (final dest in items)
+          PetCardButton(
+            onPressed: () => GoRouter.of(context).push(dest.route),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(dest.icon, size: 28),
+                  const SizedBox(height: Spacing.s),
+                  Text(
+                    dest.label,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _Destination {
+  const _Destination({
+    required this.label,
+    required this.icon,
+    required this.route,
+  });
+  final String label;
+  final IconData icon;
+  final String route;
 }

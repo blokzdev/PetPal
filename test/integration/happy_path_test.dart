@@ -110,8 +110,8 @@ void main() {
     // 3. Navigate to wiki browser via Home.
     await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.text('Open journal'), findsOneWidget);
-    await tester.tap(find.text('Open journal'));
+    expect(find.text('Journal'), findsOneWidget);
+    await tester.tap(find.text('Journal'));
     await tester.pumpAndSettle();
 
     // Entry visible in the browser, grouped under `food`.

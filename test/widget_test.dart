@@ -165,4 +165,61 @@ void main() {
       findsOneWidget,
     );
   });
+
+  // -----------------------------------------------------------------
+  // Task 5.12 — home destinations land as a 2-col PetCard grid below
+  // the primary CTA (user-locked). The five tile labels (Journal,
+  // Profile, Reminders, Care guides, Settings) replace the previous
+  // OutlinedButton.icon stack; the chat CTA stays as a FilledButton
+  // above the grid.
+  // -----------------------------------------------------------------
+  testWidgets('home destinations render as a 2-col PetCardButton grid '
+      'below the chat CTA', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          ..._dataOverrides(withPetNamed: 'Loki'),
+        ],
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The chat CTA stays as a FilledButton above the grid.
+    expect(find.widgetWithText(FilledButton, 'Chat with Loki'),
+        findsOneWidget);
+
+    // The five destinations all render as cards. Tap-handler comes
+    // from PetCardButton, not OutlinedButton — assert by type +
+    // label (the previous 'Open journal' / 'Edit profile' verbose
+    // labels collapsed to 'Journal' / 'Profile' to fit the tile
+    // grid).
+    for (final label in const [
+      'Journal',
+      'Profile',
+      'Reminders',
+      'Care guides',
+      'Settings',
+    ]) {
+      expect(find.text(label), findsOneWidget,
+          reason: 'destination "$label" is missing');
+    }
+
+    // The OutlinedButton.icon stack is gone — no OutlinedButton
+    // should be present on home in release-mode-equivalent state.
+    // (Debug-only adds a Dev tile, also a PetCardButton, not an
+    // OutlinedButton — so this assertion holds in test mode.)
+    expect(find.byType(OutlinedButton), findsNothing,
+        reason: 'home destinations should be cards, not outlined '
+            'buttons (5.12)');
+
+    // The grid uses GridView.count with crossAxisCount: 2.
+    final grid = tester.widget<GridView>(find.byType(GridView));
+    final delegate =
+        grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+    expect(delegate.crossAxisCount, 2);
+  });
 }
