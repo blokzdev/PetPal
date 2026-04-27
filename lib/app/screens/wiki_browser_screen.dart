@@ -152,6 +152,32 @@ class _Tree extends StatelessWidget {
   }
 }
 
+/// Map internal entry types to user-facing labels (VOICE.md §3 + §4).
+/// `digest`, `wiki`, etc. are forbidden tokens in user-facing strings;
+/// the journal browser's group headers go through this table.
+String _humanTypeLabel(String type) {
+  switch (type) {
+    case 'digest':
+      return 'Weekly summary';
+    case 'vet':
+      return 'Vet visits';
+    case 'food':
+      return 'Food';
+    case 'weight':
+      return 'Weight';
+    case 'behavior':
+      return 'Behavior';
+    case 'photos':
+      return 'Photos';
+    default:
+      // Unknown type → title-case the raw key as a graceful fallback
+      // rather than showing a forbidden lowercase token.
+      return type.isEmpty
+          ? type
+          : '${type[0].toUpperCase()}${type.substring(1)}';
+  }
+}
+
 class _TypeHeader extends StatelessWidget {
   const _TypeHeader({required this.type, required this.count});
   final String type;
@@ -165,7 +191,7 @@ class _TypeHeader extends StatelessWidget {
       color: scheme.surfaceContainerHighest,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Text(
-        '$type · $count',
+        '${_humanTypeLabel(type)} · $count',
         style: TextStyle(
           color: scheme.onSurfaceVariant,
           fontWeight: FontWeight.w600,
@@ -276,7 +302,7 @@ class _DigestCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'WEEKLY DIGEST',
+                  'WEEKLY SUMMARY',
                   style: text.labelSmall?.copyWith(
                     color: scheme.onSurfaceVariant,
                     letterSpacing: 1.4,

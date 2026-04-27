@@ -148,7 +148,7 @@ class _EmptyState extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => GoRouter.of(context).push('/dev'),
             icon: const Icon(Icons.science_outlined),
-            label: const Text('Open harness · dev screen'),
+            label: const Text('Dev tools'),
           ),
         ],
       ],

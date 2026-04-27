@@ -73,8 +73,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Group headers + entry titles.
-    expect(find.text('food · 1'), findsOneWidget);
-    expect(find.text('vet · 1'), findsOneWidget);
+    expect(find.text('Food · 1'), findsOneWidget);
+    expect(find.text('Vet visits · 1'), findsOneWidget);
     expect(find.text('Carrot trial'), findsOneWidget);
     expect(find.text('Annual checkup'), findsOneWidget);
 
@@ -180,14 +180,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Group headers stay — both 'digest' and 'vet' clusters render.
-    expect(find.text('digest · 1'), findsOneWidget);
-    expect(find.text('vet · 1'), findsOneWidget);
+    expect(find.text('Weekly summary · 1'), findsOneWidget);
+    expect(find.text('Vet visits · 1'), findsOneWidget);
 
     // Editorial register: kicker + name-interpolated possessive
     // title + date range. The literal entry.title ("Weekly digest
     // 2026-04-26") is NOT shown — the editorial card surfaces the
     // magazine-style copy instead. Magazine-style hierarchy.
-    expect(find.text('WEEKLY DIGEST'), findsOneWidget);
+    expect(find.text('WEEKLY SUMMARY'), findsOneWidget);
     expect(find.text("Milo's week"), findsOneWidget);
     expect(find.text('Apr 20–26'), findsOneWidget);
     expect(find.text('Weekly digest 2026-04-26'), findsNothing);
@@ -222,6 +222,19 @@ void main() {
       find.textContaining('Milo logged one vet visit'),
       findsOneWidget,
     );
+
+    // Task 5.13 — wiki entry screen renders the user-facing title
+    // ("Weekly summary"), not the file-system slug or the literal
+    // entry.title ("Weekly digest 2026-04-26"). VOICE.md §3 + §4
+    // forbid 'digest' in user-facing strings.
+    expect(
+      find.widgetWithText(AppBar, 'Weekly summary'),
+      findsOneWidget,
+      reason: 'AppBar title must use the VOICE.md vocab "Weekly '
+          'summary", not the raw filename or "Weekly digest …"',
+    );
+    expect(find.textContaining('weekly.md'), findsNothing,
+        reason: 'filename must not leak into the AppBar title');
   });
 
   testWidgets('digest card date range spans months when the window '

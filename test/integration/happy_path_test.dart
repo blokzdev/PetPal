@@ -115,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Entry visible in the browser, grouped under `food`.
-    expect(find.text('food · 1'), findsOneWidget);
+    expect(find.text('Food · 1'), findsOneWidget);
     expect(find.text('Carrot trial'), findsOneWidget);
 
     // 4. Open the entry and read its body.

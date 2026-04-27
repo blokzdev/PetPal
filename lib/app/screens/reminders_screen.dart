@@ -45,7 +45,7 @@ class RemindersScreen extends ConsumerWidget {
               ),
         loading: () => const _RemindersSkeleton(),
         error: (e, _) =>
-            Center(child: Text('Could not load reminders: $e')),
+            const Center(child: Text("Couldn't load reminders.")),
       ),
       floatingActionButton: petsAsync.maybeWhen(
         data: (pets) => pets.isEmpty
@@ -136,7 +136,7 @@ class _Body extends ConsumerWidget {
                 : _List(rows: rows, petId: pet.id as int),
             loading: () => const _RemindersSkeleton(),
             error: (e, _) =>
-                Center(child: Text('Could not load reminders: $e')),
+                const Center(child: Text("Couldn't load reminders.")),
           ),
         ),
       ],
