@@ -117,6 +117,9 @@ flutter:
     - assets/skills/puppy/
     - assets/skills/senior-dog/
     - assets/skills/new-cat/
+    - assets/skills/reactive-dog/
+    - assets/skills/senior-cat/
+    - assets/skills/multi-cat/
     # Phase 4 reminder notification templates (task 4.8). One YAML
     # per canonical kind: flea_treatment, heartworm_dose, vaccine_due,
     # weight_check. Each declares `title:` and `body:`; body may
