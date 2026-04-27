@@ -209,12 +209,13 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 - [ ] 6.1 Photo storage layer — per CLAUDE.md §5, photos are `wiki/<pet_id>/photos/<id>.jpg + <id>.md`. Implement `WikiRepo` extension to write image bytes + sidecar markdown atomically. Storage budget cap (warn at 500 MB per pet, hard limit 1 GB v1). FTS5 indexes the sidecar caption.
 - [ ] 6.2 Pet profile photo — single photo on the SOUL profile, used in home greeting + chat appbar. Validates the storage layer with smallest UI surface.
 - [ ] 6.3 Photo timeline screen — `/photos` route, time-ordered grid of every photo across the pet's wiki. Tap → entry. Reuses Phase 5 design system.
-- [ ] 6.4 Multimodal chat input — photo upload to chat. **Constrained: PetPal describes what it sees, never diagnoses.** Vision request via Anthropic API; response runs through the existing `RedFlagScreener`. New tool `attach_photo` registered alongside existing chat tools. New DECISIONS row capturing the constraint explicitly.
+- [ ] 6.4 Multimodal chat input — photo upload to chat. **Constrained: PetPal describes what it sees, never diagnoses.** Vision request via Anthropic API; response runs through the existing `RedFlagScreener`. New tool `attach_photo` registered alongside existing chat tools. New DECISIONS row capturing the constraint explicitly. **Vision call site lands quota-aware in stub form per DECISIONS row 36:** a `VisionGate` check returns "always allowed" in Phase 6 (no enforcement yet) but is wired in at the same line where the API call fires, so Phase 7 task 7.10 can plug in real enforcement (Pro 30/mo + credit-balance) without a code re-shape.
 - [ ] 6.5 Vet-visit structured entry type — new entry kind `wiki/<pet>/vet/YYYY-MM-DD-<slug>.md` with structured frontmatter (`vet_name`, `reason`, `diagnosis`, `prescriptions: []`, `follow_up_date`). Form-driven creator UI; freeform fallback for non-vet entries.
 - [ ] 6.6 Auto-follow-up reminders — when a vet-visit entry has `follow_up_date`, auto-create a `notification`-mode reminder. Reuses existing scheduling stack.
 - [ ] 6.7 Weight + symptom trend charts — add `fl_chart` dep (DECISIONS row required). Charts: weight time-series, recurring-symptom frequency. Surface on the SOUL profile.
-- [ ] 6.8 Smarter weekly summary — upgrade `lib/harness/synthesis/weekly_digest.dart` to surface trends, anomalies, gentle observations ("Loki's weight has trended down for 3 weeks"). New synthesis prompt; no new infrastructure.
-- [ ] 6.9 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**.
+- [ ] 6.8 Smarter weekly summary — upgrade `lib/harness/synthesis/weekly_digest.dart` to surface trends, anomalies, gentle observations ("Loki's weight has trended down for 3 weeks"). New synthesis prompt; no new infrastructure. Tagged Pro-feature in copy/framing per DECISIONS row 36, but no enforcement gating in Phase 6 (Pro entitlement service ships in Phase 7). Existing free-tier digest entries already in journals stay as-is on the model shift — they're memory, and memory is free.
+- [ ] 6.9 Monthly health report — new synthesis cadence, longer-form than the weekly: trends, weight curves, recurring patterns, vet-visit follow-up status. Reuses the `mode=synthesis` runner from Phase 4; new prompt scaffolding only. Pro-feature framing in copy; no enforcement gating in Phase 6 (lands in Phase 7 task 7.10). Per DECISIONS row 36.
+- [ ] 6.10 Phase wrap-up commit + summary; flag **on-device verification REQUIRED**.
 
 **Cuts (deferred to v1.1 or Phase 7):**
 - *Multi-pet UI improvements* → Phase 7 (free tier = 1 pet per DECISIONS row 8; multi-pet UI is Pro-only, belongs alongside the paywall).
@@ -237,23 +238,29 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 
 ## Phase 7 — Monetization, Cloud Sync, Multi-Pet UI
 
-**Goal:** Pro subscription, one expert-pack IAP, cloud sync chosen and implemented, multi-pet UI behind the paywall, accessibility pass. (Renamed from old Phase 5: dropped redundant "Polish" — Phase 5 covers that — added "Multi-Pet UI" since multi-pet moves here from the Phase 6 candidate list.)
-**Definition of done:** subscribe with a Play tester account → install on a second device → wiki syncs; multi-pet works for Pro users; accessibility pass clean.
+**Goal:** ship the v1 monetization model from DECISIONS row 36 — PetPal-hosted LLM proxy funding the free 200-msg/mo allowance, Pro subscription with sync + unlimited pets + unmetered text + 30 vision/mo + weekly + monthly synthesis + unlimited reminders, BYOK as a free-tier modifier that bypasses the proxy, photo credit packs for vision overage, multi-pet UI behind the paywall, accessibility pass. (Renamed from old Phase 5; multi-pet moved here from Phase 6 candidate list per DECISIONS row 34; full task-list overhaul per DECISIONS row 36.)
+**Definition of done:** a free user can complete onboarding without entering an API key and chat up to 200 messages in a calendar month with the counter visible only in Settings; the same user can flip the BYOK toggle in Settings and continue chatting without limit; subscribing with a Play tester account unlocks sync, unlimited text chat, 30 vision/mo, and unlimited reminders; installing on a second device with the same Play account syncs the journal end-to-end; a Pro user who exceeds 30 vision/mo can buy a $2.99 = 50 photo credit pack and the balance rolls over; multi-pet works for Pro users; accessibility pass clean.
 
-- [ ] 7.1 Tier service (free: 1 pet, 30-day memory window) and gating checks
-- [ ] 7.2 `in_app_purchase` integration: monthly + annual subs
-- [ ] 7.3 One expert-pack IAP wired (e.g., "Senior Dog")
-- [ ] 7.4 Paywall screens + restore-purchases
-- [ ] 7.5 Multi-pet UI improvements — pet switcher widget, cross-pet timeline, family-wide reminders. Lives behind the Pro paywall. (Moved from the original Phase 6 candidate list per DECISIONS row 34.)
-- [ ] 7.6 **Cloud sync backend decision** (Supabase vs git-remote vs BYOC object store) — append to `DECISIONS.md`
-- [ ] 7.7 Implement `CloudSyncAdapter` against the chosen backend
-- [ ] 7.8 Conflict resolution: last-writer-wins with `.conflict.md` fallback
-- [ ] 7.9 Settings: data export, data delete, privacy info screen
-- [ ] 7.10 Accessibility pass: contrast, screen reader labels, text scaling, touch-target sizes
-- [ ] 7.11 Opt-in crash analytics (lightweight)
-- [ ] 7.12 Phase wrap-up commit + summary
+- [ ] 7.1 **Backend service architecture decision** — append to `DECISIONS.md`. Pick provider for the LLM proxy + auth + per-user metering store (Supabase Edge Functions, Cloudflare Workers, dedicated Node service, etc.). Spec: request-forwarding latency budget, prompt-cache passthrough requirements, auth model (Play Billing receipt → identity, or anonymous device-bound token), metering store, observability + alerting on cost run-up. Decision-only task; no implementation.
+- [ ] 7.2 Backend service implementation — LLM proxy that forwards Anthropic calls with PetPal's key (must transparently passthrough Anthropic `cache_control` blocks so prompt caching still works), auth, per-user message counter (resets monthly on entitlement-renewal date), per-user vision counter, photo-credit balance, hardening: rate-limit floor, abuse detection, log retention.
+- [ ] 7.3 `AnthropicClient` two-path refactor — introduce `LlmTransport` abstraction at `lib/harness/agent/llm_transport.dart`. Existing direct-call code at `lib/harness/agent/anthropic_client.dart` becomes `DirectTransport` (BYOK path). New `ProxyTransport` calls the Phase 7.2 backend. Agent loop and prompt-caching layer unchanged — selection happens at construction time based on active tier. Tests cover both transports.
+- [ ] 7.4 Tier service & entitlement model — Drift schema additions for `entitlements` (state ∈ {free, pro_monthly, pro_annual, byok}, renewal_date, photo_credits_balance, monthly_text_count, monthly_vision_count, counter_period_start). Riverpod `entitlementProvider` exposes the active state to the UI and the agent loop.
+- [ ] 7.5 `in_app_purchase` integration: monthly + annual subs — Pro $7.99/mo + $59/yr. Subscription receipt → backend → entitlement update.
+- [ ] 7.6 Photo credit pack IAP — $2.99 = 50 vision analyses, consumable IAP, balance rolls over indefinitely. Backend records the credit grant; client reads via `entitlementProvider`.
+- [ ] 7.7 Care pack IAP wired — one starter pack ($2.99–$4.99 range), e.g. "Reactive Dog" or "Senior Cat". Non-consumable IAP, ties to skill loader.
+- [ ] 7.8 Expert pack IAP wired — one starter ($14.99–$39.99 range), e.g. "Senior Dog Care". Non-consumable IAP.
+- [ ] 7.9 Paywall screens + restore-purchases — Pro upgrade screen with VOICE.md §7 additive copy ("Pro lifts the limit," not "you've hit the cap"). Restore-purchases works for subs + credit-pack history.
+- [ ] 7.10 Quota enforcement at the agent loop boundary — pre-call gate at `lib/harness/agent/agent_loop.dart` consults `entitlementProvider`. Free: 200 msg/mo, red-flag-screened turns exempt and never counted (verified by guarding the increment behind the screener result). Pro: unmetered text, 30 vision/mo + credit balance. Free + BYOK: no quota. Reminders gate at `lib/harness/scheduling/scheduler.dart` enforces 5-cap free / unlimited Pro. Sync gate at the `CloudSyncAdapter` checks Pro entitlement.
+- [ ] 7.11 BYOK onboarding path + settings switcher — restructure `lib/app/screens/onboarding_screen.dart`: API-key entry stops being a required step. New onboarding flow: welcome → privacy disclosure (proxy-default copy from VOICE.md §6 example 15) → done. Settings gets a "Bring your own Anthropic key" toggle (VOICE.md §6 example 12 copy) that activates `DirectTransport` and stores the key via `flutter_secure_storage`. Existing API-key UI moves to Settings; existing keys persist on upgrade.
+- [ ] 7.12 Multi-pet UI improvements — pet switcher widget, cross-pet timeline, family-wide reminders. Pro-gated; free tier add-pet block uses VOICE.md §6 example 9 copy. (Moved from the original Phase 6 candidate list per DECISIONS row 34.)
+- [ ] 7.13 **Cloud sync backend decision** — append to `DECISIONS.md`. Separate decision from 7.1 (the proxy backend); may collapse onto the same provider (e.g. Supabase covers both) or split (e.g. Cloudflare Workers proxy + Supabase Storage sync). Spec: object versioning, conflict semantics, encryption-at-rest, BYOC option for paranoid users.
+- [ ] 7.14 Implement `CloudSyncAdapter` against the chosen sync backend. End-to-end encryption per PRODUCT.md commitment.
+- [ ] 7.15 Conflict resolution: last-writer-wins with `.conflict.md` fallback for genuinely-divergent edits.
+- [ ] 7.16 Settings: data export, data delete, privacy info screen — privacy-info copy refreshed for the proxy-default + BYOK story (replaces the original "your key, your calls" framing). Data delete must purge backend records too (proxy logs, sync objects, entitlement counters) on Pro accounts.
+- [ ] 7.17 Accessibility pass + opt-in crash analytics — contrast, screen reader labels, text scaling, touch-target sizes. Lightweight crash analytics (opt-in, off by default).
+- [ ] 7.18 Phase wrap-up commit + summary; flag **on-device verification REQUIRED across two devices** for sync test.
 
-**On-device verification:** subscribe with tester account on device A → install on device B → confirm wiki syncs; add a second pet and confirm pet switcher works; trigger a conflict and confirm `.conflict.md` is created.
+**On-device verification (REQUIRED):** subscribe with tester account on device A → install on device B → confirm wiki syncs; add a second pet and confirm pet switcher works; trigger a sync conflict and confirm `.conflict.md` is created; chat 200+ messages on a free tester account and confirm the upgrade prompt fires; flip BYOK and confirm calls bypass the backend (verify via proxy logs); buy a photo credit pack and confirm balance rolls over to next month.
 
 **STOP.**
 

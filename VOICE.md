@@ -36,7 +36,7 @@ Bad:   The AI thinks Loki might benefit from…
 Good:  PetPal noticed Loki has been losing weight since March.
 ```
 
-Two narrow exceptions where AI framing is **mandatory**:
+Three narrow exceptions where AI framing is **mandatory**:
 
 1. **Onboarding privacy disclosure.** Plain language about which calls
    leave the device and what they carry. Required for trust and Play
@@ -44,9 +44,16 @@ Two narrow exceptions where AI framing is **mandatory**:
 2. **Anywhere the user is making a safety judgment** (red-flag
    escalations, medication-related answers): briefly remind them PetPal
    is software, not a vet, before the substantive content.
+3. **Backend routing disclosure (onboarding, BYOK toggle, Settings).**
+   Plain language about which path a chat call takes. By default,
+   messages and the relevant memories about the pet route through
+   PetPal's servers to Anthropic's Claude — that's how the monthly free
+   allowance is metered. With BYOK on, calls go direct to Anthropic
+   using the user's API key, and PetPal's servers never see them. Both
+   paths are honest framing; the user picks.
 
-Outside those two contexts, the words "AI", "LLM", "agent", "assistant",
-and "chatbot" do not appear in body copy.
+Outside those three contexts, the words "AI", "LLM", "agent",
+"assistant", and "chatbot" do not appear in body copy.
 
 ## 3. Vocabulary translation table
 
@@ -93,6 +100,12 @@ periodically (a CI lint enforces this in Phase 5):
 
 Tool-call pills must show the friendly translation, not the raw tool
 name. The user should never see `calling search_wiki…`.
+
+Also forbidden: **metering language in the chat surface itself**
+("12/200 messages used", countdown badges on the composer, progress
+bars draining as the user types). The monthly chat counter lives in
+Settings as ambient information; chat is unmetered visually. See §7
+for the underlying principle.
 
 ## 5. Pet-name interpolation rule (permanent)
 
@@ -216,9 +229,91 @@ shells stay static.**
         subtitle. Persists forever — it is a historical record, not a
         current-state indicator. Survives any future edit-message or
         mark-resolved feature (Phase 5+).
+
+11. Free-tier monthly chat row in Settings
+    Bad:  "127/200 messages used. Upgrade to Pro for unlimited."
+    After: "PetPal handles 200 chats a month on the free plan. You've
+            had 127 so far this month — plenty of room. Pro lifts the
+            limit if you'd rather not think about it."
+                                          (counter is ambient, not a
+                                          meter; never appears on the
+                                          chat surface itself)
+
+12. BYOK toggle in Settings
+    Bad:  "Use your own API key to bypass the quota."
+    After: "Bring your own Anthropic key
+            By default, PetPal handles the connection to Claude and
+            includes a monthly chat allowance. Switch this on if you'd
+            rather use your own Anthropic API key — your messages then
+            go directly to Anthropic without passing through PetPal's
+            servers, and the monthly limits don't apply."
+                                          (additive, not extractive;
+                                          honest about the routing)
+
+13. Photo credit pack purchase prompt (Pro user, vision cap reached)
+    Bad:  "Out of vision credits. Buy 50 more for $2.99."
+    After: "Photo analysis: 30 a month on Pro
+            You've used this month's allowance. Top up with 50 more
+            for $2.99 — they don't expire, so unused ones roll into
+            next month."
+                                          (cost-per-action framing fits
+                                          vision; never used for chat)
+
+14. Pro upgrade prompt at the monthly chat allowance
+    Bad:  "You've hit the free limit. Subscribe now."
+    After: "That's 200 messages this month
+            You've used this month's free allowance. Pro lifts the
+            limit, adds sync across devices, and unlocks photo
+            analysis — or, if you'd rather, switch to your own
+            Anthropic API key in Settings to keep chatting now."
+                                          (offer both ladders: pay or
+                                          BYOK; never strand the user)
+
+15. Onboarding privacy disclosure (replaces the API-key entry page)
+    Bad:  "Enter your Anthropic API key to begin."
+    After: "How chat works
+            When you ask PetPal something, your message and the
+            relevant memories about your pet go to Anthropic's Claude.
+            By default, PetPal routes that through our servers — this
+            is how the free 200-message-a-month allowance works, and
+            it's the only thing that leaves the phone. You can switch
+            to your own Anthropic API key any time in Settings; with
+            that on, calls go direct to Anthropic and our servers
+            don't see them."
+                                          (defaults to no-friction
+                                          onboarding; surfaces BYOK as
+                                          a Settings choice, not a
+                                          required setup step)
 ```
 
-## 7. Process
+## 7. Monetization voice principles
+
+Three rules govern every string in a quota row, paywall screen, upsell
+prompt, Settings row, or purchase confirmation:
+
+1. **Additive framing.** Pro adds — never subtracts what was promised
+   free. "Pro lifts the limit," not "you've hit the free cap." The free
+   tier is functional and respected on its own terms.
+
+2. **No metering language in chat.** Chat is an emotional, companion-
+   positioned surface. A "12/200 used" badge on the composer breaks the
+   warmth. The counter belongs in Settings only, framed as ambient
+   information, not a meter ticking down. The reminder cap (5) and the
+   pet count (1) follow the same rule — they're stated where you'd
+   naturally encounter them, not surveilled.
+
+3. **Credits only for vision.** The photo credit pack is the only
+   credit-balance UI in the app. Vision is the only feature where "one
+   photo, one analysis" is intuitive cost-per-call. Metering chat by
+   credits would feel transactional and would conflict with the
+   companion positioning — a rejected design we considered and
+   deliberately walked away from (DECISIONS row 36).
+
+The deeper rule: PetPal is a memory companion. Anything that makes a
+user feel they're paying to access their own pet's memories breaks the
+product. Quotas exist for cost-bounding, never for friction.
+
+## 8. Process
 
 - New copy goes through this file before it ships. Reviewers reject
   strings that fail §1–§5.

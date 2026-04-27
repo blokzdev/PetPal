@@ -25,7 +25,7 @@ irreplaceable and accumulates over years.
 
 1. **The compounding-memory user.** Multi-year owner who wants a single
    source of truth across vets, sitters, and family. Highest LTV — pays
-   for unlimited memory and sync.
+   for sync across devices and unlimited pets.
 2. **The new-pet anxious owner.** First puppy, kitten, or exotic;
    overwhelmed by what to track and when. Highest conversion — guided
    onboarding and species-specific care guides do most of the work.
@@ -58,26 +58,39 @@ specific instead of generic.
   Memory is private by default.
 - **Not an AI companion.** PetPal is a knowledgeable assistant. No
   anthropomorphizing, no roleplay, no "I" with a personality.
-- **Not a marketplace at v1.** Care packs and expert knowledge are
-  monetization layers that come once we have real users and real signal.
+- **Not an open marketplace at v1.** First-party care packs ship at
+  launch; third-party-authored expert knowledge packs (the Year 2
+  layer) come once we have real users and real signal.
 - **Not cloud-first.** Local-first, user-owned markdown. Optional
   encrypted sync is a Pro feature, not a default.
+- **Not a meter on every interaction.** Quotas exist to bound our AI
+  costs, not to ration access to your pet's memory. Chat is unmetered
+  for Pro subscribers and on BYOK. The free monthly chat allowance is
+  generous and lives in Settings, not in the chat surface itself.
 
 ## Two-year vision
 
 Year 1: ship the compounding-memory loop and prove retention. The free
-tier is functional but visibly limited (one pet, 30-day rolling memory,
-3 reminders); Pro unlocks unlimited memory, unlimited pets, weekly
-summary synthesis, and optional encrypted sync. By month 12, ten
-species supported, three first-party care packs (Puppy, Senior, Reactive
-Dog), 1,000 paying Pro subscribers.
+tier is unlimited locally — one pet, unlimited journal, 200 chat
+messages per month (safety/red-flag escalations never count toward the
+allowance), 5 reminders, manual browsing, export anytime. Pro
+($7.99/mo or $59/yr) adds end-to-end encrypted cross-device sync,
+unlimited pets, unlimited text chat, 30 photo-vision analyses per
+month, AI weekly summary plus monthly health report, and unlimited
+reminders. BYOK (a free-tier modifier, not a paid tier) lets users
+supply their own Anthropic API key to lift every cost-driven cap —
+calls route direct to Anthropic without crossing PetPal's backend, and
+the monthly limits don't apply. Photo credit packs ($2.99 = 50
+analyses, roll over indefinitely) cover Pro users who exceed the
+monthly vision cap. By month 12, ten species supported, three
+first-party care packs (Puppy, Senior, Reactive Dog), 1,000 paying
+Pro subscribers.
 
 Year 2: open the marketplace. Credentialed vets and behaviorists author
 expert knowledge packs ($14.99–$39.99 one-time); a vet-supply affiliate
 layer covers reorders. The defensibility shifts from feature parity
 ("we have chat too") to corpus depth ("PetPal knows three years of my
-animal's life and which behaviorist I trust"). Lifetime tier ($99–$129,
-local-only, no sync) for the privacy-first segment.
+animal's life and which behaviorist I trust").
 
 The moat compounds with use. Every entry the user writes makes the next
 answer better, and makes leaving more painful — that's the business.

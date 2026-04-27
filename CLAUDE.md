@@ -173,7 +173,7 @@ PetPal follows SemaClaw §3.6's four-mode scheduled-task taxonomy. Mode is store
 | `synthesis`        | LLM call   | No — writes a journal entry | WorkManager → SynthesisRunner               | Weekly summary entry under `wiki/<id>/digest/` |
 | `synthesisNotify`  | LLM call   | Yes — notification post-fire | WorkManager → SynthesisRunner → notification | "Loki's weekly summary is ready" (Pro tier) |
 
-Choose `notification` by default. Reach for `script` when the work is data-only and shouldn't interrupt the user. Reach for `synthesis` when the value depends on summarization that can't be pre-templated. `synthesisNotify` is reserved for Phase 5+ Pro features and is currently a stubbed dispatcher branch.
+Choose `notification` by default. Reach for `script` when the work is data-only and shouldn't interrupt the user. Reach for `synthesis` when the value depends on summarization that can't be pre-templated. `synthesisNotify` is reserved for Phase 7+ Pro features (weekly summary + monthly health report notifications, per DECISIONS row 36) and is currently a stubbed dispatcher branch.
 
 The taxonomy is locked in DECISIONS row 28.
 
@@ -249,7 +249,9 @@ The **MVP** screen list — delivered by end of Phase 2 — is the architectural
 
 Reminders, skills, paywall, sync are explicitly **not** in MVP. Reminders shipped in Phase 4; skills shipped in Phase 3; paywall + sync land in Phase 7.
 
-The **shipped v1** is not the MVP. Per DECISIONS row 34 we restructured after Phase 4: MVP architecture stays, but the v1 the user installs from the Play Store includes the Phase 5 design system + Phase 6 feature depth (photo timeline, multimodal chat, vet-visit structured entries + auto-follow-up reminders, weight/symptom trend charts, smarter weekly summary). The harness was past MVP-grade; the surface needed to catch up before monetization. Don't conflate "MVP done" with "ready to ship".
+The **shipped v1** is not the MVP. Per DECISIONS row 34 we restructured after Phase 4: MVP architecture stays, but the v1 the user installs from the Play Store includes the Phase 5 design system + Phase 6 feature depth (photo timeline, multimodal chat, vet-visit structured entries + auto-follow-up reminders, weight/symptom trend charts, smarter weekly summary, monthly health report). The harness was past MVP-grade; the surface needed to catch up before monetization. Don't conflate "MVP done" with "ready to ship".
+
+Per DECISIONS row 36, the v1 free tier is: 1 pet, unlimited local journal, 200 chat messages/month (red-flag-screened turns are exempt and never counted), 5 reminders, manual browsing, export. Pro lifts every cost-driven cap, adds sync, unlimited pets, weekly + monthly synthesis. BYOK is a free-tier modifier that lifts the message + vision quotas in exchange for the user supplying their own Anthropic key — calls then route direct to Anthropic, bypassing PetPal's backend.
 
 ---
 
@@ -269,7 +271,8 @@ The **shipped v1** is not the MVP. Per DECISIONS row 34 we restructured after Ph
 | flutter_local_notifications | Notification surface |
 | workmanager | Condition-gated background work (sync, embeddings) |
 | in_app_purchase | Play Billing for subs + IAPs |
-| Cloud sync backend | **Deferred to Phase 5.** `CloudSyncAdapter` interface lands in Phase 2. |
+| Cloud sync backend | **Deferred to Phase 7** (provider locked by DECISIONS row 36 follow-up in Phase 7 task 7.13). `CloudSyncAdapter` interface lands in Phase 2. |
+| PetPal backend proxy | Phase 7 deliverable. LLM-call proxy (forwards Anthropic calls with our key, transparently passes `cache_control` blocks for prompt caching), auth, per-user metering (text msg/mo, vision/mo, photo-credit balance). Funds the free-tier 200-msg/mo allowance. BYOK users opt out at Settings and call Anthropic directly. Backend choice — Supabase Edge / Cloudflare Workers / dedicated Node — locked by DECISIONS row 36 follow-up in Phase 7 task 7.1. |
 
 ---
 
@@ -384,7 +387,7 @@ The release build is meaningfully smaller than `flutter build apk --debug` (R8 m
 
 ## 15. Phased build plan
 
-See `ROADMAP.md`. Eight phases: Phase 0 (scaffold) → Phase 8 (Play Store). MVP architecture at end of Phase 2; shipped v1 at end of Phase 6 (including the Phase 5 design system + Phase 6 feature depth); paywall + sync in Phase 7. The original plan was six phases — DECISIONS row 34 captures the post-Phase-4 restructure that inserted Phase 5 (Product Polish & Visual Identity) and Phase 6 (Feature Depth & AI Capabilities) before the original monetization phase (now Phase 7).
+See `ROADMAP.md`. Eight phases: Phase 0 (scaffold) → Phase 8 (Play Store). MVP architecture at end of Phase 2; shipped v1 at end of Phase 6 (including the Phase 5 design system + Phase 6 feature depth); paywall + sync in Phase 7. The original plan was six phases — DECISIONS row 34 captures the post-Phase-4 restructure that inserted Phase 5 (Product Polish & Visual Identity) and Phase 6 (Feature Depth & AI Capabilities) before the original monetization phase (now Phase 7). Row 36 captures the Phase-7 monetization-model overhaul: unlimited free local memory (no cap), cost-bounded Pro quotas (200 msg/mo free funded by a PetPal-hosted LLM proxy; unmetered text + 30 vision/mo + sync on Pro), BYOK as a free-tier modifier, photo credit packs for vision overage, dropped lifetime tier.
 
 ---
 
