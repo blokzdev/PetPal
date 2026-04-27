@@ -4,6 +4,7 @@ import '../../data/db/database.dart';
 import '../../harness/agent/agent_loop.dart';
 import '../../harness/agent/tool_dispatcher.dart';
 import '../../harness/session_builder.dart';
+import '../platform/haptics.dart';
 import '../providers.dart';
 import 'chat_error.dart';
 import 'chat_state.dart';
@@ -109,7 +110,15 @@ class ChatNotifier extends Notifier<ChatState> {
                 ToolPill(id: id, name: name, input: input),
               ],
             );
-          case AgentToolResult(:final toolUseId):
+          case AgentToolResult(:final toolUseId, :final isError):
+            // Capture the originating pill BEFORE removing it so we
+            // know which tool just completed (the result event itself
+            // carries only the use-id, not the tool name — see
+            // AgentToolResult in agent_loop.dart).
+            final completedPill = state.activeTools.firstWhere(
+              (p) => p.id == toolUseId,
+              orElse: () => const ToolPill(id: '', name: '', input: {}),
+            );
             state = state.copyWith(
               activeTools: state.activeTools
                   .where((p) => p.id != toolUseId)
@@ -118,6 +127,12 @@ class ChatNotifier extends Notifier<ChatState> {
             // Tools may have written entries / mutated SOUL.md; bust the
             // wiki browser's cache so the next view fetches fresh.
             ref.invalidate(wikiEntriesProvider);
+            // Task 5.8 — light haptic on save-memory commit. Fires only
+            // for a successful write_wiki_entry; the visual hero moment
+            // (snackbar + tool-pill settle animation) lands in 5.9.
+            if (!isError && completedPill.name == 'write_wiki_entry') {
+              ref.read(hapticsProvider).light();
+            }
           case AgentLoopDone(:final history):
             final escalations = composed.redFlag != null
                 ? {

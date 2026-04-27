@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 
@@ -17,9 +18,27 @@ class HomeScreen extends ConsumerWidget {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
+          // Task 5.8 — AnimatedSwitcher (Material 3 default fade) on
+          // greeting state changes: empty→named-pet on first add, and
+          // pet-swap when Pro lifts the 1-pet cap. Keyed on the
+          // current pet id (or 'empty' / 'loading') so the switcher
+          // sees a child identity change, not just a property change.
           child: pets.when(
-            data: (list) =>
-                list.isEmpty ? const _EmptyState() : _Greeting(pets: list),
+            data: (list) {
+              final child = list.isEmpty
+                  ? const _EmptyState()
+                  : _Greeting(pets: list);
+              final keyValue = list.isEmpty ? 'empty' : 'pet-${list.last.id}';
+              return AnimatedSwitcher(
+                duration: Motion.short,
+                switchInCurve: Motion.standardCurve,
+                switchOutCurve: Motion.standardCurve,
+                child: KeyedSubtree(
+                  key: ValueKey(keyValue),
+                  child: child,
+                ),
+              );
+            },
             loading: () => const CircularProgressIndicator(),
             error: (e, _) => Text('Could not read pets: $e'),
           ),

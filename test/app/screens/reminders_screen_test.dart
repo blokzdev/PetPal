@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:petpal/app/platform/haptics.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/harness/scheduling/notification_template.dart';
@@ -10,6 +11,7 @@ import 'package:petpal/harness/scheduling/reminder_kinds.dart';
 import 'package:petpal/main.dart';
 import 'package:petpal/platform/alarm_scheduler.dart';
 import 'package:petpal/platform/schedule_health.dart';
+import 'package:petpal/platform/settings_storage.dart';
 import 'package:petpal/platform/work_scheduler.dart';
 
 import '../../_helpers/fake_api_key_storage.dart';
@@ -247,5 +249,75 @@ void main() {
       find.textContaining('Confirm timing with your vet'),
       findsOneWidget,
     );
+  });
+
+  // -------------------------------------------------------------------
+  // Task 5.8 — haptics. Asserts the light-impact haptic fires at the
+  // two reminder commit points: schedule (on successful create) and
+  // complete/cancel (on swipe-dismiss confirm). Counts via FakeHaptics
+  // since HapticFeedback's platform channel is a no-op under test.
+  // -------------------------------------------------------------------
+  testWidgets('schedule-reminder fires a light haptic on successful save',
+      (tester) async {
+    final haptics = FakeHaptics();
+    final stack = await buildChatTestStack(
+      llm: ScriptedLlmClient(scripts: const []),
+    );
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          ...stack.overrides,
+          alarmSchedulerProvider.overrideWithValue(
+            AlarmScheduler(bindings: _NoopAlarmBindings()),
+          ),
+          workSchedulerProvider.overrideWithValue(
+            WorkScheduler(bindings: _NoopWorkBindings()),
+          ),
+          notificationTemplatesProvider.overrideWithValue(
+            InMemoryNotificationTemplates({
+              for (final k in ReminderKind.values)
+                k: NotificationTemplate(
+                  title: k.label,
+                  body: '${k.label} body for {pet_name}',
+                ),
+            }),
+          ),
+          scheduleHealthServiceProvider.overrideWithValue(_FakeHealth()),
+          settingsStorageProvider.overrideWithValue(InMemorySettingsStorage()),
+          hapticsProvider.overrideWithValue(haptics),
+        ],
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Reminders'));
+    await tester.pumpAndSettle();
+
+    // Open the add-reminder form via the FAB (disambiguated from the
+    // empty-state PetButton — both share the icon by design).
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byIcon(Icons.add_alarm),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Milo is a dog → the form pre-populates `_when` from the
+    // species-default cadence, so we don't need to tap through the
+    // date picker. Just commit.
+    expect(haptics.lightCount, 0,
+        reason: 'no haptic until the user actually commits the schedule');
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Save'));
+    await tester.pumpAndSettle();
+
+    expect(haptics.lightCount, 1,
+        reason: 'one light haptic fires on a successful schedule commit');
   });
 }

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/chat/chat_notifier.dart';
 import 'package:petpal/app/chat/chat_state.dart';
+import 'package:petpal/app/platform/haptics.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
@@ -71,6 +72,7 @@ void main() {
       ],
     ]);
 
+    final haptics = FakeHaptics();
     final container = ProviderContainer(
       overrides: [
         appDatabaseProvider.overrideWith((ref) async {
@@ -86,6 +88,12 @@ void main() {
         // and crash. This test doesn't exercise skills.
         skillSourceProvider.overrideWithValue(const EmptySkillSource()),
         llmClientProvider.overrideWithValue(llmClient),
+        // 5.8 — chat layer fires HapticFeedback on a successful
+        // write_wiki_entry. The services binding isn't initialized
+        // in non-widget tests, so swap to a counting fake; we also
+        // assert the haptic actually fired (one light pulse per
+        // successful write).
+        hapticsProvider.overrideWithValue(haptics),
       ],
     );
     addTearDown(container.dispose);
@@ -101,6 +109,12 @@ void main() {
     expect(state.error, isNull, reason: 'no error should surface');
     expect(state.streamingAssistant, isNull);
     expect(state.activeTools, isEmpty);
+
+    // 5.8 — exactly one light haptic for the single successful
+    // write_wiki_entry tool result. Subsequent text-only turns must
+    // not fire additional haptics.
+    expect(haptics.lightCount, 1,
+        reason: 'one light haptic per successful write_wiki_entry commit');
 
     // The entry actually lives in the DB now.
     final entries = await db.select(db.entries).get();

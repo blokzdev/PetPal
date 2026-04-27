@@ -202,18 +202,20 @@ class _AsyncAppScaffold<T> extends StatelessWidget {
     );
   }
 
-  /// Default loading: a calm vertical stack of skeleton lines. Reads as
-  /// "list incoming" without the visual weight of a centered spinner.
+  /// Default loading: a stack of ListTile-shaped row skeletons —
+  /// authentic preview of typical list geometry (icon + title + subtitle).
+  /// Reads as "list incoming" without the visual weight of a centered
+  /// spinner. List surfaces with non-default row shapes (e.g. reminders'
+  /// trailing chip) override `loading:` with a shape-tuned variant.
   Widget _defaultLoading() {
-    return ListView.separated(
-      padding: Insets.l,
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.s),
       itemCount: 6,
-      separatorBuilder: (_, _) => const SizedBox(height: Spacing.m),
-      itemBuilder: (_, i) => PetSkeleton.line(
-        // Vary the bar widths slightly so the skeleton reads as text-
-        // like rather than a row of identical bars.
-        width: 320 - (i.isEven ? 0 : 60).toDouble(),
-        height: 18,
+      // Vary title/subtitle widths slightly so the stack reads as a
+      // list of distinct items rather than a column of identical rows.
+      itemBuilder: (_, i) => PetSkeletonListRow(
+        titleWidth: 220 - (i.isEven ? 0 : 50).toDouble(),
+        subtitleWidth: 140 - (i.isEven ? 30 : 0).toDouble(),
       ),
     );
   }

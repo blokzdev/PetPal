@@ -197,7 +197,10 @@ void main() {
         ),
       ));
       // Default loading is six PetSkeleton.line rows in a ListView.
-      expect(find.byType(PetSkeleton), findsNWidgets(6));
+      // 5.8: default loading is now a stack of PetSkeletonListRow
+      // (icon + title + subtitle = 3 PetSkeletons each). 6 rows × 3 = 18.
+      expect(find.byType(PetSkeletonListRow), findsNWidgets(6));
+      expect(find.byType(PetSkeleton), findsNWidgets(18));
       expect(find.text('never'), findsNothing);
     });
 

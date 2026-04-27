@@ -5,11 +5,14 @@ import '../../data/onboarding_templates.dart';
 import '../../data/repos/reminder_repo.dart';
 import '../../data/soul_file.dart';
 import '../../harness/scheduling/reminder_kinds.dart';
+import '../design/design.dart';
+import '../platform/haptics.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/battery_exemption_prompt.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
+import '../widgets/pet_skeleton.dart';
 
 /// Reminders CRUD screen — per-pet destination, so the app bar
 /// interpolates the active pet's name (VOICE.md §5).
@@ -40,7 +43,7 @@ class RemindersScreen extends ConsumerWidget {
                 pet: pets.last,
                 onAdd: () => _openAdd(context, ref, pets.last.id),
               ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _RemindersSkeleton(),
         error: (e, _) =>
             Center(child: Text('Could not load reminders: $e')),
       ),
@@ -131,12 +134,34 @@ class _Body extends ConsumerWidget {
                     onAdd: onAdd,
                   )
                 : _List(rows: rows, petId: pet.id as int),
-            loading: () => const Center(child: CircularProgressIndicator()),
+            loading: () => const _RemindersSkeleton(),
             error: (e, _) =>
                 Center(child: Text('Could not load reminders: $e')),
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Reminders loading skeleton — matches the actual reminder row
+/// geometry: leading icon circle, two stacked lines (kind + when),
+/// trailing "fires-in" chip. Authentic preview rather than the
+/// generic AppScaffold.async default. Six rows mirrors the typical
+/// free-tier cap (DECISIONS row 36).
+class _RemindersSkeleton extends StatelessWidget {
+  const _RemindersSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+      itemCount: 6,
+      itemBuilder: (_, i) => PetSkeletonListRow(
+        hasTrailing: true,
+        titleWidth: 180 - (i.isEven ? 0 : 40).toDouble(),
+        subtitleWidth: 120 - (i.isEven ? 30 : 0).toDouble(),
+      ),
     );
   }
 }
@@ -203,6 +228,11 @@ class _List extends ConsumerWidget {
             final service = await ref.read(reminderServiceProvider.future);
             await service.cancel(r.id);
             ref.invalidate(_remindersListProvider);
+            // Task 5.8 — light haptic on completing/cancelling a
+            // reminder. Fires after the cancel succeeds, before the
+            // animation plays out, so the buzz syncs with the row's
+            // visual departure.
+            ref.read(hapticsProvider).light();
             return true;
           },
           child: ListTile(
@@ -399,6 +429,9 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
         when: when,
       );
       if (!mounted) return;
+      // Task 5.8 — light haptic on schedule-reminder commit, before
+      // the form pops back to the list.
+      ref.read(hapticsProvider).light();
       Navigator.of(context).pop(true);
     } catch (e) {
       if (!mounted) return;

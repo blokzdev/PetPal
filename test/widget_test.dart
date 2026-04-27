@@ -1,4 +1,5 @@
 import 'package:drift/native.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
@@ -53,6 +54,17 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Add your pet'), findsOneWidget);
+    // 5.8 — the greeting slot is wrapped in an AnimatedSwitcher so
+    // the empty-state ↔ named-pet transition fades cleanly. The
+    // child carries a stable ValueKey ('empty' here) so the switcher
+    // sees an identity change when the user adds their first pet.
+    final switcher = tester.widget<AnimatedSwitcher>(
+      find.ancestor(
+        of: find.text('Add your pet'),
+        matching: find.byType(AnimatedSwitcher),
+      ).first,
+    );
+    expect(switcher.duration, const Duration(milliseconds: 200));
   });
 
   testWidgets('Unonboarded user lands on the welcome page', (tester) async {

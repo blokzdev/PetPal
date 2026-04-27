@@ -57,4 +57,51 @@ void main() {
     // the builder is functioning.
     expect(find.byType(PetSkeleton), findsOneWidget);
   });
+
+  // -------------------------------------------------------------------
+  // Task 5.8 — PetSkeletonListRow composite. Authentic ListTile-shaped
+  // preview, parameterized so journal / care guides / reminders all
+  // share one row primitive. Default configuration matches the new
+  // AppScaffold.async loading default.
+  // -------------------------------------------------------------------
+  group('PetSkeletonListRow', () {
+    testWidgets('default: leading circle + 2 lines, no trailing',
+        (tester) async {
+      await tester.pumpWidget(_wrap(const PetSkeletonListRow()));
+      // Pump one frame; don't pumpAndSettle (PetSkeleton's pulse
+      // controller repeats forever).
+      await tester.pump();
+      // 1 circle + 2 lines = 3 PetSkeleton primitives, no rectangles.
+      expect(find.byType(PetSkeleton), findsNWidgets(3));
+    });
+
+    testWidgets('hasTrailing=true adds a chip-shaped rectangle',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        const PetSkeletonListRow(hasTrailing: true),
+      ));
+      await tester.pump();
+      // 1 circle + 2 lines + 1 trailing rectangle = 4 PetSkeletons.
+      expect(find.byType(PetSkeleton), findsNWidgets(4));
+    });
+
+    testWidgets('hasLeading=false drops the leading circle',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        const PetSkeletonListRow(hasLeading: false),
+      ));
+      await tester.pump();
+      // 0 leading + 2 lines = 2 PetSkeletons.
+      expect(find.byType(PetSkeleton), findsNWidgets(2));
+    });
+
+    testWidgets('lines=1 drops the subtitle line', (tester) async {
+      await tester.pumpWidget(_wrap(
+        const PetSkeletonListRow(lines: 1),
+      ));
+      await tester.pump();
+      // 1 leading circle + 1 title line = 2 PetSkeletons.
+      expect(find.byType(PetSkeleton), findsNWidgets(2));
+    });
+  });
 }

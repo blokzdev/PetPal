@@ -13,6 +13,14 @@ import '../design/design.dart';
 /// - [PetSkeleton.line]      — single text-line placeholder (height 14)
 /// - [PetSkeleton.rectangle] — arbitrary rect (cards, images)
 /// - [PetSkeleton.circle]    — avatars and icon-shaped placeholders
+///
+/// One composite, layered on the primitives:
+///
+/// - [PetSkeletonListRow]    — ListTile-shaped row (optional leading
+///   circle, 1–2 stacked lines, optional trailing chip-shape).
+///   Used by [AppScaffold.async]'s default loading and by any list
+///   surface that wants an authentic preview of its row geometry —
+///   journal entries, care guides, reminders all share it.
 class PetSkeleton extends StatefulWidget {
   const PetSkeleton.line({
     super.key,
@@ -46,6 +54,73 @@ class PetSkeleton extends StatefulWidget {
 }
 
 enum _SkeletonShape { line, rectangle, circle }
+
+/// ListTile-shaped row skeleton — composes the primitives. Honors the
+/// same pulse animation by virtue of building from `PetSkeleton.line`
+/// + `PetSkeleton.circle` + `PetSkeleton.rectangle` children, each of
+/// which runs its own controller. Authoring rather than wrapping
+/// keeps a single shared duration/curve from the primitive class.
+///
+/// Default geometry approximates Material's ListTile (56dp min height,
+/// 16dp horizontal padding) so a `listRow` skeleton drops into a
+/// `ListView.builder` without further wrapping.
+class PetSkeletonListRow extends StatelessWidget {
+  const PetSkeletonListRow({
+    super.key,
+    this.hasLeading = true,
+    this.lines = 2,
+    this.hasTrailing = false,
+    this.titleWidth = 200,
+    this.subtitleWidth = 140,
+  }) : assert(lines == 1 || lines == 2, 'lines must be 1 or 2');
+
+  /// Whether to render a 40dp leading circle (avatar / icon slot).
+  final bool hasLeading;
+
+  /// 1 (title only) or 2 (title + subtitle).
+  final int lines;
+
+  /// Whether to render a 56×28dp trailing chip-shaped rectangle.
+  final bool hasTrailing;
+
+  final double titleWidth;
+  final double subtitleWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: Spacing.m,
+        vertical: Spacing.s,
+      ),
+      child: Row(
+        children: [
+          if (hasLeading) ...[
+            const PetSkeleton.circle(diameter: 40),
+            const SizedBox(width: Spacing.m),
+          ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                PetSkeleton.line(width: titleWidth, height: 16),
+                if (lines == 2) ...[
+                  const SizedBox(height: Spacing.xs),
+                  PetSkeleton.line(width: subtitleWidth, height: 12),
+                ],
+              ],
+            ),
+          ),
+          if (hasTrailing) ...[
+            const SizedBox(width: Spacing.m),
+            const PetSkeleton.rectangle(width: 56, height: 28),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
 class _PetSkeletonState extends State<PetSkeleton>
     with SingleTickerProviderStateMixin {
