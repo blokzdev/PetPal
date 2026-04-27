@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_empty_state.dart';
 
 /// Care guides browser. Shows every bundled guide applicable to the
 /// active pet's species, with an enable/disable toggle per row.
@@ -16,33 +17,32 @@ class SkillBrowserScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final catalogAsync = ref.watch(skillCatalogProvider);
-    return AppScaffold(
+    return AppScaffold.async<List<SkillCatalogEntry>>(
       title: 'Care guides',
-      body: catalogAsync.when(
-        data: (entries) =>
-            entries.isEmpty ? const _Empty() : _SkillList(entries: entries),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) =>
-            Center(child: Text('Could not load care guides: $e')),
-      ),
+      value: catalogAsync,
+      onRetry: () => ref.invalidate(skillCatalogProvider),
+      data: (context, entries) =>
+          entries.isEmpty ? const CareGuidesEmptyForTesting() : _SkillList(entries: entries),
     );
   }
 }
 
-class _Empty extends StatelessWidget {
-  const _Empty();
+/// Care guides empty state — global screen, no pet-name interpolation
+/// (VOICE.md §5). Static copy, no CTA: the user can't author a guide
+/// from inside PetPal in v1, and waiting for more bundled packs is
+/// the only legitimate path forward.
+class CareGuidesEmptyForTesting extends StatelessWidget {
+  const CareGuidesEmptyForTesting({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          "No care guides for your pet's species yet — we're adding more.",
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
+    return const PetEmptyState(
+      icon: Icons.menu_book_outlined,
+      heading: 'No care guides yet for your pet.',
+      body: "We're adding more. Care guides activate during chat "
+          'when you mention what they cover — like "puppy" or '
+          '"senior cat" — so the right one shows up at the right '
+          'time, not as a wall of articles.',
     );
   }
 }

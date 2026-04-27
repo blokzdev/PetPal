@@ -8,6 +8,8 @@ import '../../harness/scheduling/reminder_kinds.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/battery_exemption_prompt.dart';
+import '../widgets/pet_button.dart';
+import '../widgets/pet_empty_state.dart';
 
 /// Reminders CRUD screen — per-pet destination, so the app bar
 /// interpolates the active pet's name (VOICE.md §5).
@@ -34,7 +36,10 @@ class RemindersScreen extends ConsumerWidget {
       body: petsAsync.when(
         data: (pets) => pets.isEmpty
             ? const _NoPet()
-            : _Body(pet: pets.last),
+            : _Body(
+                pet: pets.last,
+                onAdd: () => _openAdd(context, ref, pets.last.id),
+              ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) =>
             Center(child: Text('Could not load reminders: $e')),
@@ -102,8 +107,9 @@ final _scheduleHealthProvider = FutureProvider.autoDispose((ref) async {
 });
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.pet});
+  const _Body({required this.pet, required this.onAdd});
   final dynamic pet;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -120,7 +126,10 @@ class _Body extends ConsumerWidget {
         Expanded(
           child: reminders.when(
             data: (rows) => rows.isEmpty
-                ? const _Empty()
+                ? RemindersEmptyForTesting(
+                    petName: pet.name as String,
+                    onAdd: onAdd,
+                  )
                 : _List(rows: rows, petId: pet.id as int),
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, _) =>
@@ -132,19 +141,33 @@ class _Body extends ConsumerWidget {
   }
 }
 
-class _Empty extends StatelessWidget {
-  const _Empty();
+/// Reminders empty state — task 5.7 (locked option: action-first with
+/// category examples). The body teaches what KINDS of reminders are
+/// useful (heartworm, flea treatment, vaccines) so a user with no
+/// mental model gets concrete starters. Per-pet destination → name
+/// interpolation (VOICE.md §5). The CTA mirrors the FAB so the empty
+/// state has its own large affordance — duplication is intentional;
+/// the FAB anchors at the bottom-right and can be missed on first use.
+class RemindersEmptyForTesting extends StatelessWidget {
+  const RemindersEmptyForTesting({
+    super.key,
+    required this.petName,
+    required this.onAdd,
+  });
+  final String petName;
+  final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          'No reminders yet. Tap *Add reminder* to set one.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+    return PetEmptyState(
+      icon: Icons.alarm_outlined,
+      heading: 'No reminders for $petName yet.',
+      body: 'Heartworm. Flea treatment. Vaccines. Set a reminder '
+          "and PetPal will nudge you when it's due.",
+      action: PetButton(
+        label: 'Add reminder',
+        onPressed: onAdd,
+        icon: Icons.add_alarm,
       ),
     );
   }

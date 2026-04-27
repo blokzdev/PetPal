@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
 import '../chat/chat_state.dart';
+import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_empty_state.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -70,7 +72,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         children: [
           Expanded(
             child: ui.isEmpty && state.streamingAssistant == null
-                ? _EmptyChat(petName: petName)
+                ? EmptyChatForTesting(
+                    petName: petName,
+                    onSuggest: (prompt) {
+                      _input.text = prompt;
+                      _input.selection = TextSelection.fromPosition(
+                        TextPosition(offset: _input.text.length),
+                      );
+                    },
+                  )
                 : _MessageList(
                     controller: _scrollController,
                     messages: ui,
@@ -97,31 +107,66 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   }
 }
 
-class _EmptyChat extends StatelessWidget {
-  const _EmptyChat({required this.petName});
+/// Chat empty state — task 5.7 (locked option: suggested prompts as
+/// tappable chips). The user has just opened chat with their pet's
+/// agent and has no mental model for what to type. Three concrete
+/// prompt chips lower activation energy; tapping a chip pre-fills
+/// the composer (does NOT auto-send — user can still edit).
+///
+/// Per VOICE.md §1: warm, never saccharine, no anthropomorphizing
+/// PetPal. The heading describes what the chat IS ("Chat with PetPal
+/// about Loki"), not a greeting. The chips are concrete things an
+/// owner might actually say, not chatbot-demo prompts.
+///
+/// Per VOICE.md §5 the heading interpolates the pet name. The third
+/// chip stays generic where pet name doesn't naturally fit, so it
+/// works regardless of species.
+class EmptyChatForTesting extends StatelessWidget {
+  const EmptyChatForTesting({
+    super.key,
+    required this.petName,
+    required this.onSuggest,
+  });
   final String petName;
+  final ValueChanged<String> onSuggest;
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final body = petName == 'PetPal'
-        ? 'Tell PetPal something about your pet to get started.'
-        : "Tell PetPal what's been happening with $petName.";
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.chat_bubble_outline, size: 56, color: scheme.primary),
-            const SizedBox(height: 12),
-            Text(
-              body,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium,
+    final hasName = petName.isNotEmpty && petName != 'PetPal';
+    final heading = hasName
+        ? 'Chat with PetPal about $petName.'
+        : 'Chat with PetPal about your pet.';
+    final body = hasName
+        ? "Try one of these, or just type what's been happening:"
+        : "Try one of these, or just type what's been happening:";
+
+    final prompts = hasName
+        ? <String>[
+            '$petName had vaccines today',
+            '$petName has been scratching since yesterday',
+            'What food works for $petName?',
+          ]
+        : const <String>[
+            'My pet had vaccines today',
+            'My pet has been scratching since yesterday',
+            'What food should I avoid?',
+          ];
+
+    return PetEmptyState(
+      icon: Icons.chat_bubble_outline,
+      heading: heading,
+      body: body,
+      action: Wrap(
+        spacing: Spacing.s,
+        runSpacing: Spacing.s,
+        alignment: WrapAlignment.center,
+        children: [
+          for (final prompt in prompts)
+            ActionChip(
+              label: Text(prompt),
+              onPressed: () => onSuggest(prompt),
             ),
-          ],
-        ),
+        ],
       ),
     );
   }

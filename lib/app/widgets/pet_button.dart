@@ -77,10 +77,16 @@ class _PetButtonContent extends StatelessWidget {
   Widget build(BuildContext context) {
     // Stack so the label always lays out (controls width) regardless of
     // loading state. The label fades to opacity 0 while loading; the
-    // spinner fades in on top. Width never changes — no layout shift on
-    // tap, no neighbouring widgets jumping. The label is wrapped in
-    // IgnorePointer when invisible so its no-longer-visible text can't
-    // accidentally absorb hit-testing on the button surface.
+    // spinner mounts only when loading. Width never changes (label
+    // always occupies its full width via opacity-only fade) — no
+    // layout shift on tap, no neighbouring widgets jumping.
+    //
+    // The spinner is conditionally mounted rather than always-rendered-
+    // -with-opacity-0 because CircularProgressIndicator has a
+    // continuously-running animation that blocks `pumpAndSettle` in
+    // widget tests even when invisible. Conditionally mounting kills
+    // the animation when not in use; the small cross-fade-in for the
+    // spinner is sacrificed in exchange for testable surfaces.
     final labelWidget = Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -100,11 +106,8 @@ class _PetButtonContent extends StatelessWidget {
           opacity: isLoading ? 0 : 1,
           child: IgnorePointer(ignoring: isLoading, child: labelWidget),
         ),
-        AnimatedOpacity(
-          duration: Motion.short,
-          curve: Motion.standardCurve,
-          opacity: isLoading ? 1 : 0,
-          child: SizedBox(
+        if (isLoading)
+          SizedBox(
             width: 18,
             height: 18,
             child: CircularProgressIndicator(
@@ -112,7 +115,6 @@ class _PetButtonContent extends StatelessWidget {
               color: spinnerColor,
             ),
           ),
-        ),
       ],
     );
   }

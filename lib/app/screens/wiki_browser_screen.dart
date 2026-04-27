@@ -8,6 +8,8 @@ import '../../data/db/database.dart';
 import '../../data/wiki_export.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_button.dart';
+import '../widgets/pet_empty_state.dart';
 
 class WikiBrowserScreen extends ConsumerStatefulWidget {
   const WikiBrowserScreen({super.key});
@@ -56,7 +58,7 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
       orElse: () => null,
     );
     final title = petName == null ? 'Journal' : "$petName's journal";
-    return AppScaffold(
+    return AppScaffold.async<List<Entry>>(
       title: title,
       actions: [
         IconButton(
@@ -76,39 +78,47 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
           icon: const Icon(Icons.refresh),
         ),
       ],
-      body: entriesAsync.when(
-        data: (entries) =>
-            entries.isEmpty ? const _Empty() : _Tree(entries: entries),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Could not load journal: $e')),
-      ),
+      value: entriesAsync,
+      onRetry: () => ref.invalidate(wikiEntriesProvider),
+      data: (context, entries) => entries.isEmpty
+          ? JournalEmptyForTesting(petName: petName)
+          : _Tree(entries: entries),
     );
   }
 }
 
-class _Empty extends ConsumerWidget {
-  const _Empty();
+/// Journal empty state — task 5.7 (locked option: narrative invitation).
+/// Frames the journal as the moat-product, where Loki's life
+/// accumulates over time. Concrete sensory examples sit inside the
+/// prose rather than as a separate list, so the surface reads as
+/// warm-companion, not marketing-bullets. Per VOICE.md §5 the body
+/// interpolates the pet's name on a per-pet destination.
+class JournalEmptyForTesting extends StatelessWidget {
+  const JournalEmptyForTesting({super.key, required this.petName});
+  final String? petName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final petsAsync = ref.watch(petsProvider);
-    final petName = petsAsync.maybeWhen(
-      data: (pets) => pets.isEmpty ? null : pets.last.name,
-      orElse: () => null,
-    );
+  Widget build(BuildContext context) {
+    final heading = petName == null
+        ? 'No memories yet.'
+        : 'No memories about $petName yet.';
     final body = petName == null
-        ? "No memories yet. Tell PetPal what's been happening and "
-            "they'll start showing up here."
-        : 'No memories about $petName yet. Tell PetPal what\'s been '
-            "happening and they'll start showing up here.";
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Text(
-          body,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+        ? "This is where your pet's life will accumulate — vet "
+            "visits, weight changes, the things you'd otherwise "
+            "forget. Tell PetPal what's been happening, and "
+            "they'll show up here."
+        : "This is where $petName's life will accumulate — vet "
+            "visits, weight changes, the things you'd otherwise "
+            "forget. Tell PetPal what's been happening, and "
+            "they'll show up here.";
+    return PetEmptyState(
+      icon: Icons.menu_book_outlined,
+      heading: heading,
+      body: body,
+      action: PetButton(
+        label: 'Open chat',
+        onPressed: () => GoRouter.of(context).go('/chat'),
+        icon: Icons.chat_bubble_outline,
       ),
     );
   }

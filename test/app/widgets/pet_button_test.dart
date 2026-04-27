@@ -42,36 +42,36 @@ void main() {
   });
 
   group('PetButton loading state', () {
-    // The Stack-based design keeps both the label and the spinner in the
-    // widget tree at all times — the label always lays out (controlling
-    // the button's width) and the two cross-fade via `AnimatedOpacity`
-    // so toggling `isLoading` never causes a layout shift. These tests
-    // assert opacity values, which is the visually-meaningful invariant.
+    // Design (post-task-5.7 follow-up to 5.2): the spinner is
+    // conditionally mounted only when isLoading=true. The label
+    // always lays out via opacity-only fade so the button width
+    // doesn't change between states — preserving the no-layout-
+    // shift guarantee — but the CircularProgressIndicator's
+    // animation no longer runs when not in use, which keeps
+    // `pumpAndSettle` working in widget tests for any surface that
+    // includes a PetButton.
 
-    testWidgets('label visible / spinner invisible when isLoading=false',
+    testWidgets('label visible / spinner not mounted when isLoading=false',
         (tester) async {
       await tester.pumpWidget(_wrap(
         PetButton(label: 'Save', onPressed: () {}),
       ));
-      // Advance past Motion.short so AnimatedOpacity reaches its target.
-      // Don't pumpAndSettle — the spinner's CircularProgressIndicator
-      // animates continuously and pumpAndSettle would time out.
-      await tester.pump(const Duration(milliseconds: 250));
+      await tester.pumpAndSettle();
       expect(find.text('Save'), findsOneWidget);
-      expect(_spinnerOpacity(tester), 0);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(_labelOpacity(tester), 1);
     });
 
-    testWidgets('spinner visible / label invisible when isLoading=true',
+    testWidgets('spinner mounted / label invisible when isLoading=true',
         (tester) async {
       await tester.pumpWidget(_wrap(
         PetButton(label: 'Save', onPressed: () {}, isLoading: true),
       ));
-      // Advance past Motion.short so AnimatedOpacity reaches its target.
       // Don't pumpAndSettle — the spinner's CircularProgressIndicator
-      // animates continuously and pumpAndSettle would time out.
+      // animates continuously while loading, which is intentional and
+      // expected during an in-flight operation.
       await tester.pump(const Duration(milliseconds: 250));
-      expect(_spinnerOpacity(tester), 1);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(_labelOpacity(tester), 0);
     });
 
@@ -85,9 +85,6 @@ void main() {
           isLoading: true,
         ),
       ));
-      // Advance past Motion.short so AnimatedOpacity reaches its target.
-      // Don't pumpAndSettle — the spinner's CircularProgressIndicator
-      // animates continuously and pumpAndSettle would time out.
       await tester.pump(const Duration(milliseconds: 250));
       // The button is rendered but its onPressed should be null while
       // loading; tapping should not increment.
@@ -105,6 +102,7 @@ void main() {
           onPressed: () {},
         ),
       ));
+      await tester.pumpAndSettle();
       final widthLabelled = tester.getSize(find.byKey(key)).width;
       await tester.pumpWidget(_wrap(
         PetButton(
@@ -114,9 +112,6 @@ void main() {
           isLoading: true,
         ),
       ));
-      // Advance past Motion.short so AnimatedOpacity reaches its target.
-      // Don't pumpAndSettle — the spinner's CircularProgressIndicator
-      // animates continuously and pumpAndSettle would time out.
       await tester.pump(const Duration(milliseconds: 250));
       final widthLoading = tester.getSize(find.byKey(key)).width;
       expect(widthLoading, widthLabelled,
@@ -135,20 +130,6 @@ void main() {
     expect(find.byIcon(Icons.add), findsOneWidget);
     expect(find.text('Add'), findsOneWidget);
   });
-}
-
-/// Returns the opacity of the AnimatedOpacity that wraps the spinner
-/// in PetButton's content stack.
-double _spinnerOpacity(WidgetTester tester) {
-  final widget = tester.widget<AnimatedOpacity>(
-    find
-        .ancestor(
-          of: find.byType(CircularProgressIndicator),
-          matching: find.byType(AnimatedOpacity),
-        )
-        .first,
-  );
-  return widget.opacity;
 }
 
 /// Returns the opacity of the AnimatedOpacity that wraps the label.

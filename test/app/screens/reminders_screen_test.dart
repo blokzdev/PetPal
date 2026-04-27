@@ -117,10 +117,16 @@ void main() {
     // App-bar interpolates the active pet's name (VOICE.md §5).
     expect(find.text("Milo's reminders"), findsOneWidget);
     // Empty state.
+    // Empty state — task 5.7 redesign. Heading is per-pet (VOICE.md
+    // §5), body teaches what kinds of reminders to set.
+    expect(find.text('No reminders for Milo yet.'), findsOneWidget);
     expect(
-      find.textContaining('No reminders yet'),
+      find.textContaining('Heartworm. Flea treatment. Vaccines.'),
       findsOneWidget,
     );
+    // CTA mirrors the FAB so the empty state has its own primary
+    // affordance.
+    expect(find.widgetWithText(FilledButton, 'Add reminder'), findsOneWidget);
     // No banners — fully-healthy fake.
     expect(find.textContaining('may delay reminders'), findsNothing);
     expect(find.textContaining('may fire up to'), findsNothing);
@@ -217,8 +223,15 @@ void main() {
     await tester.tap(find.text('Reminders'));
     await tester.pumpAndSettle();
 
-    // Tap FAB → add screen.
-    await tester.tap(find.byIcon(Icons.add_alarm));
+    // Tap FAB → add screen. Both the FAB and the empty-state PetButton
+    // use the add_alarm icon (intentional action consistency, task 5.7).
+    // Disambiguate to the FAB.
+    await tester.tap(
+      find.descendant(
+        of: find.byType(FloatingActionButton),
+        matching: find.byIcon(Icons.add_alarm),
+      ),
+    );
     await tester.pumpAndSettle();
 
     // Default kind is flea — no vaccine note yet.

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/providers.dart';
@@ -107,6 +108,15 @@ void main() {
     await tester.tap(find.text('Open journal'));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('No memories'), findsOneWidget);
+    // Empty state — task 5.7 redesign. Narrative invitation framing:
+    // heading states the empty fact, body frames the journal as the
+    // place where the pet's life accumulates, CTA opens chat.
+    // VOICE.md §5: per-pet destination → name interpolation.
+    expect(find.text('No memories about Milo yet.'), findsOneWidget);
+    expect(
+      find.textContaining("Milo's life will accumulate"),
+      findsOneWidget,
+    );
+    expect(find.widgetWithText(FilledButton, 'Open chat'), findsOneWidget);
   });
 }
