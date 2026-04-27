@@ -13,34 +13,103 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pets = ref.watch(petsProvider);
-    return AppScaffold(
+
+    // Resolve the per-state body + optional hero. Always feed a single
+    // AppScaffold.hero so the AnimatedSwitcher in the body keeps the
+    // empty→named-pet cross-fade (added in 5.8). The hero collapses
+    // to height 0 when there's no pet so the empty state still owns
+    // the full surface; once a pet exists, the 120dp hero zone fades
+    // in above the body.
+    Widget? hero;
+    Widget body = const SizedBox.shrink();
+    pets.when(
+      data: (list) {
+        final keyValue = list.isEmpty ? 'empty' : 'pet-${list.last.id}';
+        final child = list.isEmpty
+            ? const _EmptyState()
+            : _GreetingBody(pet: list.last);
+        body = Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: AnimatedSwitcher(
+              duration: Motion.short,
+              switchInCurve: Motion.standardCurve,
+              switchOutCurve: Motion.standardCurve,
+              child: KeyedSubtree(
+                key: ValueKey(keyValue),
+                child: child,
+              ),
+            ),
+          ),
+        );
+        if (list.isNotEmpty) {
+          hero = _PetGreetingHero(
+            key: ValueKey('hero-${list.last.id}'),
+            petName: list.last.name,
+          );
+        }
+      },
+      loading: () =>
+          body = const Center(child: CircularProgressIndicator()),
+      error: (e, _) =>
+          body = Center(child: Text('Could not read pets: $e')),
+    );
+
+    if (hero == null) {
+      return AppScaffold(
+        title: 'PetPal',
+        body: body,
+      );
+    }
+    return AppScaffold.hero(
       title: 'PetPal',
-      body: Center(
+      heroBuilder: (_) => hero!,
+      body: body,
+    );
+  }
+}
+
+/// Per-pet home greeting hero — task 5.10 (user-locked: centered name
+/// on a warm gradient sweep + copy = name only). Phase 6 will overlay
+/// the pet's photo as a low-opacity backdrop behind the name; nothing
+/// in this composition needs to be removed for that addition. The
+/// FittedBox + scaleDown lets long names ("Mr. Whiskers", "Princess
+/// Buttercup") shrink to fit the 120dp hero zone without overflowing.
+///
+/// The gradient runs primaryContainer (top, ~60% alpha) → surface
+/// (bottom). Soft, sky-like, leaves the AppBar reading clean.
+class _PetGreetingHero extends StatelessWidget {
+  const _PetGreetingHero({super.key, required this.petName});
+  final String petName;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            scheme.primaryContainer.withValues(alpha: 0.6),
+            scheme.surface,
+          ],
+        ),
+      ),
+      child: Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
-          // Task 5.8 — AnimatedSwitcher (Material 3 default fade) on
-          // greeting state changes: empty→named-pet on first add, and
-          // pet-swap when Pro lifts the 1-pet cap. Keyed on the
-          // current pet id (or 'empty' / 'loading') so the switcher
-          // sees a child identity change, not just a property change.
-          child: pets.when(
-            data: (list) {
-              final child = list.isEmpty
-                  ? const _EmptyState()
-                  : _Greeting(pets: list);
-              final keyValue = list.isEmpty ? 'empty' : 'pet-${list.last.id}';
-              return AnimatedSwitcher(
-                duration: Motion.short,
-                switchInCurve: Motion.standardCurve,
-                switchOutCurve: Motion.standardCurve,
-                child: KeyedSubtree(
-                  key: ValueKey(keyValue),
-                  child: child,
-                ),
-              );
-            },
-            loading: () => const CircularProgressIndicator(),
-            error: (e, _) => Text('Could not read pets: $e'),
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.l),
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              petName,
+              textAlign: TextAlign.center,
+              style: text.displaySmall?.copyWith(
+                color: scheme.onPrimaryContainer,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ),
         ),
       ),
@@ -86,24 +155,21 @@ class _EmptyState extends StatelessWidget {
   }
 }
 
-class _Greeting extends ConsumerWidget {
-  const _Greeting({required this.pets});
-  final List<dynamic> pets;
+class _GreetingBody extends ConsumerWidget {
+  const _GreetingBody({required this.pet});
+  final dynamic pet;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     // Free tier (DECISIONS row 8) — chat with the most recently-created pet.
-    final pet = pets.last;
     return SingleChildScrollView(
       child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.pets, size: 72, color: scheme.primary),
-        const SizedBox(height: 16),
-        Text(pet.name as String, style: text.headlineMedium),
-        const SizedBox(height: 8),
+        // Pet name + the previous Icons.pets header have moved into
+        // the AppScaffold.hero zone above (task 5.10). The body opens
+        // directly with the tagline so the name doesn't repeat.
         Text(
           "PetPal remembers ${pet.name}'s life so you don't have to.",
           textAlign: TextAlign.center,
