@@ -107,9 +107,15 @@ flutter:
     # ~23 MB committed; bundled into the APK so embeddings run fully
     # on-device, no network. See DECISIONS row 20.
     - assets/models/arctic-embed-xs/
-    # Per-species SOUL.md seed templates (Phase 3 task 3.4). Picked
-    # by the add-pet flow from the species dropdown.
+    # Per-category SOUL.md seed templates (Phase 3 task 3.4 + 5.5.1
+    # rename). Picked by the add-pet flow from the category dropdown.
     - assets/onboarding/
+    # Phase 5.5 task 5.5.2 — curated species lists per category.
+    # Hand-coded ~600+ entries across 8 JSON files (one per category).
+    # Schema per row: {display_name, scientific_name, category,
+    # inat_taxon_id, common_alternatives, wild_or_domestic}. Loaded
+    # lazily by the searchable picker (5.5.3). DECISIONS rows 42 + 43.
+    - assets/species/
     # Bundled launch skill packs (Phase 3 task 3.5). AssetSkillSource
     # discovers each skill via AssetManifest; each skill is a
     # subdirectory under assets/skills/<id>/ containing manifest.md

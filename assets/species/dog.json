@@ -1,0 +1,658 @@
+[
+  {
+    "display_name": "Dog (any breed)",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["dog", "puppy"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Mixed breed (mutt)",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["mutt", "mixed dog", "rescue dog"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Labrador Retriever",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Lab", "Labrador"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Golden Retriever",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Golden"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "German Shorthaired Pointer",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["GSP"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cocker Spaniel",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["American Cocker Spaniel"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "English Springer Spaniel",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Springer Spaniel", "Springer"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Vizsla",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Hungarian Vizsla"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Brittany",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Brittany Spaniel"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Weimaraner",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Weim"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Chesapeake Bay Retriever",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Chessie", "CBR"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Irish Setter",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "English Setter",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pointer",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["English Pointer"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Beagle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Dachshund",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Doxie", "Wiener dog", "Sausage dog"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bloodhound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Basset Hound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Basset"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Greyhound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Whippet",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Rhodesian Ridgeback",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Ridgeback"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Coonhound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Treeing Walker Coonhound", "Black and Tan Coonhound", "Bluetick Coonhound", "Redbone Coonhound", "Plott Hound", "American English Coonhound"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Afghan Hound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Afghan"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Basenji",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Boxer",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Doberman Pinscher",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Doberman", "Dobie", "Dobby"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Great Dane",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Mastiff",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["English Mastiff", "Bullmastiff", "Neapolitan Mastiff"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Rottweiler",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Rottie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Saint Bernard",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["St. Bernard"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Siberian Husky",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Husky"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Alaskan Malamute",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Malamute", "Mal"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bernese Mountain Dog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Berner", "BMD"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Newfoundland",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Newfie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cane Corso",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Italian Mastiff"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Akita",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Akita Inu", "Japanese Akita"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Bull Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Mini Bull Terrier", "Miniature Bull Terrier"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Staffordshire Bull Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Staffy", "Staffie", "Stafford"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "American Staffordshire Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["AmStaff", "Am Staff"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pit Bull",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["American Pit Bull Terrier", "APBT", "Pittie", "Pit"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Jack Russell Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Parson Russell Terrier", "JRT"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "West Highland White Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Westie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Scottish Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Scottie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cairn Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Airedale Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Airedale"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Fox Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Wire Fox Terrier", "Smooth Fox Terrier", "Toy Fox Terrier"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Chihuahua",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Chi"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pomeranian",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Pom"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pug",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Maltese",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Shih Tzu",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Yorkshire Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Yorkie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cavalier King Charles Spaniel",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Cavalier", "CKCS"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pekingese",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Peke"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Italian Greyhound",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Iggy", "IG"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Papillon",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Pap"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Toy Poodle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "French Bulldog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Frenchie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bulldog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["English Bulldog", "British Bulldog"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Boston Terrier",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Boston"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Standard Poodle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Poodle"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Miniature Poodle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Mini Poodle"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Dalmatian",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bichon Frise",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Bichon"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Shiba Inu",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Shiba"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Chow Chow",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Chow"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Lhasa Apso",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Border Collie",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "German Shepherd Dog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["GSD", "German Shepherd", "Alsatian"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Australian Shepherd",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Aussie", "Aussie Shepherd"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Australian Cattle Dog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Blue Heeler", "Red Heeler", "ACD", "Heeler", "Queensland Heeler"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Pembroke Welsh Corgi",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Corgi", "Pembroke"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Old English Sheepdog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["OES", "Bobtail"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Shetland Sheepdog",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Sheltie"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Belgian Malinois",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Malinois", "Mal"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Collie",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Rough Collie", "Smooth Collie", "Lassie"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Goldendoodle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Groodle"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Labradoodle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cockapoo",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Cocker Poo", "Cocker Spoodle"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cavapoo",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": ["Cavoodle"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Puggle",
+    "scientific_name": "Canis familiaris",
+    "category": "dog",
+    "inat_taxon_id": 47144,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  }
+]
