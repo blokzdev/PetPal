@@ -1,0 +1,315 @@
+[
+  {
+    "display_name": "Cat (any breed)",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["cat", "kitten", "kitty"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Domestic Shorthair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["DSH", "moggie", "moggy", "house cat", "tabby", "calico", "tortie", "tortoiseshell"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Domestic Longhair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["DLH", "longhair", "long-haired cat"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Domestic Mediumhair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["DMH", "mediumhair"],
+    "wild_or_domestic": "domestic"
+  },
+
+  {
+    "display_name": "Abyssinian",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Aby"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "American Shorthair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["ASH"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bengal",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Birman",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Sacred Birman"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Bombay",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "British Shorthair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["BSH"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Burmese",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Chartreux",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Cornish Rex",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Devon Rex",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Egyptian Mau",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Exotic Shorthair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Exotic"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Himalayan",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Himmy"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Korat",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Lykoi",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Werewolf cat"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Maine Coon",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Coon cat", "Maine Cat"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Manx",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Munchkin",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Norwegian Forest Cat",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Wegie", "Norsk Skogkatt", "Skogkatt"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Ocicat",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Oriental Shorthair",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Oriental"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Persian",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Ragdoll",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Raggie", "Ragamuffin"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Russian Blue",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Savannah",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Scottish Fold",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Highland Fold"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Selkirk Rex",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Siamese",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Singapura",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Snowshoe",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Somali",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": [],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Sphynx",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Sphinx", "hairless cat"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Tonkinese",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Tonk"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Turkish Angora",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Angora"],
+    "wild_or_domestic": "domestic"
+  },
+  {
+    "display_name": "Turkish Van",
+    "scientific_name": "Felis catus",
+    "category": "cat",
+    "inat_taxon_id": 118552,
+    "common_alternatives": ["Van"],
+    "wild_or_domestic": "domestic"
+  }
+]
