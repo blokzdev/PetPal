@@ -35,6 +35,13 @@ irreplaceable and accumulates over years.
 4. **The exotic / under-served owner.** Reptile, bird, rabbit, fish.
    Ignored by every dog-first pet app. Smaller market, near-zero
    competition, defensible niche.
+5. **The wildlife rehabilitator.** Licensed rehabbers and committed
+   amateurs caring for rescue/rehab/release animals (raptors, songbirds,
+   opossums, fawns, native rabbits) or permanent non-releasable wildlife.
+   Hidden behind a Settings toggle so typical pet owners don't see the
+   additional UI surface, but a peer use case when enabled — dedicated
+   intake/release tracking, observation contexts, and species coverage
+   that goes beyond what any companion-pet app supports.
 
 ## The core problem
 
@@ -148,6 +155,18 @@ re-vision it — cached extraction results live next to the photo binary.
   `image_picker`. v1.2 ships an in-app camera optimized for pet photography
   (continuous shutter, instant-save shortcuts). Polish item; only ships if
   v1 usage shows users hitting friction at the system camera handoff.
+- *Online iNaturalist API fallback for freeform species entries.* v1's
+  add-pet flow uses a hand-coded curated list of ~600+ species with iNat
+  taxon IDs preserved per row; users whose pet isn't in the curated list
+  fall through to a freeform "Other" path that writes `species: <user
+  text>` and `inat_taxon_id: null`. v1.2 optionally enriches those
+  freeform entries on first online connection — a single iNat API lookup
+  fills in the scientific name, taxonomy, and taxon ID. Opt-in (the v1
+  freeform path is fully functional without it); offline-degrades to v1
+  behavior. Ships only if v1 usage shows freeform-fallback usage rate
+  above ~5% — under that, the curated list is doing its job and the
+  fallback enrichment isn't worth the dependency on a public third-party
+  API.
 
 **Stays locked OUT in v1.2.** DECISIONS row 25 (medical/clinical vision
 gate) holds. v1.2 does **not** relax it: body condition scoring, wound
