@@ -7,10 +7,12 @@ import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 
 /// Add-pet flow. Phase 2.2 collected name/species/breed/DOB; Phase 3.4
-/// upgrades species to a dropdown of 8 (per DECISIONS row 25), each
-/// loading a species-specific `SOUL.md` template from
-/// `assets/onboarding/`. The harness stays species-agnostic — the pick
-/// only changes the markdown the agent sees.
+/// upgraded the species pick to a dropdown of 8 (per DECISIONS row 25),
+/// each loading a category-specific `SOUL.md` template from
+/// `assets/onboarding/`. Phase 5.5 renamed the field to `category:` (the
+/// 8-bucket axis) so a future precise `species:` field can layer on top
+/// per DECISIONS rows 42/43. The harness stays category-agnostic — the
+/// pick only changes the markdown the agent sees.
 ///
 /// Add-pet is a global action (not a per-pet destination) so the limit
 /// copy stays static — no name interpolation (VOICE.md §5).
@@ -25,7 +27,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   final _formKey = GlobalKey<FormState>();
   final _name = TextEditingController();
   final _breed = TextEditingController();
-  Species _species = Species.dog;
+  Category _category = Category.dog;
   DateTime? _dob;
   bool _saving = false;
   String? _saveError;
@@ -59,14 +61,14 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final templates = ref.read(onboardingTemplatesProvider);
       final breed = _breed.text.trim().isEmpty ? null : _breed.text.trim();
       final seedSoul = await templates.seedSoulFor(
-        species: _species,
+        category: _category,
         name: _name.text.trim(),
         breed: breed,
         dob: _dob,
       );
       await repo.createPet(
         name: _name.text.trim(),
-        species: _species.id,
+        category: _category.id,
         breed: breed,
         dob: _dob,
         seedSoul: seedSoul,
@@ -121,18 +123,18 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                     v == null || v.trim().isEmpty ? 'Required' : null,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<Species>(
-                initialValue: _species,
+              DropdownButtonFormField<Category>(
+                initialValue: _category,
                 decoration: const InputDecoration(
-                  labelText: 'Species',
+                  labelText: 'Category',
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  for (final s in Species.values)
-                    DropdownMenuItem(value: s, child: Text(s.label)),
+                  for (final c in Category.values)
+                    DropdownMenuItem(value: c, child: Text(c.label)),
                 ],
-                onChanged: (s) {
-                  if (s != null) setState(() => _species = s);
+                onChanged: (c) {
+                  if (c != null) setState(() => _category = c);
                 },
               ),
               const SizedBox(height: 16),

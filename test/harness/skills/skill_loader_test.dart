@@ -30,7 +30,7 @@ class _FakeSkillSource implements SkillSource {
 
 SkillManifest _manifest({
   required String id,
-  List<String> species = const [],
+  List<String> category = const [],
   List<String> triggers = const [],
   List<String> loads = const [],
 }) {
@@ -38,7 +38,7 @@ SkillManifest _manifest({
     id: id,
     name: id,
     version: 1,
-    species: species,
+    category: category,
     triggers: triggers,
     loads: loads,
     requiresPro: false,
@@ -48,18 +48,18 @@ SkillManifest _manifest({
 void main() {
   test('empty source produces no fragments', () async {
     final loader = SkillLoader(source: _FakeSkillSource(const []));
-    final out = await loader.match(petSpecies: 'dog', userInput: 'anything');
+    final out = await loader.match(petCategory: 'dog', userInput: 'anything');
     expect(out, isEmpty);
   });
 
-  test('species mismatch filters the skill out before trigger matching',
+  test('category mismatch filters the skill out before trigger matching',
       () async {
     final loader = SkillLoader(
       source: _FakeSkillSource([
         (
           manifest: _manifest(
             id: 'puppy',
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['puppy'],
             loads: ['overview.md'],
           ),
@@ -68,20 +68,20 @@ void main() {
       ]),
     );
     final out = await loader.match(
-      petSpecies: 'cat',
+      petCategory: 'cat',
       userInput: 'I have a puppy that nips',
     );
     expect(out, isEmpty);
   });
 
-  test('species hit + trigger hit returns every fragment in `loads:` in '
+  test('category hit + trigger hit returns every fragment in `loads:` in '
       'declaration order', () async {
     final loader = SkillLoader(
       source: _FakeSkillSource([
         (
           manifest: _manifest(
             id: 'puppy',
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['puppy', 'house training'],
             loads: ['overview.md', 'house-training.md'],
           ),
@@ -93,7 +93,7 @@ void main() {
       ]),
     );
     final out = await loader.match(
-      petSpecies: 'dog',
+      petCategory: 'dog',
       userInput: 'How do I house train my puppy?',
     );
     expect(out.map((f) => f.filename), [
@@ -111,7 +111,7 @@ void main() {
         (
           manifest: _manifest(
             id: 'cat-101',
-            species: ['cat'],
+            category: ['cat'],
             triggers: ['litter box'],
             loads: ['x.md'],
           ),
@@ -120,14 +120,14 @@ void main() {
       ]),
     );
     final out = await loader.match(
-      petSpecies: 'cat',
+      petCategory: 'cat',
       userInput: 'My LITTER Box situation is dire',
     );
     expect(out, hasLength(1));
   });
 
-  test('skill with empty species (universal) passes species filter for any '
-      'species', () async {
+  test('skill with empty category (universal) passes category filter for any '
+      'category', () async {
     final loader = SkillLoader(
       source: _FakeSkillSource([
         (
@@ -141,24 +141,24 @@ void main() {
       ]),
     );
     final dog = await loader.match(
-      petSpecies: 'dog',
+      petCategory: 'dog',
       userInput: 'tracking weight',
     );
     final parakeet = await loader.match(
-      petSpecies: 'parakeet',
+      petCategory: 'parakeet',
       userInput: 'tracking weight',
     );
     expect(dog, hasLength(1));
     expect(parakeet, hasLength(1));
   });
 
-  test('species hit but no trigger match returns nothing', () async {
+  test('category hit but no trigger match returns nothing', () async {
     final loader = SkillLoader(
       source: _FakeSkillSource([
         (
           manifest: _manifest(
             id: 'puppy',
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['puppy', 'teething'],
             loads: ['x.md'],
           ),
@@ -167,7 +167,7 @@ void main() {
       ]),
     );
     final out = await loader.match(
-      petSpecies: 'dog',
+      petCategory: 'dog',
       userInput: 'Just a normal walk today',
     );
     expect(out, isEmpty);
@@ -180,7 +180,7 @@ void main() {
         (
           manifest: _manifest(
             id: 'puppy',
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['puppy'],
             loads: ['p1.md'],
           ),
@@ -197,7 +197,7 @@ void main() {
       ]),
     );
     final out = await loader.match(
-      petSpecies: 'dog',
+      petCategory: 'dog',
       userInput: 'my puppy',
     );
     expect(out.map((f) => f.skillId), ['puppy', 'weight']);
@@ -211,7 +211,7 @@ void main() {
       SkillSourceEntry(
         manifest: _manifest(
           id: 'puppy',
-          species: ['dog'],
+          category: ['dog'],
           triggers: ['puppy'],
           loads: ['p.md'],
         ),
@@ -223,7 +223,7 @@ void main() {
       SkillSourceEntry(
         manifest: _manifest(
           id: 'kitten',
-          species: ['cat'],
+          category: ['cat'],
           triggers: ['kitten'],
           loads: ['k.md'],
         ),
@@ -234,7 +234,7 @@ void main() {
       ),
     ]);
     final loader = SkillLoader(source: source);
-    await loader.match(petSpecies: 'dog', userInput: 'my puppy');
+    await loader.match(petCategory: 'dog', userInput: 'my puppy');
     expect(dogReads, 1);
     expect(catReads, 0, reason: 'cat skill filtered out before read');
   });

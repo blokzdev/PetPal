@@ -47,7 +47,7 @@ String serializeSoul({
   required Map<String, Object?> frontmatter,
   required String body,
   List<String> keyOrder = const [
-    'species',
+    'category',
     'breed',
     'dob',
     'weight_kg',

@@ -50,7 +50,7 @@ void main() {
       () async {
     final id = await repo.createPet(
       name: 'Milo',
-      species: 'dog',
+      category: 'dog',
       breed: 'mixed',
       dob: DateTime.utc(2022, 6, 12),
     );
@@ -63,7 +63,7 @@ void main() {
     final soul = wiki.writes['wiki/$id/SOUL.md'];
     expect(soul, isNotNull);
     expect(soul, contains('# Milo'));
-    expect(soul, contains('species: dog'));
+    expect(soul, contains('category: dog'));
     expect(soul, contains('breed: mixed'));
     expect(soul, contains('dob: 2022-06-12'));
   });
@@ -74,7 +74,7 @@ void main() {
     final soul = wiki.writes['wiki/$id/SOUL.md']!;
 
     expect(soul, contains('# Luna'));
-    expect(soul, contains('species: \n'));
+    expect(soul, contains('category: \n'));
     expect(soul, contains('breed: \n'));
     expect(soul, contains('dob: \n'));
     expect(soul, contains('allergies: []'));

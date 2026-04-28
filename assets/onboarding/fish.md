@@ -1,5 +1,5 @@
 ---
-species: fish
+category: fish
 breed: {breed}
 dob: {dob}
 tank_litres:

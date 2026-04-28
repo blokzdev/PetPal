@@ -29,7 +29,7 @@ void main() {
     await stack.wiki.writeAtomic(
       soulPath,
       '---\n'
-      'species: dog\n'
+      'category: dog\n'
       'breed: mixed\n'
       'dob: 2022-06-12\n'
       'weight_kg: 14.2\n'

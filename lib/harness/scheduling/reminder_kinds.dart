@@ -44,20 +44,20 @@ enum ReminderKind {
 ///
 /// **Returns null** for `bird`, `reptile`, `fish`, and `exotic`. Per
 /// the locked design rule (DECISIONS row 31 / user lock-in), cadences
-/// for non-mammal species vary so wildly by species, age, and
+/// for non-mammal categories vary so wildly by species, age, and
 /// individual that a wrong default is worse than no default. The UI
 /// surfaces a "please set a date" state instead of pre-filling.
 Duration? defaultCadenceFor({
   required ReminderKind kind,
-  required Species species,
+  required Category category,
 }) {
   const noDefault = {
-    Species.bird,
-    Species.reptile,
-    Species.fish,
-    Species.exotic,
+    Category.bird,
+    Category.reptile,
+    Category.fish,
+    Category.exotic,
   };
-  if (noDefault.contains(species)) return null;
+  if (noDefault.contains(category)) return null;
   switch (kind) {
     case ReminderKind.fleaTreatment:
       return const Duration(days: 30);

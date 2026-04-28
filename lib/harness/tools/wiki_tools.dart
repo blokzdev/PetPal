@@ -137,7 +137,7 @@ void registerWikiTools(
           'patch': {
             'type': 'object',
             'description':
-                'Frontmatter keys to merge. Recognised keys: species, '
+                'Frontmatter keys to merge. Recognised keys: category, '
                 'breed, dob (ISO YYYY-MM-DD), weight_kg, allergies, '
                 'meds, vet_contact, temperament.',
           },

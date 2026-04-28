@@ -6,10 +6,10 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/pet_empty_state.dart';
 
 /// Care guides browser. Shows every bundled guide applicable to the
-/// active pet's species, with an enable/disable toggle per row.
-/// Species filter is enforced here so a cat owner doesn't see a "Senior
+/// active pet's category, with an enable/disable toggle per row.
+/// Category filter is enforced here so a cat owner doesn't see a "Senior
 /// Dog Care" guide they could never use (CLAUDE.md §3 — only
-/// species-aware path). Global screen → no pet name in the app bar
+/// category-aware path). Global screen → no pet name in the app bar
 /// (VOICE.md §5).
 class SkillBrowserScreen extends ConsumerWidget {
   const SkillBrowserScreen({super.key});

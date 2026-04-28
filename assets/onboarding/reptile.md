@@ -1,5 +1,5 @@
 ---
-species: reptile
+category: reptile
 breed: {breed}
 dob: {dob}
 weight_g:

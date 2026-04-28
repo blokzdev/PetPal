@@ -6,7 +6,7 @@ void main() {
     test('extracts frontmatter map and body from the canonical layout', () {
       const text = '''
 ---
-species: dog
+category: dog
 breed: mixed
 dob: 2022-06-12
 weight_kg: 14.2
@@ -20,7 +20,7 @@ temperament: [anxious, food-motivated]
 Milo is a rescue mutt.
 ''';
       final parsed = parseSoul(text);
-      expect(parsed.frontmatter['species'], 'dog');
+      expect(parsed.frontmatter['category'], 'dog');
       expect(parsed.frontmatter['breed'], 'mixed');
       expect(parsed.frontmatter['dob'], '2022-06-12');
       expect(parsed.frontmatter['weight_kg'], 14.2);
@@ -41,7 +41,7 @@ Milo is a rescue mutt.
     });
 
     test('handles malformed (no closing ---) by treating as body-only', () {
-      const text = '---\nspecies: dog\nMilo lives here.\n';
+      const text = '---\ncategory: dog\nMilo lives here.\n';
       final parsed = parseSoul(text);
       expect(parsed.frontmatter, isEmpty);
     });
@@ -54,12 +54,12 @@ Milo is a rescue mutt.
         frontmatter: {
           'extra_key': 'first-in-input',
           'breed': 'mixed',
-          'species': 'dog',
+          'category': 'dog',
         },
         body: '\n# Milo\n',
       );
       // species comes before breed because of keyOrder; extra_key trails.
-      final speciesIdx = out.indexOf('species:');
+      final speciesIdx = out.indexOf('category:');
       final breedIdx = out.indexOf('breed:');
       final extraIdx = out.indexOf('extra_key:');
       expect(speciesIdx, lessThan(breedIdx));
@@ -69,7 +69,7 @@ Milo is a rescue mutt.
     test('round-trips through parseSoul', () {
       const original = '''
 ---
-species: dog
+category: dog
 breed: mixed
 dob: 2022-06-12
 weight_kg: 14.2
@@ -88,7 +88,7 @@ A rescue.
         body: parsed.body,
       );
       final reparsed = parseSoul(reemitted);
-      expect(reparsed.frontmatter['species'], 'dog');
+      expect(reparsed.frontmatter['category'], 'dog');
       expect(reparsed.frontmatter['allergies'], ['chicken']);
       expect(reparsed.frontmatter['weight_kg'], 14.2);
       expect(reparsed.body, parsed.body);
@@ -99,7 +99,7 @@ A rescue.
     test('overwrites scalars and replaces lists, leaves untouched keys',
         () {
       final base = <String, Object?>{
-        'species': 'dog',
+        'category': 'dog',
         'weight_kg': 14.2,
         'allergies': ['chicken'],
         'breed': 'mixed',
@@ -109,7 +109,7 @@ A rescue.
         'allergies': ['chicken', 'beef'],
       };
       final merged = mergeFrontmatter(base, patch);
-      expect(merged['species'], 'dog');
+      expect(merged['category'], 'dog');
       expect(merged['breed'], 'mixed');
       expect(merged['weight_kg'], 14.5);
       expect(merged['allergies'], ['chicken', 'beef']);

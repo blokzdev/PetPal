@@ -60,7 +60,7 @@ void main() {
       () async {
     final id = await petRepo.createPet(
       name: 'Milo',
-      species: 'dog',
+      category: 'dog',
       dob: DateTime(2022, 6, 12),
     );
     final pet = (await petRepo.getPet(id))!;
@@ -71,7 +71,7 @@ void main() {
     expect(turn.systemPrompt, contains('memory-first companion for Milo'));
     expect(turn.systemPrompt, contains('never diagnose'));
     expect(turn.systemPrompt, contains("Milo's identity"));
-    expect(turn.systemPrompt, contains('species: dog'));
+    expect(turn.systemPrompt, contains('category: dog'));
     expect(turn.systemPrompt, contains('dob: 2022-06-12'));
     expect(turn.systemPrompt, contains('# Output contract'));
     expect(turn.systemPrompt, contains('wiki/$id/'));
@@ -123,7 +123,7 @@ void main() {
 
   test('skill fragments matched by SkillLoader are injected into the '
       'system prompt under "Active skills"', () async {
-    final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+    final id = await petRepo.createPet(name: 'Milo', category: 'dog');
     final pet = (await petRepo.getPet(id))!;
 
     final puppyBuilder = makeBuilder(
@@ -133,7 +133,7 @@ void main() {
             id: 'puppy',
             name: 'Puppy Care',
             version: 1,
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['house training', 'puppy'],
             loads: ['overview.md'],
             requiresPro: false,
@@ -158,7 +158,7 @@ void main() {
 
   test('skills with non-matching species are filtered out of the system '
       'prompt (CLAUDE.md §3 — only species-aware code path)', () async {
-    final id = await petRepo.createPet(name: 'Whiskers', species: 'cat');
+    final id = await petRepo.createPet(name: 'Whiskers', category: 'cat');
     final pet = (await petRepo.getPet(id))!;
 
     final dogOnlyBuilder = makeBuilder(
@@ -168,7 +168,7 @@ void main() {
             id: 'puppy',
             name: 'Puppy Care',
             version: 1,
-            species: ['dog'],
+            category: ['dog'],
             triggers: ['puppy'],
             loads: ['overview.md'],
             requiresPro: false,
@@ -230,7 +230,7 @@ void main() {
   group('red-flag screener integration (CLAUDE.md §10)', () {
     test('non-urgent input → no escalation directive, ComposedTurn.redFlag is null',
         () async {
-      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final id = await petRepo.createPet(name: 'Milo', category: 'dog');
       final pet = (await petRepo.getPet(id))!;
       final turn = await builder.compose(
         pet: pet,
@@ -247,7 +247,7 @@ void main() {
     test(
         'flagged input → directive appears in system prompt and ComposedTurn '
         'carries the match', () async {
-      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final id = await petRepo.createPet(name: 'Milo', category: 'dog');
       final pet = (await petRepo.getPet(id))!;
       final turn = await builder.compose(
         pet: pet,
@@ -276,7 +276,7 @@ void main() {
         'output contract always includes the screener-backup instruction so '
         'the model catches misses even when the regex table did not fire',
         () async {
-      final id = await petRepo.createPet(name: 'Milo', species: 'dog');
+      final id = await petRepo.createPet(name: 'Milo', category: 'dog');
       final pet = (await petRepo.getPet(id))!;
       final turn = await builder.compose(
         pet: pet,

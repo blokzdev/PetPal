@@ -25,22 +25,22 @@ void main() {
     test('flea, heartworm, vaccine, weight cadences for dog match the lock', () {
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.fleaTreatment, species: Species.dog),
+            kind: ReminderKind.fleaTreatment, category: Category.dog),
         const Duration(days: 30),
       );
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.heartwormDose, species: Species.dog),
+            kind: ReminderKind.heartwormDose, category: Category.dog),
         const Duration(days: 30),
       );
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.vaccineDue, species: Species.dog),
+            kind: ReminderKind.vaccineDue, category: Category.dog),
         const Duration(days: 365),
       );
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.weightCheck, species: Species.dog),
+            kind: ReminderKind.weightCheck, category: Category.dog),
         const Duration(days: 14),
       );
     });
@@ -48,8 +48,8 @@ void main() {
     test('cat uses the same defaults as dog', () {
       for (final k in ReminderKind.values) {
         expect(
-          defaultCadenceFor(kind: k, species: Species.cat),
-          defaultCadenceFor(kind: k, species: Species.dog),
+          defaultCadenceFor(kind: k, category: Category.cat),
+          defaultCadenceFor(kind: k, category: Category.dog),
           reason: k.id,
         );
       }
@@ -58,12 +58,12 @@ void main() {
     test('rabbit and small-mammal use the canonical defaults', () {
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.fleaTreatment, species: Species.rabbit),
+            kind: ReminderKind.fleaTreatment, category: Category.rabbit),
         const Duration(days: 30),
       );
       expect(
         defaultCadenceFor(
-            kind: ReminderKind.weightCheck, species: Species.smallMammal),
+            kind: ReminderKind.weightCheck, category: Category.smallMammal),
         const Duration(days: 14),
       );
     });
@@ -72,15 +72,15 @@ void main() {
   group('defaultCadenceFor — locked no-default species', () {
     test('bird/reptile/fish/exotic return null for every kind', () {
       const noDefault = [
-        Species.bird,
-        Species.reptile,
-        Species.fish,
-        Species.exotic,
+        Category.bird,
+        Category.reptile,
+        Category.fish,
+        Category.exotic,
       ];
       for (final s in noDefault) {
         for (final k in ReminderKind.values) {
           expect(
-            defaultCadenceFor(kind: k, species: s),
+            defaultCadenceFor(kind: k, category: s),
             isNull,
             reason: 'kind=${k.id} species=${s.id}',
           );

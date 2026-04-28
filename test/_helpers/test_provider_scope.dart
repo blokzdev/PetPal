@@ -72,7 +72,7 @@ Future<({
   // through PetRepo would do this; tests skip that step for speed.
   await wiki.writeAtomic(
     wiki.soulPath(petId),
-    '---\nspecies: dog\n---\n\n# $petName\n',
+    '---\ncategory: dog\n---\n\n# $petName\n',
   );
 
   final overrides = <Override>[

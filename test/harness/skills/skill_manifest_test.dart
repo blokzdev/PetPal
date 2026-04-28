@@ -9,7 +9,7 @@ void main() {
 id: puppy
 name: Puppy Care
 version: 1
-species: [dog]
+category: [dog]
 triggers: ["puppy", "teething", "house training", "socialization"]
 loads: ["overview.md", "house-training.md", "socialization.md"]
 requires_pro: false
@@ -22,7 +22,7 @@ Skill body — unused; loaded fragments come from `loads:`.
       expect(m.id, 'puppy');
       expect(m.name, 'Puppy Care');
       expect(m.version, 1);
-      expect(m.species, ['dog']);
+      expect(m.category, ['dog']);
       expect(
         m.triggers,
         ['puppy', 'teething', 'house training', 'socialization'],
@@ -35,7 +35,7 @@ Skill body — unused; loaded fragments come from `loads:`.
       expect(m.requiresPro, isFalse);
     });
 
-    test('omitted species list is treated as "any species" (CLAUDE.md §9)',
+    test('omitted category list is treated as "any category" (CLAUDE.md §9)',
         () {
       const text = '''
 ---
@@ -47,27 +47,27 @@ loads: []
 ---
 ''';
       final m = parseSkillManifest(text);
-      expect(m.species, isEmpty);
-      expect(m.matchesSpecies('dog'), isTrue);
-      expect(m.matchesSpecies('cat'), isTrue);
-      expect(m.matchesSpecies('parakeet'), isTrue);
+      expect(m.category, isEmpty);
+      expect(m.matchesCategory('dog'), isTrue);
+      expect(m.matchesCategory('cat'), isTrue);
+      expect(m.matchesCategory('parakeet'), isTrue);
     });
 
-    test('species: [dog, cat] matches both, rejects bird', () {
+    test('category: [dog, cat] matches both, rejects bird', () {
       const text = '''
 ---
 id: mammal-grooming
 name: Mammal grooming
 version: 1
-species: [dog, cat]
+category: [dog, cat]
 triggers: []
 loads: []
 ---
 ''';
       final m = parseSkillManifest(text);
-      expect(m.matchesSpecies('dog'), isTrue);
-      expect(m.matchesSpecies('cat'), isTrue);
-      expect(m.matchesSpecies('bird'), isFalse);
+      expect(m.matchesCategory('dog'), isTrue);
+      expect(m.matchesCategory('cat'), isTrue);
+      expect(m.matchesCategory('bird'), isFalse);
     });
 
     test('requires_pro defaults to false when omitted', () {

@@ -10,7 +10,7 @@ import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
 
 /// Editor for the active pet's SOUL.md. The frontmatter shape is fixed
-/// (CLAUDE.md §5): species, breed, dob, weight_kg, allergies, meds,
+/// (CLAUDE.md §5): category, breed, dob, weight_kg, allergies, meds,
 /// vet_contact, temperament. The body is free-text.
 ///
 /// Save round-trips through `parseSoul` → merge → `serializeSoul` →
@@ -24,7 +24,7 @@ class SoulEditorScreen extends ConsumerStatefulWidget {
 }
 
 class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
-  final _species = TextEditingController();
+  final _category = TextEditingController();
   final _breed = TextEditingController();
   final _dob = TextEditingController();
   final _weight = TextEditingController();
@@ -48,7 +48,7 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
 
   @override
   void dispose() {
-    _species.dispose();
+    _category.dispose();
     _breed.dispose();
     _dob.dispose();
     _weight.dispose();
@@ -74,7 +74,7 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
       final parsed = parseSoul(raw);
       _existingFrontmatter = parsed.frontmatter;
 
-      _species.text = _readScalar(parsed.frontmatter, 'species');
+      _category.text = _readScalar(parsed.frontmatter, 'category');
       _breed.text = _readScalar(parsed.frontmatter, 'breed');
       _dob.text = _readScalar(parsed.frontmatter, 'dob');
       _weight.text = _readScalar(parsed.frontmatter, 'weight_kg');
@@ -103,7 +103,7 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
     try {
       final wiki = await ref.read(wikiIoProvider.future);
       final patch = <String, Object?>{
-        'species': _species.text.trim(),
+        'category': _category.text.trim(),
         'breed': _breed.text.trim(),
         'dob': _dob.text.trim(),
         'weight_kg': _parseNum(_weight.text),
@@ -173,7 +173,7 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _Field(controller: _species, label: 'Species'),
+                        _Field(controller: _category, label: 'Category'),
                         const SizedBox(height: Spacing.s),
                         _Field(controller: _breed, label: 'Breed'),
                         const SizedBox(height: Spacing.s),

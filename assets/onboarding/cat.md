@@ -1,5 +1,5 @@
 ---
-species: cat
+category: cat
 breed: {breed}
 dob: {dob}
 weight_kg:

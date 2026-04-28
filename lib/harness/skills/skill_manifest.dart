@@ -9,7 +9,7 @@ class SkillManifest {
     required this.id,
     required this.name,
     required this.version,
-    required this.species,
+    required this.category,
     required this.triggers,
     required this.loads,
     required this.requiresPro,
@@ -19,22 +19,23 @@ class SkillManifest {
   final String name;
   final int version;
 
-  /// Species this skill applies to. **Empty list means "any species"** —
-  /// the harness never silently filters out a skill that didn't declare a
-  /// species list. Use an explicit `species: [dog]` in the manifest to
-  /// gate by species.
-  final List<String> species;
+  /// Categories this skill applies to (the 8-bucket axis: dog, cat, bird,
+  /// rabbit, reptile, fish, small-mammal, exotic). **Empty list means
+  /// "any category"** — the harness never silently filters out a skill
+  /// that didn't declare a category list. Use an explicit
+  /// `category: [dog]` in the manifest to gate by category.
+  final List<String> category;
 
   final List<String> triggers;
   final List<String> loads;
   final bool requiresPro;
 
-  /// Whether this skill is applicable to a pet of [petSpecies]. The
-  /// harness's only species-aware code path (CLAUDE.md §3) — [SkillLoader]
-  /// calls this before running trigger matching.
-  bool matchesSpecies(String petSpecies) {
-    if (species.isEmpty) return true;
-    return species.contains(petSpecies);
+  /// Whether this skill is applicable to a pet of [petCategory]. The
+  /// harness's only category-aware code path (CLAUDE.md §3) —
+  /// [SkillLoader] calls this before running trigger matching.
+  bool matchesCategory(String petCategory) {
+    if (category.isEmpty) return true;
+    return category.contains(petCategory);
   }
 }
 
@@ -74,7 +75,7 @@ SkillManifest parseSkillManifest(String text) {
     id: id,
     name: name,
     version: version,
-    species: _stringList(fm['species']),
+    category: _stringList(fm['category']),
     triggers: _stringList(fm['triggers']),
     loads: _stringList(fm['loads']),
     requiresPro: fm['requires_pro'] == true,

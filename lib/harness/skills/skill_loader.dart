@@ -18,9 +18,10 @@ class MatchedFragment {
 /// Selects and loads skill fragments to inject into the next agent turn.
 ///
 /// Two-stage filter, in order — see CLAUDE.md §9:
-/// 1. **Species filter** (the only species-aware code path in the harness
-///    per CLAUDE.md §3). Skills whose `species:` list doesn't include the
-///    active pet's species are dropped. An empty/omitted list = "any".
+/// 1. **Category filter** (the only category-aware code path in the
+///    harness per CLAUDE.md §3). Skills whose `category:` list doesn't
+///    include the active pet's category are dropped. An empty/omitted
+///    list = "any".
 /// 2. **Trigger match.** At least one of the skill's `triggers:` must
 ///    appear (case-insensitively) as a substring of the user input.
 ///
@@ -32,7 +33,7 @@ class SkillLoader {
   final SkillSource _source;
 
   Future<List<MatchedFragment>> match({
-    required String petSpecies,
+    required String petCategory,
     required String userInput,
   }) async {
     final input = userInput.toLowerCase();
@@ -40,7 +41,7 @@ class SkillLoader {
     final out = <MatchedFragment>[];
     for (final entry in entries) {
       final manifest = entry.manifest;
-      if (!manifest.matchesSpecies(petSpecies)) continue;
+      if (!manifest.matchesCategory(petCategory)) continue;
       final triggerHit = manifest.triggers.any(
         (t) => input.contains(t.toLowerCase()),
       );

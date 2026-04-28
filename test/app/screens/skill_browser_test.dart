@@ -30,13 +30,13 @@ class _FakeSkillSource implements SkillSource {
 SkillManifest _manifest({
   required String id,
   required String name,
-  List<String> species = const [],
+  List<String> category = const [],
 }) {
   return SkillManifest(
     id: id,
     name: name,
     version: 1,
-    species: species,
+    category: category,
     triggers: const ['x'],
     loads: const [],
     requiresPro: false,
@@ -50,17 +50,17 @@ void main() {
     );
   });
 
-  testWidgets('skill browser shows only species-applicable skills + lets '
+  testWidgets('skill browser shows only category-applicable skills + lets '
       'the user toggle each one off and back on', (tester) async {
     // Inject a fake source with one dog-only, one cat-only, and one
     // universal skill. The seeded pet in buildChatTestStack is a dog
-    // (species: dog SOUL.md), so the browser should show
+    // (category: dog SOUL.md), so the browser should show
     // puppy + universal-tracking, hide new-cat.
     final stack = await buildChatTestStack(
       llm: ScriptedLlmClient(scripts: const []),
       skillSource: _FakeSkillSource([
-        _manifest(id: 'puppy', name: 'Puppy', species: ['dog']),
-        _manifest(id: 'new-cat', name: 'New Cat', species: ['cat']),
+        _manifest(id: 'puppy', name: 'Puppy', category: ['dog']),
+        _manifest(id: 'new-cat', name: 'New Cat', category: ['cat']),
         _manifest(id: 'tracking', name: 'Universal Tracking'),
       ]),
     );

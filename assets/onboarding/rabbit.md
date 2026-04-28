@@ -1,5 +1,5 @@
 ---
-species: rabbit
+category: rabbit
 breed: {breed}
 dob: {dob}
 weight_kg:

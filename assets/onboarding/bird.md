@@ -1,5 +1,5 @@
 ---
-species: bird
+category: bird
 breed: {breed}
 dob: {dob}
 weight_g:

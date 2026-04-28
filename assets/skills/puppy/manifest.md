@@ -2,7 +2,7 @@
 id: puppy
 name: Puppy Care
 version: 1
-species: [dog]
+category: [dog]
 triggers: ["puppy", "teething", "house training", "house-training", "crate train", "socialization", "puppy class"]
 loads: ["overview.md", "house-training.md", "socialization.md"]
 requires_pro: false

@@ -2,7 +2,7 @@
 id: senior-cat
 name: Senior Cat Care
 version: 1
-species: [cat]
+category: [cat]
 triggers: ["senior cat", "old cat", "older cat", "geriatric", "kidney", "thyroid", "hyperthyroid", "drinking more", "peeing more", "weight loss", "losing weight", "yowling at night", "stopped jumping", "less active", "arthritis"]
 loads: ["overview.md", "red-flags.md", "environment.md"]
 requires_pro: false

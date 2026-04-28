@@ -351,15 +351,15 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
   bool _saving = false;
   String? _error;
 
-  Species? _activeSpecies;
+  Category? _activeCategory;
 
   @override
   void initState() {
     super.initState();
-    _loadSpecies();
+    _loadCategory();
   }
 
-  Future<void> _loadSpecies() async {
+  Future<void> _loadCategory() async {
     final wiki = await ref.read(wikiIoProvider.future);
     String soul;
     try {
@@ -367,22 +367,22 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
     } catch (_) {
       soul = '';
     }
-    final speciesId =
-        parseSoul(soul).frontmatter['species']?.toString().trim() ?? '';
+    final categoryId =
+        parseSoul(soul).frontmatter['category']?.toString().trim() ?? '';
     if (!mounted) return;
     setState(() {
-      _activeSpecies = Species.fromId(speciesId);
+      _activeCategory = Category.fromId(categoryId);
       _applyDefaultCadence();
     });
   }
 
   void _applyDefaultCadence() {
-    final species = _activeSpecies;
-    if (species == null) {
+    final category = _activeCategory;
+    if (category == null) {
       _when = null;
       return;
     }
-    final cadence = defaultCadenceFor(kind: _kind, species: species);
+    final cadence = defaultCadenceFor(kind: _kind, category: category);
     if (cadence == null) {
       _when = null; // bird/reptile/fish/exotic — require explicit pick
     } else {
@@ -449,8 +449,8 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
         : 'Set for ${_when!.year}-${_when!.month.toString().padLeft(2, '0')}-${_when!.day.toString().padLeft(2, '0')} at '
             '${_when!.hour.toString().padLeft(2, '0')}:${_when!.minute.toString().padLeft(2, '0')}';
 
-    final cadenceUnknown = _activeSpecies != null &&
-        defaultCadenceFor(kind: _kind, species: _activeSpecies!) == null;
+    final cadenceUnknown = _activeCategory != null &&
+        defaultCadenceFor(kind: _kind, category: _activeCategory!) == null;
 
     return AppScaffold(
       title: 'Add reminder',
@@ -489,7 +489,7 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
               const SizedBox(height: 16),
               if (cadenceUnknown) ...[
                 Text(
-                  "We don't have a default cadence for this species — "
+                  "We don't have a default cadence for this category — "
                   'please set a date and time.',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,

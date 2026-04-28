@@ -92,7 +92,7 @@ void main() {
           id: 'puppy',
           name: 'Puppy Care',
           version: 1,
-          species: ['dog'],
+          category: ['dog'],
           triggers: ['house training', 'puppy'],
           loads: ['overview.md'],
           requiresPro: false,
@@ -106,7 +106,7 @@ void main() {
           id: 'new-cat',
           name: 'New Cat',
           version: 1,
-          species: ['cat'],
+          category: ['cat'],
           triggers: ['house training', 'litter box'],
           loads: ['overview.md'],
           requiresPro: false,
@@ -117,7 +117,7 @@ void main() {
       ),
     ]);
 
-    // buildChatTestStack seeds a dog pet (species: dog SOUL.md).
+    // buildChatTestStack seeds a dog pet (category: dog SOUL.md).
     final stack = await buildChatTestStack(
       llm: llm,
       tools: ToolDispatcher(),
@@ -152,7 +152,7 @@ void main() {
           id: 'puppy',
           name: 'Puppy Care',
           version: 1,
-          species: ['dog'],
+          category: ['dog'],
           triggers: ['puppy', 'house training'],
           loads: ['overview.md'],
           requiresPro: false,

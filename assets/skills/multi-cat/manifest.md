@@ -2,7 +2,7 @@
 id: multi-cat
 name: Multi-Cat Household
 version: 1
-species: [cat]
+category: [cat]
 triggers: ["new cat", "second cat", "another cat", "introducing", "introduction", "fighting", "bullying", "blocking", "ambush", "hissing", "tension between", "litter box outside", "spraying"]
 loads: ["overview.md", "introductions.md", "resources.md"]
 requires_pro: false

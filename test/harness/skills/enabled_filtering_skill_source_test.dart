@@ -19,7 +19,7 @@ SkillSourceEntry _entry(String id) => SkillSourceEntry(
         id: id,
         name: id,
         version: 1,
-        species: const [],
+        category: const [],
         triggers: const ['x'],
         loads: const [],
         requiresPro: false,

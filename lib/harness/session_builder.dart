@@ -81,15 +81,15 @@ class SessionBuilder {
     final redFlag = _screener.screen(userInput);
 
     final soul = await _readSoulOrEmpty(pet.id);
-    // Species lives in SOUL.md frontmatter (CLAUDE.md §3 — the only
-    // species-aware code path). Empty string when SOUL is missing or
-    // the user hasn't filled species in yet; that surfaces only
-    // universal skills (those with empty species lists).
-    final petSpecies =
-        parseSoul(soul).frontmatter['species']?.toString().trim() ?? '';
+    // Category lives in SOUL.md frontmatter (CLAUDE.md §3 — the only
+    // category-aware code path). Empty string when SOUL is missing or
+    // the user hasn't filled category in yet; that surfaces only
+    // universal skills (those with empty category lists).
+    final petCategory =
+        parseSoul(soul).frontmatter['category']?.toString().trim() ?? '';
 
     final matched = await _skills.match(
-      petSpecies: petSpecies,
+      petCategory: petCategory,
       userInput: userInput,
     );
 

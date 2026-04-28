@@ -69,7 +69,7 @@ void main() {
         );
     await wiki.writeAtomic(
       wiki.soulPath(petId),
-      '---\nspecies: dog\n---\n\n# Milo\n',
+      '---\ncategory: dog\n---\n\n# Milo\n',
     );
   });
 

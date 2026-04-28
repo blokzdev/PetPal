@@ -195,7 +195,7 @@ void main() {
       await WikiIoFs(tempRoot).writeAtomic(
         soulPath,
         '---\n'
-        'species: dog\n'
+        'category: dog\n'
         'breed: mixed\n'
         'allergies: []\n'
         '---\n'
@@ -223,7 +223,7 @@ void main() {
       expect(updated, contains('allergies: [chicken]'));
       expect(updated, contains('vet_contact: '));
       // Untouched scalars survive.
-      expect(updated, contains('species: dog'));
+      expect(updated, contains('category: dog'));
       expect(updated, contains('breed: mixed'));
       // Body preserved.
       expect(updated, contains('# Milo'));

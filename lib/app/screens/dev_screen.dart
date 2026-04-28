@@ -108,7 +108,7 @@ class _DevScreenState extends State<DevScreen> {
       }
       final id = await _petRepo!.createPet(
         name: 'Milo',
-        species: 'dog',
+        category: 'dog',
         breed: 'mixed',
         dob: DateTime(2022, 6, 12),
       );

@@ -11,7 +11,7 @@ import 'package:petpal/harness/skills/skill_manifest.dart';
 /// `loads:` file shows up only on a real launch (or by user
 /// reports). This test reads each pack from the local filesystem
 /// (where `flutter test` runs from the project root) and asserts
-/// the manifests parse, the species filter is set as the roadmap
+/// the manifests parse, the category filter is set as the roadmap
 /// requires, and every fragment listed in `loads:` actually
 /// exists on disk.
 ///
@@ -63,7 +63,7 @@ void main() {
           .readAsStringSync();
       final manifest = parseSkillManifest(raw);
       expect(manifest.id, 'reactive-dog');
-      expect(manifest.species, ['dog']);
+      expect(manifest.category, ['dog']);
       // Trigger sanity — reactivity vocabulary the user is likely
       // to type. The exact list will evolve; pin only the must-haves.
       expect(manifest.triggers, contains('reactive'));
@@ -75,7 +75,7 @@ void main() {
           .readAsStringSync();
       final manifest = parseSkillManifest(raw);
       expect(manifest.id, 'senior-cat');
-      expect(manifest.species, ['cat']);
+      expect(manifest.category, ['cat']);
       expect(manifest.triggers, contains('senior cat'));
       // Symptom-based triggers (kidney, hyperthyroidism, weight
       // loss) — these are the phrases owners actually type when
@@ -90,7 +90,7 @@ void main() {
           .readAsStringSync();
       final manifest = parseSkillManifest(raw);
       expect(manifest.id, 'multi-cat');
-      expect(manifest.species, ['cat']);
+      expect(manifest.category, ['cat']);
       expect(manifest.triggers, contains('introducing'));
       expect(manifest.triggers, contains('fighting'));
     });

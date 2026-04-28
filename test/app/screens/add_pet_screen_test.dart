@@ -52,8 +52,8 @@ ProviderContainer _setupOverrides({
       // rootBundle (no asset bundle in widget tests).
       onboardingTemplatesProvider.overrideWithValue(
         InMemoryOnboardingTemplates({
-          for (final s in Species.values)
-            s: '---\nspecies: ${s.id}\nbreed: {breed}\n---\n# {name}\n',
+          for (final s in Category.values)
+            s: '---\ncategory: ${s.id}\nbreed: {breed}\n---\n# {name}\n',
         }),
       ),
     ],
@@ -124,7 +124,7 @@ void main() {
       find.widgetWithText(TextFormField, 'Name'),
       'Milo',
     );
-    // Species dropdown defaults to "Dog" (Phase 3.4); no need to tap.
+    // Category dropdown defaults to "Dog" (Phase 3.4); no need to tap.
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Breed (optional)'),
       'mixed',
@@ -141,7 +141,7 @@ void main() {
     final soul = wiki.writes['wiki/${pets.first.id}/SOUL.md'];
     expect(soul, isNotNull);
     expect(soul!, contains('# Milo'));
-    expect(soul, contains('species: dog'));
+    expect(soul, contains('category: dog'));
     expect(soul, contains('breed: mixed'));
 
     // Home reflects the new pet

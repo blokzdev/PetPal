@@ -5,7 +5,7 @@ import 'package:petpal/harness/skills/skill_manifest.dart';
 
 /// Disk-level validation of the launch skill packs shipped under
 /// `assets/skills/`. Catches manifest typos, missing `loads:` files,
-/// and species values that don't appear in the supported set —
+/// and category values that don't appear in the supported set —
 /// problems that would otherwise only surface at runtime on a real
 /// device.
 ///
@@ -17,11 +17,11 @@ void main() {
     '${Directory.current.path}/assets/skills',
   );
 
-  /// The set of species ids the harness recognises (from
-  /// `lib/data/onboarding_templates.dart` `Species` enum). Kept as a
+  /// The set of category ids the harness recognises (from
+  /// `lib/data/onboarding_templates.dart` `Category` enum). Kept as a
   /// literal here so this test fails loudly if a manifest declares a
-  /// species we never seed.
-  const knownSpecies = {
+  /// category we never seed.
+  const knownCategory = {
     'dog',
     'cat',
     'bird',
@@ -63,18 +63,18 @@ void main() {
     }
   });
 
-  test('every species declared in a manifest is in the supported set',
+  test('every category declared in a manifest is in the supported set',
       () {
     for (final dir in skillDirs) {
       final manifest = parseSkillManifest(
         File('${dir.path}/manifest.md').readAsStringSync(),
       );
-      for (final s in manifest.species) {
+      for (final s in manifest.category) {
         expect(
-          knownSpecies,
+          knownCategory,
           contains(s),
           reason:
-              'skill ${manifest.id} declares unknown species "$s"',
+              'skill ${manifest.id} declares unknown category "$s"',
         );
       }
     }
@@ -118,14 +118,14 @@ void main() {
     final manifest = parseSkillManifest(
       File('${puppyDir.path}/manifest.md').readAsStringSync(),
     );
-    expect(manifest.species, ['dog']);
+    expect(manifest.category, ['dog']);
     expect(manifest.loads, [
       'overview.md',
       'house-training.md',
       'socialization.md',
     ]);
-    expect(manifest.matchesSpecies('dog'), isTrue);
-    expect(manifest.matchesSpecies('cat'), isFalse);
+    expect(manifest.matchesCategory('dog'), isTrue);
+    expect(manifest.matchesCategory('cat'), isFalse);
   });
 
   test('new-cat skill is cat-only', () {
@@ -135,8 +135,8 @@ void main() {
     final manifest = parseSkillManifest(
       File('${newCatDir.path}/manifest.md').readAsStringSync(),
     );
-    expect(manifest.species, ['cat']);
-    expect(manifest.matchesSpecies('cat'), isTrue);
-    expect(manifest.matchesSpecies('dog'), isFalse);
+    expect(manifest.category, ['cat']);
+    expect(manifest.matchesCategory('cat'), isTrue);
+    expect(manifest.matchesCategory('dog'), isFalse);
   });
 }

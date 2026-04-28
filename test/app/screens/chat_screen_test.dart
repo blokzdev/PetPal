@@ -27,7 +27,7 @@ class _NoopWiki implements WikiIo {
   Future<void> writeAtomic(String relPath, String body) async {}
   @override
   Future<String> read(String relPath) async =>
-      '---\nspecies: dog\n---\n\n# Milo\n';
+      '---\ncategory: dog\n---\n\n# Milo\n';
   @override
   Future<List<String>> listForPet(int petId) async => const [];
   @override

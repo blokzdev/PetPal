@@ -1,13 +1,13 @@
 import 'package:flutter/services.dart' show rootBundle;
 
-/// The eight species the add-pet flow recognises. Picking one of these
-/// triggers a species-specific `SOUL.md` template that seeds the
+/// The eight categories the add-pet flow recognises. Picking one of these
+/// triggers a category-specific `SOUL.md` template that seeds the
 /// frontmatter keys the harness will track from day one.
 ///
-/// Anything not in this list falls through to the [generic] template —
-/// the harness still works (skill filter is the only species-aware
+/// Anything not in this list falls through to the [exotic] template —
+/// the harness still works (skill filter is the only category-aware
 /// path; see CLAUDE.md §3), but the SOUL frontmatter is plain.
-enum Species {
+enum Category {
   dog('dog'),
   cat('cat'),
   bird('bird'),
@@ -17,38 +17,38 @@ enum Species {
   smallMammal('small-mammal'),
   exotic('exotic');
 
-  const Species(this.id);
+  const Category(this.id);
 
-  /// Lowercase identifier. Used as the SOUL.md `species:` value AND as
+  /// Lowercase identifier. Used as the SOUL.md `category:` value AND as
   /// the asset filename (`assets/onboarding/<id>.md`). Skill manifests
   /// match against this.
   final String id;
 
-  /// Human-readable label for the species picker.
+  /// Human-readable label for the category picker.
   String get label {
     switch (this) {
-      case Species.dog:
+      case Category.dog:
         return 'Dog';
-      case Species.cat:
+      case Category.cat:
         return 'Cat';
-      case Species.bird:
+      case Category.bird:
         return 'Bird';
-      case Species.rabbit:
+      case Category.rabbit:
         return 'Rabbit';
-      case Species.reptile:
+      case Category.reptile:
         return 'Reptile';
-      case Species.fish:
+      case Category.fish:
         return 'Fish';
-      case Species.smallMammal:
+      case Category.smallMammal:
         return 'Small mammal';
-      case Species.exotic:
+      case Category.exotic:
         return 'Other / exotic';
     }
   }
 
-  static Species? fromId(String id) {
-    for (final s in Species.values) {
-      if (s.id == id) return s;
+  static Category? fromId(String id) {
+    for (final c in Category.values) {
+      if (c.id == id) return c;
     }
     return null;
   }
@@ -57,11 +57,11 @@ enum Species {
 /// Source of onboarding templates. Production reads from Flutter assets;
 /// tests inject an in-memory map so they don't need a Flutter binding.
 abstract class OnboardingTemplates {
-  /// Return a rendered SOUL.md for a new pet of [species]. Substitutes
-  /// {name}, {breed}, {dob} placeholders in the template; species-
+  /// Return a rendered SOUL.md for a new pet of [category]. Substitutes
+  /// {name}, {breed}, {dob} placeholders in the template; category-
   /// specific frontmatter keys come from the template itself.
   Future<String> seedSoulFor({
-    required Species species,
+    required Category category,
     required String name,
     String? breed,
     DateTime? dob,
@@ -74,13 +74,13 @@ class AssetOnboardingTemplates implements OnboardingTemplates {
 
   @override
   Future<String> seedSoulFor({
-    required Species species,
+    required Category category,
     required String name,
     String? breed,
     DateTime? dob,
   }) async {
     final raw = await rootBundle.loadString(
-      'assets/onboarding/${species.id}.md',
+      'assets/onboarding/${category.id}.md',
     );
     return renderTemplate(raw, name: name, breed: breed, dob: dob);
   }
@@ -112,17 +112,17 @@ String renderTemplate(
 /// In-memory [OnboardingTemplates] for tests.
 class InMemoryOnboardingTemplates implements OnboardingTemplates {
   InMemoryOnboardingTemplates(this._templates);
-  final Map<Species, String> _templates;
+  final Map<Category, String> _templates;
 
   @override
   Future<String> seedSoulFor({
-    required Species species,
+    required Category category,
     required String name,
     String? breed,
     DateTime? dob,
   }) async {
-    final tpl = _templates[species] ??
-        (throw StateError('no template for ${species.id}'));
+    final tpl = _templates[category] ??
+        (throw StateError('no template for ${category.id}'));
     return renderTemplate(tpl, name: name, breed: breed, dob: dob);
   }
 }

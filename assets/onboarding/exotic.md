@@ -1,5 +1,5 @@
 ---
-species: exotic
+category: exotic
 breed: {breed}
 dob: {dob}
 weight:

@@ -183,7 +183,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 ///
 /// Per VOICE.md §5 the heading interpolates the pet name. The third
 /// chip stays generic where pet name doesn't naturally fit, so it
-/// works regardless of species.
+/// works regardless of category.
 class EmptyChatForTesting extends StatelessWidget {
   const EmptyChatForTesting({
     super.key,

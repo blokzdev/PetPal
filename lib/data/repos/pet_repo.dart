@@ -5,8 +5,8 @@ import '../wiki_io.dart';
 /// SOUL.md skeleton at `wiki/<petId>/SOUL.md` so the agent has a place to
 /// merge frontmatter via update_soul (Phase 2+).
 ///
-/// Phase 3.4 introduces species-specific seed templates loaded from
-/// `assets/onboarding/<species>.md`. The add-pet flow renders the
+/// Phase 3.4 introduces category-specific seed templates loaded from
+/// `assets/onboarding/<category>.md`. The add-pet flow renders the
 /// template via [OnboardingTemplates] and passes the rendered SOUL via
 /// the optional [seedSoul] parameter on [createPet]. When [seedSoul] is
 /// omitted, [createPet] falls back to the inline generic skeleton (kept
@@ -26,7 +26,7 @@ class PetRepo {
 
   Future<int> createPet({
     required String name,
-    String? species,
+    String? category,
     String? breed,
     DateTime? dob,
     String? seedSoul,
@@ -37,7 +37,7 @@ class PetRepo {
     final body = seedSoul ??
         _genericSeedSoul(
           name: name,
-          species: species,
+          category: category,
           breed: breed,
           dob: dob,
         );
@@ -61,7 +61,7 @@ class PetRepo {
 
 String _genericSeedSoul({
   required String name,
-  String? species,
+  String? category,
   String? breed,
   DateTime? dob,
 }) {
@@ -71,7 +71,7 @@ String _genericSeedSoul({
           '${dob.month.toString().padLeft(2, '0')}-'
           '${dob.day.toString().padLeft(2, '0')}';
   return '''---
-species: ${species ?? ''}
+category: ${category ?? ''}
 breed: ${breed ?? ''}
 dob: $dobStr
 weight_kg:

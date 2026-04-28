@@ -101,8 +101,8 @@ final wikiIoProvider = FutureProvider<WikiIo>((ref) async {
   return WikiIoFs.openDefault();
 });
 
-/// Source of per-species `SOUL.md` seed templates loaded from
-/// `assets/onboarding/<species>.md`. Tests inject [InMemoryOnboardingTemplates].
+/// Source of per-category `SOUL.md` seed templates loaded from
+/// `assets/onboarding/<category>.md`. Tests inject [InMemoryOnboardingTemplates].
 final onboardingTemplatesProvider = Provider<OnboardingTemplates>((ref) {
   return const AssetOnboardingTemplates();
 });
@@ -326,9 +326,9 @@ final skillLoaderProvider = FutureProvider<SkillLoader>((ref) async {
 });
 
 /// Catalog entry for the skill browser: manifest + whether it's
-/// currently enabled. Pre-filtered to the active pet's species so the
+/// currently enabled. Pre-filtered to the active pet's category so the
 /// browser only shows relevant skills (CLAUDE.md §3 — onboarding
-/// templates and skill packs are the only species-aware paths).
+/// templates and skill packs are the only category-aware paths).
 class SkillCatalogEntry {
   const SkillCatalogEntry({required this.manifest, required this.enabled});
   final SkillManifest manifest;
@@ -342,22 +342,22 @@ final skillCatalogProvider =
   final pets = await ref.watch(petsProvider.future);
   if (pets.isEmpty) return const [];
   final wiki = await ref.watch(wikiIoProvider.future);
-  // Species lives in SOUL.md frontmatter (CLAUDE.md §3). Empty when
-  // SOUL.md is missing or the user hasn't filled in species — only
+  // Category lives in SOUL.md frontmatter (CLAUDE.md §3). Empty when
+  // SOUL.md is missing or the user hasn't filled in category — only
   // universal skills survive that case.
-  String petSpecies = '';
+  String petCategory = '';
   try {
     final soul = await wiki.read(wiki.soulPath(pets.last.id));
-    petSpecies = parseSoul(soul).frontmatter['species']?.toString() ?? '';
+    petCategory = parseSoul(soul).frontmatter['category']?.toString() ?? '';
   } catch (_) {
-    // No SOUL.md yet; petSpecies stays empty.
+    // No SOUL.md yet; petCategory stays empty.
   }
 
   final disabled = await repo.disabledIds();
   final entries = await source.list();
   return [
     for (final e in entries)
-      if (e.manifest.matchesSpecies(petSpecies))
+      if (e.manifest.matchesCategory(petCategory))
         SkillCatalogEntry(
           manifest: e.manifest,
           enabled: !disabled.contains(e.manifest.id),

@@ -79,12 +79,12 @@ class WeeklyDigestRunner {
           ..where((p) => p.id.equals(petId)))
         .getSingle();
 
-    String species = '';
+    String category = '';
     try {
       final soul = await _wiki.read(_wiki.soulPath(petId));
-      species = parseSoul(soul).frontmatter['species']?.toString() ?? '';
+      category = parseSoul(soul).frontmatter['category']?.toString() ?? '';
     } catch (_) {
-      // No SOUL.md yet — proceed with empty species.
+      // No SOUL.md yet — proceed with empty category.
     }
 
     final raw = StringBuffer();
@@ -96,10 +96,10 @@ class WeeklyDigestRunner {
         ..writeln();
     }
 
-    final speciesLabel = species.isEmpty ? 'pet' : species;
+    final categoryLabel = category.isEmpty ? 'pet' : category;
     final systemPrompt =
         'You are PetPal, generating a weekly digest for ${pet.name}, '
-        'a $speciesLabel. The user wrote the entries below this week. '
+        'a $categoryLabel. The user wrote the entries below this week. '
         'Summarise: trends in weight / food / behaviour, anything that '
         'warrants vet attention, open questions to follow up. Output '
         'concise markdown with section headers. Cite entry paths in '
