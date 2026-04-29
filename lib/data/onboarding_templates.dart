@@ -139,11 +139,67 @@ class AssetOnboardingTemplates implements OnboardingTemplates {
   }
 }
 
+/// Welcome-prose forks per relationship — VOICE.md §5.5 + 5.5.5 lock.
+/// Pet reuses the category-specific welcome already in the template;
+/// the other three replace it with relationship-specific framing
+/// (clinical-respectful for rescue/rehab, dignified-of-purpose for
+/// permanent wildlife, observer-naturalist for wildlife observation).
+/// Each branch keeps the `{name}` placeholder so the standard
+/// substitution pass below still hits.
+const String _rescueRehabBody = '# {name}\n'
+    '{name} is in your care while their next chapter takes shape. '
+    'Track intake notes, medical milestones, and progress toward '
+    'release or placement. Dates and observations travel with the '
+    'animal — log carefully. The bond is real; the goal is the '
+    'handoff.\n\n';
+
+const String _permanentWildlifeBody = '# {name}\n'
+    '{name} is a permanent resident — non-releasable, in your '
+    'long-term care. Track diet, enclosure changes, behavior, and '
+    'the slow patterns that come with years rather than weeks. '
+    'PetPal accumulates a record worthy of the responsibility.\n\n';
+
+const String _wildlifeObservationBody = '# {name}\n'
+    '{name} is on your radar — an animal you watch, not one you '
+    'keep. Log sightings, behaviors, seasonal patterns, and what '
+    "the territory looks like through {name}'s presence. The "
+    'record is the relationship.\n\n';
+
+/// Body fork: when [r] is anything other than [Relationship.pet],
+/// replace the segment from the template's first `# {name}` heading up
+/// to the `{about_petpal_should_know}` placeholder with the
+/// relationship-specific welcome. The `{name}` placeholder is
+/// preserved for the standard substitution pass to fill in. Returns
+/// [template] unchanged when [r] is null or pet.
+String _applyBodyFork(String template, Relationship? r) {
+  if (r == null || r == Relationship.pet) return template;
+  final body = switch (r) {
+    Relationship.pet => '', // unreachable — handled above
+    Relationship.rescueRehab => _rescueRehabBody,
+    Relationship.permanentWildlife => _permanentWildlifeBody,
+    Relationship.wildlifeObservation => _wildlifeObservationBody,
+  };
+  // Match from `# {name}` up to (but not including) the
+  // `{about_petpal_should_know}` placeholder — dotAll so the welcome
+  // can span multiple lines. Templates without the placeholder still
+  // get the swap (regex falls through to end-of-string).
+  final swapper =
+      RegExp(r'# \{name\}.*?(?=\{about_petpal_should_know\}|$)', dotAll: true);
+  if (swapper.hasMatch(template)) {
+    return template.replaceFirst(swapper, body);
+  }
+  return template;
+}
+
 /// Pure substitution + post-process strip. Replaces all of the `{key}`
 /// placeholders in [template] with the provided values. After
 /// substitution, any line matching `^<key>:\s*$` for an optional-strip
 /// key is removed from the rendered output (DECISIONS row 45 default-
 /// omitted rule).
+///
+/// When [relationship] is non-pet, the welcome paragraph is swapped
+/// for a relationship-specific body **before** the substitution pass
+/// — see [_applyBodyFork] + the four `_<...>Body` constants above.
 ///
 /// Exposed at top level so tests and the in-memory implementation can
 /// share the same renderer.
@@ -167,6 +223,10 @@ String renderTemplate(
   double? weightKg,
   String? aboutPetPalShouldKnow,
 }) {
+  // Body fork happens BEFORE substitution so the relationship-specific
+  // body still has live `{name}` / `{about_petpal_should_know}`
+  // placeholders for the substitution pass to fill in.
+  template = _applyBodyFork(template, relationship);
   String fmtDate(DateTime? d) => d == null
       ? ''
       : '${d.year.toString().padLeft(4, '0')}-'

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/data/onboarding_templates.dart';
 import 'package:petpal/data/relationship.dart';
+import 'package:petpal/data/soul_file.dart';
 
 /// Phase 5.5.4 / Commit A — invariants for the relationship + sub-
 /// classification enums and the renderTemplate strip-empty pass that
@@ -224,6 +225,200 @@ void main() {
       final without = renderTemplate(tpl(), name: 'Loki');
       expect(without, isNot(contains(RegExp(r'weight_kg: \d'))));
       expect(without, contains('weight_kg:'));
+    });
+  });
+
+  group('5.5.5 body fork on relationship (VOICE.md §5.5)', () {
+    String tpl() => '---\n'
+        'category: dog\n'
+        'relationship: {relationship}\n'
+        '---\n'
+        '\n'
+        '# {name}\n'
+        '{name} is a dog. Tell PetPal about {name}. The journal grows.\n'
+        '\n'
+        '{about_petpal_should_know}\n';
+
+    test('pet leaves the existing welcome prose intact', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Loki',
+        relationship: Relationship.pet,
+      );
+      // The category-specific welcome survives.
+      expect(out, contains('Loki is a dog.'));
+      expect(out, contains('The journal grows.'));
+      // None of the alt-relationship anchors appear.
+      expect(out, isNot(contains('next chapter takes shape')));
+      expect(out, isNot(contains('permanent resident')));
+      expect(out, isNot(contains('on your radar')));
+    });
+
+    test('rescueRehab swaps to the rehab welcome (clinical-respectful, '
+        'progress-toward-outcome register)', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Patch',
+        relationship: Relationship.rescueRehab,
+      );
+      // Rehab-specific opening + progress framing + handoff aphorism.
+      expect(out, contains('Patch is in your care while their next '
+          'chapter takes shape.'));
+      expect(out, contains('progress toward release or placement'));
+      expect(out, contains('the goal is the handoff'));
+      // Pet welcome is gone.
+      expect(out, isNot(contains('is a dog.')));
+      expect(out, isNot(contains('The journal grows.')));
+      // {name} substitution still happened.
+      expect(out, isNot(contains('{name}')));
+      // about_petpal_should_know placeholder still survives the swap
+      // and gets emptied because no value was supplied.
+      expect(out, isNot(contains('{about_petpal_should_know}')));
+    });
+
+    test('permanentWildlife swaps to the long-term-care welcome '
+        '(dignified-of-purpose register)', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Hawk',
+        relationship: Relationship.permanentWildlife,
+      );
+      expect(out, contains('Hawk is a permanent resident — '
+          'non-releasable, in your long-term care.'));
+      expect(out, contains('slow patterns that come with years '
+          'rather than weeks'));
+      expect(out, contains('a record worthy of the responsibility'));
+      expect(out, isNot(contains('next chapter takes shape')));
+      expect(out, isNot(contains('on your radar')));
+    });
+
+    test('wildlifeObservation swaps to the observer-naturalist welcome '
+        '(documentary register)', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Vixen',
+        relationship: Relationship.wildlifeObservation,
+      );
+      expect(out, contains('Vixen is on your radar — an animal you '
+          'watch, not one you keep.'));
+      expect(out, contains("through Vixen's presence"));
+      expect(out, contains('The record is the relationship.'));
+      expect(out, isNot(contains('a permanent resident')));
+      expect(out, isNot(contains('next chapter takes shape')));
+    });
+
+    test('aboutPetPalShouldKnow still substitutes after a body fork', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Patch',
+        relationship: Relationship.rescueRehab,
+        aboutPetPalShouldKnow: 'Came in dehydrated; on fluids.',
+      );
+      expect(out, contains('the goal is the handoff'));
+      expect(out, contains('Came in dehydrated; on fluids.'));
+    });
+
+    test('voice differentiation: each non-pet body opens with its own '
+        'locked anchor phrase (regression guard against the bodies '
+        'drifting toward each other on future edits)', () {
+      String body(Relationship r) => renderTemplate(
+            tpl(),
+            name: 'Subject',
+            relationship: r,
+          );
+      final rehab = body(Relationship.rescueRehab);
+      final permWild = body(Relationship.permanentWildlife);
+      final obs = body(Relationship.wildlifeObservation);
+
+      // Each anchor appears exactly in one of the three bodies.
+      const anchors = {
+        'next chapter takes shape': 'rehab',
+        'permanent resident': 'permanent wildlife',
+        'on your radar': 'observation',
+      };
+      for (final entry in anchors.entries) {
+        final hits = [rehab, permWild, obs]
+            .where((b) => b.contains(entry.key))
+            .length;
+        expect(hits, 1,
+            reason: '${entry.key} (${entry.value}) should appear in '
+                'exactly one body — got $hits hits.');
+      }
+    });
+  });
+
+  group('5.5.5 SOUL keyOrder canonical shape (DECISIONS row 45)', () {
+    test('serializeSoul emits the new identity / classification / '
+        'lifecycle blocks in the canonical order', () {
+      // Helper: index of `<key>:` (start-of-line). Returns -1 if absent.
+      int idx(String emitted, String key) {
+        final m = RegExp('^$key:', multiLine: true).firstMatch(emitted);
+        return m?.start ?? -1;
+      }
+
+      final out = serializeSoul(
+        frontmatter: {
+          // Deliberately scrambled insertion order; serializeSoul must
+          // re-emit per the canonical key order regardless.
+          'temperament': const ['anxious'],
+          'expected_release_date': '2026-06-01',
+          'rehab_context': 'medical',
+          'sex': 'female',
+          'relationship': 'rescue-rehab',
+          'breed': 'mixed',
+          'category': 'dog',
+          'species': 'Domestic Dog',
+          'variety': 'mutt',
+          'neutered': 'yes',
+          'working_role': '',
+          'care_context': '',
+          'dob': '2022-06-12',
+          'dob_approx': '',
+          'adoption_date': '',
+          'intake_date': '2026-04-01',
+          'weight_kg': 14.2,
+          'allergies': const ['chicken'],
+          'meds': const [],
+          'vet_contact': 'Dr. Patel',
+          'extension_key': 'still trails',
+        },
+        body: '\n# Loki\n',
+      );
+
+      // Identity block: category < species < variety < breed.
+      expect(idx(out, 'category'), greaterThanOrEqualTo(0));
+      expect(idx(out, 'category'), lessThan(idx(out, 'species')));
+      expect(idx(out, 'species'), lessThan(idx(out, 'variety')));
+      expect(idx(out, 'variety'), lessThan(idx(out, 'breed')));
+
+      // Classification: sex < neutered < relationship < working_role <
+      // rehab_context < care_context.
+      expect(idx(out, 'breed'), lessThan(idx(out, 'sex')));
+      expect(idx(out, 'sex'), lessThan(idx(out, 'neutered')));
+      expect(idx(out, 'neutered'), lessThan(idx(out, 'relationship')));
+      expect(idx(out, 'relationship'), lessThan(idx(out, 'working_role')));
+      expect(idx(out, 'working_role'), lessThan(idx(out, 'rehab_context')));
+      expect(idx(out, 'rehab_context'), lessThan(idx(out, 'care_context')));
+
+      // Lifecycle dates: dob < dob_approx < adoption_date <
+      // intake_date < expected_release_date < weight_kg.
+      expect(idx(out, 'care_context'), lessThan(idx(out, 'dob')));
+      expect(idx(out, 'dob'), lessThan(idx(out, 'dob_approx')));
+      expect(idx(out, 'dob_approx'), lessThan(idx(out, 'adoption_date')));
+      expect(idx(out, 'adoption_date'), lessThan(idx(out, 'intake_date')));
+      expect(
+        idx(out, 'intake_date'),
+        lessThan(idx(out, 'expected_release_date')),
+      );
+      expect(
+        idx(out, 'expected_release_date'),
+        lessThan(idx(out, 'weight_kg')),
+      );
+
+      // Trailing block survives in canonical position; extension keys
+      // trail by virtue of falling outside keyOrder.
+      expect(idx(out, 'weight_kg'), lessThan(idx(out, 'allergies')));
+      expect(idx(out, 'temperament'), lessThan(idx(out, 'extension_key')));
     });
   });
 }

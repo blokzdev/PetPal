@@ -43,13 +43,35 @@ ParsedSoul parseSoul(String text) {
 /// Re-emit a SOUL.md from a frontmatter map and body string. Keys are
 /// emitted in [keyOrder] first (when present), then any remaining keys
 /// in insertion order — matching the canonical layout in CLAUDE.md §5.
+///
+/// The default [keyOrder] is the canonical SOUL key order locked at
+/// DECISIONS row 45 + 5.5.5: identity (`category, species, variety,
+/// breed`), classification (`sex, neutered, relationship, working_role,
+/// rehab_context, care_context`), lifecycle dates (`dob, dob_approx,
+/// adoption_date, intake_date, expected_release_date`), then the
+/// existing `weight_kg, allergies, meds, vet_contact, temperament`
+/// block. Category-specific extension keys (e.g. `hay_type`,
+/// `tank_litres`, `enclosure_size`) trail by virtue of not appearing
+/// in [keyOrder] — they fall through to insertion order.
 String serializeSoul({
   required Map<String, Object?> frontmatter,
   required String body,
   List<String> keyOrder = const [
     'category',
+    'species',
+    'variety',
     'breed',
+    'sex',
+    'neutered',
+    'relationship',
+    'working_role',
+    'rehab_context',
+    'care_context',
     'dob',
+    'dob_approx',
+    'adoption_date',
+    'intake_date',
+    'expected_release_date',
     'weight_kg',
     'allergies',
     'meds',
