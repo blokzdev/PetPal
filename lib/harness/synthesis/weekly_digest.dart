@@ -1,6 +1,7 @@
 import 'package:drift/drift.dart' show OrderingTerm;
 
 import '../../data/db/database.dart';
+import '../../data/pet_name.dart';
 import '../../data/repos/wiki_repo.dart';
 import '../../data/soul_file.dart';
 import '../../data/wiki_io.dart';
@@ -97,8 +98,12 @@ class WeeklyDigestRunner {
     }
 
     final categoryLabel = category.isEmpty ? 'pet' : category;
+    // Bug-2 defense: an empty pet.name in the synthesis prompt would
+    // produce "generating a weekly digest for , a dog." with an
+    // orphan comma. Lowercase fallback matches the harness register.
+    final petName = displayPetNameLower(pet.name);
     final systemPrompt =
-        'You are PetPal, generating a weekly digest for ${pet.name}, '
+        'You are PetPal, generating a weekly digest for $petName, '
         'a $categoryLabel. The user wrote the entries below this week. '
         'Summarise: trends in weight / food / behaviour, anything that '
         'warrants vet attention, open questions to follow up. Output '
@@ -114,7 +119,7 @@ class WeeklyDigestRunner {
           role: msg.Message.userRole,
           content: [
             msg.TextBlock(
-              'Last ${window.inDays} days of entries for ${pet.name}:\n\n'
+              'Last ${window.inDays} days of entries for $petName:\n\n'
               '${raw.toString().trimRight()}\n',
             ),
           ],

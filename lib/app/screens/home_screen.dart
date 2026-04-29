@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../data/pet_name.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
@@ -46,7 +47,10 @@ class HomeScreen extends ConsumerWidget {
         if (list.isNotEmpty) {
           hero = _PetGreetingHero(
             key: ValueKey('hero-${list.last.id}'),
-            petName: list.last.name,
+            // Bug-2 defense: route the raw name through
+            // displayPetName so an empty/whitespace name renders
+            // as "Your pet" rather than a blank gradient.
+            petName: displayPetName(list.last.name),
           );
         }
       },
@@ -163,6 +167,11 @@ class _GreetingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final text = Theme.of(context).textTheme;
+    // Bug-2 defense: route the raw name through displayPetName so
+    // an empty/whitespace name renders as "Your pet" rather than
+    // emitting orphan apostrophes ("PetPal remembers 's life...")
+    // or trailing-space CTAs ("Chat with ").
+    final name = displayPetName(pet.name as String?);
     // Free tier (DECISIONS row 8) — chat with the most recently-created pet.
     return SingleChildScrollView(
       child: Column(
@@ -172,7 +181,7 @@ class _GreetingBody extends ConsumerWidget {
         // the AppScaffold.hero zone above (task 5.10). The body opens
         // directly with the tagline so the name doesn't repeat.
         Text(
-          "PetPal remembers ${pet.name}'s life so you don't have to.",
+          "PetPal remembers $name's life so you don't have to.",
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
@@ -183,7 +192,7 @@ class _GreetingBody extends ConsumerWidget {
         FilledButton.icon(
           onPressed: () => GoRouter.of(context).push('/chat'),
           icon: const Icon(Icons.chat_bubble),
-          label: Text('Chat with ${pet.name}'),
+          label: Text('Chat with $name'),
         ),
         const SizedBox(height: Spacing.l),
         // Destinations grid — task 5.12 (user-locked: 2-column card

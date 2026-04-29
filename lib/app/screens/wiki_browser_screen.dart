@@ -54,8 +54,17 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
     // Per-pet destination → interpolate the active pet's name into the
     // app bar title (VOICE.md §5).
     final petsAsync = ref.watch(petsProvider);
+    // Bug-2 defense: treat null AND empty/whitespace as the
+    // "no-named-pet" case so we don't render "'s journal" with an
+    // orphan apostrophe. The downstream `_Tree`, `_DigestCard`, and
+    // empty-state widgets already check for null but were
+    // partially missing the empty case.
     final petName = petsAsync.maybeWhen(
-      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      data: (pets) {
+        if (pets.isEmpty) return null;
+        final name = pets.last.name.trim();
+        return name.isEmpty ? null : name;
+      },
       orElse: () => null,
     );
     final title = petName == null ? 'Journal' : "$petName's journal";

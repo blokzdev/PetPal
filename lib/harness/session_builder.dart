@@ -1,4 +1,5 @@
 import '../data/db/database.dart';
+import '../data/pet_name.dart';
 import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import 'agent/messages.dart';
@@ -141,9 +142,15 @@ class SessionBuilder {
     required List<String> skillFragments,
     RedFlagMatch? redFlag,
   }) {
+    // Bug-2 defense: lowercase-form fallback (matches the
+    // `?? 'your pet'` pattern in reminder_service) so an empty
+    // pet.name doesn't produce "a memory-first companion for ."
+    // at the top of the system prompt.
+    final petLower = displayPetNameLower(pet.name);
+    final petTitle = displayPetName(pet.name);
     final buf = StringBuffer()
       ..writeln(
-        'You are PetPal, a memory-first companion for ${pet.name}. '
+        'You are PetPal, a memory-first companion for $petLower. '
         "You help the owner track their pet's life and know when to call "
         "the vet. You never diagnose. You ground every answer in the pet's "
         'wiki.',
@@ -152,7 +159,7 @@ class SessionBuilder {
 
     if (soul.isNotEmpty) {
       buf
-        ..writeln("# ${pet.name}'s identity")
+        ..writeln("# $petTitle's identity")
         ..writeln()
         ..writeln(soul.trimRight())
         ..writeln();

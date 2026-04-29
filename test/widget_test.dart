@@ -167,6 +167,61 @@ void main() {
   });
 
   // -----------------------------------------------------------------
+  // Bug 2 regression — defensive empty-name handling on Home. With a
+  // pet whose `name` is empty / whitespace, no surface should emit
+  // orphan punctuation: the tagline "PetPal remembers 's life so..."
+  // and the CTA "Chat with " (trailing space) were the user-reported
+  // failure modes from on-device verification.
+  // -----------------------------------------------------------------
+  testWidgets('Bug 2 regression: empty-name pet renders Home with the '
+      '"Your pet" fallback — no orphan apostrophe in tagline, no '
+      'trailing space in chat CTA, hero shows the placeholder',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          // Empty name — the failure mode that surfaced on-device.
+          ..._dataOverrides(withPetNamed: ''),
+        ],
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Tagline: "PetPal remembers Your pet's life..." — NOT
+    // "PetPal remembers 's life..." with the orphan apostrophe.
+    expect(
+      find.text(
+        "PetPal remembers Your pet's life so you don't have to.",
+      ),
+      findsOneWidget,
+      reason: 'displayPetName must replace empty pet.name with the '
+          '"Your pet" fallback in the home tagline.',
+    );
+    expect(
+      find.text("PetPal remembers 's life so you don't have to."),
+      findsNothing,
+      reason: 'orphan apostrophe must never reach the tagline.',
+    );
+
+    // Chat CTA: "Chat with Your pet" — no trailing-space artefact.
+    expect(
+      find.widgetWithText(FilledButton, 'Chat with Your pet'),
+      findsOneWidget,
+    );
+    expect(
+      find.widgetWithText(FilledButton, 'Chat with '),
+      findsNothing,
+    );
+
+    // Hero greeting: shows the placeholder, not blank.
+    expect(find.text('Your pet'), findsWidgets);
+  });
+
+  // -----------------------------------------------------------------
   // Task 5.12 — home destinations land as a 2-col PetCard grid below
   // the primary CTA (user-locked). The five tile labels (Journal,
   // Profile, Reminders, Care guides, Settings) replace the previous

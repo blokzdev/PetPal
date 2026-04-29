@@ -133,8 +133,15 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
     // Per-pet destination → interpolate name into the app bar
     // (VOICE.md §5). Falls back to "Profile" if no pet is loaded yet.
     final petsAsync = ref.watch(petsProvider);
+    // Bug-2 defense: treat empty/whitespace name same as null so
+    // downstream branches don't render "'s profile" with an orphan
+    // apostrophe.
     final petName = petsAsync.maybeWhen(
-      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      data: (pets) {
+        if (pets.isEmpty) return null;
+        final name = pets.last.name.trim();
+        return name.isEmpty ? null : name;
+      },
       orElse: () => null,
     );
     final title = petName == null ? 'Profile' : "$petName's profile";

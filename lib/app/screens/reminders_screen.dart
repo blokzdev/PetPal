@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/onboarding_templates.dart';
+import '../../data/pet_name.dart';
 import '../../data/repos/reminder_repo.dart';
 import '../../data/soul_file.dart';
 import '../../harness/scheduling/reminder_kinds.dart';
@@ -28,8 +29,14 @@ class RemindersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final petsAsync = ref.watch(petsProvider);
+    // Bug-2 defense: empty/whitespace name → treat as null so the
+    // title falls back to "Reminders" rather than "'s reminders".
     final petName = petsAsync.maybeWhen(
-      data: (pets) => pets.isEmpty ? null : pets.last.name,
+      data: (pets) {
+        if (pets.isEmpty) return null;
+        final name = pets.last.name.trim();
+        return name.isEmpty ? null : name;
+      },
       orElse: () => null,
     );
     final title = petName == null ? 'Reminders' : "$petName's reminders";
@@ -130,7 +137,11 @@ class _Body extends ConsumerWidget {
           child: reminders.when(
             data: (rows) => rows.isEmpty
                 ? RemindersEmptyForTesting(
-                    petName: pet.name as String,
+                    // Bug-2 defense: empty/whitespace name → "Your
+                    // pet" via displayPetName so the empty heading
+                    // doesn't render "No reminders for  yet." with
+                    // a double-space.
+                    petName: displayPetName(pet.name as String?),
                     onAdd: onAdd,
                   )
                 : _List(rows: rows, petId: pet.id as int),
