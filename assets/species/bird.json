@@ -1189,5 +1189,352 @@
     "common_alternatives": [
       "Java Peafowl"
     ]
+  },
+  {
+    "display_name": "Red-tailed Hawk",
+    "scientific_name": "Buteo jamaicensis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "redtail"
+    ]
+  },
+  {
+    "display_name": "Cooper's Hawk",
+    "scientific_name": "Accipiter cooperii",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Sharp-shinned Hawk",
+    "scientific_name": "Accipiter striatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sharpie"
+    ]
+  },
+  {
+    "display_name": "Northern Goshawk",
+    "scientific_name": "Accipiter gentilis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "goshawk"
+    ]
+  },
+  {
+    "display_name": "Red-shouldered Hawk",
+    "scientific_name": "Buteo lineatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Broad-winged Hawk",
+    "scientific_name": "Buteo platypterus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Swainson's Hawk",
+    "scientific_name": "Buteo swainsoni",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Northern Harrier",
+    "scientific_name": "Circus hudsonius",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "marsh hawk"
+    ]
+  },
+  {
+    "display_name": "Harris's Hawk",
+    "scientific_name": "Parabuteo unicinctus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Harris Hawk"
+    ]
+  },
+  {
+    "display_name": "Bald Eagle",
+    "scientific_name": "Haliaeetus leucocephalus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Golden Eagle",
+    "scientific_name": "Aquila chrysaetos",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Osprey",
+    "scientific_name": "Pandion haliaetus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "fish hawk",
+      "sea hawk"
+    ]
+  },
+  {
+    "display_name": "American Kestrel",
+    "scientific_name": "Falco sparverius",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sparrow hawk"
+    ]
+  },
+  {
+    "display_name": "Merlin",
+    "scientific_name": "Falco columbarius",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pigeon hawk"
+    ]
+  },
+  {
+    "display_name": "Peregrine Falcon",
+    "scientific_name": "Falco peregrinus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "peregrine",
+      "duck hawk"
+    ]
+  },
+  {
+    "display_name": "Gyrfalcon",
+    "scientific_name": "Falco rusticolus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "gyr"
+    ]
+  },
+  {
+    "display_name": "Prairie Falcon",
+    "scientific_name": "Falco mexicanus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Turkey Vulture",
+    "scientific_name": "Cathartes aura",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "TV",
+      "buzzard"
+    ]
+  },
+  {
+    "display_name": "Black Vulture",
+    "scientific_name": "Coragyps atratus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Great Horned Owl",
+    "scientific_name": "Bubo virginianus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "GHOW",
+      "hoot owl"
+    ]
+  },
+  {
+    "display_name": "Barn Owl",
+    "scientific_name": "Tyto alba",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BNOW"
+    ]
+  },
+  {
+    "display_name": "Eastern Screech Owl",
+    "scientific_name": "Megascops asio",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "screech owl"
+    ]
+  },
+  {
+    "display_name": "Western Screech Owl",
+    "scientific_name": "Megascops kennicottii",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Barred Owl",
+    "scientific_name": "Strix varia",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BDOW"
+    ]
+  },
+  {
+    "display_name": "Snowy Owl",
+    "scientific_name": "Bubo scandiacus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Northern Saw-whet Owl",
+    "scientific_name": "Aegolius acadicus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "saw-whet"
+    ]
+  },
+  {
+    "display_name": "Burrowing Owl",
+    "scientific_name": "Athene cunicularia",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Long-eared Owl",
+    "scientific_name": "Asio otus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Short-eared Owl",
+    "scientific_name": "Asio flammeus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Mallard",
+    "scientific_name": "Anas platyrhynchos",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "wild mallard"
+    ]
+  },
+  {
+    "display_name": "Wood Duck",
+    "scientific_name": "Aix sponsa",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "woodie"
+    ]
+  },
+  {
+    "display_name": "Canada Goose",
+    "scientific_name": "Branta canadensis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Canadian Goose"
+    ]
+  },
+  {
+    "display_name": "Trumpeter Swan",
+    "scientific_name": "Cygnus buccinator",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Mute Swan",
+    "scientific_name": "Cygnus olor",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Common Loon",
+    "scientific_name": "Gavia immer",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Great Northern Diver"
+    ]
+  },
+  {
+    "display_name": "Great Blue Heron",
+    "scientific_name": "Ardea herodias",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "GBH",
+      "blue heron"
+    ]
+  },
+  {
+    "display_name": "Great Egret",
+    "scientific_name": "Ardea alba",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "white egret"
+    ]
+  },
+  {
+    "display_name": "Snowy Egret",
+    "scientific_name": "Egretta thula",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Green Heron",
+    "scientific_name": "Butorides virescens",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Black-crowned Night-Heron",
+    "scientific_name": "Nycticorax nycticorax",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "night heron"
+    ]
+  },
+  {
+    "display_name": "American White Pelican",
+    "scientific_name": "Pelecanus erythrorhynchos",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "white pelican"
+    ]
+  },
+  {
+    "display_name": "Brown Pelican",
+    "scientific_name": "Pelecanus occidentalis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
   }
 ]
