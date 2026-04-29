@@ -1,0 +1,659 @@
+[
+  {
+    "display_name": "Reptile (any species)",
+    "scientific_name": "Reptilia",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "reptile"
+    ]
+  },
+  {
+    "display_name": "Lizard (any species)",
+    "scientific_name": "Lacertilia",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "lizard"
+    ]
+  },
+  {
+    "display_name": "Snake (any species)",
+    "scientific_name": "Serpentes",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "snake"
+    ]
+  },
+  {
+    "display_name": "Tortoise (any species)",
+    "scientific_name": "Testudinidae",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "tortoise"
+    ]
+  },
+  {
+    "display_name": "Leopard Gecko",
+    "scientific_name": "Eublepharis macularius",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "leo",
+      "leo gecko"
+    ]
+  },
+  {
+    "display_name": "Crested Gecko",
+    "scientific_name": "Correlophus ciliatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "crestie"
+    ]
+  },
+  {
+    "display_name": "Gargoyle Gecko",
+    "scientific_name": "Rhacodactylus auriculatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Tokay Gecko",
+    "scientific_name": "Gekko gecko",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "African Fat-tailed Gecko",
+    "scientific_name": "Hemitheconyx caudicinctus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "AFT",
+      "Fat-tail"
+    ]
+  },
+  {
+    "display_name": "Madagascar Giant Day Gecko",
+    "scientific_name": "Phelsuma grandis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "day gecko",
+      "Phelsuma"
+    ]
+  },
+  {
+    "display_name": "Bearded Dragon",
+    "scientific_name": "Pogona vitticeps",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "beardie",
+      "central bearded dragon"
+    ]
+  },
+  {
+    "display_name": "Blue-tongue Skink",
+    "scientific_name": "Tiliqua scincoides",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BTS",
+      "blue-tongued skink",
+      "Northern Blue Tongue",
+      "Eastern Blue Tongue"
+    ]
+  },
+  {
+    "display_name": "Ackies Monitor",
+    "scientific_name": "Varanus acanthurus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Spiny-tailed Monitor",
+      "Ridge-tailed Monitor"
+    ]
+  },
+  {
+    "display_name": "Savannah Monitor",
+    "scientific_name": "Varanus exanthematicus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Sav Monitor"
+    ]
+  },
+  {
+    "display_name": "Argentine Black and White Tegu",
+    "scientific_name": "Salvator merianae",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BW Tegu",
+      "Argentine Tegu"
+    ]
+  },
+  {
+    "display_name": "Green Iguana",
+    "scientific_name": "Iguana iguana",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "iguana",
+      "common iguana"
+    ]
+  },
+  {
+    "display_name": "Chinese Water Dragon",
+    "scientific_name": "Physignathus cocincinus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "water dragon"
+    ]
+  },
+  {
+    "display_name": "Uromastyx",
+    "scientific_name": "Uromastyx",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "uro",
+      "spiny-tailed lizard",
+      "Mali Uromastyx",
+      "Egyptian Uromastyx"
+    ]
+  },
+  {
+    "display_name": "Frilled Lizard",
+    "scientific_name": "Chlamydosaurus kingii",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "frilled dragon",
+      "frillneck"
+    ]
+  },
+  {
+    "display_name": "Veiled Chameleon",
+    "scientific_name": "Chamaeleo calyptratus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Yemen Chameleon"
+    ]
+  },
+  {
+    "display_name": "Panther Chameleon",
+    "scientific_name": "Furcifer pardalis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Ambilobe Panther",
+      "Nosy Be Panther"
+    ]
+  },
+  {
+    "display_name": "Jackson's Chameleon",
+    "scientific_name": "Trioceros jacksonii",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Jackson Chameleon",
+      "three-horned chameleon"
+    ]
+  },
+  {
+    "display_name": "Green Anole",
+    "scientific_name": "Anolis carolinensis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "American chameleon",
+      "Carolina anole"
+    ]
+  },
+  {
+    "display_name": "Brown Anole",
+    "scientific_name": "Anolis sagrei",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Cuban Brown Anole"
+    ]
+  },
+  {
+    "display_name": "Ball Python",
+    "scientific_name": "Python regius",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BP",
+      "Royal Python"
+    ]
+  },
+  {
+    "display_name": "Reticulated Python",
+    "scientific_name": "Malayopython reticulatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "retic"
+    ]
+  },
+  {
+    "display_name": "Burmese Python",
+    "scientific_name": "Python bivittatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Burm"
+    ]
+  },
+  {
+    "display_name": "Carpet Python",
+    "scientific_name": "Morelia spilota",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Jungle Carpet",
+      "Coastal Carpet",
+      "Diamond Python"
+    ]
+  },
+  {
+    "display_name": "Green Tree Python",
+    "scientific_name": "Morelia viridis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "GTP",
+      "chondro"
+    ]
+  },
+  {
+    "display_name": "Corn Snake",
+    "scientific_name": "Pantherophis guttatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "red rat snake"
+    ]
+  },
+  {
+    "display_name": "California Kingsnake",
+    "scientific_name": "Lampropeltis californiae",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Cal King"
+    ]
+  },
+  {
+    "display_name": "Eastern Kingsnake",
+    "scientific_name": "Lampropeltis getula",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Common Kingsnake",
+      "Chain Kingsnake"
+    ]
+  },
+  {
+    "display_name": "Milk Snake",
+    "scientific_name": "Lampropeltis triangulum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Honduran Milk Snake",
+      "Pueblan Milk Snake",
+      "Sinaloan Milk Snake"
+    ]
+  },
+  {
+    "display_name": "Boa Constrictor",
+    "scientific_name": "Boa constrictor",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BCI",
+      "boa",
+      "Common Boa",
+      "Red-tailed Boa"
+    ]
+  },
+  {
+    "display_name": "Rosy Boa",
+    "scientific_name": "Lichanura trivirgata",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Kenyan Sand Boa",
+    "scientific_name": "Eryx colubrinus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sand boa",
+      "East African Sand Boa"
+    ]
+  },
+  {
+    "display_name": "Western Hognose Snake",
+    "scientific_name": "Heterodon nasicus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "hognose",
+      "Western Hognose"
+    ]
+  },
+  {
+    "display_name": "Eastern Hognose Snake",
+    "scientific_name": "Heterodon platirhinos",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "puff adder"
+    ]
+  },
+  {
+    "display_name": "Garter Snake",
+    "scientific_name": "Thamnophis sirtalis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Common Garter Snake",
+      "garden snake"
+    ]
+  },
+  {
+    "display_name": "Black Rat Snake",
+    "scientific_name": "Pantherophis obsoletus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Eastern Rat Snake",
+      "rat snake"
+    ]
+  },
+  {
+    "display_name": "Red-eared Slider",
+    "scientific_name": "Trachemys scripta elegans",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "RES",
+      "slider",
+      "red-ear"
+    ]
+  },
+  {
+    "display_name": "Yellow-bellied Slider",
+    "scientific_name": "Trachemys scripta scripta",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "yellow-belly slider"
+    ]
+  },
+  {
+    "display_name": "Painted Turtle",
+    "scientific_name": "Chrysemys picta",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Eastern Painted",
+      "Western Painted",
+      "Midland Painted"
+    ]
+  },
+  {
+    "display_name": "Map Turtle",
+    "scientific_name": "Graptemys",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Mississippi Map",
+      "Northern Map",
+      "False Map"
+    ]
+  },
+  {
+    "display_name": "Eastern Musk Turtle",
+    "scientific_name": "Sternotherus odoratus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "stinkpot",
+      "musk turtle"
+    ]
+  },
+  {
+    "display_name": "Eastern Mud Turtle",
+    "scientific_name": "Kinosternon subrubrum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mud turtle"
+    ]
+  },
+  {
+    "display_name": "Eastern Box Turtle",
+    "scientific_name": "Terrapene carolina",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "box turtle"
+    ]
+  },
+  {
+    "display_name": "Three-toed Box Turtle",
+    "scientific_name": "Terrapene mexicana triunguis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Russian Tortoise",
+    "scientific_name": "Testudo horsfieldii",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Horsfield's Tortoise",
+      "steppe tortoise"
+    ]
+  },
+  {
+    "display_name": "Greek Tortoise",
+    "scientific_name": "Testudo graeca",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Spur-thighed Tortoise"
+    ]
+  },
+  {
+    "display_name": "Hermann's Tortoise",
+    "scientific_name": "Testudo hermanni",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Hermann"
+    ]
+  },
+  {
+    "display_name": "Sulcata Tortoise",
+    "scientific_name": "Centrochelys sulcata",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "African Spurred Tortoise",
+      "sulcata"
+    ]
+  },
+  {
+    "display_name": "Leopard Tortoise",
+    "scientific_name": "Stigmochelys pardalis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Red-footed Tortoise",
+    "scientific_name": "Chelonoidis carbonarius",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "redfoot"
+    ]
+  },
+  {
+    "display_name": "Yellow-footed Tortoise",
+    "scientific_name": "Chelonoidis denticulatus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "yellowfoot"
+    ]
+  },
+  {
+    "display_name": "Indian Star Tortoise",
+    "scientific_name": "Geochelone elegans",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "star tortoise"
+    ]
+  },
+  {
+    "display_name": "Axolotl",
+    "scientific_name": "Ambystoma mexicanum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Mexican Walking Fish",
+      "axie"
+    ]
+  },
+  {
+    "display_name": "Tiger Salamander",
+    "scientific_name": "Ambystoma tigrinum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Fire Salamander",
+    "scientific_name": "Salamandra salamandra",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Eastern Newt",
+    "scientific_name": "Notophthalmus viridescens",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "red eft",
+      "newt"
+    ]
+  },
+  {
+    "display_name": "Argentine Pacman Frog",
+    "scientific_name": "Ceratophrys ornata",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pacman frog",
+      "horned frog"
+    ]
+  },
+  {
+    "display_name": "Cranwell's Pacman Frog",
+    "scientific_name": "Ceratophrys cranwelli",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Cranwell's horned frog"
+    ]
+  },
+  {
+    "display_name": "White's Tree Frog",
+    "scientific_name": "Litoria caerulea",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dumpy frog",
+      "Australian Green Tree Frog"
+    ]
+  },
+  {
+    "display_name": "Red-eyed Tree Frog",
+    "scientific_name": "Agalychnis callidryas",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "RETF"
+    ]
+  },
+  {
+    "display_name": "African Dwarf Frog",
+    "scientific_name": "Hymenochirus boettgeri",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ADF",
+      "dwarf frog"
+    ]
+  },
+  {
+    "display_name": "African Clawed Frog",
+    "scientific_name": "Xenopus laevis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ACF",
+      "clawed frog"
+    ]
+  },
+  {
+    "display_name": "African Bullfrog",
+    "scientific_name": "Pyxicephalus adspersus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pixie frog"
+    ]
+  },
+  {
+    "display_name": "Oriental Fire-bellied Toad",
+    "scientific_name": "Bombina orientalis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "fire-bellied toad",
+      "FBT"
+    ]
+  },
+  {
+    "display_name": "Poison Dart Frog",
+    "scientific_name": "Dendrobates",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dart frog",
+      "Blue Dart Frog",
+      "Strawberry Dart Frog",
+      "Dyeing Dart Frog"
+    ]
+  }
+]
