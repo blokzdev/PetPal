@@ -1536,5 +1536,262 @@
     "category": "bird",
     "inat_taxon_id": null,
     "common_alternatives": []
+  },
+  {
+    "display_name": "American Robin",
+    "scientific_name": "Turdus migratorius",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "robin"
+    ]
+  },
+  {
+    "display_name": "Northern Cardinal",
+    "scientific_name": "Cardinalis cardinalis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "cardinal"
+    ]
+  },
+  {
+    "display_name": "Blue Jay",
+    "scientific_name": "Cyanocitta cristata",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "House Sparrow",
+    "scientific_name": "Passer domesticus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "English Sparrow"
+    ]
+  },
+  {
+    "display_name": "European Starling",
+    "scientific_name": "Sturnus vulgaris",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "starling",
+      "Common Starling"
+    ]
+  },
+  {
+    "display_name": "House Finch",
+    "scientific_name": "Haemorhous mexicanus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "American Goldfinch",
+    "scientific_name": "Spinus tristis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "wild canary"
+    ]
+  },
+  {
+    "display_name": "Mourning Dove",
+    "scientific_name": "Zenaida macroura",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "MODO"
+    ]
+  },
+  {
+    "display_name": "Black-capped Chickadee",
+    "scientific_name": "Poecile atricapillus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "chickadee"
+    ]
+  },
+  {
+    "display_name": "Eastern Bluebird",
+    "scientific_name": "Sialia sialis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "bluebird"
+    ]
+  },
+  {
+    "display_name": "Cedar Waxwing",
+    "scientific_name": "Bombycilla cedrorum",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "waxwing"
+    ]
+  },
+  {
+    "display_name": "Northern Mockingbird",
+    "scientific_name": "Mimus polyglottos",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mockingbird"
+    ]
+  },
+  {
+    "display_name": "Gray Catbird",
+    "scientific_name": "Dumetella carolinensis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "catbird"
+    ]
+  },
+  {
+    "display_name": "Common Grackle",
+    "scientific_name": "Quiscalus quiscula",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "grackle"
+    ]
+  },
+  {
+    "display_name": "Red-winged Blackbird",
+    "scientific_name": "Agelaius phoeniceus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "RWBL"
+    ]
+  },
+  {
+    "display_name": "American Crow",
+    "scientific_name": "Corvus brachyrhynchos",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "crow"
+    ]
+  },
+  {
+    "display_name": "Common Raven",
+    "scientific_name": "Corvus corax",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "raven"
+    ]
+  },
+  {
+    "display_name": "Black-billed Magpie",
+    "scientific_name": "Pica hudsonia",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "magpie"
+    ]
+  },
+  {
+    "display_name": "Steller's Jay",
+    "scientific_name": "Cyanocitta stelleri",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Downy Woodpecker",
+    "scientific_name": "Dryobates pubescens",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "downy"
+    ]
+  },
+  {
+    "display_name": "Northern Flicker",
+    "scientific_name": "Colaptes auratus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "flicker",
+      "yellow-shafted flicker"
+    ]
+  },
+  {
+    "display_name": "Pileated Woodpecker",
+    "scientific_name": "Dryocopus pileatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Ruby-throated Hummingbird",
+    "scientific_name": "Archilochus colubris",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "hummingbird"
+    ]
+  },
+  {
+    "display_name": "Anna's Hummingbird",
+    "scientific_name": "Calypte anna",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "White-throated Sparrow",
+    "scientific_name": "Zonotrichia albicollis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Song Sparrow",
+    "scientific_name": "Melospiza melodia",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Dark-eyed Junco",
+    "scientific_name": "Junco hyemalis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "junco",
+      "snowbird"
+    ]
+  },
+  {
+    "display_name": "Barn Swallow",
+    "scientific_name": "Hirundo rustica",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Tree Swallow",
+    "scientific_name": "Tachycineta bicolor",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Bird (any species)",
+    "scientific_name": "Aves",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "bird",
+      "fledgling",
+      "nestling"
+    ]
   }
 ]
