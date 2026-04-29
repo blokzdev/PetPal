@@ -83,6 +83,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   PetSex _sex = PetSex.unknown;
   NeuteredStatus _neutered = NeuteredStatus.unknown;
 
+  /// "In your words" — freeform multiline prose substituted into the
+  /// `{about_petpal_should_know}` placeholder in the category template.
+  /// Empty input renders to nothing (orphan blank line collapsed by
+  /// renderTemplate's `\n\n\n+` cleanup).
+  final _aboutPetPalShouldKnow = TextEditingController();
+
   bool _saving = false;
   String? _saveError;
 
@@ -93,6 +99,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     _otherSpecies.dispose();
     _dobApprox.dispose();
     _weight.dispose();
+    _aboutPetPalShouldKnow.dispose();
     super.dispose();
   }
 
@@ -223,6 +230,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final intakeDate = isRehab ? _intakeDate : null;
       final expectedReleaseDate = isRehab ? _expectedReleaseDate : null;
       final weightKg = _resolvedWeightKg();
+      final aboutText = _aboutPetPalShouldKnow.text.trim();
       final seedSoul = await templates.seedSoulFor(
         category: _category,
         name: _name.text.trim(),
@@ -240,6 +248,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
         intakeDate: intakeDate,
         expectedReleaseDate: expectedReleaseDate,
         weightKg: weightKg,
+        aboutPetPalShouldKnow: aboutText.isEmpty ? null : aboutText,
       );
       await repo.createPet(
         name: _name.text.trim(),
@@ -411,6 +420,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                 onSexChanged: (s) => setState(() => _sex = s),
                 onNeuteredChanged: (n) => setState(() => _neutered = n),
               ),
+              const SizedBox(height: Spacing.l),
+              _InYourWordsCard(controller: _aboutPetPalShouldKnow),
               const SizedBox(height: Spacing.l),
               if (_saveError != null) ...[
                 Text(
@@ -966,6 +977,65 @@ class _TernaryRow<T> extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// "In your words" PetCard — DECISIONS row 47 + 5.5.4 design D7=B
+/// lock. Multiline freeform prose that substitutes into the
+/// `{about_petpal_should_know}` placeholder at the end of the
+/// category-template body.
+class _InYourWordsCard extends StatelessWidget {
+  const _InYourWordsCard({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PetSectionHeader(title: 'In your words'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.m,
+              0,
+              Spacing.m,
+              Spacing.m,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  'What should PetPal know about your pet? Habits, '
+                  'history, things to keep in mind. (Optional — you can '
+                  'always add more later.)',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: Spacing.s),
+                TextFormField(
+                  controller: controller,
+                  minLines: 4,
+                  maxLines: 8,
+                  textCapitalization: TextCapitalization.sentences,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    hintText:
+                        'e.g. Loki is a rescue mutt who came home in '
+                        'October 2023. Afraid of skateboards, soft for '
+                        'frozen carrots.',
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
