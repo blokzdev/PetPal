@@ -1,6 +1,6 @@
 [
   {
-    "display_name": "Cat (any breed)",
+    "display_name": "Cat",
     "scientific_name": "Felis catus",
     "category": "cat",
     "inat_taxon_id": 118552,
@@ -8,325 +8,225 @@
       "cat",
       "kitten",
       "kitty"
-    ]
-  },
-  {
-    "display_name": "Domestic Shorthair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "DSH",
-      "moggie",
-      "moggy",
-      "house cat",
-      "tabby",
-      "calico",
-      "tortie",
-      "tortoiseshell"
-    ]
-  },
-  {
-    "display_name": "Domestic Longhair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "DLH",
-      "longhair",
-      "long-haired cat"
-    ]
-  },
-  {
-    "display_name": "Domestic Mediumhair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "DMH",
-      "mediumhair"
-    ]
-  },
-  {
-    "display_name": "Abyssinian",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Aby"
-    ]
-  },
-  {
-    "display_name": "American Shorthair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "ASH"
-    ]
-  },
-  {
-    "display_name": "Bengal",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Birman",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Sacred Birman"
-    ]
-  },
-  {
-    "display_name": "Bombay",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "British Shorthair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "BSH"
-    ]
-  },
-  {
-    "display_name": "Burmese",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Chartreux",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Cornish Rex",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Devon Rex",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Egyptian Mau",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Exotic Shorthair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Exotic"
-    ]
-  },
-  {
-    "display_name": "Himalayan",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Himmy"
-    ]
-  },
-  {
-    "display_name": "Korat",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Lykoi",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Werewolf cat"
-    ]
-  },
-  {
-    "display_name": "Maine Coon",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Coon cat",
-      "Maine Cat"
-    ]
-  },
-  {
-    "display_name": "Manx",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Munchkin",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Norwegian Forest Cat",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Wegie",
-      "Norsk Skogkatt",
-      "Skogkatt"
-    ]
-  },
-  {
-    "display_name": "Ocicat",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Oriental Shorthair",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Oriental"
-    ]
-  },
-  {
-    "display_name": "Persian",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Ragdoll",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Raggie",
-      "Ragamuffin"
-    ]
-  },
-  {
-    "display_name": "Russian Blue",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Savannah",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Scottish Fold",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Highland Fold"
-    ]
-  },
-  {
-    "display_name": "Selkirk Rex",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Siamese",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Singapura",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Snowshoe",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Somali",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Sphynx",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Sphinx",
-      "hairless cat"
-    ]
-  },
-  {
-    "display_name": "Tonkinese",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Tonk"
-    ]
-  },
-  {
-    "display_name": "Turkish Angora",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Angora"
-    ]
-  },
-  {
-    "display_name": "Turkish Van",
-    "scientific_name": "Felis catus",
-    "category": "cat",
-    "inat_taxon_id": 118552,
-    "common_alternatives": [
-      "Van"
+    ],
+    "breeds": [
+      {
+        "name": "Mixed breed",
+        "alternatives": []
+      },
+      {
+        "name": "Not sure",
+        "alternatives": []
+      },
+      {
+        "name": "Abyssinian",
+        "alternatives": [
+          "Aby"
+        ]
+      },
+      {
+        "name": "American Shorthair",
+        "alternatives": [
+          "ASH"
+        ]
+      },
+      {
+        "name": "Bengal",
+        "alternatives": []
+      },
+      {
+        "name": "Birman",
+        "alternatives": [
+          "Sacred Birman"
+        ]
+      },
+      {
+        "name": "Bombay",
+        "alternatives": []
+      },
+      {
+        "name": "British Shorthair",
+        "alternatives": [
+          "BSH"
+        ]
+      },
+      {
+        "name": "Burmese",
+        "alternatives": []
+      },
+      {
+        "name": "Chartreux",
+        "alternatives": []
+      },
+      {
+        "name": "Cornish Rex",
+        "alternatives": []
+      },
+      {
+        "name": "Devon Rex",
+        "alternatives": []
+      },
+      {
+        "name": "Domestic Longhair",
+        "alternatives": [
+          "DLH",
+          "longhair",
+          "long-haired cat"
+        ]
+      },
+      {
+        "name": "Domestic Mediumhair",
+        "alternatives": [
+          "DMH",
+          "mediumhair"
+        ]
+      },
+      {
+        "name": "Domestic Shorthair",
+        "alternatives": [
+          "DSH",
+          "moggie",
+          "moggy",
+          "house cat",
+          "tabby",
+          "calico",
+          "tortie",
+          "tortoiseshell"
+        ]
+      },
+      {
+        "name": "Egyptian Mau",
+        "alternatives": []
+      },
+      {
+        "name": "Exotic Shorthair",
+        "alternatives": [
+          "Exotic"
+        ]
+      },
+      {
+        "name": "Himalayan",
+        "alternatives": [
+          "Himmy"
+        ]
+      },
+      {
+        "name": "Korat",
+        "alternatives": []
+      },
+      {
+        "name": "Lykoi",
+        "alternatives": [
+          "Werewolf cat"
+        ]
+      },
+      {
+        "name": "Maine Coon",
+        "alternatives": [
+          "Coon cat",
+          "Maine Cat"
+        ]
+      },
+      {
+        "name": "Manx",
+        "alternatives": []
+      },
+      {
+        "name": "Munchkin",
+        "alternatives": []
+      },
+      {
+        "name": "Norwegian Forest Cat",
+        "alternatives": [
+          "Wegie",
+          "Norsk Skogkatt",
+          "Skogkatt"
+        ]
+      },
+      {
+        "name": "Ocicat",
+        "alternatives": []
+      },
+      {
+        "name": "Oriental Shorthair",
+        "alternatives": [
+          "Oriental"
+        ]
+      },
+      {
+        "name": "Persian",
+        "alternatives": []
+      },
+      {
+        "name": "Ragdoll",
+        "alternatives": [
+          "Raggie",
+          "Ragamuffin"
+        ]
+      },
+      {
+        "name": "Russian Blue",
+        "alternatives": []
+      },
+      {
+        "name": "Savannah",
+        "alternatives": []
+      },
+      {
+        "name": "Scottish Fold",
+        "alternatives": [
+          "Highland Fold"
+        ]
+      },
+      {
+        "name": "Selkirk Rex",
+        "alternatives": []
+      },
+      {
+        "name": "Siamese",
+        "alternatives": []
+      },
+      {
+        "name": "Singapura",
+        "alternatives": []
+      },
+      {
+        "name": "Snowshoe",
+        "alternatives": []
+      },
+      {
+        "name": "Somali",
+        "alternatives": []
+      },
+      {
+        "name": "Sphynx",
+        "alternatives": [
+          "Sphinx",
+          "hairless cat"
+        ]
+      },
+      {
+        "name": "Tonkinese",
+        "alternatives": [
+          "Tonk"
+        ]
+      },
+      {
+        "name": "Turkish Angora",
+        "alternatives": [
+          "Angora"
+        ]
+      },
+      {
+        "name": "Turkish Van",
+        "alternatives": [
+          "Van"
+        ]
+      },
+      {
+        "name": "Other",
+        "alternatives": []
+      }
     ]
   }
 ]
