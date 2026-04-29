@@ -1,5 +1,7 @@
 import 'package:flutter/services.dart' show rootBundle;
 
+import 'relationship.dart';
+
 /// The eight categories the add-pet flow recognises. Picking one of these
 /// triggers a category-specific `SOUL.md` template that seeds the
 /// frontmatter keys the harness will track from day one.
@@ -57,15 +59,32 @@ enum Category {
 /// Source of onboarding templates. Production reads from Flutter assets;
 /// tests inject an in-memory map so they don't need a Flutter binding.
 abstract class OnboardingTemplates {
-  /// Return a rendered SOUL.md for a new pet of [category]. Substitutes
-  /// {species}, {name}, {breed}, {dob} placeholders in the template;
-  /// category-specific frontmatter keys come from the template itself.
+  /// Return a rendered SOUL.md for a new pet of [category]. All of the
+  /// optional fields below substitute into placeholders in the template;
+  /// when a value is null/empty AND the key is on the optional-strip
+  /// list (variety, sex, neutered, working_role, rehab_context,
+  /// care_context, dob_approx, adoption_date, intake_date,
+  /// expected_release_date), the entire frontmatter line is removed
+  /// from the rendered output per DECISIONS row 45 default-omitted rule.
   Future<String> seedSoulFor({
     required Category category,
     required String name,
     String? species,
+    String? variety,
     String? breed,
+    PetSex? sex,
+    NeuteredStatus? neutered,
+    Relationship? relationship,
+    WorkingRole? workingRole,
+    RehabContext? rehabContext,
+    CareContext? careContext,
     DateTime? dob,
+    String? dobApprox,
+    DateTime? adoptionDate,
+    DateTime? intakeDate,
+    DateTime? expectedReleaseDate,
+    double? weightKg,
+    String? aboutPetPalShouldKnow,
   });
 }
 
@@ -78,20 +97,53 @@ class AssetOnboardingTemplates implements OnboardingTemplates {
     required Category category,
     required String name,
     String? species,
+    String? variety,
     String? breed,
+    PetSex? sex,
+    NeuteredStatus? neutered,
+    Relationship? relationship,
+    WorkingRole? workingRole,
+    RehabContext? rehabContext,
+    CareContext? careContext,
     DateTime? dob,
+    String? dobApprox,
+    DateTime? adoptionDate,
+    DateTime? intakeDate,
+    DateTime? expectedReleaseDate,
+    double? weightKg,
+    String? aboutPetPalShouldKnow,
   }) async {
     final raw = await rootBundle.loadString(
       'assets/onboarding/${category.id}.md',
     );
-    return renderTemplate(raw, name: name, species: species, breed: breed, dob: dob);
+    return renderTemplate(
+      raw,
+      name: name,
+      species: species,
+      variety: variety,
+      breed: breed,
+      sex: sex,
+      neutered: neutered,
+      relationship: relationship,
+      workingRole: workingRole,
+      rehabContext: rehabContext,
+      careContext: careContext,
+      dob: dob,
+      dobApprox: dobApprox,
+      adoptionDate: adoptionDate,
+      intakeDate: intakeDate,
+      expectedReleaseDate: expectedReleaseDate,
+      weightKg: weightKg,
+      aboutPetPalShouldKnow: aboutPetPalShouldKnow,
+    );
   }
 }
 
-/// Pure substitution: replaces `{species}`, `{name}`, `{breed}`, `{dob}`
-/// in [template] with the provided values. Empty values leave the
-/// placeholder (frontmatter parsing already tolerates `key:` with no
-/// value).
+/// Pure substitution + post-process strip. Replaces all of the `{key}`
+/// placeholders in [template] with the provided values. After
+/// substitution, any line matching `^<key>:\s*$` for an optional-strip
+/// key is removed from the rendered output (DECISIONS row 45 default-
+/// omitted rule).
 ///
 /// Exposed at top level so tests and the in-memory implementation can
 /// share the same renderer.
@@ -99,19 +151,96 @@ String renderTemplate(
   String template, {
   required String name,
   String? species,
+  String? variety,
   String? breed,
+  PetSex? sex,
+  NeuteredStatus? neutered,
+  Relationship? relationship,
+  WorkingRole? workingRole,
+  RehabContext? rehabContext,
+  CareContext? careContext,
   DateTime? dob,
+  String? dobApprox,
+  DateTime? adoptionDate,
+  DateTime? intakeDate,
+  DateTime? expectedReleaseDate,
+  double? weightKg,
+  String? aboutPetPalShouldKnow,
 }) {
-  final dobStr = dob == null
+  String fmtDate(DateTime? d) => d == null
       ? ''
-      : '${dob.year.toString().padLeft(4, '0')}-'
-          '${dob.month.toString().padLeft(2, '0')}-'
-          '${dob.day.toString().padLeft(2, '0')}';
-  return template
+      : '${d.year.toString().padLeft(4, '0')}-'
+          '${d.month.toString().padLeft(2, '0')}-'
+          '${d.day.toString().padLeft(2, '0')}';
+
+  // Default-omitted: write empty when the user picked the default
+  // (none/unknown) so the post-strip pass can remove the line.
+  String roleId(WorkingRole? r) =>
+      (r == null || r == WorkingRole.none) ? '' : r.id;
+  String rehabId(RehabContext? r) =>
+      (r == null || r == RehabContext.none) ? '' : r.id;
+  String careId(CareContext? r) =>
+      (r == null || r == CareContext.none) ? '' : r.id;
+  String sexId(PetSex? s) =>
+      (s == null || s == PetSex.unknown) ? '' : s.id;
+  String neuteredId(NeuteredStatus? n) =>
+      (n == null || n == NeuteredStatus.unknown) ? '' : n.id;
+
+  String rendered = template
       .replaceAll('{species}', species ?? '')
-      .replaceAll('{name}', name)
+      .replaceAll('{variety}', variety ?? '')
       .replaceAll('{breed}', breed ?? '')
-      .replaceAll('{dob}', dobStr);
+      .replaceAll('{sex}', sexId(sex))
+      .replaceAll('{neutered}', neuteredId(neutered))
+      .replaceAll('{relationship}', relationship?.id ?? Relationship.pet.id)
+      .replaceAll('{working_role}', roleId(workingRole))
+      .replaceAll('{rehab_context}', rehabId(rehabContext))
+      .replaceAll('{care_context}', careId(careContext))
+      .replaceAll('{dob}', fmtDate(dob))
+      .replaceAll('{dob_approx}', dobApprox ?? '')
+      .replaceAll('{adoption_date}', fmtDate(adoptionDate))
+      .replaceAll('{intake_date}', fmtDate(intakeDate))
+      .replaceAll('{expected_release_date}', fmtDate(expectedReleaseDate))
+      .replaceAll('{weight_kg}', weightKg == null ? '' : weightKg.toStringAsFixed(1))
+      .replaceAll('{name}', name)
+      .replaceAll(
+        '{about_petpal_should_know}',
+        aboutPetPalShouldKnow == null || aboutPetPalShouldKnow.trim().isEmpty
+            ? ''
+            : aboutPetPalShouldKnow.trim(),
+      );
+
+  // Strip empty-value lines for optional keys per DECISIONS row 45.
+  // Each pattern matches a frontmatter line where the key has no value
+  // (just a trailing space or nothing). Multi-line regex; remove the
+  // entire line including its newline.
+  const optionalKeys = [
+    'variety',
+    'sex',
+    'neutered',
+    'working_role',
+    'rehab_context',
+    'care_context',
+    'dob_approx',
+    'adoption_date',
+    'intake_date',
+    'expected_release_date',
+  ];
+  for (final key in optionalKeys) {
+    rendered = rendered.replaceAll(
+      RegExp('^$key:\\s*\\n', multiLine: true),
+      '',
+    );
+  }
+
+  // Body insertion of the "In your words" prose: the templates have a
+  // `{about_petpal_should_know}` placeholder at the end of the welcome
+  // prose. After substitution, if the user provided text, it sits as
+  // a second paragraph. If empty, the placeholder rendered to nothing
+  // and we strip any orphan blank line at that position.
+  rendered = rendered.replaceAll(RegExp(r'\n\n\n+'), '\n\n');
+
+  return rendered;
 }
 
 /// In-memory [OnboardingTemplates] for tests.
@@ -124,11 +253,43 @@ class InMemoryOnboardingTemplates implements OnboardingTemplates {
     required Category category,
     required String name,
     String? species,
+    String? variety,
     String? breed,
+    PetSex? sex,
+    NeuteredStatus? neutered,
+    Relationship? relationship,
+    WorkingRole? workingRole,
+    RehabContext? rehabContext,
+    CareContext? careContext,
     DateTime? dob,
+    String? dobApprox,
+    DateTime? adoptionDate,
+    DateTime? intakeDate,
+    DateTime? expectedReleaseDate,
+    double? weightKg,
+    String? aboutPetPalShouldKnow,
   }) async {
     final tpl = _templates[category] ??
         (throw StateError('no template for ${category.id}'));
-    return renderTemplate(tpl, name: name, species: species, breed: breed, dob: dob);
+    return renderTemplate(
+      tpl,
+      name: name,
+      species: species,
+      variety: variety,
+      breed: breed,
+      sex: sex,
+      neutered: neutered,
+      relationship: relationship,
+      workingRole: workingRole,
+      rehabContext: rehabContext,
+      careContext: careContext,
+      dob: dob,
+      dobApprox: dobApprox,
+      adoptionDate: adoptionDate,
+      intakeDate: intakeDate,
+      expectedReleaseDate: expectedReleaseDate,
+      weightKg: weightKg,
+      aboutPetPalShouldKnow: aboutPetPalShouldKnow,
+    );
   }
 }

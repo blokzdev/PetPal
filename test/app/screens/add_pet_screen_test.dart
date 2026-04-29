@@ -87,6 +87,16 @@ void main() {
   });
 
   testWidgets('add-pet form requires a name', (tester) async {
+    // 5.5.4 expanded the form (relationship + sub-classification) past
+    // the default 800x600 surface, pushing Save off-viewport. Resize so
+    // the whole form fits without needing scroll plumbing in the test.
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -109,6 +119,13 @@ void main() {
 
   testWidgets('saving a pet creates the row, seeds SOUL.md, and routes Home '
       'with the pet greeted', (tester) async {
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
@@ -125,8 +142,10 @@ void main() {
       'Milo',
     );
     // Category dropdown defaults to "Dog" (Phase 3.4); no need to tap.
+    // Without a species pick, the form falls through to the universal
+    // "Variety (optional)" freeform text field (DECISIONS row 47 lock).
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'Breed (optional)'),
+      find.widgetWithText(TextFormField, 'Variety (optional)'),
       'mixed',
     );
     await tester.tap(find.text('Save'));

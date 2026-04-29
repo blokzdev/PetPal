@@ -1,8 +1,19 @@
 ---
 category: reptile
 species: {species}
+variety: {variety}
 breed: {breed}
+sex: {sex}
+neutered: {neutered}
+relationship: {relationship}
+working_role: {working_role}
+rehab_context: {rehab_context}
+care_context: {care_context}
 dob: {dob}
+dob_approx: {dob_approx}
+adoption_date: {adoption_date}
+intake_date: {intake_date}
+expected_release_date: {expected_release_date}
 weight_g:
 allergies: []
 meds: []
@@ -20,3 +31,5 @@ uvb_bulb: ''
 temperatures, humidity, UVB age, enclosure changes, shed cycles, and
 feeding schedule. Note bulb replacement dates; UVB output drops long
 before the bulb visibly fails.
+
+{about_petpal_should_know}

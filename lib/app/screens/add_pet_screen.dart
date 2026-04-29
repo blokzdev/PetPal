@@ -3,9 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../data/onboarding_templates.dart';
+import '../../data/relationship.dart';
 import '../../data/species_catalog.dart';
+import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_card.dart';
+import '../widgets/pet_section_header.dart';
 import '../widgets/species_picker_sheet.dart';
 
 /// Add-pet flow. Phase 5.5.3 lands the curated species picker on top of
@@ -44,6 +48,16 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   /// applicable. Special "Other" handling stores freeform text in
   /// [_breed].
   BreedEntry? _breedEntry;
+
+  /// Relationship picker state — DECISIONS row 44. Always shown to
+  /// every user with `pet` pre-selected.
+  Relationship _relationship = Relationship.pet;
+
+  /// Sub-classification per DECISIONS row 47. Defaults to `none`,
+  /// omitted from disk by renderTemplate's strip-empty pass.
+  WorkingRole _workingRole = WorkingRole.none;
+  RehabContext _rehabContext = RehabContext.none;
+  CareContext _careContext = CareContext.none;
 
   DateTime? _dob;
   bool _saving = false;
@@ -129,6 +143,10 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
         name: _name.text.trim(),
         species: speciesValue,
         breed: breed,
+        relationship: _relationship,
+        workingRole: _workingRole,
+        rehabContext: _rehabContext,
+        careContext: _careContext,
         dob: _dob,
       );
       await repo.createPet(
@@ -245,11 +263,42 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                 TextFormField(
                   controller: _breed,
                   decoration: const InputDecoration(
-                    labelText: 'Breed (optional)',
+                    labelText: 'Variety (optional)',
                     border: OutlineInputBorder(),
                   ),
                 ),
               ],
+              const SizedBox(height: Spacing.l),
+              _RelationshipCard(
+                value: _relationship,
+                onChanged: (r) {
+                  setState(() {
+                    _relationship = r;
+                    // Reset sub-classification on relationship change so
+                    // a stale picker value doesn't sneak through to disk.
+                    _workingRole = WorkingRole.none;
+                    _rehabContext = RehabContext.none;
+                    _careContext = CareContext.none;
+                  });
+                },
+              ),
+              const SizedBox(height: Spacing.s),
+              AnimatedSwitcher(
+                duration: Motion.short,
+                child: _SubClassificationField(
+                  key: ValueKey(_relationship),
+                  relationship: _relationship,
+                  workingRole: _workingRole,
+                  rehabContext: _rehabContext,
+                  careContext: _careContext,
+                  onWorkingRoleChanged: (r) =>
+                      setState(() => _workingRole = r),
+                  onRehabContextChanged: (r) =>
+                      setState(() => _rehabContext = r),
+                  onCareContextChanged: (r) =>
+                      setState(() => _careContext = r),
+                ),
+              ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: _pickDob,
@@ -348,6 +397,142 @@ class _BreedField extends StatelessWidget {
               : theme.textTheme.bodyMedium,
         ),
       ),
+    );
+  }
+}
+
+/// Relationship card — DECISIONS row 44 + 5.5.4 design D5=C lock. Renders
+/// the "Relationship" section header inside a [PetCard] with four
+/// inline radio rows. Always visible; `pet` is pre-selected by the
+/// parent state. The four values are surfaced verbatim from the
+/// [Relationship] enum so the picker stays in sync with the lock.
+class _RelationshipCard extends StatelessWidget {
+  const _RelationshipCard({
+    required this.value,
+    required this.onChanged,
+  });
+
+  final Relationship value;
+  final ValueChanged<Relationship> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: RadioGroup<Relationship>(
+        groupValue: value,
+        onChanged: (v) {
+          if (v != null) onChanged(v);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const PetSectionHeader(title: 'Relationship'),
+            for (final r in Relationship.values)
+              RadioListTile<Relationship>(
+                title: Text(r.label),
+                value: r,
+                dense: true,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Sub-classification picker shown beneath [_RelationshipCard]. Renders
+/// the role/context picker that pairs with the active relationship per
+/// DECISIONS row 47 (working_role 7 / rehab_context 9 / care_context 5).
+/// Returns an empty box for `wildlifeObservation` — observation entries
+/// have no analog sub-classification.
+class _SubClassificationField extends StatelessWidget {
+  const _SubClassificationField({
+    super.key,
+    required this.relationship,
+    required this.workingRole,
+    required this.rehabContext,
+    required this.careContext,
+    required this.onWorkingRoleChanged,
+    required this.onRehabContextChanged,
+    required this.onCareContextChanged,
+  });
+
+  final Relationship relationship;
+  final WorkingRole workingRole;
+  final RehabContext rehabContext;
+  final CareContext careContext;
+  final ValueChanged<WorkingRole> onWorkingRoleChanged;
+  final ValueChanged<RehabContext> onRehabContextChanged;
+  final ValueChanged<CareContext> onCareContextChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    switch (relationship) {
+      case Relationship.pet:
+        return _SubPicker<WorkingRole>(
+          label: 'Working role',
+          value: workingRole,
+          values: WorkingRole.values,
+          labelOf: (r) => r.label,
+          onChanged: onWorkingRoleChanged,
+        );
+      case Relationship.rescueRehab:
+        return _SubPicker<RehabContext>(
+          label: 'Rehab context',
+          value: rehabContext,
+          values: RehabContext.values,
+          labelOf: (r) => r.label,
+          onChanged: onRehabContextChanged,
+        );
+      case Relationship.permanentWildlife:
+        return _SubPicker<CareContext>(
+          label: 'Care context',
+          value: careContext,
+          values: CareContext.values,
+          labelOf: (r) => r.label,
+          onChanged: onCareContextChanged,
+        );
+      case Relationship.wildlifeObservation:
+        return const SizedBox.shrink();
+    }
+  }
+}
+
+/// Generic dropdown sub-picker — flat dropdown rather than another stack
+/// of radio rows because the values can run to 9 (rehab_context). Keeps
+/// the relationship card visually dominant (it's the answer to "who is
+/// this animal to you"); the sub-picker is a smaller follow-up.
+class _SubPicker<T> extends StatelessWidget {
+  const _SubPicker({
+    required this.label,
+    required this.value,
+    required this.values,
+    required this.labelOf,
+    required this.onChanged,
+  });
+
+  final String label;
+  final T value;
+  final List<T> values;
+  final String Function(T) labelOf;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return DropdownButtonFormField<T>(
+      initialValue: value,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      items: [
+        for (final v in values)
+          DropdownMenuItem<T>(value: v, child: Text(labelOf(v))),
+      ],
+      onChanged: (v) {
+        if (v != null) onChanged(v);
+      },
     );
   }
 }
