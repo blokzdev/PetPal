@@ -213,6 +213,73 @@ void main() {
     expect(find.text('Milo'), findsOneWidget);
   });
 
+  testWidgets('Bug 1 regression: a phone-shaped scroll viewport that '
+      'unmounts the Name field still rejects empty-name save (no '
+      'pet row, no SOUL.md write). Reproduces the on-device bug '
+      'where ListView lazy-mounting let the Name validator skip '
+      'and produced SOUL files with an empty `# {name}` header.',
+      (tester) async {
+    // Default phone-ish surface — small enough that the Name field
+    // scrolls out of viewport when Save comes into view. (The other
+    // 5.5.4+ tests deliberately oversize to 900x1600 so the whole
+    // form fits without scrolling — keeping THIS test on a
+    // realistic surface is the whole point.)
+    tester.view.physicalSize = const Size(400, 700);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add your pet'));
+    await tester.pumpAndSettle();
+
+    // Scroll the form's scrollable until Save is visible. We
+    // explicitly scope to the Form's descendant Scrollable — there
+    // are multiple Scrollables in PetPalApp's widget tree — and on
+    // a 400x700 surface Save sits well below the viewport. The
+    // defense-in-depth name guard in `_save()` is what makes this
+    // test pass: even if a future refactor reintroduces the
+    // lazy-mount bug, the guard catches the empty-name case before
+    // any SOUL.md write.
+    // Several descendants of `Form` are themselves `Scrollable`
+    // (each TextFormField owns one for caret overflow, etc.); the
+    // form's own SingleChildScrollView is the FIRST in widget-tree
+    // order. Take `.first` and pass that as the scroll source.
+    final formScrollable = find
+        .descendant(
+          of: find.byType(Form),
+          matching: find.byType(Scrollable),
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.text('Save'),
+      200,
+      scrollable: formScrollable,
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    // No pet row, no SOUL.md write — the defense-in-depth guard
+    // catches the empty name even if the Form's validate() pass
+    // missed it.
+    final pets = await db.select(db.pets).get();
+    expect(pets, isEmpty,
+        reason: 'Empty-name save must not reach the database.');
+    expect(wiki.writes, isEmpty,
+        reason: 'Empty-name save must not write a SOUL.md file.');
+
+    // Inline error surface — `_saveError` renders.
+    expect(find.text('Name is required.'), findsOneWidget);
+  });
+
   testWidgets('5.5.4: relationship=rescue-rehab reveals intake + '
       'expected-release date pickers; switching back hides them',
       (tester) async {

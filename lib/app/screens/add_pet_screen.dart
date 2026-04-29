@@ -206,6 +206,19 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   }
 
   Future<void> _save() async {
+    // Defense-in-depth: even if Form.validate() somehow returns true on
+    // an empty name (e.g. a future ListView refactor lazy-unmounts the
+    // Name field at scroll time so it's not in the Form's _fields
+    // registry — the bug Phase 5.5.4 shipped before Bug-1 fix), refuse
+    // the write here. SOUL.md must never get an empty `# {name}`
+    // header — it cascades into orphan-apostrophe taglines and empty
+    // chat-CTA strings across the app surface.
+    final trimmedName = _name.text.trim();
+    if (trimmedName.isEmpty) {
+      _formKey.currentState?.validate();
+      setState(() => _saveError = 'Name is required.');
+      return;
+    }
     if (!_formKey.currentState!.validate()) return;
     setState(() {
       _saving = true;
@@ -242,7 +255,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final aboutText = _aboutPetPalShouldKnow.text.trim();
       final seedSoul = await templates.seedSoulFor(
         category: effectiveCategory,
-        name: _name.text.trim(),
+        name: trimmedName,
         species: speciesValue,
         breed: breed,
         sex: _sex,
@@ -260,7 +273,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
         aboutPetPalShouldKnow: aboutText.isEmpty ? null : aboutText,
       );
       await repo.createPet(
-        name: _name.text.trim(),
+        name: trimmedName,
         category: effectiveCategory.id,
         species: speciesValue,
         breed: breed,
@@ -293,12 +306,23 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     }
     return AppScaffold(
       title: 'Add a pet',
+      // SingleChildScrollView + Column (NOT ListView). ListView lazy-
+      // mounts children based on viewport, so when the user scrolls
+      // down to tap Save the Name TextFormField at the top scrolls
+      // past the cache extent and unmounts. Form.validate() then
+      // doesn't see the empty Name field and the save proceeds with
+      // an empty `# {name}` SOUL — see Bug-1 fix on the Phase 5.5
+      // on-device verification round. Column keeps every FormField
+      // mounted regardless of scroll position so validation always
+      // covers the whole form.
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: ListView(
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               TextFormField(
                 controller: _name,
                 decoration: const InputDecoration(
@@ -451,7 +475,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                       )
                     : const Text('Save'),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
