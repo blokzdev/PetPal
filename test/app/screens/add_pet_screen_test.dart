@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/onboarding_templates.dart';
+import 'package:petpal/data/species_catalog.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/main.dart';
 
@@ -60,11 +61,24 @@ const _richDogTemplate =
     '\n'
     '{about_petpal_should_know}\n';
 
+/// Rich exotic template — used by the 5.5.6 freeform-species test that
+/// expects `category: exotic` + `species: <freeform-text>` in the
+/// captured SOUL.
+const _richExoticTemplate =
+    '---\n'
+    'category: exotic\n'
+    'species: {species}\n'
+    'breed: {breed}\n'
+    '---\n'
+    '# {name}\n'
+    "{name} doesn't fit one of PetPal's standard species.\n";
+
 ProviderContainer _setupOverrides({
   required AppDatabase db,
   required WikiIo wiki,
   required FakeApiKeyStorage storage,
   bool richTemplates = false,
+  SpeciesCatalog? catalog,
 }) {
   return ProviderContainer(
     overrides: [
@@ -82,9 +96,12 @@ ProviderContainer _setupOverrides({
           for (final s in Category.values)
             s: richTemplates && s == Category.dog
                 ? _richDogTemplate
-                : '---\ncategory: ${s.id}\nbreed: {breed}\n---\n# {name}\n',
+                : richTemplates && s == Category.exotic
+                    ? _richExoticTemplate
+                    : '---\ncategory: ${s.id}\nbreed: {breed}\n---\n# {name}\n',
         }),
       ),
+      if (catalog != null) speciesCatalogProvider.overrideWithValue(catalog),
     ],
   );
 }
@@ -314,6 +331,90 @@ void main() {
     expect(soul, isNot(contains('rehab_context:')));
     expect(soul, isNot(contains('intake_date:')));
     expect(soul, isNot(contains('expected_release_date:')));
+  });
+
+  testWidgets('5.5.6: "Other (type your own)" routes a freeform species '
+      'to category=exotic in the SOUL, regardless of the picked '
+      'category', (tester) async {
+    // Inject a minimal in-memory catalog so the picker sheet renders.
+    container.dispose();
+    container = _setupOverrides(
+      db: db,
+      wiki: wiki,
+      storage: storage,
+      richTemplates: true,
+      catalog: InMemorySpeciesCatalog(const {
+        // Empty entries means the picker just shows the "Other" tile —
+        // exactly the tail-row path 5.5.6 wires through.
+        'dog': [],
+      }),
+    );
+
+    tester.view.physicalSize = const Size(900, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: const PetPalApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Add your pet'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextFormField, 'Name'),
+      'Specimen',
+    );
+
+    // Open the species picker. Category defaults to Dog; we'll deny
+    // every entry the freeform path so the test passes through "Other".
+    await tester.tap(find.text('Tap to pick a species'));
+    await tester.pumpAndSettle();
+
+    // Tap the freeform tail row. Exact-match `find.text` here, not
+    // `textContaining` — the empty-results hint in the picker also
+    // contains the substring 'Other (type your own)' (in quotes).
+    await tester.tap(find.text('Other (type your own)'));
+    await tester.pumpAndSettle();
+
+    // The new prompt copy lands on the freeform input.
+    expect(
+      find.widgetWithText(
+        TextFormField,
+        'Type the species — common names work.',
+      ),
+      findsOneWidget,
+    );
+
+    // Type a freeform species and save.
+    await tester.enterText(
+      find.widgetWithText(
+        TextFormField,
+        'Type the species — common names work.',
+      ),
+      'tegu',
+    );
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    // The captured SOUL.md routes through the exotic template even
+    // though the user picked Dog at the category step. The freeform
+    // species text flows through to `species:`. Per ROADMAP 5.5.6.
+    // (Category lives in SOUL frontmatter, not the pets DB row — the
+    // pets table only stores id / name / createdAt.)
+    final pets = await db.select(db.pets).get();
+    expect(pets, hasLength(1));
+    final soul = wiki.writes['wiki/${pets.first.id}/SOUL.md'];
+    expect(soul, isNotNull);
+    expect(soul!, contains('category: exotic'));
+    expect(soul, contains('species: tegu'));
+    expect(soul, isNot(contains('category: dog')));
   });
 
   testWidgets('free-tier gate: AddPetScreen blocks a second pet '

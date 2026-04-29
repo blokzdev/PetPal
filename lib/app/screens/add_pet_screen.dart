@@ -216,6 +216,15 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final templates = ref.read(onboardingTemplatesProvider);
       final breed = _breed.text.trim().isEmpty ? null : _breed.text.trim();
       final speciesValue = _resolvedSpeciesValue();
+      // 5.5.6 — freeform species ("Other (type your own)") routes to
+      // category=exotic regardless of the user's category pick. The
+      // exotic template carries the catch-all frontmatter shape; the
+      // skill loader treats `exotic` normally. The original picked
+      // category is dropped on the floor: an animal we can't catalog
+      // shouldn't pretend to be tracked under a category it didn't
+      // match. Per ROADMAP 5.5.6.
+      final effectiveCategory =
+          _isOtherSpecies ? Category.exotic : _category;
       // Lifecycle date: only the picked kind's value is threaded into
       // the SOUL. The other two are nulled so renderTemplate's strip-
       // empty pass omits their lines.
@@ -232,7 +241,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final weightKg = _resolvedWeightKg();
       final aboutText = _aboutPetPalShouldKnow.text.trim();
       final seedSoul = await templates.seedSoulFor(
-        category: _category,
+        category: effectiveCategory,
         name: _name.text.trim(),
         species: speciesValue,
         breed: breed,
@@ -252,7 +261,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       );
       await repo.createPet(
         name: _name.text.trim(),
-        category: _category.id,
+        category: effectiveCategory.id,
         species: speciesValue,
         breed: breed,
         dob: dob,
@@ -335,7 +344,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                 TextFormField(
                   controller: _otherSpecies,
                   decoration: const InputDecoration(
-                    labelText: 'Type the species',
+                    labelText: 'Type the species — common names work.',
                     border: OutlineInputBorder(),
                   ),
                   textCapitalization: TextCapitalization.words,
