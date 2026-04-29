@@ -673,5 +673,521 @@
       "Nun Pigeon",
       "Show Pigeon"
     ]
+  },
+  {
+    "display_name": "Chicken",
+    "scientific_name": "Gallus gallus domesticus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "chicken",
+      "hen",
+      "rooster",
+      "chook"
+    ],
+    "breeds": [
+      {
+        "name": "Mixed breed",
+        "alternatives": []
+      },
+      {
+        "name": "Not sure",
+        "alternatives": []
+      },
+      {
+        "name": "Ameraucana",
+        "alternatives": []
+      },
+      {
+        "name": "Ancona",
+        "alternatives": []
+      },
+      {
+        "name": "Andalusian",
+        "alternatives": [
+          "Blue Andalusian"
+        ]
+      },
+      {
+        "name": "Appenzeller Spitzhauben",
+        "alternatives": [
+          "Appenzeller"
+        ]
+      },
+      {
+        "name": "Araucana",
+        "alternatives": []
+      },
+      {
+        "name": "Australorp",
+        "alternatives": [
+          "Black Australorp"
+        ]
+      },
+      {
+        "name": "Barnevelder",
+        "alternatives": []
+      },
+      {
+        "name": "Belgian d'Anvers",
+        "alternatives": [
+          "d'Anvers",
+          "Antwerp Belgian"
+        ]
+      },
+      {
+        "name": "Belgian d'Uccle",
+        "alternatives": [
+          "d'Uccle",
+          "Mille Fleur"
+        ]
+      },
+      {
+        "name": "Black Star",
+        "alternatives": [
+          "Black Sex Link"
+        ]
+      },
+      {
+        "name": "Brahma",
+        "alternatives": [
+          "Buff Brahma",
+          "Light Brahma",
+          "Dark Brahma"
+        ]
+      },
+      {
+        "name": "Buckeye",
+        "alternatives": []
+      },
+      {
+        "name": "California White",
+        "alternatives": []
+      },
+      {
+        "name": "Campine",
+        "alternatives": []
+      },
+      {
+        "name": "Catalana",
+        "alternatives": []
+      },
+      {
+        "name": "Chantecler",
+        "alternatives": []
+      },
+      {
+        "name": "Cochin",
+        "alternatives": [
+          "Pekin Bantam"
+        ]
+      },
+      {
+        "name": "Cornish",
+        "alternatives": []
+      },
+      {
+        "name": "Cornish Cross",
+        "alternatives": [
+          "Cornish Rock",
+          "broiler chicken",
+          "meat bird"
+        ]
+      },
+      {
+        "name": "Crevecoeur",
+        "alternatives": []
+      },
+      {
+        "name": "Cubalaya",
+        "alternatives": []
+      },
+      {
+        "name": "Delaware",
+        "alternatives": []
+      },
+      {
+        "name": "Dominique",
+        "alternatives": []
+      },
+      {
+        "name": "Dorking",
+        "alternatives": []
+      },
+      {
+        "name": "Dutch Bantam",
+        "alternatives": []
+      },
+      {
+        "name": "Easter Egger",
+        "alternatives": [
+          "EE"
+        ]
+      },
+      {
+        "name": "Faverolles",
+        "alternatives": [
+          "Salmon Faverolles"
+        ]
+      },
+      {
+        "name": "Frizzle",
+        "alternatives": []
+      },
+      {
+        "name": "Hamburg",
+        "alternatives": []
+      },
+      {
+        "name": "Holland",
+        "alternatives": []
+      },
+      {
+        "name": "Houdan",
+        "alternatives": []
+      },
+      {
+        "name": "ISA Brown",
+        "alternatives": [
+          "Brown layer"
+        ]
+      },
+      {
+        "name": "Iowa Blue",
+        "alternatives": []
+      },
+      {
+        "name": "Jaerhon",
+        "alternatives": [
+          "Norwegian Jaerhon"
+        ]
+      },
+      {
+        "name": "Java",
+        "alternatives": []
+      },
+      {
+        "name": "Jersey Giant",
+        "alternatives": []
+      },
+      {
+        "name": "Kraienkoppe",
+        "alternatives": []
+      },
+      {
+        "name": "Lakenvelder",
+        "alternatives": []
+      },
+      {
+        "name": "Langshan",
+        "alternatives": []
+      },
+      {
+        "name": "Leghorn",
+        "alternatives": [
+          "White Leghorn",
+          "Brown Leghorn"
+        ]
+      },
+      {
+        "name": "Malay",
+        "alternatives": []
+      },
+      {
+        "name": "Marans",
+        "alternatives": [
+          "Black Copper Marans",
+          "Cuckoo Marans"
+        ]
+      },
+      {
+        "name": "Minorca",
+        "alternatives": []
+      },
+      {
+        "name": "Modern Game",
+        "alternatives": []
+      },
+      {
+        "name": "Naked Neck",
+        "alternatives": [
+          "Turken",
+          "Transylvanian Naked Neck"
+        ]
+      },
+      {
+        "name": "New Hampshire",
+        "alternatives": [
+          "New Hampshire Red"
+        ]
+      },
+      {
+        "name": "Old English Game",
+        "alternatives": [
+          "OEG"
+        ]
+      },
+      {
+        "name": "Olive Egger",
+        "alternatives": [
+          "OE"
+        ]
+      },
+      {
+        "name": "Orloff",
+        "alternatives": [
+          "Russian Orloff"
+        ]
+      },
+      {
+        "name": "Orpington",
+        "alternatives": [
+          "Buff Orpington",
+          "Black Orpington",
+          "Lavender Orpington"
+        ]
+      },
+      {
+        "name": "Penedesenca",
+        "alternatives": []
+      },
+      {
+        "name": "Phoenix",
+        "alternatives": []
+      },
+      {
+        "name": "Plymouth Rock",
+        "alternatives": [
+          "Barred Rock",
+          "Barred Plymouth Rock"
+        ]
+      },
+      {
+        "name": "Polish",
+        "alternatives": []
+      },
+      {
+        "name": "Red Star",
+        "alternatives": [
+          "Red Sex Link",
+          "Cinnamon Queen",
+          "Golden Comet"
+        ]
+      },
+      {
+        "name": "Redcap",
+        "alternatives": []
+      },
+      {
+        "name": "Rhode Island Red",
+        "alternatives": [
+          "RIR"
+        ]
+      },
+      {
+        "name": "Rhode Island White",
+        "alternatives": [
+          "RIW"
+        ]
+      },
+      {
+        "name": "Rosecomb",
+        "alternatives": []
+      },
+      {
+        "name": "Sablepoot",
+        "alternatives": [
+          "Booted Bantam"
+        ]
+      },
+      {
+        "name": "Sebright",
+        "alternatives": []
+      },
+      {
+        "name": "Serama",
+        "alternatives": [
+          "Malaysian Serama"
+        ]
+      },
+      {
+        "name": "Shamo",
+        "alternatives": []
+      },
+      {
+        "name": "Sicilian Buttercup",
+        "alternatives": [
+          "Buttercup"
+        ]
+      },
+      {
+        "name": "Silkie",
+        "alternatives": [
+          "Silky",
+          "Chinese Silkie"
+        ]
+      },
+      {
+        "name": "Spanish",
+        "alternatives": [
+          "White-faced Black Spanish"
+        ]
+      },
+      {
+        "name": "Sumatra",
+        "alternatives": []
+      },
+      {
+        "name": "Sussex",
+        "alternatives": [
+          "Speckled Sussex",
+          "Light Sussex",
+          "Coronation Sussex"
+        ]
+      },
+      {
+        "name": "Vorwerk",
+        "alternatives": []
+      },
+      {
+        "name": "Welsummer",
+        "alternatives": []
+      },
+      {
+        "name": "Wyandotte",
+        "alternatives": [
+          "Silver-laced Wyandotte",
+          "Gold-laced Wyandotte",
+          "Blue Laced Red Wyandotte"
+        ]
+      },
+      {
+        "name": "Yokohama",
+        "alternatives": []
+      },
+      {
+        "name": "Other",
+        "alternatives": []
+      }
+    ]
+  },
+  {
+    "display_name": "Domestic Duck",
+    "scientific_name": "Anas platyrhynchos domesticus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "duck",
+      "Pekin",
+      "Pekin Duck",
+      "Khaki Campbell",
+      "Indian Runner",
+      "Runner Duck",
+      "Cayuga",
+      "Rouen",
+      "Welsh Harlequin",
+      "Saxony",
+      "Magpie Duck",
+      "Call Duck",
+      "Crested Duck"
+    ]
+  },
+  {
+    "display_name": "Muscovy Duck",
+    "scientific_name": "Cairina moschata",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Muscovy",
+      "Barbary Duck"
+    ]
+  },
+  {
+    "display_name": "Domestic Goose",
+    "scientific_name": "Anser anser domesticus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "goose",
+      "Embden",
+      "Toulouse",
+      "African Goose",
+      "Chinese Goose",
+      "Sebastopol",
+      "Pilgrim Goose",
+      "American Buff"
+    ]
+  },
+  {
+    "display_name": "Domestic Turkey",
+    "scientific_name": "Meleagris gallopavo",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "turkey",
+      "Bourbon Red",
+      "Royal Palm",
+      "Narragansett",
+      "Broad Breasted White",
+      "Broad Breasted Bronze",
+      "Heritage Turkey",
+      "Standard Bronze",
+      "Slate Turkey"
+    ]
+  },
+  {
+    "display_name": "Coturnix Quail",
+    "scientific_name": "Coturnix japonica",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "quail",
+      "Japanese Quail",
+      "Pharaoh Quail",
+      "Jumbo Quail",
+      "Texas A&M Quail"
+    ]
+  },
+  {
+    "display_name": "Bobwhite Quail",
+    "scientific_name": "Colinus virginianus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Northern Bobwhite"
+    ]
+  },
+  {
+    "display_name": "Helmeted Guineafowl",
+    "scientific_name": "Numida meleagris",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "guinea fowl",
+      "Pearl Guinea",
+      "guinea hen",
+      "guineafowl"
+    ]
+  },
+  {
+    "display_name": "Indian Peafowl",
+    "scientific_name": "Pavo cristatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "peacock",
+      "peahen",
+      "Blue Peafowl",
+      "India Blue"
+    ]
+  },
+  {
+    "display_name": "Green Peafowl",
+    "scientific_name": "Pavo muticus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Java Peafowl"
+    ]
   }
 ]
