@@ -1,0 +1,631 @@
+[
+  {
+    "display_name": "Fish (any species)",
+    "scientific_name": "Actinopterygii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "fish"
+    ]
+  },
+  {
+    "display_name": "Betta",
+    "scientific_name": "Betta splendens",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Siamese Fighting Fish",
+      "Halfmoon Betta",
+      "Crowntail Betta",
+      "Plakat",
+      "Veiltail Betta"
+    ]
+  },
+  {
+    "display_name": "Goldfish",
+    "scientific_name": "Carassius auratus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Common Goldfish",
+      "Comet",
+      "Shubunkin",
+      "Fantail",
+      "Ryukin",
+      "Oranda",
+      "Ranchu",
+      "Lionhead",
+      "Telescope",
+      "Bubble Eye",
+      "Pearlscale",
+      "Black Moor",
+      "Celestial"
+    ]
+  },
+  {
+    "display_name": "Neon Tetra",
+    "scientific_name": "Paracheirodon innesi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "neon"
+    ]
+  },
+  {
+    "display_name": "Cardinal Tetra",
+    "scientific_name": "Paracheirodon axelrodi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "cardinal"
+    ]
+  },
+  {
+    "display_name": "Black Neon Tetra",
+    "scientific_name": "Hyphessobrycon herbertaxelrodi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Black Skirt Tetra",
+    "scientific_name": "Gymnocorymbus ternetzi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Black Widow Tetra"
+    ]
+  },
+  {
+    "display_name": "Glowlight Tetra",
+    "scientific_name": "Hemigrammus erythrozonus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Lemon Tetra",
+    "scientific_name": "Hyphessobrycon pulchripinnis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Rummy Nose Tetra",
+    "scientific_name": "Hemigrammus bleheri",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "rummynose"
+    ]
+  },
+  {
+    "display_name": "Serpae Tetra",
+    "scientific_name": "Hyphessobrycon eques",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Bloodfin Tetra",
+    "scientific_name": "Aphyocharax anisitsi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Diamond Tetra",
+    "scientific_name": "Moenkhausia pittieri",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Congo Tetra",
+    "scientific_name": "Phenacogrammus interruptus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Angelfish",
+    "scientific_name": "Pterophyllum scalare",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "freshwater angelfish"
+    ]
+  },
+  {
+    "display_name": "Discus",
+    "scientific_name": "Symphysodon",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Blue Discus",
+      "Red Discus",
+      "Heckel Discus"
+    ]
+  },
+  {
+    "display_name": "Oscar",
+    "scientific_name": "Astronotus ocellatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Tiger Oscar",
+      "Albino Oscar"
+    ]
+  },
+  {
+    "display_name": "Convict Cichlid",
+    "scientific_name": "Amatitlania nigrofasciata",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "zebra cichlid",
+      "convict"
+    ]
+  },
+  {
+    "display_name": "Jack Dempsey Cichlid",
+    "scientific_name": "Rocio octofasciata",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Jack Dempsey"
+    ]
+  },
+  {
+    "display_name": "Green Terror",
+    "scientific_name": "Andinoacara rivulatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Firemouth Cichlid",
+    "scientific_name": "Thorichthys meeki",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "firemouth"
+    ]
+  },
+  {
+    "display_name": "Severum",
+    "scientific_name": "Heros severus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Gold Severum",
+      "Banded Cichlid"
+    ]
+  },
+  {
+    "display_name": "Ram Cichlid",
+    "scientific_name": "Mikrogeophagus ramirezi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "German Ram",
+      "Bolivian Ram",
+      "Blue Ram"
+    ]
+  },
+  {
+    "display_name": "Apistogramma",
+    "scientific_name": "Apistogramma",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dwarf cichlid",
+      "apisto"
+    ]
+  },
+  {
+    "display_name": "African Cichlid (Mbuna)",
+    "scientific_name": "Pseudotropheus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mbuna",
+      "Lake Malawi cichlid",
+      "rock cichlid"
+    ]
+  },
+  {
+    "display_name": "Peacock Cichlid",
+    "scientific_name": "Aulonocara",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "peacock"
+    ]
+  },
+  {
+    "display_name": "Frontosa",
+    "scientific_name": "Cyphotilapia frontosa",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Kribensis",
+    "scientific_name": "Pelvicachromis pulcher",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "krib"
+    ]
+  },
+  {
+    "display_name": "Yellow Lab Cichlid",
+    "scientific_name": "Labidochromis caeruleus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Electric Yellow Cichlid",
+      "yellow lab"
+    ]
+  },
+  {
+    "display_name": "Bristlenose Pleco",
+    "scientific_name": "Ancistrus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "BN pleco",
+      "bushynose pleco"
+    ]
+  },
+  {
+    "display_name": "Common Pleco",
+    "scientific_name": "Pterygoplichthys",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pleco",
+      "plecostomus",
+      "Sailfin Pleco"
+    ]
+  },
+  {
+    "display_name": "Corydoras Catfish",
+    "scientific_name": "Corydoras",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "cory cat",
+      "corydoras",
+      "Bronze Cory",
+      "Albino Cory",
+      "Panda Cory",
+      "Sterba's Cory",
+      "Pygmy Cory",
+      "Julii Cory"
+    ]
+  },
+  {
+    "display_name": "Otocinclus",
+    "scientific_name": "Otocinclus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "oto",
+      "dwarf sucker"
+    ]
+  },
+  {
+    "display_name": "Pictus Catfish",
+    "scientific_name": "Pimelodus pictus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Glass Catfish",
+    "scientific_name": "Kryptopterus vitreolus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ghost catfish"
+    ]
+  },
+  {
+    "display_name": "Synodontis Catfish",
+    "scientific_name": "Synodontis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "upside-down catfish"
+    ]
+  },
+  {
+    "display_name": "Three Spot Gourami",
+    "scientific_name": "Trichopodus trichopterus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Blue Gourami",
+      "Opaline Gourami",
+      "Gold Gourami"
+    ]
+  },
+  {
+    "display_name": "Pearl Gourami",
+    "scientific_name": "Trichopodus leerii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "lace gourami"
+    ]
+  },
+  {
+    "display_name": "Dwarf Gourami",
+    "scientific_name": "Trichogaster lalius",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dwarf flame gourami",
+      "powder blue gourami"
+    ]
+  },
+  {
+    "display_name": "Honey Gourami",
+    "scientific_name": "Trichogaster chuna",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Sparkling Gourami",
+    "scientific_name": "Trichopsis pumila",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pygmy gourami"
+    ]
+  },
+  {
+    "display_name": "Kissing Gourami",
+    "scientific_name": "Helostoma temminckii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "kisser fish"
+    ]
+  },
+  {
+    "display_name": "Guppy",
+    "scientific_name": "Poecilia reticulata",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "fancy guppy",
+      "Endler guppy"
+    ]
+  },
+  {
+    "display_name": "Endler's Livebearer",
+    "scientific_name": "Poecilia wingei",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Endler"
+    ]
+  },
+  {
+    "display_name": "Molly",
+    "scientific_name": "Poecilia sphenops",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Black Molly",
+      "Sailfin Molly",
+      "Dalmatian Molly",
+      "Balloon Molly"
+    ]
+  },
+  {
+    "display_name": "Platy",
+    "scientific_name": "Xiphophorus maculatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Mickey Mouse Platy",
+      "Sunburst Platy"
+    ]
+  },
+  {
+    "display_name": "Swordtail",
+    "scientific_name": "Xiphophorus hellerii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sword"
+    ]
+  },
+  {
+    "display_name": "Killifish",
+    "scientific_name": "Cyprinodontiformes",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Aphyosemion",
+      "Nothobranchius",
+      "Golden Wonder Killifish",
+      "Clown Killifish"
+    ]
+  },
+  {
+    "display_name": "Tiger Barb",
+    "scientific_name": "Puntigrus tetrazona",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Cherry Barb",
+    "scientific_name": "Puntius titteya",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Rosy Barb",
+    "scientific_name": "Pethia conchonius",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Gold Barb",
+    "scientific_name": "Barbodes semifasciolatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Zebra Danio",
+    "scientific_name": "Danio rerio",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "zebrafish",
+      "GloFish"
+    ]
+  },
+  {
+    "display_name": "Pearl Danio",
+    "scientific_name": "Danio albolineatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Giant Danio",
+    "scientific_name": "Devario aequipinnatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Celestial Pearl Danio",
+    "scientific_name": "Danio margaritatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "CPD",
+      "galaxy rasbora"
+    ]
+  },
+  {
+    "display_name": "Harlequin Rasbora",
+    "scientific_name": "Trigonostigma heteromorpha",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "harlequin"
+    ]
+  },
+  {
+    "display_name": "Chili Rasbora",
+    "scientific_name": "Boraras brigittae",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mosquito rasbora"
+    ]
+  },
+  {
+    "display_name": "Clown Loach",
+    "scientific_name": "Chromobotia macracanthus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Yoyo Loach",
+    "scientific_name": "Botia almorhae",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Pakistani Loach"
+    ]
+  },
+  {
+    "display_name": "Kuhli Loach",
+    "scientific_name": "Pangio kuhlii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "coolie loach"
+    ]
+  },
+  {
+    "display_name": "Boesemani Rainbowfish",
+    "scientific_name": "Melanotaenia boesemani",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Boesemani Rainbow"
+    ]
+  },
+  {
+    "display_name": "Australian Rainbowfish",
+    "scientific_name": "Melanotaenia",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "rainbowfish"
+    ]
+  },
+  {
+    "display_name": "Bala Shark",
+    "scientific_name": "Balantiocheilos melanopterus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Tricolor Shark",
+      "silver shark"
+    ]
+  },
+  {
+    "display_name": "Red-tailed Black Shark",
+    "scientific_name": "Epalzeorhynchos bicolor",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "redtail shark",
+      "RTBS"
+    ]
+  },
+  {
+    "display_name": "Rainbow Shark",
+    "scientific_name": "Epalzeorhynchos frenatum",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ruby shark"
+    ]
+  },
+  {
+    "display_name": "Chinese Algae Eater",
+    "scientific_name": "Gyrinocheilus aymonieri",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "CAE"
+    ]
+  },
+  {
+    "display_name": "Siamese Algae Eater",
+    "scientific_name": "Crossocheilus oblongus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "SAE"
+    ]
+  }
+]
