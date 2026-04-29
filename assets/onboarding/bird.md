@@ -1,5 +1,6 @@
 ---
 category: bird
+species: {species}
 breed: {breed}
 dob: {dob}
 weight_g:

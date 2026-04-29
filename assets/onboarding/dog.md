@@ -1,5 +1,6 @@
 ---
 category: dog
+species: {species}
 breed: {breed}
 dob: {dob}
 weight_kg:

@@ -5,6 +5,7 @@ import '../data/db/connection.dart';
 import '../data/db/database.dart';
 import '../data/onboarding_templates.dart';
 import '../data/repos/pet_repo.dart';
+import '../data/species_catalog.dart';
 import '../data/repos/reminder_repo.dart';
 import '../data/repos/skill_repo.dart';
 import '../data/repos/wiki_repo.dart';
@@ -105,6 +106,13 @@ final wikiIoProvider = FutureProvider<WikiIo>((ref) async {
 /// `assets/onboarding/<category>.md`. Tests inject [InMemoryOnboardingTemplates].
 final onboardingTemplatesProvider = Provider<OnboardingTemplates>((ref) {
   return const AssetOnboardingTemplates();
+});
+
+/// Source of curated species data per category. Production loads JSON
+/// lazily from `assets/species/<category>.json` (DECISIONS rows 42 +
+/// 46). Tests inject [InMemorySpeciesCatalog].
+final speciesCatalogProvider = Provider<SpeciesCatalog>((ref) {
+  return AssetSpeciesCatalog();
 });
 
 final petRepoProvider = FutureProvider<PetRepo>((ref) async {

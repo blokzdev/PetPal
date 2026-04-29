@@ -27,6 +27,7 @@ class PetRepo {
   Future<int> createPet({
     required String name,
     String? category,
+    String? species,
     String? breed,
     DateTime? dob,
     String? seedSoul,
@@ -38,6 +39,7 @@ class PetRepo {
         _genericSeedSoul(
           name: name,
           category: category,
+          species: species,
           breed: breed,
           dob: dob,
         );
@@ -62,6 +64,7 @@ class PetRepo {
 String _genericSeedSoul({
   required String name,
   String? category,
+  String? species,
   String? breed,
   DateTime? dob,
 }) {
@@ -72,6 +75,7 @@ String _genericSeedSoul({
           '${dob.day.toString().padLeft(2, '0')}';
   return '''---
 category: ${category ?? ''}
+species: ${species ?? ''}
 breed: ${breed ?? ''}
 dob: $dobStr
 weight_kg:

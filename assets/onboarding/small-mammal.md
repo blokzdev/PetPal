@@ -1,5 +1,6 @@
 ---
 category: small-mammal
+species: {species}
 breed: {breed}
 dob: {dob}
 weight_g:
