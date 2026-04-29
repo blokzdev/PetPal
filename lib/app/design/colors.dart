@@ -1,3 +1,4 @@
+import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 
 /// Soft modern palette — locked in DECISIONS row 35.
@@ -43,13 +44,29 @@ abstract final class PetPalColors {
   static const Color darkOnSurface = Color(0xFFEEE9E0);
 }
 
-/// Builds the light `ColorScheme`. Seeded from sage, then overrides every
-/// surface band with the warm scale to neutralise the M3-default drift
-/// toward lavender on sage primaries. Sage stays primary; coral lands as
-/// `tertiary` (M3 reserves `secondary` for a derivative of the seed —
-/// putting coral on `tertiary` keeps it semantically "the accent").
+/// Builds the light `ColorScheme`. Phase 5.6 (DECISIONS row 50)
+/// upgraded the resolution: FlexColorScheme generates the tonal
+/// derivatives (containers, on-tones, fixed pairs) from the sage
+/// primary + coral tertiary anchors with proper M3 tonal harmony,
+/// then the manual surface overrides land last to neutralise the
+/// M3-default drift toward lavender on sage primaries (DECISIONS
+/// row 35 hex values stay pinned). Sage stays primary; coral lands
+/// as `tertiary` — M3 reserves `secondary` for a derivative of the
+/// seed, so putting coral on `tertiary` keeps it semantically "the
+/// accent."
 ColorScheme buildLightColorScheme() {
-  final base = ColorScheme.fromSeed(seedColor: PetPalColors.sage);
+  final base = FlexColorScheme.light(
+    colors: const FlexSchemeColor(
+      primary: PetPalColors.sage,
+      primaryContainer: PetPalColors.lightSurfaceContainerHigh,
+      secondary: PetPalColors.sage,
+      secondaryContainer: PetPalColors.lightSurfaceContainer,
+      tertiary: PetPalColors.coral,
+      tertiaryContainer: PetPalColors.lightSurfaceContainerHigh,
+    ),
+    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    blendLevel: 8,
+  ).toScheme;
   return base.copyWith(
     primary: PetPalColors.sage,
     onPrimary: PetPalColors.warmOffWhite,
@@ -66,12 +83,24 @@ ColorScheme buildLightColorScheme() {
   );
 }
 
-/// Builds the dark `ColorScheme` — honest warm graphite (DECISIONS row 38).
+/// Builds the dark `ColorScheme` — honest warm graphite (DECISIONS
+/// row 38). Same tonal-harmony upgrade as light via FlexColorScheme
+/// (DECISIONS row 50); manual warm-graphite surface overrides land
+/// last so brand-color pull-through stays out of the surface bands
+/// and journal/chat content reads cleanly.
 ColorScheme buildDarkColorScheme() {
-  final base = ColorScheme.fromSeed(
-    seedColor: PetPalColors.sage,
-    brightness: Brightness.dark,
-  );
+  final base = FlexColorScheme.dark(
+    colors: const FlexSchemeColor(
+      primary: PetPalColors.sage,
+      primaryContainer: PetPalColors.darkSurfaceContainerHigh,
+      secondary: PetPalColors.sage,
+      secondaryContainer: PetPalColors.darkSurfaceContainer,
+      tertiary: PetPalColors.coral,
+      tertiaryContainer: PetPalColors.darkSurfaceContainerHigh,
+    ),
+    surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
+    blendLevel: 6,
+  ).toScheme;
   return base.copyWith(
     primary: PetPalColors.sage,
     onPrimary: PetPalColors.graphite,

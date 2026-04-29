@@ -61,6 +61,13 @@ dependencies:
   android_alarm_manager_plus: ^4.0.7
   workmanager: ^0.9.0+3
   permission_handler: ^11.3.1
+  # Phase 5.6 — Feel Polish foundation (DECISIONS row 50). The
+  # existing PetPalColors hex values stay pinned via the manual
+  # surface overrides in colors.dart; FlexColorScheme improves
+  # derived containers / on-tones / fixed pairs and dark-mode
+  # sophistication beyond ColorScheme.fromSeed defaults.
+  # Flutter Favorite, 160/160 pub points, rydmike (verified).
+  flex_color_scheme: ^8.4.0
 
 dev_dependencies:
   flutter_test:
