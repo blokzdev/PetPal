@@ -169,6 +169,16 @@ re-vision it — cached extraction results live next to the photo binary.
   above ~5% — under that, the curated list is doing its job and the
   fallback enrichment isn't worth the dependency on a public third-party
   API.
+- *Multi-provider LLM support.* Gemini API alongside Anthropic, with
+  provider selection in onboarding and settings. Lands alongside the
+  BYOK proxy work originally scoped for Phase 7. Ships post-v1 with
+  proper voice calibration on the second provider, vision parity for
+  photo capture, tool-format conversion, and quota logic for users
+  with one or both keys configured. v1 ships Anthropic-only via the
+  existing `LlmTransport` abstraction; the abstraction is the
+  affordance, not a commitment to multi-provider in v1. Retention
+  feature (cost flexibility, quota independence), not an acquisition
+  feature — DECISIONS row 49.
 
 **Stays locked OUT in v1.2.** DECISIONS row 25 (medical/clinical vision
 gate) holds. v1.2 does **not** relax it: body condition scoring, wound
