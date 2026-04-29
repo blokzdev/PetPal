@@ -1,0 +1,576 @@
+[
+  {
+    "display_name": "Exotic pet (any species)",
+    "scientific_name": "Animalia",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "exotic"
+    ]
+  },
+  {
+    "display_name": "Capybara",
+    "scientific_name": "Hydrochoerus hydrochaeris",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "water hog",
+      "capy"
+    ]
+  },
+  {
+    "display_name": "Patagonian Mara",
+    "scientific_name": "Dolichotis patagonum",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Patagonian cavy"
+    ]
+  },
+  {
+    "display_name": "African Pouched Rat",
+    "scientific_name": "Cricetomys gambianus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Gambian Pouched Rat"
+    ]
+  },
+  {
+    "display_name": "Fennec Fox",
+    "scientific_name": "Vulpes zerda",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "fennec"
+    ]
+  },
+  {
+    "display_name": "Domestic Skunk",
+    "scientific_name": "Mephitis mephitis",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pet skunk",
+      "descented skunk"
+    ]
+  },
+  {
+    "display_name": "Coatimundi",
+    "scientific_name": "Nasua narica",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "coati",
+      "white-nosed coati"
+    ]
+  },
+  {
+    "display_name": "Kinkajou",
+    "scientific_name": "Potos flavus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "honey bear"
+    ]
+  },
+  {
+    "display_name": "Genet",
+    "scientific_name": "Genetta",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Common Genet",
+      "Small-spotted Genet"
+    ]
+  },
+  {
+    "display_name": "Asian Palm Civet",
+    "scientific_name": "Paradoxurus hermaphroditus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "palm civet",
+      "luwak"
+    ]
+  },
+  {
+    "display_name": "Banded Mongoose",
+    "scientific_name": "Mungos mungo",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mongoose"
+    ]
+  },
+  {
+    "display_name": "Serval",
+    "scientific_name": "Leptailurus serval",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Common Marmoset",
+    "scientific_name": "Callithrix jacchus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "marmoset"
+    ]
+  },
+  {
+    "display_name": "Capuchin Monkey",
+    "scientific_name": "Cebus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "capuchin"
+    ]
+  },
+  {
+    "display_name": "Squirrel Monkey",
+    "scientific_name": "Saimiri",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Bushbaby",
+    "scientific_name": "Galago",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "galago",
+      "lesser bushbaby"
+    ]
+  },
+  {
+    "display_name": "Lesser Hedgehog Tenrec",
+    "scientific_name": "Echinops telfairi",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pygmy tenrec",
+      "tenrec"
+    ]
+  },
+  {
+    "display_name": "Bennett's Wallaby",
+    "scientific_name": "Notamacropus rufogriseus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "red-necked wallaby",
+      "wallaby"
+    ]
+  },
+  {
+    "display_name": "Wallaroo",
+    "scientific_name": "Osphranter robustus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common wallaroo"
+    ]
+  },
+  {
+    "display_name": "American Alligator",
+    "scientific_name": "Alligator mississippiensis",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "alligator",
+      "gator"
+    ]
+  },
+  {
+    "display_name": "Spectacled Caiman",
+    "scientific_name": "Caiman crocodilus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common caiman"
+    ]
+  },
+  {
+    "display_name": "Cuvier's Dwarf Caiman",
+    "scientific_name": "Paleosuchus palpebrosus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dwarf caiman"
+    ]
+  },
+  {
+    "display_name": "Tarantula (any species)",
+    "scientific_name": "Theraphosidae",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "pet tarantula"
+    ]
+  },
+  {
+    "display_name": "Mexican Red Knee Tarantula",
+    "scientific_name": "Brachypelma hamorii",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Red Knee",
+      "MRK"
+    ]
+  },
+  {
+    "display_name": "Chilean Rose Tarantula",
+    "scientific_name": "Grammostola rosea",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Chilean Rose Hair",
+      "rose hair tarantula"
+    ]
+  },
+  {
+    "display_name": "Curly Hair Tarantula",
+    "scientific_name": "Tliltocatl albopilosus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Honduran Curly Hair"
+    ]
+  },
+  {
+    "display_name": "Brazilian Black Tarantula",
+    "scientific_name": "Grammostola pulchra",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Pinktoe Tarantula",
+    "scientific_name": "Avicularia avicularia",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Common Pinktoe"
+    ]
+  },
+  {
+    "display_name": "Antilles Pinktoe",
+    "scientific_name": "Caribena versicolor",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Martinique Pinktoe",
+      "versicolor"
+    ]
+  },
+  {
+    "display_name": "Goliath Birdeater",
+    "scientific_name": "Theraphosa blondi",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Goliath bird-eating spider"
+    ]
+  },
+  {
+    "display_name": "Cobalt Blue Tarantula",
+    "scientific_name": "Cyriopagopus lividus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Mexican Red Leg Tarantula",
+    "scientific_name": "Brachypelma emilia",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Red Leg"
+    ]
+  },
+  {
+    "display_name": "Salmon Pink Birdeater",
+    "scientific_name": "Lasiodora parahybana",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "LP",
+      "Brazilian Salmon Pink"
+    ]
+  },
+  {
+    "display_name": "Greenbottle Blue Tarantula",
+    "scientific_name": "Chromatopelma cyaneopubescens",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "GBB"
+    ]
+  },
+  {
+    "display_name": "Mexican Red Rump",
+    "scientific_name": "Tliltocatl vagans",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "red rump"
+    ]
+  },
+  {
+    "display_name": "Emperor Scorpion",
+    "scientific_name": "Pandinus imperator",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "emperor"
+    ]
+  },
+  {
+    "display_name": "Asian Forest Scorpion",
+    "scientific_name": "Heterometrus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Bark Scorpion",
+    "scientific_name": "Centruroides",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Arizona Bark Scorpion"
+    ]
+  },
+  {
+    "display_name": "Vinegaroon",
+    "scientific_name": "Mastigoproctus giganteus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Giant Whip Scorpion"
+    ]
+  },
+  {
+    "display_name": "Madagascar Hissing Cockroach",
+    "scientific_name": "Gromphadorhina portentosa",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "hissing cockroach",
+      "hisser"
+    ]
+  },
+  {
+    "display_name": "Dubia Roach",
+    "scientific_name": "Blaptica dubia",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dubia",
+      "Argentine wood roach"
+    ]
+  },
+  {
+    "display_name": "Indian Stick Insect",
+    "scientific_name": "Carausius morosus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "walking stick"
+    ]
+  },
+  {
+    "display_name": "Stick Insect (any species)",
+    "scientific_name": "Phasmatodea",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "phasmid",
+      "walking stick",
+      "stickbug"
+    ]
+  },
+  {
+    "display_name": "Praying Mantis",
+    "scientific_name": "Mantodea",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "mantis",
+      "Chinese Mantis",
+      "European Mantis"
+    ]
+  },
+  {
+    "display_name": "Giant African Millipede",
+    "scientific_name": "Archispirostreptus gigas",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "AGB Millipede"
+    ]
+  },
+  {
+    "display_name": "American Giant Millipede",
+    "scientific_name": "Narceus americanus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Bumblebee Millipede",
+    "scientific_name": "Anadenobolus monilicornis",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "yellow-banded millipede"
+    ]
+  },
+  {
+    "display_name": "Centipede",
+    "scientific_name": "Chilopoda",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Vietnamese Centipede",
+      "Scolopendra"
+    ]
+  },
+  {
+    "display_name": "Garden Snail",
+    "scientific_name": "Cornu aspersum",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common snail",
+      "European brown snail"
+    ]
+  },
+  {
+    "display_name": "Giant African Land Snail",
+    "scientific_name": "Achatina fulica",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "GALS",
+      "Achatina"
+    ]
+  },
+  {
+    "display_name": "Roman Snail",
+    "scientific_name": "Helix pomatia",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Burgundy snail",
+      "edible snail"
+    ]
+  },
+  {
+    "display_name": "Isopod (any species)",
+    "scientific_name": "Isopoda",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "roly poly",
+      "pill bug",
+      "woodlouse"
+    ]
+  },
+  {
+    "display_name": "Powder Blue Isopod",
+    "scientific_name": "Porcellionides pruinosus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "powder blue"
+    ]
+  },
+  {
+    "display_name": "Spanish Orange Isopod",
+    "scientific_name": "Porcellio scaber",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "scaber",
+      "common rough woodlouse"
+    ]
+  },
+  {
+    "display_name": "Dwarf White Isopod",
+    "scientific_name": "Trichorhina tomentosa",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "dwarf white"
+    ]
+  },
+  {
+    "display_name": "Cubaris Isopod",
+    "scientific_name": "Cubaris",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Rubber Ducky Isopod",
+      "Cubaris murina"
+    ]
+  },
+  {
+    "display_name": "Caribbean Hermit Crab",
+    "scientific_name": "Coenobita clypeatus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "land hermit crab",
+      "purple pincher"
+    ]
+  },
+  {
+    "display_name": "Ecuadorian Hermit Crab",
+    "scientific_name": "Coenobita compressus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "E-crab",
+      "Ecuadorian"
+    ]
+  },
+  {
+    "display_name": "Vampire Crab",
+    "scientific_name": "Geosesarma",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Fiddler Crab",
+    "scientific_name": "Uca",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Pet Beetle (any species)",
+    "scientific_name": "Coleoptera",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Hercules Beetle",
+      "Rhinoceros Beetle",
+      "Stag Beetle"
+    ]
+  },
+  {
+    "display_name": "Pet Ant Colony",
+    "scientific_name": "Formicidae",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ant colony",
+      "ant farm"
+    ]
+  }
+]
