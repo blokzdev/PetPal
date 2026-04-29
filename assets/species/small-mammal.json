@@ -4,619 +4,668 @@
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["cavy", "guinea-pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "cavy",
+      "guinea-pig"
+    ]
   },
   {
     "display_name": "American Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["English Guinea Pig", "shorthair cavy"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "English Guinea Pig",
+      "shorthair cavy"
+    ]
   },
   {
     "display_name": "Abyssinian Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["Aby cavy", "rosette guinea pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Aby cavy",
+      "rosette guinea pig"
+    ]
   },
   {
     "display_name": "Peruvian Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["long-haired guinea pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "long-haired guinea pig"
+    ]
   },
   {
     "display_name": "Silkie Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["Sheltie Guinea Pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Sheltie Guinea Pig"
+    ]
   },
   {
     "display_name": "Texel Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["curly Sheltie"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "curly Sheltie"
+    ]
   },
   {
     "display_name": "Coronet Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "White Crested Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["Crested Guinea Pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Crested Guinea Pig"
+    ]
   },
   {
     "display_name": "Teddy Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Rex Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Skinny Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["hairless guinea pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "hairless guinea pig"
+    ]
   },
   {
     "display_name": "Baldwin Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
-    "common_alternatives": ["fully hairless guinea pig"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "fully hairless guinea pig"
+    ]
   },
-
   {
     "display_name": "Hamster (any species)",
     "scientific_name": "Cricetinae",
     "category": "small-mammal",
     "inat_taxon_id": 51792,
-    "common_alternatives": ["hamster"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "hamster"
+    ]
   },
   {
     "display_name": "Syrian Hamster",
     "scientific_name": "Mesocricetus auratus",
     "category": "small-mammal",
     "inat_taxon_id": 45176,
-    "common_alternatives": ["Golden Hamster", "Teddy Bear Hamster", "Black Bear Hamster", "Fancy Hamster"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Golden Hamster",
+      "Teddy Bear Hamster",
+      "Black Bear Hamster",
+      "Fancy Hamster"
+    ]
   },
   {
     "display_name": "Roborovski Dwarf Hamster",
     "scientific_name": "Phodopus roborovskii",
     "category": "small-mammal",
     "inat_taxon_id": 45178,
-    "common_alternatives": ["Robo Hamster", "Robo Dwarf"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Robo Hamster",
+      "Robo Dwarf"
+    ]
   },
   {
     "display_name": "Campbell's Dwarf Hamster",
     "scientific_name": "Phodopus campbelli",
     "category": "small-mammal",
     "inat_taxon_id": 45179,
-    "common_alternatives": ["Campbell's Russian Dwarf", "Russian Dwarf Hamster"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Campbell's Russian Dwarf",
+      "Russian Dwarf Hamster"
+    ]
   },
   {
     "display_name": "Winter White Dwarf Hamster",
     "scientific_name": "Phodopus sungorus",
     "category": "small-mammal",
     "inat_taxon_id": 45180,
-    "common_alternatives": ["Djungarian Hamster", "Siberian Hamster", "Winter White"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Djungarian Hamster",
+      "Siberian Hamster",
+      "Winter White"
+    ]
   },
   {
     "display_name": "Chinese Hamster",
     "scientific_name": "Cricetulus griseus",
     "category": "small-mammal",
     "inat_taxon_id": 45200,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
-
   {
     "display_name": "Rat (any variety)",
     "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
     "inat_taxon_id": 44544,
-    "common_alternatives": ["fancy rat", "pet rat"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "fancy rat",
+      "pet rat"
+    ]
   },
   {
     "display_name": "Dumbo Rat",
     "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
     "inat_taxon_id": 44544,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Rex Rat",
     "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
     "inat_taxon_id": 44544,
-    "common_alternatives": ["curly-coat rat"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "curly-coat rat"
+    ]
   },
   {
     "display_name": "Hairless Rat",
     "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
     "inat_taxon_id": 44544,
-    "common_alternatives": ["Sphynx Rat", "naked rat"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Sphynx Rat",
+      "naked rat"
+    ]
   },
   {
     "display_name": "Manx Rat",
     "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
     "inat_taxon_id": 44544,
-    "common_alternatives": ["tailless rat"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "tailless rat"
+    ]
   },
-
   {
     "display_name": "Mouse (pet)",
     "scientific_name": "Mus musculus",
     "category": "small-mammal",
     "inat_taxon_id": 44550,
-    "common_alternatives": ["fancy mouse", "pet mouse"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "fancy mouse",
+      "pet mouse"
+    ]
   },
   {
     "display_name": "African Soft-furred Mouse",
     "scientific_name": "Praomys natalensis",
     "category": "small-mammal",
     "inat_taxon_id": 45343,
-    "common_alternatives": ["multimammate mouse", "ASF mouse"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "multimammate mouse",
+      "ASF mouse"
+    ]
   },
-
   {
     "display_name": "Mongolian Gerbil",
     "scientific_name": "Meriones unguiculatus",
     "category": "small-mammal",
     "inat_taxon_id": 44574,
-    "common_alternatives": ["gerbil"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "gerbil"
+    ]
   },
   {
     "display_name": "Fat-tailed Gerbil",
     "scientific_name": "Pachyuromys duprasi",
     "category": "small-mammal",
     "inat_taxon_id": 45307,
-    "common_alternatives": ["Duprasi"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Duprasi"
+    ]
   },
-
   {
     "display_name": "Chinchilla",
     "scientific_name": "Chinchilla lanigera",
     "category": "small-mammal",
     "inat_taxon_id": 43253,
-    "common_alternatives": ["long-tailed chinchilla", "pet chinchilla"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "long-tailed chinchilla",
+      "pet chinchilla"
+    ]
   },
   {
     "display_name": "Short-tailed Chinchilla",
     "scientific_name": "Chinchilla chinchilla",
     "category": "small-mammal",
     "inat_taxon_id": 43254,
-    "common_alternatives": [],
-    "wild_or_domestic": "either"
+    "common_alternatives": []
   },
-
   {
     "display_name": "Degu",
     "scientific_name": "Octodon degus",
     "category": "small-mammal",
     "inat_taxon_id": 43243,
-    "common_alternatives": ["common degu", "brush-tailed rat"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "common degu",
+      "brush-tailed rat"
+    ]
   },
   {
     "display_name": "Black-tailed Prairie Dog",
     "scientific_name": "Cynomys ludovicianus",
     "category": "small-mammal",
     "inat_taxon_id": 46072,
-    "common_alternatives": ["prairie dog"],
-    "wild_or_domestic": "either"
+    "common_alternatives": [
+      "prairie dog"
+    ]
   },
-
   {
     "display_name": "Ferret",
     "scientific_name": "Mustela furo",
     "category": "small-mammal",
     "inat_taxon_id": 43811,
-    "common_alternatives": ["domestic ferret", "fitch"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "domestic ferret",
+      "fitch"
+    ]
   },
-
   {
     "display_name": "African Pygmy Hedgehog",
     "scientific_name": "Atelerix albiventris",
     "category": "small-mammal",
     "inat_taxon_id": 43816,
-    "common_alternatives": ["pygmy hedgehog", "four-toed hedgehog", "pet hedgehog"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "pygmy hedgehog",
+      "four-toed hedgehog",
+      "pet hedgehog"
+    ]
   },
   {
     "display_name": "Long-eared Hedgehog",
     "scientific_name": "Hemiechinus auritus",
     "category": "small-mammal",
     "inat_taxon_id": 43824,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "European Hedgehog",
     "scientific_name": "Erinaceus europaeus",
     "category": "small-mammal",
     "inat_taxon_id": 43820,
-    "common_alternatives": ["common hedgehog", "West European hedgehog"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "common hedgehog",
+      "West European hedgehog"
+    ]
   },
-
   {
     "display_name": "Sugar Glider",
     "scientific_name": "Petaurus breviceps",
     "category": "small-mammal",
     "inat_taxon_id": 42891,
-    "common_alternatives": ["sugar bear"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "sugar bear"
+    ]
   },
-
   {
     "display_name": "Eastern Gray Squirrel",
     "scientific_name": "Sciurus carolinensis",
     "category": "small-mammal",
     "inat_taxon_id": 46017,
-    "common_alternatives": ["gray squirrel", "grey squirrel"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "gray squirrel",
+      "grey squirrel"
+    ]
   },
   {
     "display_name": "Fox Squirrel",
     "scientific_name": "Sciurus niger",
     "category": "small-mammal",
     "inat_taxon_id": 46018,
-    "common_alternatives": ["eastern fox squirrel"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "eastern fox squirrel"
+    ]
   },
   {
     "display_name": "Western Gray Squirrel",
     "scientific_name": "Sciurus griseus",
     "category": "small-mammal",
     "inat_taxon_id": 46019,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "American Red Squirrel",
     "scientific_name": "Tamiasciurus hudsonicus",
     "category": "small-mammal",
     "inat_taxon_id": 46020,
-    "common_alternatives": ["red squirrel", "pine squirrel"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "red squirrel",
+      "pine squirrel"
+    ]
   },
   {
     "display_name": "Douglas Squirrel",
     "scientific_name": "Tamiasciurus douglasii",
     "category": "small-mammal",
     "inat_taxon_id": 46021,
-    "common_alternatives": ["chickaree"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "chickaree"
+    ]
   },
   {
     "display_name": "Northern Flying Squirrel",
     "scientific_name": "Glaucomys sabrinus",
     "category": "small-mammal",
     "inat_taxon_id": 46050,
-    "common_alternatives": ["flying squirrel"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "flying squirrel"
+    ]
   },
   {
     "display_name": "Southern Flying Squirrel",
     "scientific_name": "Glaucomys volans",
     "category": "small-mammal",
     "inat_taxon_id": 46051,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Eastern Chipmunk",
     "scientific_name": "Tamias striatus",
     "category": "small-mammal",
     "inat_taxon_id": 46074,
-    "common_alternatives": ["chipmunk"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "chipmunk"
+    ]
   },
   {
     "display_name": "Least Chipmunk",
     "scientific_name": "Neotamias minimus",
     "category": "small-mammal",
     "inat_taxon_id": 46075,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Townsend's Chipmunk",
     "scientific_name": "Neotamias townsendii",
     "category": "small-mammal",
     "inat_taxon_id": 46076,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Groundhog",
     "scientific_name": "Marmota monax",
     "category": "small-mammal",
     "inat_taxon_id": 46063,
-    "common_alternatives": ["woodchuck", "whistle-pig"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "woodchuck",
+      "whistle-pig"
+    ]
   },
   {
     "display_name": "Yellow-bellied Marmot",
     "scientific_name": "Marmota flaviventris",
     "category": "small-mammal",
     "inat_taxon_id": 46064,
-    "common_alternatives": ["rockchuck"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "rockchuck"
+    ]
   },
-
   {
     "display_name": "Virginia Opossum",
     "scientific_name": "Didelphis virginiana",
     "category": "small-mammal",
     "inat_taxon_id": 42572,
-    "common_alternatives": ["opossum", "possum (US)", "North American opossum"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "opossum",
+      "possum (US)",
+      "North American opossum"
+    ]
   },
-
   {
     "display_name": "Striped Skunk",
     "scientific_name": "Mephitis mephitis",
     "category": "small-mammal",
     "inat_taxon_id": 41770,
-    "common_alternatives": ["common skunk", "skunk"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "common skunk",
+      "skunk"
+    ]
   },
   {
     "display_name": "Eastern Spotted Skunk",
     "scientific_name": "Spilogale putorius",
     "category": "small-mammal",
     "inat_taxon_id": 41773,
-    "common_alternatives": ["spotted skunk"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "spotted skunk"
+    ]
   },
   {
     "display_name": "Hooded Skunk",
     "scientific_name": "Mephitis macroura",
     "category": "small-mammal",
     "inat_taxon_id": 41771,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
-
   {
     "display_name": "Raccoon",
     "scientific_name": "Procyon lotor",
     "category": "small-mammal",
     "inat_taxon_id": 41663,
-    "common_alternatives": ["common raccoon", "northern raccoon"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "common raccoon",
+      "northern raccoon"
+    ]
   },
   {
     "display_name": "Ringtail",
     "scientific_name": "Bassariscus astutus",
     "category": "small-mammal",
     "inat_taxon_id": 41666,
-    "common_alternatives": ["ringtail cat", "miner's cat"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "ringtail cat",
+      "miner's cat"
+    ]
   },
-
   {
     "display_name": "American Mink",
     "scientific_name": "Neogale vison",
     "category": "small-mammal",
     "inat_taxon_id": 41965,
-    "common_alternatives": ["mink"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "mink"
+    ]
   },
   {
     "display_name": "Long-tailed Weasel",
     "scientific_name": "Neogale frenata",
     "category": "small-mammal",
     "inat_taxon_id": 41995,
-    "common_alternatives": ["weasel"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "weasel"
+    ]
   },
   {
     "display_name": "Short-tailed Weasel",
     "scientific_name": "Mustela richardsonii",
     "category": "small-mammal",
     "inat_taxon_id": 41996,
-    "common_alternatives": ["ermine", "stoat"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "ermine",
+      "stoat"
+    ]
   },
   {
     "display_name": "Least Weasel",
     "scientific_name": "Mustela nivalis",
     "category": "small-mammal",
     "inat_taxon_id": 41997,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "American Marten",
     "scientific_name": "Martes americana",
     "category": "small-mammal",
     "inat_taxon_id": 42008,
-    "common_alternatives": ["pine marten (American)"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "pine marten (American)"
+    ]
   },
   {
     "display_name": "Fisher",
     "scientific_name": "Pekania pennanti",
     "category": "small-mammal",
     "inat_taxon_id": 42010,
-    "common_alternatives": ["fisher cat"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "fisher cat"
+    ]
   },
-
   {
     "display_name": "North American River Otter",
     "scientific_name": "Lontra canadensis",
     "category": "small-mammal",
     "inat_taxon_id": 41858,
-    "common_alternatives": ["river otter"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "river otter"
+    ]
   },
-
   {
     "display_name": "American Beaver",
     "scientific_name": "Castor canadensis",
     "category": "small-mammal",
     "inat_taxon_id": 43799,
-    "common_alternatives": ["beaver"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "beaver"
+    ]
   },
-
   {
     "display_name": "Muskrat",
     "scientific_name": "Ondatra zibethicus",
     "category": "small-mammal",
     "inat_taxon_id": 45324,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Nutria",
     "scientific_name": "Myocastor coypus",
     "category": "small-mammal",
     "inat_taxon_id": 43251,
-    "common_alternatives": ["coypu"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "coypu"
+    ]
   },
-
   {
     "display_name": "White-footed Mouse",
     "scientific_name": "Peromyscus leucopus",
     "category": "small-mammal",
     "inat_taxon_id": 45253,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Deer Mouse",
     "scientific_name": "Peromyscus maniculatus",
     "category": "small-mammal",
     "inat_taxon_id": 45254,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Meadow Vole",
     "scientific_name": "Microtus pennsylvanicus",
     "category": "small-mammal",
     "inat_taxon_id": 45389,
-    "common_alternatives": ["field mouse", "vole"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "field mouse",
+      "vole"
+    ]
   },
   {
     "display_name": "Eastern Mole",
     "scientific_name": "Scalopus aquaticus",
     "category": "small-mammal",
     "inat_taxon_id": 43846,
-    "common_alternatives": ["mole"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "mole"
+    ]
   },
   {
     "display_name": "Star-nosed Mole",
     "scientific_name": "Condylura cristata",
     "category": "small-mammal",
     "inat_taxon_id": 43850,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Northern Short-tailed Shrew",
     "scientific_name": "Blarina brevicauda",
     "category": "small-mammal",
     "inat_taxon_id": 43856,
-    "common_alternatives": ["shrew"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "shrew"
+    ]
   },
-
   {
     "display_name": "American Pika",
     "scientific_name": "Ochotona princeps",
     "category": "small-mammal",
     "inat_taxon_id": 43141,
-    "common_alternatives": ["pika"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "pika"
+    ]
   },
-
   {
     "display_name": "Big Brown Bat",
     "scientific_name": "Eptesicus fuscus",
     "category": "small-mammal",
     "inat_taxon_id": 40222,
-    "common_alternatives": [],
-    "wild_or_domestic": "wild"
+    "common_alternatives": []
   },
   {
     "display_name": "Little Brown Bat",
     "scientific_name": "Myotis lucifugus",
     "category": "small-mammal",
     "inat_taxon_id": 40225,
-    "common_alternatives": ["little brown myotis"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "little brown myotis"
+    ]
   },
   {
     "display_name": "Mexican Free-tailed Bat",
     "scientific_name": "Tadarida brasiliensis",
     "category": "small-mammal",
     "inat_taxon_id": 40282,
-    "common_alternatives": ["Brazilian free-tailed bat"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Brazilian free-tailed bat"
+    ]
   },
   {
     "display_name": "Bat (any species)",
     "scientific_name": "Chiroptera",
     "category": "small-mammal",
     "inat_taxon_id": 40268,
-    "common_alternatives": ["bat"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "bat"
+    ]
   }
 ]

@@ -4,324 +4,341 @@
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["bunny", "pet rabbit", "house rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "bunny",
+      "pet rabbit",
+      "house rabbit"
+    ]
   },
   {
     "display_name": "Mixed breed rabbit",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["mixed bunny", "rescue rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "mixed bunny",
+      "rescue rabbit"
+    ]
   },
-
   {
     "display_name": "Holland Lop",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Mini Lop",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Miniature Lop"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Miniature Lop"
+    ]
   },
   {
     "display_name": "French Lop",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "English Lop",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "American Fuzzy Lop",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Fuzzy Lop"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Fuzzy Lop"
+    ]
   },
   {
     "display_name": "Lionhead",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Netherland Dwarf",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Dwarf rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Dwarf rabbit"
+    ]
   },
   {
     "display_name": "Polish",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Polish rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Polish rabbit"
+    ]
   },
   {
     "display_name": "Britannia Petite",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Jersey Wooly",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
-
   {
     "display_name": "Mini Rex",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Rex",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Standard Rex"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Standard Rex"
+    ]
   },
   {
     "display_name": "Satin",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Satin rabbit", "Mini Satin"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Satin rabbit",
+      "Mini Satin"
+    ]
   },
   {
     "display_name": "English Angora",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Angora", "Angora rabbit", "French Angora", "Satin Angora", "Giant Angora"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Angora",
+      "Angora rabbit",
+      "French Angora",
+      "Satin Angora",
+      "Giant Angora"
+    ]
   },
-
   {
     "display_name": "Flemish Giant",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Flemish"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Flemish"
+    ]
   },
   {
     "display_name": "Continental Giant",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Conti"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Conti"
+    ]
   },
   {
     "display_name": "Checkered Giant",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "New Zealand",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["New Zealand White", "New Zealand Red", "New Zealand Black"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "New Zealand White",
+      "New Zealand Red",
+      "New Zealand Black"
+    ]
   },
   {
     "display_name": "Californian",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["California White"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "California White"
+    ]
   },
   {
     "display_name": "Beveren",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Champagne d'Argent",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Champagne"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Champagne"
+    ]
   },
-
   {
     "display_name": "Dutch",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Dutch rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Dutch rabbit"
+    ]
   },
   {
     "display_name": "English Spot",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Harlequin",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Harlequin rabbit", "Magpie"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Harlequin rabbit",
+      "Magpie"
+    ]
   },
   {
     "display_name": "Himalayan",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Himalayan rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Himalayan rabbit"
+    ]
   },
   {
     "display_name": "Tan",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Tan rabbit"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Tan rabbit"
+    ]
   },
   {
     "display_name": "Silver Marten",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Florida White",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
   {
     "display_name": "Chinchilla rabbit",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["American Chinchilla", "Standard Chinchilla", "Giant Chinchilla"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "American Chinchilla",
+      "Standard Chinchilla",
+      "Giant Chinchilla"
+    ]
   },
   {
     "display_name": "American Sable",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": ["Sable"],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": [
+      "Sable"
+    ]
   },
   {
     "display_name": "Havana",
     "scientific_name": "Oryctolagus cuniculus",
     "category": "rabbit",
     "inat_taxon_id": 43155,
-    "common_alternatives": [],
-    "wild_or_domestic": "domestic"
+    "common_alternatives": []
   },
-
   {
     "display_name": "Eastern Cottontail",
     "scientific_name": "Sylvilagus floridanus",
     "category": "rabbit",
     "inat_taxon_id": 43129,
-    "common_alternatives": ["Cottontail", "Wild rabbit", "American cottontail"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Cottontail",
+      "Wild rabbit",
+      "American cottontail"
+    ]
   },
   {
     "display_name": "Desert Cottontail",
     "scientific_name": "Sylvilagus audubonii",
     "category": "rabbit",
     "inat_taxon_id": 43135,
-    "common_alternatives": ["Audubon's cottontail"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Audubon's cottontail"
+    ]
   },
   {
     "display_name": "Mountain Cottontail",
     "scientific_name": "Sylvilagus nuttallii",
     "category": "rabbit",
     "inat_taxon_id": 43137,
-    "common_alternatives": ["Nuttall's cottontail"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Nuttall's cottontail"
+    ]
   },
   {
     "display_name": "Snowshoe Hare",
     "scientific_name": "Lepus americanus",
     "category": "rabbit",
     "inat_taxon_id": 43117,
-    "common_alternatives": ["Snowshoe rabbit", "Varying hare"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Snowshoe rabbit",
+      "Varying hare"
+    ]
   },
   {
     "display_name": "Black-tailed Jackrabbit",
     "scientific_name": "Lepus californicus",
     "category": "rabbit",
     "inat_taxon_id": 43106,
-    "common_alternatives": ["Jackrabbit", "American desert hare"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Jackrabbit",
+      "American desert hare"
+    ]
   },
   {
     "display_name": "European Hare",
     "scientific_name": "Lepus europaeus",
     "category": "rabbit",
     "inat_taxon_id": 43122,
-    "common_alternatives": ["Brown hare"],
-    "wild_or_domestic": "wild"
-  },
-  {
-    "display_name": "European Rabbit (wild)",
-    "scientific_name": "Oryctolagus cuniculus",
-    "category": "rabbit",
-    "inat_taxon_id": 43155,
-    "common_alternatives": ["Wild European rabbit"],
-    "wild_or_domestic": "wild"
+    "common_alternatives": [
+      "Brown hare"
+    ]
   }
 ]

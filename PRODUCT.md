@@ -38,10 +38,12 @@ irreplaceable and accumulates over years.
 5. **The wildlife rehabilitator.** Licensed rehabbers and committed
    amateurs caring for rescue/rehab/release animals (raptors, songbirds,
    opossums, fawns, native rabbits) or permanent non-releasable wildlife.
-   Hidden behind a Settings toggle so typical pet owners don't see the
-   additional UI surface, but a peer use case when enabled — dedicated
-   intake/release tracking, observation contexts, and species coverage
-   that goes beyond what any companion-pet app supports.
+   PetPal treats wildlife rehab as a peer use case alongside pet
+   ownership: the add-pet flow asks every user about their relationship
+   to the animal — pet, rescue/rehab, permanent care, observation — so
+   a rehabber's setup is first-class, not a hidden mode. Dedicated
+   intake/release tracking and species coverage that goes beyond what
+   any companion-pet app supports.
 
 ## The core problem
 

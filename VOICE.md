@@ -150,6 +150,70 @@ usual once the user picks one.
 When in doubt: **page destinations personalize; buttons and global
 shells stay static.**
 
+## 5.5. Relationship picker labels and surface rule
+
+PetPal asks every user about their relationship to the animal at
+add-pet time. The picker is shown to everyone with **Pet** pre-selected
+so casual owners tap through in two seconds; rehabbers and observers
+see their use case named. Per DECISIONS row 44, the relationship is a
+SOUL.md fact that shapes content — not a UI chrome modifier.
+
+**Locked picker labels** (4-value `relationship` enum, frontmatter
+key `relationship`):
+
+- **Pet** — frontmatter value `pet`, default
+- **Rescue / rehab** — frontmatter value `rescue-rehab`
+- **Permanent wildlife** — frontmatter value `permanent-wildlife`
+- **Wildlife observation** — frontmatter value `wildlife-observation`
+
+All four read as situation-describing noun phrases, parallel
+grammatical shape, picker-vertical-friendly. The slash in "Rescue /
+rehab" makes the multi-purpose nature visual. "Permanent wildlife"
+drops a redundant "care" (implicit when paired with the other three).
+
+**Sub-classification labels** (three optional secondary fields per
+DECISIONS row 45, each conditional on the relationship pick):
+
+- *When relationship = Pet*, secondary picker `working_role`:
+  None (default — "companion") / Service / Therapy / Working / Other
+- *When relationship = Rescue / rehab*, secondary picker `rehab_context`:
+  None (default) / Foster / Medical / Behavioral / Palliative /
+  Conditioning / Quarantine / Other
+- *When relationship = Permanent wildlife*, secondary picker
+  `care_context`: None (default) / Sanctuary / Educational /
+  Non-releasable / Other
+- *When relationship = Wildlife observation*: no secondary picker
+
+**Surface rule — relationship affects content, not destination labels.**
+
+Relationship is a SOUL.md fact that shapes:
+
+- Skill-pack filtering (rehab packs activate when relationship =
+  rescue-rehab; service-dog packs activate when working_role = service)
+- Profile editor field visibility (intake_date / expected_release_date
+  appear conditionally when relationship = rescue-rehab)
+- AI emphasis in chat ("track Loki's release readiness" vs. "track
+  Loki's vet schedule")
+- Weekly-summary phrasing
+- The SOUL body template fork at onboarding (5.5.5)
+
+It does **not** shape:
+
+- App-bar titles (still "Loki's journal" — never "Loki's rehab journal")
+- Button labels, navigation copy, scrollback
+- Snackbars, error banners, toasts
+- Pet switcher cards (still "Loki" — never "Loki (rescue)")
+
+A rescue that becomes unreleasable transitions from rescue-rehab to
+permanent-wildlife over its life, and the destination labels shouldn't
+visibly mutate when that happens. The relationship is asked once at
+onboarding, recorded in SOUL frontmatter, edited later in the profile
+editor, and expressed through the body's opening paragraph and the
+agent's behavior — not through running surface copy.
+
+The §5 pet-name interpolation rule (DECISIONS row 27) stays exactly
+as-is. Relationship is one layer deeper than chrome.
+
 ## 6. Before / after copy examples
 
 ```
