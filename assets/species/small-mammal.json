@@ -1,107 +1,108 @@
 [
   {
-    "display_name": "Guinea Pig (any breed)",
+    "display_name": "Guinea Pig",
     "scientific_name": "Cavia porcellus",
     "category": "small-mammal",
     "inat_taxon_id": 43174,
     "common_alternatives": [
       "cavy",
-      "guinea-pig"
+      "guinea-pig",
+      "guinea pig"
+    ],
+    "breeds": [
+      {
+        "name": "Mixed breed",
+        "alternatives": []
+      },
+      {
+        "name": "Not sure",
+        "alternatives": []
+      },
+      {
+        "name": "Abyssinian Guinea Pig",
+        "alternatives": [
+          "Aby cavy",
+          "rosette guinea pig"
+        ]
+      },
+      {
+        "name": "American Guinea Pig",
+        "alternatives": [
+          "English Guinea Pig",
+          "shorthair cavy"
+        ]
+      },
+      {
+        "name": "Baldwin Guinea Pig",
+        "alternatives": [
+          "fully hairless guinea pig"
+        ]
+      },
+      {
+        "name": "Coronet Guinea Pig",
+        "alternatives": []
+      },
+      {
+        "name": "Peruvian Guinea Pig",
+        "alternatives": [
+          "long-haired guinea pig"
+        ]
+      },
+      {
+        "name": "Rex Guinea Pig",
+        "alternatives": []
+      },
+      {
+        "name": "Silkie Guinea Pig",
+        "alternatives": [
+          "Sheltie Guinea Pig"
+        ]
+      },
+      {
+        "name": "Skinny Pig",
+        "alternatives": [
+          "hairless guinea pig"
+        ]
+      },
+      {
+        "name": "Teddy Guinea Pig",
+        "alternatives": []
+      },
+      {
+        "name": "Texel Guinea Pig",
+        "alternatives": [
+          "curly Sheltie"
+        ]
+      },
+      {
+        "name": "White Crested Guinea Pig",
+        "alternatives": [
+          "Crested Guinea Pig"
+        ]
+      },
+      {
+        "name": "Other",
+        "alternatives": []
+      }
     ]
   },
   {
-    "display_name": "American Guinea Pig",
-    "scientific_name": "Cavia porcellus",
+    "display_name": "Rat",
+    "scientific_name": "Rattus norvegicus",
     "category": "small-mammal",
-    "inat_taxon_id": 43174,
+    "inat_taxon_id": 44544,
     "common_alternatives": [
-      "English Guinea Pig",
-      "shorthair cavy"
-    ]
-  },
-  {
-    "display_name": "Abyssinian Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "Aby cavy",
-      "rosette guinea pig"
-    ]
-  },
-  {
-    "display_name": "Peruvian Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "long-haired guinea pig"
-    ]
-  },
-  {
-    "display_name": "Silkie Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "Sheltie Guinea Pig"
-    ]
-  },
-  {
-    "display_name": "Texel Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "curly Sheltie"
-    ]
-  },
-  {
-    "display_name": "Coronet Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "White Crested Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "Crested Guinea Pig"
-    ]
-  },
-  {
-    "display_name": "Teddy Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Rex Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Skinny Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "hairless guinea pig"
-    ]
-  },
-  {
-    "display_name": "Baldwin Guinea Pig",
-    "scientific_name": "Cavia porcellus",
-    "category": "small-mammal",
-    "inat_taxon_id": 43174,
-    "common_alternatives": [
-      "fully hairless guinea pig"
+      "fancy rat",
+      "pet rat",
+      "Dumbo Rat",
+      "Dumbo",
+      "Rex Rat",
+      "curly-coat rat",
+      "Hairless Rat",
+      "Sphynx Rat",
+      "naked rat",
+      "Manx Rat",
+      "tailless rat"
     ]
   },
   {
@@ -162,51 +163,6 @@
     "category": "small-mammal",
     "inat_taxon_id": 45200,
     "common_alternatives": []
-  },
-  {
-    "display_name": "Rat (any variety)",
-    "scientific_name": "Rattus norvegicus",
-    "category": "small-mammal",
-    "inat_taxon_id": 44544,
-    "common_alternatives": [
-      "fancy rat",
-      "pet rat"
-    ]
-  },
-  {
-    "display_name": "Dumbo Rat",
-    "scientific_name": "Rattus norvegicus",
-    "category": "small-mammal",
-    "inat_taxon_id": 44544,
-    "common_alternatives": []
-  },
-  {
-    "display_name": "Rex Rat",
-    "scientific_name": "Rattus norvegicus",
-    "category": "small-mammal",
-    "inat_taxon_id": 44544,
-    "common_alternatives": [
-      "curly-coat rat"
-    ]
-  },
-  {
-    "display_name": "Hairless Rat",
-    "scientific_name": "Rattus norvegicus",
-    "category": "small-mammal",
-    "inat_taxon_id": 44544,
-    "common_alternatives": [
-      "Sphynx Rat",
-      "naked rat"
-    ]
-  },
-  {
-    "display_name": "Manx Rat",
-    "scientific_name": "Rattus norvegicus",
-    "category": "small-mammal",
-    "inat_taxon_id": 44544,
-    "common_alternatives": [
-      "tailless rat"
-    ]
   },
   {
     "display_name": "Mouse (pet)",
