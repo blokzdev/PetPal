@@ -221,6 +221,7 @@ String renderTemplate(
     'working_role',
     'rehab_context',
     'care_context',
+    'dob',
     'dob_approx',
     'adoption_date',
     'intake_date',

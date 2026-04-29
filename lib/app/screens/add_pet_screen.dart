@@ -59,7 +59,30 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   RehabContext _rehabContext = RehabContext.none;
   CareContext _careContext = CareContext.none;
 
+  /// Which lifecycle date the user is providing — DOB (the default),
+  /// an approximate age, or the adoption date. Mutually exclusive: only
+  /// the picked kind's input is shown and threaded into the SOUL.
+  LifecycleDateKind _dateKind = LifecycleDateKind.dob;
   DateTime? _dob;
+  final _dobApprox = TextEditingController();
+  DateTime? _adoptionDate;
+
+  /// Conditional rescue-rehab dates — surfaced only when relationship
+  /// is `rescueRehab` (DECISIONS row 47).
+  DateTime? _intakeDate;
+  DateTime? _expectedReleaseDate;
+
+  /// Weight + unit toggle. `_useImperial` flips the input label and
+  /// converts the typed value to kg before persisting (kg is the
+  /// canonical SOUL frontmatter unit; the toggle is UI sugar only).
+  final _weight = TextEditingController();
+  bool _useImperial = false;
+
+  /// Sex / neutered ternaries default to `unknown` and strip on disk
+  /// per the row-45 default-omitted rule.
+  PetSex _sex = PetSex.unknown;
+  NeuteredStatus _neutered = NeuteredStatus.unknown;
+
   bool _saving = false;
   String? _saveError;
 
@@ -68,6 +91,8 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     _name.dispose();
     _breed.dispose();
     _otherSpecies.dispose();
+    _dobApprox.dispose();
+    _weight.dispose();
     super.dispose();
   }
 
@@ -80,6 +105,52 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       lastDate: now,
     );
     if (picked != null) setState(() => _dob = picked);
+  }
+
+  Future<void> _pickAdoptionDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate:
+          _adoptionDate ?? DateTime(now.year - 1, now.month, now.day),
+      firstDate: DateTime(now.year - 30),
+      lastDate: now,
+    );
+    if (picked != null) setState(() => _adoptionDate = picked);
+  }
+
+  Future<void> _pickIntakeDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _intakeDate ?? now,
+      firstDate: DateTime(now.year - 5),
+      lastDate: now,
+    );
+    if (picked != null) setState(() => _intakeDate = picked);
+  }
+
+  Future<void> _pickExpectedReleaseDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate:
+          _expectedReleaseDate ?? DateTime(now.year, now.month + 1, now.day),
+      firstDate: DateTime(now.year - 1),
+      lastDate: DateTime(now.year + 5),
+    );
+    if (picked != null) setState(() => _expectedReleaseDate = picked);
+  }
+
+  /// Parse the weight input box into kilograms. Returns null when the
+  /// box is empty or unparseable; the caller then leaves `weight_kg:`
+  /// off-disk via the strip-empty pass.
+  double? _resolvedWeightKg() {
+    final raw = _weight.text.trim();
+    if (raw.isEmpty) return null;
+    final parsed = double.tryParse(raw);
+    if (parsed == null) return null;
+    return _useImperial ? parsed * 0.45359237 : parsed;
   }
 
   Future<void> _pickSpecies() async {
@@ -138,23 +209,44 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
       final templates = ref.read(onboardingTemplatesProvider);
       final breed = _breed.text.trim().isEmpty ? null : _breed.text.trim();
       final speciesValue = _resolvedSpeciesValue();
+      // Lifecycle date: only the picked kind's value is threaded into
+      // the SOUL. The other two are nulled so renderTemplate's strip-
+      // empty pass omits their lines.
+      final dob = _dateKind == LifecycleDateKind.dob ? _dob : null;
+      final dobApprox = _dateKind == LifecycleDateKind.approxAge
+          ? (_dobApprox.text.trim().isEmpty ? null : _dobApprox.text.trim())
+          : null;
+      final adoptionDate =
+          _dateKind == LifecycleDateKind.adoptionDate ? _adoptionDate : null;
+      // Rescue-rehab dates only apply when the relationship is rehab.
+      final isRehab = _relationship == Relationship.rescueRehab;
+      final intakeDate = isRehab ? _intakeDate : null;
+      final expectedReleaseDate = isRehab ? _expectedReleaseDate : null;
+      final weightKg = _resolvedWeightKg();
       final seedSoul = await templates.seedSoulFor(
         category: _category,
         name: _name.text.trim(),
         species: speciesValue,
         breed: breed,
+        sex: _sex,
+        neutered: _neutered,
         relationship: _relationship,
         workingRole: _workingRole,
         rehabContext: _rehabContext,
         careContext: _careContext,
-        dob: _dob,
+        dob: dob,
+        dobApprox: dobApprox,
+        adoptionDate: adoptionDate,
+        intakeDate: intakeDate,
+        expectedReleaseDate: expectedReleaseDate,
+        weightKg: weightKg,
       );
       await repo.createPet(
         name: _name.text.trim(),
         category: _category.id,
         species: speciesValue,
         breed: breed,
-        dob: _dob,
+        dob: dob,
         seedSoul: seedSoul,
       );
       ref.invalidate(petsProvider);
@@ -170,9 +262,6 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final dobLabel = _dob == null
-        ? 'Date of birth (optional)'
-        : 'Date of birth: ${_dob!.year}-${_dob!.month.toString().padLeft(2, '0')}-${_dob!.day.toString().padLeft(2, '0')}';
     final petsAsync = ref.watch(petsProvider);
     final atLimit = petsAsync.maybeWhen(
       data: (pets) => pets.isNotEmpty,
@@ -299,13 +388,30 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                       setState(() => _careContext = r),
                 ),
               ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: _pickDob,
-                icon: const Icon(Icons.calendar_today),
-                label: Text(dobLabel),
+              const SizedBox(height: Spacing.l),
+              _AboutPetCard(
+                dateKind: _dateKind,
+                dob: _dob,
+                dobApprox: _dobApprox,
+                adoptionDate: _adoptionDate,
+                relationship: _relationship,
+                intakeDate: _intakeDate,
+                expectedReleaseDate: _expectedReleaseDate,
+                weight: _weight,
+                useImperial: _useImperial,
+                sex: _sex,
+                neutered: _neutered,
+                onDateKindChanged: (k) => setState(() => _dateKind = k),
+                onPickDob: _pickDob,
+                onPickAdoptionDate: _pickAdoptionDate,
+                onPickIntakeDate: _pickIntakeDate,
+                onPickExpectedReleaseDate: _pickExpectedReleaseDate,
+                onUseImperialChanged: (v) =>
+                    setState(() => _useImperial = v),
+                onSexChanged: (s) => setState(() => _sex = s),
+                onNeuteredChanged: (n) => setState(() => _neutered = n),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: Spacing.l),
               if (_saveError != null) ...[
                 Text(
                   _saveError!,
@@ -533,6 +639,333 @@ class _SubPicker<T> extends StatelessWidget {
       onChanged: (v) {
         if (v != null) onChanged(v);
       },
+    );
+  }
+}
+
+/// "About this pet" card — DECISIONS row 47 + 5.5.4 design D7=B lock.
+/// Gathers the pet's lifecycle date (one of DOB / approximate age /
+/// adoption date), conditional rescue-rehab intake + release dates,
+/// weight (kg or lb), sex, and neutered status. Each input is optional;
+/// defaults serialize as empty and strip on disk.
+class _AboutPetCard extends StatelessWidget {
+  const _AboutPetCard({
+    required this.dateKind,
+    required this.dob,
+    required this.dobApprox,
+    required this.adoptionDate,
+    required this.relationship,
+    required this.intakeDate,
+    required this.expectedReleaseDate,
+    required this.weight,
+    required this.useImperial,
+    required this.sex,
+    required this.neutered,
+    required this.onDateKindChanged,
+    required this.onPickDob,
+    required this.onPickAdoptionDate,
+    required this.onPickIntakeDate,
+    required this.onPickExpectedReleaseDate,
+    required this.onUseImperialChanged,
+    required this.onSexChanged,
+    required this.onNeuteredChanged,
+  });
+
+  final LifecycleDateKind dateKind;
+  final DateTime? dob;
+  final TextEditingController dobApprox;
+  final DateTime? adoptionDate;
+  final Relationship relationship;
+  final DateTime? intakeDate;
+  final DateTime? expectedReleaseDate;
+  final TextEditingController weight;
+  final bool useImperial;
+  final PetSex sex;
+  final NeuteredStatus neutered;
+  final ValueChanged<LifecycleDateKind> onDateKindChanged;
+  final VoidCallback onPickDob;
+  final VoidCallback onPickAdoptionDate;
+  final VoidCallback onPickIntakeDate;
+  final VoidCallback onPickExpectedReleaseDate;
+  final ValueChanged<bool> onUseImperialChanged;
+  final ValueChanged<PetSex> onSexChanged;
+  final ValueChanged<NeuteredStatus> onNeuteredChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const PetSectionHeader(title: 'About this pet'),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              Spacing.m,
+              0,
+              Spacing.m,
+              Spacing.m,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _LifecycleDateField(
+                  kind: dateKind,
+                  dob: dob,
+                  dobApprox: dobApprox,
+                  adoptionDate: adoptionDate,
+                  onKindChanged: onDateKindChanged,
+                  onPickDob: onPickDob,
+                  onPickAdoptionDate: onPickAdoptionDate,
+                ),
+                AnimatedSwitcher(
+                  duration: Motion.short,
+                  child: relationship == Relationship.rescueRehab
+                      ? Padding(
+                          key: const ValueKey('rescue-rehab-dates'),
+                          padding: const EdgeInsets.only(top: Spacing.m),
+                          child: _RescueRehabDates(
+                            intakeDate: intakeDate,
+                            expectedReleaseDate: expectedReleaseDate,
+                            onPickIntakeDate: onPickIntakeDate,
+                            onPickExpectedReleaseDate:
+                                onPickExpectedReleaseDate,
+                          ),
+                        )
+                      : const SizedBox.shrink(
+                          key: ValueKey('no-rescue-rehab-dates'),
+                        ),
+                ),
+                const SizedBox(height: Spacing.m),
+                _WeightField(
+                  controller: weight,
+                  useImperial: useImperial,
+                  onUseImperialChanged: onUseImperialChanged,
+                ),
+                const SizedBox(height: Spacing.m),
+                _TernaryRow<PetSex>(
+                  label: 'Sex',
+                  value: sex,
+                  values: PetSex.values,
+                  labelOf: (s) => s.label,
+                  onChanged: onSexChanged,
+                ),
+                const SizedBox(height: Spacing.s),
+                _TernaryRow<NeuteredStatus>(
+                  label: 'Neutered',
+                  value: neutered,
+                  values: NeuteredStatus.values,
+                  labelOf: (n) => n.label,
+                  onChanged: onNeuteredChanged,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LifecycleDateField extends StatelessWidget {
+  const _LifecycleDateField({
+    required this.kind,
+    required this.dob,
+    required this.dobApprox,
+    required this.adoptionDate,
+    required this.onKindChanged,
+    required this.onPickDob,
+    required this.onPickAdoptionDate,
+  });
+
+  final LifecycleDateKind kind;
+  final DateTime? dob;
+  final TextEditingController dobApprox;
+  final DateTime? adoptionDate;
+  final ValueChanged<LifecycleDateKind> onKindChanged;
+  final VoidCallback onPickDob;
+  final VoidCallback onPickAdoptionDate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<LifecycleDateKind>(
+          segments: const [
+            ButtonSegment(
+              value: LifecycleDateKind.dob,
+              label: Text('DOB'),
+            ),
+            ButtonSegment(
+              value: LifecycleDateKind.approxAge,
+              label: Text('Approx age'),
+            ),
+            ButtonSegment(
+              value: LifecycleDateKind.adoptionDate,
+              label: Text('Adoption'),
+            ),
+          ],
+          selected: {kind},
+          onSelectionChanged: (s) => onKindChanged(s.first),
+        ),
+        const SizedBox(height: Spacing.s),
+        AnimatedSwitcher(
+          duration: Motion.short,
+          child: switch (kind) {
+            LifecycleDateKind.dob => OutlinedButton.icon(
+                key: const ValueKey('dob-picker'),
+                onPressed: onPickDob,
+                icon: const Icon(Icons.calendar_today),
+                label: Text(_dobLabel(dob)),
+              ),
+            LifecycleDateKind.approxAge => TextFormField(
+                key: const ValueKey('dob-approx'),
+                controller: dobApprox,
+                decoration: const InputDecoration(
+                  labelText: 'Approximate age (e.g. "about 3 years")',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            LifecycleDateKind.adoptionDate => OutlinedButton.icon(
+                key: const ValueKey('adoption-picker'),
+                onPressed: onPickAdoptionDate,
+                icon: const Icon(Icons.calendar_today),
+                label: Text(_adoptionLabel(adoptionDate)),
+              ),
+          },
+        ),
+      ],
+    );
+  }
+
+  static String _fmt(DateTime d) =>
+      '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+  static String _dobLabel(DateTime? d) =>
+      d == null ? 'Pick date of birth' : 'DOB: ${_fmt(d)}';
+  static String _adoptionLabel(DateTime? d) =>
+      d == null ? 'Pick adoption date' : 'Adopted: ${_fmt(d)}';
+}
+
+class _RescueRehabDates extends StatelessWidget {
+  const _RescueRehabDates({
+    required this.intakeDate,
+    required this.expectedReleaseDate,
+    required this.onPickIntakeDate,
+    required this.onPickExpectedReleaseDate,
+  });
+
+  final DateTime? intakeDate;
+  final DateTime? expectedReleaseDate;
+  final VoidCallback onPickIntakeDate;
+  final VoidCallback onPickExpectedReleaseDate;
+
+  @override
+  Widget build(BuildContext context) {
+    String fmt(DateTime d) =>
+        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OutlinedButton.icon(
+          onPressed: onPickIntakeDate,
+          icon: const Icon(Icons.calendar_today),
+          label: Text(intakeDate == null
+              ? 'Pick intake date'
+              : 'Intake: ${fmt(intakeDate!)}'),
+        ),
+        const SizedBox(height: Spacing.s),
+        OutlinedButton.icon(
+          onPressed: onPickExpectedReleaseDate,
+          icon: const Icon(Icons.calendar_today),
+          label: Text(expectedReleaseDate == null
+              ? 'Pick expected release date'
+              : 'Release: ${fmt(expectedReleaseDate!)}'),
+        ),
+      ],
+    );
+  }
+}
+
+class _WeightField extends StatelessWidget {
+  const _WeightField({
+    required this.controller,
+    required this.useImperial,
+    required this.onUseImperialChanged,
+  });
+
+  final TextEditingController controller;
+  final bool useImperial;
+  final ValueChanged<bool> onUseImperialChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: TextFormField(
+            controller: controller,
+            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            decoration: InputDecoration(
+              labelText: useImperial ? 'Weight (lb)' : 'Weight (kg)',
+              border: const OutlineInputBorder(),
+            ),
+            validator: (v) {
+              if (v == null || v.trim().isEmpty) return null;
+              return double.tryParse(v.trim()) == null ? 'Number' : null;
+            },
+          ),
+        ),
+        const SizedBox(width: Spacing.s),
+        SegmentedButton<bool>(
+          segments: const [
+            ButtonSegment(value: false, label: Text('kg')),
+            ButtonSegment(value: true, label: Text('lb')),
+          ],
+          selected: {useImperial},
+          onSelectionChanged: (s) => onUseImperialChanged(s.first),
+        ),
+      ],
+    );
+  }
+}
+
+class _TernaryRow<T> extends StatelessWidget {
+  const _TernaryRow({
+    required this.label,
+    required this.value,
+    required this.values,
+    required this.labelOf,
+    required this.onChanged,
+  });
+
+  final String label;
+  final T value;
+  final List<T> values;
+  final String Function(T) labelOf;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      children: [
+        SizedBox(
+          width: 96,
+          child: Text(label, style: theme.textTheme.bodyMedium),
+        ),
+        Expanded(
+          child: SegmentedButton<T>(
+            segments: [
+              for (final v in values)
+                ButtonSegment<T>(value: v, label: Text(labelOf(v))),
+            ],
+            selected: {value},
+            onSelectionChanged: (s) => onChanged(s.first),
+          ),
+        ),
+      ],
     );
   }
 }

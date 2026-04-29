@@ -175,4 +175,55 @@ void main() {
       expect(out, isNot(contains('\n\n\n')));
     });
   });
+
+  group('renderTemplate weight + lifecycle dates (Commit B)', () {
+    String tpl() => [
+          '---',
+          'category: dog',
+          'dob: {dob}',
+          'dob_approx: {dob_approx}',
+          'adoption_date: {adoption_date}',
+          'weight_kg: {weight_kg}',
+          '---',
+          '# {name}',
+          '',
+        ].join('\n');
+
+    test('DOB substitutes; the other two strip', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Loki',
+        dob: DateTime(2022, 6, 12),
+      );
+      expect(out, contains('dob: 2022-06-12'));
+      expect(out, isNot(contains('dob_approx:')));
+      expect(out, isNot(contains('adoption_date:')));
+    });
+
+    test('approxAge substitutes; dob + adoption_date strip', () {
+      final out = renderTemplate(
+        tpl(),
+        name: 'Loki',
+        dobApprox: 'about 3 years',
+      );
+      expect(out, contains('dob_approx: about 3 years'));
+      expect(out, isNot(contains(RegExp(r'^dob:', multiLine: true))));
+      expect(out, isNot(contains('adoption_date:')));
+    });
+
+    test('weight_kg renders to one decimal when supplied; stays empty '
+        'on disk when omitted (treated as "unknown" by the harness, '
+        'matching the legacy weight_g: / tank_litres: hint pattern)', () {
+      final withWeight = renderTemplate(
+        tpl(),
+        name: 'Loki',
+        weightKg: 12.345,
+      );
+      expect(withWeight, contains('weight_kg: 12.3'));
+
+      final without = renderTemplate(tpl(), name: 'Loki');
+      expect(without, isNot(contains(RegExp(r'weight_kg: \d'))));
+      expect(without, contains('weight_kg:'));
+    });
+  });
 }
