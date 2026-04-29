@@ -627,5 +627,357 @@
     "common_alternatives": [
       "SAE"
     ]
+  },
+  {
+    "display_name": "Common Clownfish",
+    "scientific_name": "Amphiprion ocellaris",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Nemo",
+      "False Percula",
+      "Ocellaris Clownfish"
+    ]
+  },
+  {
+    "display_name": "Maroon Clownfish",
+    "scientific_name": "Premnas biaculeatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Spine-cheeked Clownfish"
+    ]
+  },
+  {
+    "display_name": "Tomato Clownfish",
+    "scientific_name": "Amphiprion frenatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Three-stripe Damsel",
+    "scientific_name": "Dascyllus aruanus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Humbug Damsel"
+    ]
+  },
+  {
+    "display_name": "Yellowtail Damsel",
+    "scientific_name": "Chrysiptera parasema",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Yellowtail Blue Damsel"
+    ]
+  },
+  {
+    "display_name": "Yellow Tang",
+    "scientific_name": "Zebrasoma flavescens",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Blue Tang",
+    "scientific_name": "Paracanthurus hepatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Dory",
+      "Hippo Tang",
+      "Regal Tang",
+      "Pacific Blue Tang"
+    ]
+  },
+  {
+    "display_name": "Sailfin Tang",
+    "scientific_name": "Zebrasoma desjardinii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Desjardin's Sailfin Tang"
+    ]
+  },
+  {
+    "display_name": "Powder Blue Tang",
+    "scientific_name": "Acanthurus leucosternon",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Naso Tang",
+    "scientific_name": "Naso lituratus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Lipstick Tang"
+    ]
+  },
+  {
+    "display_name": "Six-line Wrasse",
+    "scientific_name": "Pseudocheilinus hexataenia",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sixline"
+    ]
+  },
+  {
+    "display_name": "Cleaner Wrasse",
+    "scientific_name": "Labroides dimidiatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Bluestreak Cleaner Wrasse"
+    ]
+  },
+  {
+    "display_name": "Fairy Wrasse",
+    "scientific_name": "Cirrhilabrus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Solorensis Fairy",
+      "Lubbock's Fairy"
+    ]
+  },
+  {
+    "display_name": "Yellow Coris Wrasse",
+    "scientific_name": "Halichoeres chrysus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Canary Wrasse"
+    ]
+  },
+  {
+    "display_name": "Yellow Watchman Goby",
+    "scientific_name": "Cryptocentrus cinctus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "watchman goby"
+    ]
+  },
+  {
+    "display_name": "Diamond Goby",
+    "scientific_name": "Valenciennea puellaris",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Sleeper Diamond Goby",
+      "sand-sifting goby"
+    ]
+  },
+  {
+    "display_name": "Firefish Goby",
+    "scientific_name": "Nemateleotris magnifica",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "firefish",
+      "fire dartfish"
+    ]
+  },
+  {
+    "display_name": "Mandarin Dragonet",
+    "scientific_name": "Synchiropus splendidus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Mandarin Goby",
+      "Mandarinfish",
+      "Green Mandarin"
+    ]
+  },
+  {
+    "display_name": "Lawnmower Blenny",
+    "scientific_name": "Salarias fasciatus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Algae Blenny",
+      "Sailfin Blenny"
+    ]
+  },
+  {
+    "display_name": "Bicolor Blenny",
+    "scientific_name": "Ecsenius bicolor",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Banggai Cardinalfish",
+    "scientific_name": "Pterapogon kauderni",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Banggai Cardinal",
+      "Kaudern's Cardinal"
+    ]
+  },
+  {
+    "display_name": "Pajama Cardinalfish",
+    "scientific_name": "Sphaeramia nematoptera",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Pajama Cardinal"
+    ]
+  },
+  {
+    "display_name": "Royal Gramma",
+    "scientific_name": "Gramma loreto",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Royal Dottyback",
+    "scientific_name": "Pictichromis paccagnellae",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Bicolor Dottyback"
+    ]
+  },
+  {
+    "display_name": "Orchid Dottyback",
+    "scientific_name": "Pseudochromis fridmani",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Fridmani Pseudo"
+    ]
+  },
+  {
+    "display_name": "Lyretail Anthias",
+    "scientific_name": "Pseudanthias squamipinnis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Sea Goldie"
+    ]
+  },
+  {
+    "display_name": "Cherry Shrimp",
+    "scientific_name": "Neocaridina davidi",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Red Cherry Shrimp",
+      "RCS",
+      "Neocaridina"
+    ]
+  },
+  {
+    "display_name": "Amano Shrimp",
+    "scientific_name": "Caridina multidentata",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Yamato shrimp",
+      "Algae shrimp"
+    ]
+  },
+  {
+    "display_name": "Crystal Red Shrimp",
+    "scientific_name": "Caridina cantonensis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "CRS",
+      "Crystal Black Shrimp",
+      "Bee Shrimp"
+    ]
+  },
+  {
+    "display_name": "Ghost Shrimp",
+    "scientific_name": "Palaemonetes paludosus",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Glass Shrimp"
+    ]
+  },
+  {
+    "display_name": "Cleaner Shrimp",
+    "scientific_name": "Lysmata amboinensis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Skunk Cleaner Shrimp",
+      "Pacific Cleaner Shrimp"
+    ]
+  },
+  {
+    "display_name": "Peppermint Shrimp",
+    "scientific_name": "Lysmata wurdemanni",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Hermit Crab (saltwater)",
+    "scientific_name": "Clibanarius",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Blue-legged Hermit",
+      "Scarlet Hermit",
+      "marine hermit"
+    ]
+  },
+  {
+    "display_name": "Mystery Snail",
+    "scientific_name": "Pomacea bridgesii",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Apple Snail",
+      "Gold Mystery Snail",
+      "Blue Mystery Snail"
+    ]
+  },
+  {
+    "display_name": "Nerite Snail",
+    "scientific_name": "Neritina natalensis",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Zebra Nerite",
+      "Tiger Nerite",
+      "Horned Nerite"
+    ]
+  },
+  {
+    "display_name": "Assassin Snail",
+    "scientific_name": "Anentome helena",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Ramshorn Snail",
+    "scientific_name": "Planorbidae",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ramshorn"
+    ]
+  },
+  {
+    "display_name": "Malaysian Trumpet Snail",
+    "scientific_name": "Melanoides tuberculata",
+    "category": "fish",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "MTS"
+    ]
   }
 ]
