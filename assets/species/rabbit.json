@@ -251,5 +251,28 @@
     "common_alternatives": [
       "Brown hare"
     ]
+  },
+  {
+    "display_name": "Marsh Rabbit",
+    "scientific_name": "Sylvilagus palustris",
+    "category": "rabbit",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Swamp Rabbit",
+    "scientific_name": "Sylvilagus aquaticus",
+    "category": "rabbit",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "cane-cutter"
+    ]
+  },
+  {
+    "display_name": "Pygmy Rabbit",
+    "scientific_name": "Brachylagus idahoensis",
+    "category": "rabbit",
+    "inat_taxon_id": null,
+    "common_alternatives": []
   }
 ]

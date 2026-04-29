@@ -655,5 +655,105 @@
       "Strawberry Dart Frog",
       "Dyeing Dart Frog"
     ]
+  },
+  {
+    "display_name": "American Bullfrog",
+    "scientific_name": "Lithobates catesbeianus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "bullfrog"
+    ]
+  },
+  {
+    "display_name": "Green Frog",
+    "scientific_name": "Lithobates clamitans",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Northern Leopard Frog",
+    "scientific_name": "Lithobates pipiens",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "leopard frog"
+    ]
+  },
+  {
+    "display_name": "Wood Frog",
+    "scientific_name": "Lithobates sylvaticus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Spring Peeper",
+    "scientific_name": "Pseudacris crucifer",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "peeper"
+    ]
+  },
+  {
+    "display_name": "Gray Treefrog",
+    "scientific_name": "Hyla versicolor",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "gray tree frog"
+    ]
+  },
+  {
+    "display_name": "American Toad",
+    "scientific_name": "Anaxyrus americanus",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common American toad"
+    ]
+  },
+  {
+    "display_name": "Spotted Salamander",
+    "scientific_name": "Ambystoma maculatum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Marbled Salamander",
+    "scientific_name": "Ambystoma opacum",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Hellbender",
+    "scientific_name": "Cryptobranchus alleganiensis",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "snot otter",
+      "devil dog"
+    ]
+  },
+  {
+    "display_name": "Common Snapping Turtle",
+    "scientific_name": "Chelydra serpentina",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "snapping turtle",
+      "snapper"
+    ]
+  },
+  {
+    "display_name": "Wood Turtle",
+    "scientific_name": "Glyptemys insculpta",
+    "category": "reptile",
+    "inat_taxon_id": null,
+    "common_alternatives": []
   }
 ]

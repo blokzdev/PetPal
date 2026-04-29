@@ -572,5 +572,220 @@
       "ant colony",
       "ant farm"
     ]
+  },
+  {
+    "display_name": "White-tailed Deer",
+    "scientific_name": "Odocoileus virginianus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "whitetail",
+      "WTD"
+    ]
+  },
+  {
+    "display_name": "Mule Deer",
+    "scientific_name": "Odocoileus hemionus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Black-tailed Deer",
+    "scientific_name": "Odocoileus hemionus columbianus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "blacktail"
+    ]
+  },
+  {
+    "display_name": "Elk",
+    "scientific_name": "Cervus canadensis",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "wapiti"
+    ]
+  },
+  {
+    "display_name": "Moose",
+    "scientific_name": "Alces alces",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Pronghorn",
+    "scientific_name": "Antilocapra americana",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "American antelope",
+      "pronghorn antelope"
+    ]
+  },
+  {
+    "display_name": "Bighorn Sheep",
+    "scientific_name": "Ovis canadensis",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "American Bison",
+    "scientific_name": "Bison bison",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "buffalo",
+      "bison"
+    ]
+  },
+  {
+    "display_name": "Harbor Seal",
+    "scientific_name": "Phoca vitulina",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common seal"
+    ]
+  },
+  {
+    "display_name": "Gray Seal",
+    "scientific_name": "Halichoerus grypus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Northern Elephant Seal",
+    "scientific_name": "Mirounga angustirostris",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "elephant seal"
+    ]
+  },
+  {
+    "display_name": "California Sea Lion",
+    "scientific_name": "Zalophus californianus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "sea lion"
+    ]
+  },
+  {
+    "display_name": "Harbor Porpoise",
+    "scientific_name": "Phocoena phocoena",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "porpoise"
+    ]
+  },
+  {
+    "display_name": "American Black Bear",
+    "scientific_name": "Ursus americanus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "black bear"
+    ]
+  },
+  {
+    "display_name": "Brown Bear",
+    "scientific_name": "Ursus arctos",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "grizzly bear",
+      "Kodiak bear"
+    ]
+  },
+  {
+    "display_name": "Polar Bear",
+    "scientific_name": "Ursus maritimus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Common Brushtail Possum",
+    "scientific_name": "Trichosurus vulpecula",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "brushtail",
+      "Australian possum"
+    ]
+  },
+  {
+    "display_name": "Common Ringtail Possum",
+    "scientific_name": "Pseudocheirus peregrinus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "ringtail possum"
+    ]
+  },
+  {
+    "display_name": "Eastern Grey Kangaroo",
+    "scientific_name": "Macropus giganteus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "grey kangaroo",
+      "kangaroo"
+    ]
+  },
+  {
+    "display_name": "Red Kangaroo",
+    "scientific_name": "Osphranter rufus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Koala",
+    "scientific_name": "Phascolarctos cinereus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Common Wombat",
+    "scientific_name": "Vombatus ursinus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "wombat"
+    ]
+  },
+  {
+    "display_name": "Nine-banded Armadillo",
+    "scientific_name": "Dasypus novemcinctus",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "armadillo"
+    ]
+  },
+  {
+    "display_name": "Tasmanian Devil",
+    "scientific_name": "Sarcophilus harrisii",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Raccoon Dog",
+    "scientific_name": "Nyctereutes procyonoides",
+    "category": "exotic",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "tanuki"
+    ]
   }
 ]

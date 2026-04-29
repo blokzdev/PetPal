@@ -527,5 +527,67 @@
         "alternatives": []
       }
     ]
+  },
+  {
+    "display_name": "Coyote",
+    "scientific_name": "Canis latrans",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "prairie wolf",
+      "American jackal"
+    ]
+  },
+  {
+    "display_name": "Gray Wolf",
+    "scientific_name": "Canis lupus",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "timber wolf",
+      "wolf"
+    ]
+  },
+  {
+    "display_name": "Red Fox",
+    "scientific_name": "Vulpes vulpes",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "common fox"
+    ]
+  },
+  {
+    "display_name": "Gray Fox",
+    "scientific_name": "Urocyon cinereoargenteus",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Arctic Fox",
+    "scientific_name": "Vulpes lagopus",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "polar fox",
+      "white fox"
+    ]
+  },
+  {
+    "display_name": "Kit Fox",
+    "scientific_name": "Vulpes macrotis",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Dingo",
+    "scientific_name": "Canis lupus dingo",
+    "category": "dog",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Australian Dingo"
+    ]
   }
 ]

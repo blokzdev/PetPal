@@ -623,5 +623,30 @@
     "common_alternatives": [
       "bat"
     ]
+  },
+  {
+    "display_name": "North American Porcupine",
+    "scientific_name": "Erethizon dorsatum",
+    "category": "small-mammal",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "porcupine"
+    ]
+  },
+  {
+    "display_name": "American Badger",
+    "scientific_name": "Taxidea taxus",
+    "category": "small-mammal",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "badger"
+    ]
+  },
+  {
+    "display_name": "Sea Otter",
+    "scientific_name": "Enhydra lutris",
+    "category": "small-mammal",
+    "inat_taxon_id": null,
+    "common_alternatives": []
   }
 ]

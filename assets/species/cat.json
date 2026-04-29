@@ -228,5 +228,58 @@
         "alternatives": []
       }
     ]
+  },
+  {
+    "display_name": "Bobcat",
+    "scientific_name": "Lynx rufus",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "red lynx"
+    ]
+  },
+  {
+    "display_name": "Canada Lynx",
+    "scientific_name": "Lynx canadensis",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "Canadian lynx"
+    ]
+  },
+  {
+    "display_name": "Eurasian Lynx",
+    "scientific_name": "Lynx lynx",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "European Wildcat",
+    "scientific_name": "Felis silvestris",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "wildcat"
+    ]
+  },
+  {
+    "display_name": "Ocelot",
+    "scientific_name": "Leopardus pardalis",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Mountain Lion",
+    "scientific_name": "Puma concolor",
+    "category": "cat",
+    "inat_taxon_id": null,
+    "common_alternatives": [
+      "cougar",
+      "puma",
+      "panther",
+      "catamount"
+    ]
   }
 ]
