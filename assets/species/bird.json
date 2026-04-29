@@ -1,0 +1,364 @@
+[
+  {
+    "display_name": "Parrot (any species)",
+    "scientific_name": "Psittaciformes",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["parrot"]
+  },
+
+  {
+    "display_name": "Cockatiel",
+    "scientific_name": "Nymphicus hollandicus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["tiel", "quarrion"]
+  },
+  {
+    "display_name": "Sulphur-crested Cockatoo",
+    "scientific_name": "Cacatua galerita",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["sulfur-crested cockatoo"]
+  },
+  {
+    "display_name": "Umbrella Cockatoo",
+    "scientific_name": "Cacatua alba",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["white cockatoo"]
+  },
+  {
+    "display_name": "Moluccan Cockatoo",
+    "scientific_name": "Cacatua moluccensis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["salmon-crested cockatoo"]
+  },
+  {
+    "display_name": "Goffin's Cockatoo",
+    "scientific_name": "Cacatua goffiniana",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["Tanimbar corella"]
+  },
+  {
+    "display_name": "Galah",
+    "scientific_name": "Eolophus roseicapilla",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["rose-breasted cockatoo", "pink and grey cockatoo"]
+  },
+
+  {
+    "display_name": "Blue-and-yellow Macaw",
+    "scientific_name": "Ara ararauna",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["blue and gold macaw", "B&G macaw"]
+  },
+  {
+    "display_name": "Green-winged Macaw",
+    "scientific_name": "Ara chloropterus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["red-and-green macaw"]
+  },
+  {
+    "display_name": "Scarlet Macaw",
+    "scientific_name": "Ara macao",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Hyacinth Macaw",
+    "scientific_name": "Anodorhynchus hyacinthinus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Hahn's Macaw",
+    "scientific_name": "Diopsittaca nobilis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["red-shouldered macaw", "noble macaw"]
+  },
+  {
+    "display_name": "Severe Macaw",
+    "scientific_name": "Ara severa",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["chestnut-fronted macaw"]
+  },
+  {
+    "display_name": "Military Macaw",
+    "scientific_name": "Ara militaris",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+
+  {
+    "display_name": "Sun Conure",
+    "scientific_name": "Aratinga solstitialis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["sun parakeet"]
+  },
+  {
+    "display_name": "Green-cheeked Conure",
+    "scientific_name": "Pyrrhura molinae",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["green cheek conure", "GCC", "pineapple conure", "cinnamon conure", "yellow-sided conure"]
+  },
+  {
+    "display_name": "Nanday Conure",
+    "scientific_name": "Aratinga nenday",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["black-hooded parakeet", "Nanday parakeet"]
+  },
+  {
+    "display_name": "Jenday Conure",
+    "scientific_name": "Aratinga jandaya",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["Jandaya parakeet"]
+  },
+  {
+    "display_name": "Cherry-headed Conure",
+    "scientific_name": "Psittacara erythrogenys",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["red-masked parakeet"]
+  },
+  {
+    "display_name": "Blue-crowned Conure",
+    "scientific_name": "Thectocercus acuticaudatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["sharp-tailed conure"]
+  },
+
+  {
+    "display_name": "Yellow-naped Amazon",
+    "scientific_name": "Amazona auropalliata",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["yellow-naped parrot"]
+  },
+  {
+    "display_name": "Yellow-headed Amazon",
+    "scientific_name": "Amazona oratrix",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["double yellow-headed Amazon"]
+  },
+  {
+    "display_name": "Blue-fronted Amazon",
+    "scientific_name": "Amazona aestiva",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["turquoise-fronted Amazon"]
+  },
+  {
+    "display_name": "Lilac-crowned Amazon",
+    "scientific_name": "Amazona finschi",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["Finsch's Amazon"]
+  },
+  {
+    "display_name": "Mealy Amazon",
+    "scientific_name": "Amazona farinosa",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["mealy parrot"]
+  },
+  {
+    "display_name": "Orange-winged Amazon",
+    "scientific_name": "Amazona amazonica",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Red-lored Amazon",
+    "scientific_name": "Amazona autumnalis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["yellow-cheeked Amazon"]
+  },
+
+  {
+    "display_name": "Congo African Grey",
+    "scientific_name": "Psittacus erithacus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["African grey parrot", "CAG"]
+  },
+  {
+    "display_name": "Timneh African Grey",
+    "scientific_name": "Psittacus timneh",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["TAG"]
+  },
+
+  {
+    "display_name": "Eclectus Parrot",
+    "scientific_name": "Eclectus roratus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["eclectus"]
+  },
+  {
+    "display_name": "Blue-headed Pionus",
+    "scientific_name": "Pionus menstruus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["blue-headed parrot"]
+  },
+  {
+    "display_name": "Rainbow Lorikeet",
+    "scientific_name": "Trichoglossus moluccanus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["rainbow lory"]
+  },
+
+  {
+    "display_name": "Peach-faced Lovebird",
+    "scientific_name": "Agapornis roseicollis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["rosy-faced lovebird"]
+  },
+  {
+    "display_name": "Fischer's Lovebird",
+    "scientific_name": "Agapornis fischeri",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Masked Lovebird",
+    "scientific_name": "Agapornis personatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["yellow-collared lovebird"]
+  },
+
+  {
+    "display_name": "Budgerigar",
+    "scientific_name": "Melopsittacus undulatus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["budgie", "parakeet", "shell parakeet"]
+  },
+  {
+    "display_name": "Indian Ringneck Parakeet",
+    "scientific_name": "Psittacula krameri",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["rose-ringed parakeet", "ringneck"]
+  },
+  {
+    "display_name": "Quaker Parakeet",
+    "scientific_name": "Myiopsitta monachus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["monk parakeet"]
+  },
+  {
+    "display_name": "Bourke's Parakeet",
+    "scientific_name": "Neopsephotus bourkii",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["Bourke's parrot"]
+  },
+  {
+    "display_name": "Lineolated Parakeet",
+    "scientific_name": "Bolborhynchus lineola",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["linnie", "barred parakeet"]
+  },
+  {
+    "display_name": "Plum-headed Parakeet",
+    "scientific_name": "Psittacula cyanocephala",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+
+  {
+    "display_name": "Black-headed Caique",
+    "scientific_name": "Pionites melanocephalus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["black-capped caique"]
+  },
+  {
+    "display_name": "White-bellied Caique",
+    "scientific_name": "Pionites leucogaster",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+
+  {
+    "display_name": "Senegal Parrot",
+    "scientific_name": "Poicephalus senegalus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["Senegal"]
+  },
+  {
+    "display_name": "Meyer's Parrot",
+    "scientific_name": "Poicephalus meyeri",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["brown parrot"]
+  },
+  {
+    "display_name": "Red-bellied Parrot",
+    "scientific_name": "Poicephalus rufiventris",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+
+  {
+    "display_name": "Pacific Parrotlet",
+    "scientific_name": "Forpus coelestis",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": ["celestial parrotlet", "pocket parrot"]
+  },
+  {
+    "display_name": "Green-rumped Parrotlet",
+    "scientific_name": "Forpus passerinus",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+
+  {
+    "display_name": "Eastern Rosella",
+    "scientific_name": "Platycercus eximius",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  },
+  {
+    "display_name": "Crimson Rosella",
+    "scientific_name": "Platycercus elegans",
+    "category": "bird",
+    "inat_taxon_id": null,
+    "common_alternatives": []
+  }
+]
