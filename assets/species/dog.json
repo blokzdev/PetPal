@@ -12,94 +12,520 @@
       "pup"
     ],
     "breeds": [
-      "Mixed breed",
-      "Not sure",
-      "Afghan Hound",
-      "Airedale Terrier",
-      "Akita",
-      "Alaskan Malamute",
-      "American Staffordshire Terrier",
-      "Australian Cattle Dog",
-      "Australian Shepherd",
-      "Basenji",
-      "Basset Hound",
-      "Beagle",
-      "Belgian Malinois",
-      "Bernese Mountain Dog",
-      "Bichon Frise",
-      "Bloodhound",
-      "Border Collie",
-      "Boston Terrier",
-      "Boxer",
-      "Brittany",
-      "Bull Terrier",
-      "Bulldog",
-      "Cairn Terrier",
-      "Cane Corso",
-      "Cavalier King Charles Spaniel",
-      "Chesapeake Bay Retriever",
-      "Chihuahua",
-      "Chow Chow",
-      "Cocker Spaniel",
-      "Collie",
-      "Coonhound",
-      "Dachshund",
-      "Dalmatian",
-      "Doberman Pinscher",
-      "English Setter",
-      "English Springer Spaniel",
-      "Fox Terrier",
-      "French Bulldog",
-      "German Shepherd Dog",
-      "German Shorthaired Pointer",
-      "Golden Retriever",
-      "Great Dane",
-      "Greyhound",
-      "Irish Setter",
-      "Italian Greyhound",
-      "Jack Russell Terrier",
-      "Labrador Retriever",
-      "Lhasa Apso",
-      "Maltese",
-      "Mastiff",
-      "Miniature Poodle",
-      "Newfoundland",
-      "Old English Sheepdog",
-      "Papillon",
-      "Pekingese",
-      "Pembroke Welsh Corgi",
-      "Pit Bull",
-      "Pointer",
-      "Pomeranian",
-      "Pug",
-      "Rhodesian Ridgeback",
-      "Rottweiler",
-      "Saint Bernard",
-      "Scottish Terrier",
-      "Shetland Sheepdog",
-      "Shiba Inu",
-      "Shih Tzu",
-      "Siberian Husky",
-      "Staffordshire Bull Terrier",
-      "Standard Poodle",
-      "Toy Poodle",
-      "Vizsla",
-      "Weimaraner",
-      "West Highland White Terrier",
-      "Whippet",
-      "Yorkshire Terrier",
-      "Cavapoo",
-      "Chiweenie",
-      "Cockapoo",
-      "Goldendoodle",
-      "Labradoodle",
-      "Maltipoo",
-      "Pomsky",
-      "Puggle",
-      "Schnoodle",
-      "Shorkie",
-      "Yorkipoo",
-      "Other"
+      {
+        "name": "Mixed breed",
+        "alternatives": []
+      },
+      {
+        "name": "Not sure",
+        "alternatives": []
+      },
+      {
+        "name": "Afghan Hound",
+        "alternatives": [
+          "Afghan"
+        ]
+      },
+      {
+        "name": "Airedale Terrier",
+        "alternatives": [
+          "Airedale"
+        ]
+      },
+      {
+        "name": "Akita",
+        "alternatives": [
+          "Akita Inu",
+          "Japanese Akita"
+        ]
+      },
+      {
+        "name": "Alaskan Malamute",
+        "alternatives": [
+          "Malamute",
+          "Mal"
+        ]
+      },
+      {
+        "name": "American Staffordshire Terrier",
+        "alternatives": [
+          "AmStaff",
+          "Am Staff"
+        ]
+      },
+      {
+        "name": "Australian Cattle Dog",
+        "alternatives": [
+          "Blue Heeler",
+          "Red Heeler",
+          "ACD",
+          "Heeler",
+          "Queensland Heeler"
+        ]
+      },
+      {
+        "name": "Australian Shepherd",
+        "alternatives": [
+          "Aussie",
+          "Aussie Shepherd"
+        ]
+      },
+      {
+        "name": "Basenji",
+        "alternatives": []
+      },
+      {
+        "name": "Basset Hound",
+        "alternatives": [
+          "Basset"
+        ]
+      },
+      {
+        "name": "Beagle",
+        "alternatives": []
+      },
+      {
+        "name": "Belgian Malinois",
+        "alternatives": [
+          "Malinois",
+          "Mal"
+        ]
+      },
+      {
+        "name": "Bernese Mountain Dog",
+        "alternatives": [
+          "Berner",
+          "BMD"
+        ]
+      },
+      {
+        "name": "Bichon Frise",
+        "alternatives": [
+          "Bichon"
+        ]
+      },
+      {
+        "name": "Bloodhound",
+        "alternatives": []
+      },
+      {
+        "name": "Border Collie",
+        "alternatives": []
+      },
+      {
+        "name": "Boston Terrier",
+        "alternatives": [
+          "Boston"
+        ]
+      },
+      {
+        "name": "Boxer",
+        "alternatives": []
+      },
+      {
+        "name": "Brittany",
+        "alternatives": [
+          "Brittany Spaniel"
+        ]
+      },
+      {
+        "name": "Bull Terrier",
+        "alternatives": [
+          "Mini Bull Terrier",
+          "Miniature Bull Terrier"
+        ]
+      },
+      {
+        "name": "Bulldog",
+        "alternatives": [
+          "English Bulldog",
+          "British Bulldog"
+        ]
+      },
+      {
+        "name": "Cairn Terrier",
+        "alternatives": []
+      },
+      {
+        "name": "Cane Corso",
+        "alternatives": [
+          "Italian Mastiff"
+        ]
+      },
+      {
+        "name": "Cavalier King Charles Spaniel",
+        "alternatives": [
+          "Cavalier",
+          "CKCS"
+        ]
+      },
+      {
+        "name": "Chesapeake Bay Retriever",
+        "alternatives": [
+          "Chessie",
+          "CBR"
+        ]
+      },
+      {
+        "name": "Chihuahua",
+        "alternatives": [
+          "Chi"
+        ]
+      },
+      {
+        "name": "Chow Chow",
+        "alternatives": [
+          "Chow"
+        ]
+      },
+      {
+        "name": "Cocker Spaniel",
+        "alternatives": [
+          "American Cocker Spaniel",
+          "Cocker"
+        ]
+      },
+      {
+        "name": "Collie",
+        "alternatives": [
+          "Rough Collie",
+          "Smooth Collie",
+          "Lassie"
+        ]
+      },
+      {
+        "name": "Coonhound",
+        "alternatives": [
+          "Treeing Walker Coonhound",
+          "Black and Tan Coonhound",
+          "Bluetick Coonhound",
+          "Redbone Coonhound",
+          "Plott Hound",
+          "American English Coonhound"
+        ]
+      },
+      {
+        "name": "Dachshund",
+        "alternatives": [
+          "Doxie",
+          "Wiener dog",
+          "Sausage dog"
+        ]
+      },
+      {
+        "name": "Dalmatian",
+        "alternatives": []
+      },
+      {
+        "name": "Doberman Pinscher",
+        "alternatives": [
+          "Doberman",
+          "Dobie",
+          "Dobby"
+        ]
+      },
+      {
+        "name": "English Setter",
+        "alternatives": []
+      },
+      {
+        "name": "English Springer Spaniel",
+        "alternatives": [
+          "Springer Spaniel",
+          "Springer"
+        ]
+      },
+      {
+        "name": "Fox Terrier",
+        "alternatives": [
+          "Wire Fox Terrier",
+          "Smooth Fox Terrier",
+          "Toy Fox Terrier"
+        ]
+      },
+      {
+        "name": "French Bulldog",
+        "alternatives": [
+          "Frenchie"
+        ]
+      },
+      {
+        "name": "German Shepherd Dog",
+        "alternatives": [
+          "GSD",
+          "German Shepherd",
+          "Alsatian"
+        ]
+      },
+      {
+        "name": "German Shorthaired Pointer",
+        "alternatives": [
+          "GSP"
+        ]
+      },
+      {
+        "name": "Golden Retriever",
+        "alternatives": [
+          "Golden"
+        ]
+      },
+      {
+        "name": "Great Dane",
+        "alternatives": []
+      },
+      {
+        "name": "Greyhound",
+        "alternatives": []
+      },
+      {
+        "name": "Irish Setter",
+        "alternatives": []
+      },
+      {
+        "name": "Italian Greyhound",
+        "alternatives": [
+          "Iggy",
+          "IG"
+        ]
+      },
+      {
+        "name": "Jack Russell Terrier",
+        "alternatives": [
+          "Parson Russell Terrier",
+          "JRT"
+        ]
+      },
+      {
+        "name": "Labrador Retriever",
+        "alternatives": [
+          "Lab",
+          "Labrador"
+        ]
+      },
+      {
+        "name": "Lhasa Apso",
+        "alternatives": []
+      },
+      {
+        "name": "Maltese",
+        "alternatives": []
+      },
+      {
+        "name": "Mastiff",
+        "alternatives": [
+          "English Mastiff",
+          "Bullmastiff",
+          "Neapolitan Mastiff"
+        ]
+      },
+      {
+        "name": "Miniature Poodle",
+        "alternatives": [
+          "Mini Poodle"
+        ]
+      },
+      {
+        "name": "Newfoundland",
+        "alternatives": [
+          "Newfie"
+        ]
+      },
+      {
+        "name": "Old English Sheepdog",
+        "alternatives": [
+          "OES",
+          "Bobtail"
+        ]
+      },
+      {
+        "name": "Papillon",
+        "alternatives": [
+          "Pap"
+        ]
+      },
+      {
+        "name": "Pekingese",
+        "alternatives": [
+          "Peke"
+        ]
+      },
+      {
+        "name": "Pembroke Welsh Corgi",
+        "alternatives": [
+          "Corgi",
+          "Pembroke"
+        ]
+      },
+      {
+        "name": "Pit Bull",
+        "alternatives": [
+          "American Pit Bull Terrier",
+          "APBT",
+          "Pittie",
+          "Pit"
+        ]
+      },
+      {
+        "name": "Pointer",
+        "alternatives": [
+          "English Pointer"
+        ]
+      },
+      {
+        "name": "Pomeranian",
+        "alternatives": [
+          "Pom"
+        ]
+      },
+      {
+        "name": "Pug",
+        "alternatives": []
+      },
+      {
+        "name": "Rhodesian Ridgeback",
+        "alternatives": [
+          "Ridgeback"
+        ]
+      },
+      {
+        "name": "Rottweiler",
+        "alternatives": [
+          "Rottie"
+        ]
+      },
+      {
+        "name": "Saint Bernard",
+        "alternatives": [
+          "St. Bernard"
+        ]
+      },
+      {
+        "name": "Scottish Terrier",
+        "alternatives": [
+          "Scottie"
+        ]
+      },
+      {
+        "name": "Shetland Sheepdog",
+        "alternatives": [
+          "Sheltie"
+        ]
+      },
+      {
+        "name": "Shiba Inu",
+        "alternatives": [
+          "Shiba"
+        ]
+      },
+      {
+        "name": "Shih Tzu",
+        "alternatives": []
+      },
+      {
+        "name": "Siberian Husky",
+        "alternatives": [
+          "Husky"
+        ]
+      },
+      {
+        "name": "Staffordshire Bull Terrier",
+        "alternatives": [
+          "Staffy",
+          "Staffie",
+          "Stafford"
+        ]
+      },
+      {
+        "name": "Standard Poodle",
+        "alternatives": []
+      },
+      {
+        "name": "Toy Poodle",
+        "alternatives": []
+      },
+      {
+        "name": "Vizsla",
+        "alternatives": [
+          "Hungarian Vizsla"
+        ]
+      },
+      {
+        "name": "Weimaraner",
+        "alternatives": [
+          "Weim"
+        ]
+      },
+      {
+        "name": "West Highland White Terrier",
+        "alternatives": [
+          "Westie"
+        ]
+      },
+      {
+        "name": "Whippet",
+        "alternatives": []
+      },
+      {
+        "name": "Yorkshire Terrier",
+        "alternatives": [
+          "Yorkie"
+        ]
+      },
+      {
+        "name": "Cavapoo",
+        "alternatives": [
+          "Cavoodle"
+        ]
+      },
+      {
+        "name": "Chiweenie",
+        "alternatives": []
+      },
+      {
+        "name": "Cockapoo",
+        "alternatives": [
+          "Cocker Poo",
+          "Cocker Spoodle"
+        ]
+      },
+      {
+        "name": "Goldendoodle",
+        "alternatives": [
+          "Groodle"
+        ]
+      },
+      {
+        "name": "Labradoodle",
+        "alternatives": []
+      },
+      {
+        "name": "Maltipoo",
+        "alternatives": []
+      },
+      {
+        "name": "Pomsky",
+        "alternatives": []
+      },
+      {
+        "name": "Puggle",
+        "alternatives": []
+      },
+      {
+        "name": "Schnoodle",
+        "alternatives": []
+      },
+      {
+        "name": "Shorkie",
+        "alternatives": []
+      },
+      {
+        "name": "Yorkipoo",
+        "alternatives": []
+      },
+      {
+        "name": "Other",
+        "alternatives": []
+      }
     ]
   }
 ]
