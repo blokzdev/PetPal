@@ -56,6 +56,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    // Phase 6 task 6.6 — the Add photo tile lands at top-left of the
+    // destinations grid, pushing Profile into row 2 / col 1 which can
+    // sit below the test viewport (800×600). Scroll into view first.
+    await tester.ensureVisible(find.text('Profile'));
     await tester.tap(find.text('Profile'));
     await tester.pumpAndSettle();
 

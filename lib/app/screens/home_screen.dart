@@ -252,6 +252,15 @@ class _DestinationsGrid extends StatelessWidget {
   const _DestinationsGrid();
 
   static const _items = <_Destination>[
+    // Phase 6 task 6.6 — camera-as-memory tile lands top-left,
+    // displacing Journal. Routes to /photos/capture which launches
+    // the picker chooser (camera vs gallery) and lands on the
+    // form-preview screen post-pick.
+    _Destination(
+      label: 'Add photo',
+      icon: PhosphorIconsRegular.camera,
+      route: '/photos/capture',
+    ),
     _Destination(
       label: 'Journal',
       icon: PhosphorIconsRegular.bookOpen,

@@ -9,6 +9,7 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/photo_capture_screen.dart';
 import 'screens/photo_timeline_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
@@ -61,6 +62,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/photos',
         builder: (context, state) => const PhotoTimelineScreen(),
+      ),
+      // Phase 6 task 6.6 — camera-as-memory capture flow. Reached
+      // from the home grid's "Add photo" tile (top-left); launches
+      // the camera-vs-gallery chooser on entry, displays the
+      // form-preview on pick.
+      GoRoute(
+        path: '/photos/capture',
+        builder: (context, state) => const PhotoCaptureScreen(),
       ),
       GoRoute(
         path: '/soul',
