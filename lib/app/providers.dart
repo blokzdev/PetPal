@@ -10,6 +10,7 @@ import '../data/repos/pet_repo.dart';
 import '../data/species_catalog.dart';
 import '../data/repos/reminder_repo.dart';
 import '../data/repos/skill_repo.dart';
+import '../data/repos/trends_repo.dart';
 import '../data/repos/wiki_repo.dart';
 import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
@@ -292,6 +293,39 @@ final wikiRepoProvider = FutureProvider<WikiRepo>((ref) async {
   final wiki = await ref.watch(wikiIoProvider.future);
   final worker = await ref.watch(embeddingWorkerProvider.future);
   return WikiRepo(db: db, wiki: wiki, embeddings: worker);
+});
+
+/// Phase 6 task 6.12 — read-only trends repo for the SOUL profile
+/// charts. Watches the wiki entries provider (so the chart refetches
+/// after any tool-driven save) plus the underlying database + wiki
+/// IO. The two lookups (weight history + symptom frequencies) are
+/// surfaced as their own FutureProviders.family-by-petId so the
+/// charts can be loaded independently and don't block each other.
+final trendsRepoProvider = FutureProvider<TrendsRepo>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final wiki = await ref.watch(wikiIoProvider.future);
+  return TrendsRepo(db: db, wiki: wiki);
+});
+
+/// Phase 6 task 6.12 — weight history for the active pet. Refetched
+/// on `ref.invalidate(wikiEntriesProvider)` cascade since the trends
+/// repo depends on entries and we already invalidate wikiEntries on
+/// every write.
+final weightHistoryProvider =
+    FutureProvider.family<List<WeightObservation>, int>((ref, petId) async {
+  // Watch wikiEntriesProvider so a new weight entry triggers a refetch.
+  ref.watch(wikiEntriesProvider);
+  final repo = await ref.watch(trendsRepoProvider.future);
+  return repo.weightHistory(petId);
+});
+
+/// Phase 6 task 6.12 — symptom frequencies for the active pet.
+/// FTS5-backed; fast even on a large journal.
+final symptomFrequenciesProvider =
+    FutureProvider.family<List<SymptomFrequency>, int>((ref, petId) async {
+  ref.watch(wikiEntriesProvider);
+  final repo = await ref.watch(trendsRepoProvider.future);
+  return repo.symptomFrequencies(petId);
 });
 
 final hybridRetrieverProvider = FutureProvider<HybridRetriever>((ref) async {

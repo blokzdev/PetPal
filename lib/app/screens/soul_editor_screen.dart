@@ -10,6 +10,8 @@ import '../../data/soul_file.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/charts/symptom_chart.dart';
+import '../widgets/charts/weight_chart.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
@@ -174,6 +176,12 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
             _ProfilePhotoCard(
               petId: ref.read(activePetIdProvider)(),
             ),
+            const SizedBox(height: Spacing.s),
+            // Phase 6 task 6.12 — weight + symptom trend charts.
+            // Sit between the profile-photo card and the
+            // Profile/About card so the user lands on visual identity
+            // first, then trends, then editing the structured fields.
+            _TrendsSection(petId: ref.read(activePetIdProvider)()),
             const SizedBox(height: Spacing.s),
             // Single card surface with a SectionHeader divider between
             // Profile (frontmatter) and About (prose) — task 5.12
@@ -485,6 +493,63 @@ class _Avatar extends StatelessWidget {
         height: 72,
         fit: BoxFit.cover,
         gaplessPlayback: true,
+      ),
+    );
+  }
+}
+
+/// Phase 6 task 6.12 — trend charts section. Two stacked PetCards:
+/// the weight time-series and the symptom-frequency bar chart. Each
+/// loads its own provider; while loading, a tiny loading state shows
+/// (the providers settle quickly — both are FTS5/index queries).
+class _TrendsSection extends ConsumerWidget {
+  const _TrendsSection({required this.petId});
+  final int petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final weightAsync = ref.watch(weightHistoryProvider(petId));
+    final symptomsAsync = ref.watch(symptomFrequenciesProvider(petId));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        weightAsync.when(
+          data: (obs) => WeightChart(observations: obs),
+          loading: () => const _ChartLoading(label: 'Weight over time'),
+          error: (_, _) => const _ChartLoading(label: 'Weight over time'),
+        ),
+        const SizedBox(height: Spacing.s),
+        symptomsAsync.when(
+          data: (freq) => SymptomChart(frequencies: freq),
+          loading: () => const _ChartLoading(label: 'What’s come up'),
+          error: (_, _) =>
+              const _ChartLoading(label: 'What’s come up'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChartLoading extends StatelessWidget {
+  const _ChartLoading({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return PetCard(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+        child: Row(
+          children: [
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            const SizedBox(width: Spacing.s),
+            Text(label, style: Theme.of(context).textTheme.bodyMedium),
+          ],
+        ),
       ),
     );
   }

@@ -109,6 +109,15 @@ dependencies:
   # there. v1 stays gallery-only via image_picker.pickImage(source:
   # ImageSource.gallery) for 6.2 to keep 6.2 small.
   image_picker: ^1.2.2
+  # Phase 6 task 6.12 — fl_chart for weight time-series + symptom-
+  # frequency charts on the SOUL profile. Pure-Dart Canvas-based,
+  # no native plugin, no manifest changes (DECISIONS row 56). Only
+  # the chart primitives (LineChart, BarChart) are used; the package
+  # is heavy enough that a leaner alternative was considered, but
+  # fl_chart is the de facto Flutter charting library (4.5M weekly
+  # downloads, 130+ pub points) and the stylistic flexibility maps
+  # cleanly onto the warm-modern palette without theme overrides.
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:
