@@ -320,6 +320,57 @@ Re-sequenced from the original 4.1–4.11 enumeration to **harness-first → pla
 
 ---
 
+## Phase 6.5 — Visual Refinement Pass (Stitch-driven concept exploration)
+
+**Goal:** explore PetPal's visual surface beyond what was reachable
+through token-and-component refinement alone. Phases 5–6 built a
+disciplined design system (sage palette, Inter + Source Serif 4
+pairing, Phosphor icons, spring motion, the PetCard / PetButton /
+PetEmptyState / PetSkeleton primitives). Phase 6.5 takes that system
+into Google's Stitch (stitch.withgoogle.com) — a generative-UI tool
+that produces visual concepts from a brand brief plus per-screen
+prompts — to surface concept directions the in-codebase iteration
+loop wouldn't reach. Three stages, **not** auto-advancing:
+
+- **Stage 1: DESIGN.md generation.** Single markdown file at repo
+  root (`DESIGN.md`) capturing brand thesis, anti-patterns, color
+  tokens with intent, typography pairing with intent, motion
+  vocabulary, and component primitives. The file gets uploaded to
+  Stitch alongside per-screen prompts. Doc-only; no code changes.
+- **Stage 2: Stitch curation.** The user runs Stitch sessions
+  against `DESIGN.md` + per-screen prompts. Outputs are reviewed
+  together — kept, cut, or recombined into a curated direction.
+  Task list scoped after Stage 1 lands.
+- **Stage 3: Implementation.** Curated directions land as code
+  changes inside the existing token + primitive system. Anything
+  that requires a new dependency or token-level change gets a
+  DECISIONS row. Task list scoped after Stage 2 curation completes.
+
+The three-stage shape exists so Stitch outputs inform implementation
+rather than dictating it. PetPal's design language has been built
+deliberately; Stitch is a concept-generation tool, not a system
+replacement. Stage 2's curation is where deliberate-vs-Stitch
+tension gets resolved before any code moves.
+
+- [x] 6.5.1 DESIGN.md Stage 1 — generate the doc. Six sections
+  (Brand Thesis verbatim, Anti-Patterns verbatim, Color Tokens with
+  Intent, Typography Pairing with Intent, Motion Vocabulary,
+  Component Primitives). Under ~3000 words, intent over completeness,
+  `[INTENT-INFERRED]` flags where intent is uncertain from code
+  alone, thesis-vs-implementation conflicts surfaced in commit
+  messages rather than silently reconciled. DECISIONS row captures
+  the document as input-to-Stitch (intent, not spec; outputs are
+  curated, not implemented wholesale).
+- [ ] 6.5.2 Stitch curation (Stage 2). Task list locks once Stage 1
+  ships and Stitch sessions are run.
+- [ ] 6.5.3 Implementation (Stage 3). Task list locks once Stage 2
+  curation completes.
+
+**STOP after each stage.** No auto-advancement; each stage is a
+deliberate handoff back to the user.
+
+---
+
 ## Phase 7 — Monetization, Cloud Sync, Multi-Pet UI
 
 **Goal:** ship the v1 monetization model from DECISIONS row 36 — PetPal-hosted LLM proxy funding the free 200-msg/mo allowance, Pro subscription with sync + unlimited pets + unmetered text + 30 vision/mo + weekly + monthly synthesis + unlimited reminders, BYOK as a free-tier modifier that bypasses the proxy, photo credit packs for vision overage, multi-pet UI behind the paywall, accessibility pass. (Renamed from old Phase 5; multi-pet moved here from Phase 6 candidate list per DECISIONS row 34; full task-list overhaul per DECISIONS row 36.)
