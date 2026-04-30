@@ -11,6 +11,7 @@ import '../../data/wiki_io.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/red_flag_badge.dart';
 
 /// Convert a wiki entry path into a user-facing AppBar title. Per
 /// VOICE.md §3 + §4: the literal filename ("2026-04-25-carrot-trial.md")
@@ -189,11 +190,27 @@ class _PhotoEntryView extends StatelessWidget {
             '/$imageFilename',
           )
         : null;
+    final redFlagMatch = frontmatter['red_flag_match'];
+    final redFlagId = redFlagMatch is String && redFlagMatch.isNotEmpty
+        ? redFlagMatch
+        : null;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(Spacing.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          // Phase 6 task 6.7 — historical urgency marker. The badge
+          // sits above the image so it's the first thing the user
+          // sees when they reopen a flagged memory; the live preamble
+          // (the chat-side equivalent) was the prominent alert at
+          // capture-time, this is the persistent record (CLAUDE.md
+          // §10).
+          if (redFlagId != null) ...[
+            const RedFlagBadge(
+              label: 'PetPal flagged something it noticed in this photo',
+            ),
+            const SizedBox(height: Spacing.s),
+          ],
           if (binaryPath != null)
             ClipRRect(
               borderRadius: Corners.s,

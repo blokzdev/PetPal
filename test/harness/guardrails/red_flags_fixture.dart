@@ -654,3 +654,167 @@ const negatives = <String, List<String>>{
     "She's lethargic this evening — ate well at lunch",
   ],
 };
+
+/// Phase 6 task 6.7 — vision-style fixtures. The same regex table runs
+/// on the photo extractor's `freeform_caption + notable_objects`
+/// payload; these phrases match the cadence a model produces when
+/// describing a scene rather than a chat-turn ("blood on the floor
+/// next to the dog" vs "I noticed blood in his stool"). ≥10 per
+/// category — the screener regex is shared with the chat fixtures, so
+/// these are confirmation that vision-cadence English still trips the
+/// table, not a separate regex set.
+///
+/// `lethargy_anorexia` is the multi-symptom AND case; for a vision
+/// payload to flag it, both signals must appear in the joined caption
+/// + objects string. Photos rarely caption "lethargic AND anorexic"
+/// — usually one or the other — so the floor here is still 10
+/// constructed phrasings that pair both signals in caption-style
+/// language. The expectation is that real-world photos will mostly
+/// flag via the single-symptom categories above (collapse, dyspnea,
+/// pale_gums, blood_*); lethargy_anorexia is included for
+/// completeness.
+const visionPositives = <String, List<String>>{
+  'blood_in_stool': [
+    'Blood in the stool visible on the rug',
+    'Bloody diarrhea pooled on the floor',
+    'Black tarry stool on the bathroom tile',
+    'Dark stool, almost black, in the litter box',
+    'Red stool next to the dog bed',
+    'Bloody poop on the kitchen floor',
+    'Tarry stool sample on a paper towel',
+    'Stool looks black and sticky',
+    'Blood in his stool on the carpet',
+    'Bloody diarrhoea on the laminate',
+    'Stool is dark and bloody on the grass',
+  ],
+  'blood_in_vomit': [
+    'Vomit blood pooled on the kitchen floor',
+    'Blood in vomit on the rug',
+    'Vomits blood near the doorway',
+    'Vomit blood pooled by the couch',
+    'Threw up blood onto the welcome mat',
+    'Coughing up blood, droplets on the floor',
+    'Blood in his vomit on the tile',
+    'Blood in her vomit by the dog bed',
+    'Vomits blood — puddle on the floor',
+    'Vomit blood and bile on the linoleum',
+    'Blood in the throw up on the carpet',
+  ],
+  'repeat_vomit': [
+    'Vomit multiple times — piles on the floor',
+    'Vomit several times across the kitchen',
+    'Vomit several times — puddles on the laminate',
+    'Vomits all morning — pile after pile visible',
+    'Threw up multiple times — vomit pools visible',
+    'Throwing up repeatedly throughout the room',
+    'Vomit many times — three piles on the rug',
+    'Vomit 5 times across the tile floor',
+    'Keeps throwing up — fresh vomit on the bedding',
+    'Vomits repeatedly on the back porch',
+    'Vomits repeatedly — pools on the kitchen mat',
+  ],
+  'seizure': [
+    'Dog mid-seizure on the kitchen floor',
+    'Convulsing on the rug',
+    'Seizing on his side in the yard',
+    'A seizure in progress on the bed',
+    'Convulsion captured mid-episode',
+    'Mid-seizure, head tilted back',
+    'Seizing — paws stiff and twitching',
+    'Convulsing dog on the laminate floor',
+    'Epileptic episode — body rigid on the tile',
+    'Seizure — eyes glazed, body shaking',
+    'A convulsion on the pet bed',
+  ],
+  'bloat': [
+    'Distended abdomen — belly visibly swollen',
+    'Bloated belly, taut and round',
+    'Swollen abdomen, dog standing stiffly',
+    'Hard belly, distended outward',
+    'Tight tummy, belly bulging',
+    'Bloated stomach, drum-tight',
+    'Belly looks distended and hard',
+    'Abdomen is swollen and tense',
+    'Distended belly — possible GDV',
+    'Stomach is bloated, sides taut',
+    'Tummy looks bloated and round',
+  ],
+  'pale_gums': [
+    'Pale gums visible — owner lifted the lip',
+    'White gums in the close-up',
+    'Whitish gums — mouth slightly open',
+    'Grey gums in the photo',
+    'Gums look pale and almost colourless',
+    'Gums are pale in the lifted-lip shot',
+    'Bluish gums visible inside the mouth',
+    'Yellow gums — tinted icteric',
+    'Yellowish gums under the lip',
+    'Gums look white in the close-up',
+    'Pale gums caught on camera',
+  ],
+  'toxin_ingestion': [
+    'Dog ate chocolate — wrapper torn open on the floor',
+    'Ate xylitol gum — empty pack visible',
+    'Dog ate grapes — stems on the kitchen rug',
+    'He ate raisins from the spilled box',
+    'Ate onions from the cutting board',
+    'Cat ate lilies from the bouquet',
+    'Drank antifreeze from a puddle in the garage',
+    'Ate rat poison — green pellets next to him',
+    'Swallowed a battery — packaging chewed open',
+    'He swallowed a sock — half visible in his mouth',
+    'Got into the trash — wrappers everywhere',
+  ],
+  'dyspnea': [
+    'Open-mouth breathing in a cat — concerning',
+    'Gasping for air on the porch',
+    'Cyanotic-looking — bluish tongue visible',
+    'Blue tongue in the close-up',
+    'Purple tongue — open-mouth panting',
+    'Laboured breathing — chest heaving',
+    'Struggling to breathe, ribs flaring',
+    'Open-mouth panting — cat in distress',
+    'Wheezing severely — chest movement visible',
+    'Hard to breathe — flared nostrils',
+    "Can't breathe properly — open-mouth and tense",
+  ],
+  'collapse': [
+    'Dog collapsed on the kitchen floor',
+    'Passed out on the porch',
+    'Unresponsive — lying on his side',
+    'Unconscious in the yard',
+    'Lost consciousness — splayed on the rug',
+    'Collapsed by the food bowl',
+    'Non-responsive on the pet bed',
+    'Fainted briefly — recovering on the tile',
+    "Won't wake up — eyes closed, motionless",
+    "Won't respond on the bathroom floor",
+    'Dog collapsed in the driveway',
+  ],
+  'trauma_fracture': [
+    'Broken leg — bone visibly bent',
+    'Broken paw — limp and swollen',
+    'Suspected fracture — leg held off the ground',
+    "Won't put weight on his back leg in the photo",
+    'Hit by a car — visible road rash on side',
+    'Hit by a car — limping in the yard',
+    'Deep wound on his leg, bleeding',
+    'Deep cut on her paw, bandaged but soaked',
+    'Deep laceration on the side',
+    'Deep gash from a fence — bleeding through gauze',
+    "Won't stop bleeding from a paw wound",
+  ],
+  'lethargy_anorexia': [
+    "Loki seems lethargic and won't eat — full bowl",
+    "Listless on the bed — won't eat the dinner he loves",
+    'Exhausted on the rug, refusing food in the bowl',
+    'Very tired and not eating — kibble untouched',
+    'Lethargic and refusing food on the kitchen tile',
+    "Listless and won't eat — uneaten kibble next to him",
+    'Lethargic and anorexic — bowl full, dog limp',
+    "He won't eat and is lethargic on the dog bed",
+    'She is listless and refusing food — full bowl behind',
+    "Won't get up and won't eat — food sitting beside him",
+    'Lethargic on the floor, no appetite — full plate visible',
+  ],
+};

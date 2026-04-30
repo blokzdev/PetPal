@@ -9,6 +9,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/repos/wiki_repo.dart';
 import '../../data/soul_file.dart';
+import '../../harness/guardrails/red_flag_screener.dart';
 import '../../harness/vision/photo_extractor.dart';
 import '../design/design.dart';
 import '../platform/haptics.dart';
@@ -18,6 +19,7 @@ import '../widgets/pet_button.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
 import '../widgets/pet_skeleton.dart';
+import '../widgets/red_flag_badge.dart';
 
 /// Phase 6 task 6.6 — camera-as-memory capture flow + inline-
 /// editable form preview + save.
@@ -79,6 +81,13 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
   bool _saving = false;
   String? _saveError;
   bool _pickerOpened = false;
+
+  /// Phase 6 task 6.7 — non-null when the extractor's
+  /// `freeform_caption + notable_objects` payload trips the screener.
+  /// Persisted to the sidecar's `red_flag_match` frontmatter on save
+  /// so the entry view + timeline carry the historical badge forever
+  /// (CLAUDE.md §10 — flags are a historical record).
+  RedFlagMatch? _redFlag;
 
   @override
   void dispose() {
@@ -204,6 +213,19 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
           for (final _ in result.enrichmentHints) TextEditingController(),
         ];
       }
+      // Phase 6 task 6.7 — run the red-flag screener over the
+      // extractor's findings. We screen the model-emitted
+      // `freeform_caption + notable_objects` (the user's edits are
+      // tracked separately on save). The badge surfaces above Save
+      // immediately; on save the match id persists to the sidecar
+      // so it survives across app restarts and shows on the timeline
+      // tile + the entry view.
+      final screener = ref.read(redFlagScreenerProvider);
+      final visionPayload = [
+        result.freeformCaption,
+        ...result.notableObjects,
+      ].where((s) => s.trim().isNotEmpty).join('\n');
+      _redFlag = screener.screenWithVision(visionExtracted: visionPayload);
     });
   }
 
@@ -247,6 +269,9 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
                   ? _enrichmentLabels[i]
                   : _enrichmentControllers[i].text.trim(),
           ],
+        // Phase 6 task 6.7 — historical red-flag marker. Persists on
+        // the sidecar; entry view + timeline tile read it back.
+        if (_redFlag != null) 'red_flag_match': _redFlag!.category.id,
       };
 
       final repo = await ref.read(wikiRepoProvider.future);
@@ -428,6 +453,18 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
                       ],
                     ),
                   ),
+                  if (_redFlag != null) ...[
+                    const SizedBox(height: Spacing.m),
+                    // Phase 6 task 6.7 — vision-source flag wording.
+                    // Mirrors the chat scrollback marker tone (subdued,
+                    // historical) but clarifies the source so the user
+                    // knows PetPal flagged something it observed in the
+                    // photo, not something they typed.
+                    const RedFlagBadge(
+                      label:
+                          'PetPal flagged something it noticed in this photo',
+                    ),
+                  ],
                   if (_saveError != null) ...[
                     const SizedBox(height: Spacing.m),
                     Text(

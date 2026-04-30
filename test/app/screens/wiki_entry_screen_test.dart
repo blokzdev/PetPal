@@ -257,5 +257,41 @@ byte_size: 1536
       await tester.pumpAndSettle();
       expect(find.text('Memory'), findsOneWidget);
     });
+
+    // Phase 6 task 6.7 — when the sidecar carries a non-empty
+    // `red_flag_match` field (the screener flagged the extractor's
+    // freeform_caption + notable_objects at save time), the photo
+    // entry view shows the historical urgency badge above the photo.
+    testWidgets('renders the red-flag badge when frontmatter has a '
+        'non-empty red_flag_match', (tester) async {
+      const flaggedSidecar = '''---
+type: photos
+image: abc-123.jpg
+ts: 2026-04-25T14:30:12
+byte_size: 24576
+red_flag_match: collapse
+---
+
+Loki on the kitchen floor.
+''';
+      await tester.pumpWidget(_wrap(_StubWiki(flaggedSidecar)));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('PetPal flagged something it noticed in this photo'),
+        findsOneWidget,
+        reason: '6.7 historical badge on flagged photo entries',
+      );
+    });
+
+    testWidgets('does NOT render the red-flag badge when red_flag_match is '
+        'absent (the regular case)', (tester) async {
+      // The default photoSidecar has no red_flag_match field.
+      await tester.pumpWidget(_wrap(_StubWiki(photoSidecar)));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('PetPal flagged something it noticed in this photo'),
+        findsNothing,
+      );
+    });
   });
 }

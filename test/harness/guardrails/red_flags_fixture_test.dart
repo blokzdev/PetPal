@@ -69,4 +69,39 @@ void main() {
       expect(canonical, contains(id), reason: id);
     }
   });
+
+  // Phase 6 task 6.7 — vision-cadence positives walked through
+  // `screenWithVision(visionExtracted: ...)`. Two assertions per
+  // phrase: (a) the same regex table flags the category, and (b) the
+  // returned RedFlagMatch carries `source: RedFlagSource.vision` so
+  // downstream UI can frame "PetPal noticed something in this photo"
+  // distinctly from a chat-typed flag.
+  group('vision positives — every fixture phrase must flag via screenWithVision'
+      ' with source=vision', () {
+    visionPositives.forEach((categoryId, phrases) {
+      for (final phrase in phrases) {
+        test('"$phrase" → $categoryId (vision)', () {
+          final match = screener.screenWithVision(visionExtracted: phrase);
+          expect(match, isNotNull, reason: phrase);
+          expect(match!.category.id, categoryId, reason: phrase);
+          expect(match.source, RedFlagSource.vision, reason: phrase);
+        });
+      }
+    });
+  });
+
+  group('vision coverage floor — every category has ≥10 vision phrasings', () {
+    for (final entry in visionPositives.entries) {
+      test('${entry.key} has ≥10 vision phrasings', () {
+        expect(entry.value.length, greaterThanOrEqualTo(10));
+      });
+    }
+  });
+
+  test('vision-fixture categories are all canonical', () {
+    final canonical = redFlagPatterns.map((p) => p.id).toSet();
+    for (final id in visionPositives.keys) {
+      expect(canonical, contains(id), reason: id);
+    }
+  });
 }

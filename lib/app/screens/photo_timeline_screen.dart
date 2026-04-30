@@ -11,6 +11,7 @@ import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
+import '../widgets/red_flag_badge.dart';
 
 /// Phase 6 task 6.3 — photo timeline. A 3-column square grid of every
 /// photo across the active pet's wiki, time-ordered (newest first).
@@ -94,8 +95,8 @@ class _PhotoTile extends ConsumerWidget {
           extra: entry.path,
         ),
         child: wikiAsync.when(
-          data: (wiki) => FutureBuilder<Uint8List>(
-            future: _resolveBinaryBytes(wiki, entry.path),
+          data: (wiki) => FutureBuilder<_TilePayload>(
+            future: _resolveTilePayload(wiki, entry.path),
             builder: (context, snap) {
               if (snap.connectionState != ConnectionState.done) {
                 return const ColoredBox(color: Colors.transparent);
@@ -103,11 +104,27 @@ class _PhotoTile extends ConsumerWidget {
               if (snap.hasError || snap.data == null) {
                 return _TileFallback();
               }
-              return Image.memory(
-                snap.data!,
-                fit: BoxFit.cover,
-                gaplessPlayback: true,
-                errorBuilder: (_, _, _) => _TileFallback(),
+              final payload = snap.data!;
+              // Phase 6 task 6.7 — flagged photos carry a small icon
+              // chip in the top-right corner. Subdued treatment per
+              // CLAUDE.md §10 (badge is a historical record, not a
+              // current-state alert).
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.memory(
+                    payload.bytes,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, _, _) => _TileFallback(),
+                  ),
+                  if (payload.flagged)
+                    const Positioned(
+                      top: 4,
+                      right: 4,
+                      child: RedFlagBadge.tile(),
+                    ),
+                ],
               );
             },
           ),
@@ -155,12 +172,20 @@ class _PhotosEmpty extends StatelessWidget {
   }
 }
 
-/// Resolve a sidecar `.md` path to the matching `.jpg` (or other ext)
-/// binary bytes. Reads the sidecar to discover the `image:` filename,
-/// then reads the binary via wiki IO. Two reads per tile is fine for
-/// v1; a future enhancement could thumbnail-cache the binary at write
-/// time.
-Future<Uint8List> _resolveBinaryBytes(dynamic wiki, String sidecarPath) async {
+/// Bytes + flag for a single grid tile.
+class _TilePayload {
+  const _TilePayload({required this.bytes, required this.flagged});
+  final Uint8List bytes;
+  final bool flagged;
+}
+
+/// Resolve a sidecar `.md` path to its image bytes plus the red-flag
+/// state. Reads the sidecar once, extracts both `image:` and (Phase 6
+/// task 6.7) `red_flag_match:` from the same parse, then reads the
+/// binary via wiki IO. Two reads per tile is fine for v1; a future
+/// enhancement could thumbnail-cache the binary at write time.
+Future<_TilePayload> _resolveTilePayload(
+    dynamic wiki, String sidecarPath) async {
   final sidecarBody = await wiki.read(sidecarPath) as String;
   final imageFilename = _extractImageFilename(sidecarBody);
   if (imageFilename == null) {
@@ -172,7 +197,11 @@ Future<Uint8List> _resolveBinaryBytes(dynamic wiki, String sidecarPath) async {
     RegExp(r'/[^/]+\.md$'),
     '/$imageFilename',
   );
-  return await wiki.readBytes(binaryPath) as Uint8List;
+  final bytes = await wiki.readBytes(binaryPath) as Uint8List;
+  return _TilePayload(
+    bytes: bytes,
+    flagged: _hasRedFlagMatch(sidecarBody),
+  );
 }
 
 /// Hand-parse the sidecar's `image:` line. Avoids importing
@@ -182,4 +211,15 @@ String? _extractImageFilename(String sidecarBody) {
   final m = RegExp(r'^image:\s*(\S+)\s*$', multiLine: true)
       .firstMatch(sidecarBody);
   return m?.group(1)?.trim();
+}
+
+/// Phase 6 task 6.7 — does the sidecar carry a `red_flag_match:`
+/// frontmatter field with a non-empty value? Same hand-parse approach
+/// as `_extractImageFilename` — the field is always on its own line
+/// when present.
+bool _hasRedFlagMatch(String sidecarBody) {
+  final m = RegExp(r'^red_flag_match:\s*(\S+.*?)\s*$', multiLine: true)
+      .firstMatch(sidecarBody);
+  final raw = m?.group(1)?.trim();
+  return raw != null && raw.isNotEmpty;
 }
