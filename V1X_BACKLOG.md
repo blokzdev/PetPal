@@ -324,12 +324,53 @@ Each entry uses the same shape:
 
 ### AI-created tags within fixed primary categories
 
-- **Source:** post-Phase-5.6 v1.x backlog scoping.
-- **DECISIONS:** *(pending — added in Commit 3 of this round)*.
+- **Source:** post-Phase-5.6 v1.x backlog scoping; surfaced
+  pre-Phase-6.
+- **DECISIONS:** 53.
 - **Scope:** Medium.
-- **Dependencies:** v1 journal category enum (locked); v1 chat tool
-  catalog.
-- **Notes:** *(populated in Commit 3 alongside the DECISIONS row.)*
+- **Dependencies:** v1 journal category enum (locked, fixed); v1
+  chat tool catalog (`write_wiki_entry` accepts a primary
+  `type:`); v1 FTS5 index (extending it to tag arrays is part of
+  the v1.x scope).
+- **Notes:** v1 ships with **fixed primary journal categories**
+  only — the entry's `type:` field is a closed enum (`vet`,
+  `food`, `weight`, `behavior`, `photos`, `digest`, …). AI-created
+  tags are a **secondary axis nested under the fixed primary**
+  — for a `type: vet` entry the agent could attach free-form tags
+  like `rabies`, `annual-checkup`, `follow-up-needed`,
+  `prescription-active` that capture finer-grained signal without
+  expanding the closed-enum primary. **Why fixed primary in v1.**
+  Fixed-enum primaries make the v1 surface predictable: the
+  journal browser groups by a known list, the FTS5 index has a
+  small set of group keys, the tool dispatcher's
+  `write_wiki_entry` has a closed argument shape, and the agent
+  doesn't drift into cluttered taxonomy on day one. **What v1.x
+  adds.** (a) Schema: per-entry `tags: [string]` frontmatter
+  field; FTS5 indexes the tags inline with title + body; tags
+  participate in retrieval ranking. (b) Tool: `write_wiki_entry`
+  gains an optional `tags: List<String>` arg; the agent generates
+  tags when entry content warrants it, suppresses tags when the
+  entry is too thin to tag meaningfully. (c) UI: tag chips on
+  entry tiles in the journal browser; tap a chip to filter the
+  view to entries sharing the tag. Tag editor in the entry detail
+  screen for user-level corrections / additions / removals. (d)
+  Normalization: lowercase + hyphen-snake by default; near-dup
+  collapse (`rabies-vaccine` near `rabies` near `Rabies`); the
+  agent's prompt includes the pet's existing tag set so it
+  prefers reusing established tags over inventing variants. (e)
+  Pruning: when the last entry carrying a tag is deleted, the
+  tag retires from the global tag set; the user-visible tag list
+  shrinks naturally rather than accumulating dead labels. (f)
+  Cap: ≤5 tags per entry to keep the chip row legible. **Why
+  v1.x and not v1.1 / v1.2.** This is a "behaviour-tunes-on-real-
+  usage" feature, not a cost-controlled v1.2-photo-intelligence
+  candidate or a v1.1-clear-scope cut. Trigger to revisit: ~3–6
+  months of real journal entries showing patterns that the fixed
+  primaries don't surface cleanly. If users naturally taxonomize
+  entries inside the body prose ("scratching since Tuesday",
+  "still on prednisone") and the existing FTS5 search finds
+  them, tags add ceremony without value; if users want to
+  *filter* by recurring concepts, tags pull their weight.
 
 ---
 
