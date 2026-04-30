@@ -26,6 +26,10 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _running = false;
   String? _runMessage;
+  // Phase 6 task 6.14 — separate state for the monthly run so the
+  // two surfaces don't share a spinner / outcome line.
+  bool _monthlyRunning = false;
+  String? _monthlyRunMessage;
 
   Future<void> _runDigest() async {
     setState(() {
@@ -57,6 +61,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       setState(() {
         _running = false;
         _runMessage = 'Failed: $e';
+      });
+    }
+  }
+
+  /// Phase 6 task 6.14 — manual trigger for the monthly health report.
+  /// Mirrors `_runDigest` for now; Phase 7 wires it to a
+  /// synthesisNotify-mode reminder firing once a month behind a Pro
+  /// entitlement check.
+  Future<void> _runMonthlyReport() async {
+    setState(() {
+      _monthlyRunning = true;
+      _monthlyRunMessage = null;
+    });
+    try {
+      final pets = await ref.read(petsProvider.future);
+      if (pets.isEmpty) {
+        if (!mounted) return;
+        setState(() {
+          _monthlyRunning = false;
+          _monthlyRunMessage = 'Add a pet first.';
+        });
+        return;
+      }
+      final runner =
+          await ref.read(monthlyReportRunnerProvider.future);
+      final result = await runner.run(petId: pets.last.id);
+      ref.invalidate(wikiEntriesProvider);
+      if (!mounted) return;
+      setState(() {
+        _monthlyRunning = false;
+        _monthlyRunMessage = result.skipped
+            ? 'Skipped: ${result.reason ?? 'no reason given'}'
+            : "Saved this month's report.";
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _monthlyRunning = false;
+        _monthlyRunMessage = 'Failed: $e';
       });
     }
   }
@@ -131,6 +174,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: _running ? null : _runDigest,
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: Spacing.l),
+          // Phase 6 task 6.14 — monthly health report. Same surface
+          // shape as the weekly digest but longer-arc. Manual-trigger
+          // only in Phase 6; Phase 7 task 7.10 wires the
+          // synthesisNotify-mode reminder behind the Pro paywall.
+          const PetSectionHeader(title: 'Monthly health report'),
+          PetCard(
+            padding: EdgeInsets.zero,
+            child: ListTile(
+              title: const Text('Generate this month\'s report now'),
+              subtitle: Text(
+                _monthlyRunMessage ??
+                    'A longer-arc summary of the past 30 days — '
+                        'weight curve, vet follow-ups, recurring '
+                        'patterns, photo memory anchors. Pro.',
+              ),
+              trailing: _monthlyRunning
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Icon(PhosphorIconsRegular.play),
+              onTap: _monthlyRunning ? null : _runMonthlyReport,
             ),
           ),
           const SizedBox(height: Spacing.l),

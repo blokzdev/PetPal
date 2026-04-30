@@ -37,6 +37,7 @@ import '../harness/observation/affective_observer.dart';
 import '../harness/vision/photo_extractor.dart';
 import '../harness/vision/vision_gate.dart';
 import '../harness/skills/skill_source.dart';
+import '../harness/synthesis/monthly_report.dart';
 import '../harness/synthesis/weekly_digest.dart';
 import '../harness/tools/scheduling_tools.dart';
 import '../harness/tools/wiki_tools.dart';
@@ -594,6 +595,24 @@ final weeklyDigestRunnerProvider =
   final wikiRepo = await ref.watch(wikiRepoProvider.future);
   final llm = ref.watch(llmClientProvider);
   return WeeklyDigestRunner(
+    db: db,
+    wiki: wiki,
+    wikiRepo: wikiRepo,
+    llm: llm,
+  );
+});
+
+/// Phase 6 task 6.14 — [MonthlyReportRunner] for the longer-arc Pro
+/// surface. Same composition shape as the weekly runner; the
+/// scheduling-side wiring (a synthesisNotify-mode reminder that fires
+/// once a month) lands in Phase 7 alongside the entitlement gate.
+final monthlyReportRunnerProvider =
+    FutureProvider<MonthlyReportRunner>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final wikiRepo = await ref.watch(wikiRepoProvider.future);
+  final llm = ref.watch(llmClientProvider);
+  return MonthlyReportRunner(
     db: db,
     wiki: wiki,
     wikiRepo: wikiRepo,
