@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/soul_file.dart';
+import '../../harness/scheduling/reminder_kinds.dart';
 import '../design/design.dart';
 import '../platform/haptics.dart';
 import '../providers.dart';
@@ -109,6 +110,13 @@ class _VetVisitFormScreenState extends ConsumerState<VetVisitFormScreen> {
 
   void _clearFollowUpDate() => setState(() => _followUpDate = null);
 
+  /// Test hook — the date picker is awkward to drive from widget
+  /// tests, so 6.11's reminder-creation tests set the follow-up
+  /// date programmatically.
+  @visibleForTesting
+  void setFollowUpDateForTesting(DateTime? value) =>
+      setState(() => _followUpDate = value);
+
   Future<void> _save() async {
     setState(() {
       _saving = true;
@@ -161,6 +169,42 @@ class _VetVisitFormScreenState extends ConsumerState<VetVisitFormScreen> {
         body: body,
         ts: _visitDate,
       );
+
+      // Phase 6 task 6.11 — auto-create a notification-mode reminder
+      // when the user set a follow_up_date. Reuses the existing
+      // scheduling stack (`ReminderService.create`) which writes the
+      // reminder row + arms the platform alarm. The vet_followup
+      // template (assets/reminders/vet_followup.yaml) renders the
+      // body as "Time for {pet}'s vet follow-up — book an
+      // appointment." Best-effort — a scheduling failure does NOT
+      // roll back the entry write. The vet visit itself is more
+      // valuable than the reminder; the user can re-create the
+      // reminder via the chat agent if scheduling fails.
+      final followUpAt = _followUpDate;
+      if (followUpAt != null) {
+        try {
+          final reminders =
+              await ref.read(reminderServiceProvider.future);
+          await reminders.create(
+            petId: petId,
+            kind: ReminderKind.vetFollowUp.id,
+            // Fire at 9 AM local on the follow-up date — the
+            // existing scheduler treats `when` as the exact fire
+            // time. Picker emitted midnight; bumping to morning so
+            // the notification doesn't fire while the user sleeps.
+            when: DateTime(
+              followUpAt.year,
+              followUpAt.month,
+              followUpAt.day,
+              9,
+            ),
+            // Default mode is notification — see ReminderService.create.
+          );
+        } catch (_) {
+          // Reminder failure shouldn't block the vet entry save.
+          // (The user still has the entry on disk; no data lost.)
+        }
+      }
 
       // Bust the journal browser's entry cache so the new vet entry
       // lands without a manual refresh.

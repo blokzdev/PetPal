@@ -11,7 +11,14 @@ enum ReminderKind {
   fleaTreatment('flea_treatment'),
   heartwormDose('heartworm_dose'),
   vaccineDue('vaccine_due'),
-  weightCheck('weight_check');
+  weightCheck('weight_check'),
+
+  /// Phase 6 task 6.11 — auto-created from a vet-visit entry's
+  /// `follow_up_date` field. Not user-pickable from the create-
+  /// reminder UI; arrives only via the form-driven 6.10 entry
+  /// creator's save handler (or, in v1.x, agent-side `schedule_reminder`
+  /// calls with the same kind id).
+  vetFollowUp('vet_followup');
 
   const ReminderKind(this.id);
   final String id;
@@ -27,6 +34,8 @@ enum ReminderKind {
         return 'Vaccine';
       case ReminderKind.weightCheck:
         return 'Weight check';
+      case ReminderKind.vetFollowUp:
+        return 'Vet follow-up';
     }
   }
 
@@ -67,6 +76,14 @@ Duration? defaultCadenceFor({
       return const Duration(days: 365);
     case ReminderKind.weightCheck:
       return const Duration(days: 14);
+    case ReminderKind.vetFollowUp:
+      // Vet follow-ups are calendar-pinned by the vet at the visit;
+      // no sensible default cadence. Returns null so any UI surface
+      // that ever picks vetFollowUp from a kind-picker shows a
+      // "please set a date" state. The 6.11 auto-create path always
+      // supplies an explicit `when:` so this null is unreachable
+      // there.
+      return null;
   }
 }
 

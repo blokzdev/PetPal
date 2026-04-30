@@ -267,6 +267,8 @@ class _List extends ConsumerWidget {
         return PhosphorIconsRegular.syringe;
       case ReminderKind.weightCheck:
         return PhosphorIconsRegular.scales;
+      case ReminderKind.vetFollowUp:
+        return PhosphorIconsRegular.firstAidKit;
       case null:
         return PhosphorIconsRegular.bell;
     }

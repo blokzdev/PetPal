@@ -7,11 +7,45 @@ import 'package:petpal/app/providers.dart';
 import 'package:petpal/app/screens/vet_visit_form_screen.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/data/soul_file.dart';
-import 'package:petpal/main.dart';
+import 'package:petpal/harness/scheduling/notification_template.dart';
+import 'package:petpal/harness/scheduling/reminder_kinds.dart';
+import 'package:petpal/platform/alarm_scheduler.dart';
+import 'package:petpal/platform/work_scheduler.dart';
 
 import '../../_helpers/fake_api_key_storage.dart';
 import '../../_helpers/scripted_llm_client.dart';
 import '../../_helpers/test_provider_scope.dart';
+
+/// No-op alarm bindings so the platform-trigger arm path doesn't try
+/// to reach AndroidAlarmManager (which doesn't exist in `flutter
+/// test`). Always reports exact-arm success.
+class _NoOpAlarmBindings implements AlarmManagerBindings {
+  @override
+  Future<bool> oneShotAt({
+    required DateTime whenTs,
+    required int id,
+    required bool exact,
+  }) async => true;
+
+  @override
+  Future<void> cancel(int id) async {}
+}
+
+class _NoOpWorkBindings implements WorkmanagerBindings {
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  Future<void> registerOneOff({
+    required String uniqueName,
+    required String taskName,
+    required Duration initialDelay,
+    required Map<String, dynamic> inputData,
+  }) async {}
+
+  @override
+  Future<void> cancelByUniqueName(String uniqueName) async {}
+}
 
 /// Phase 6 task 6.10 — vet-visit structured entry creator.
 ///
@@ -99,7 +133,7 @@ void main() {
         TextField,
         "Anything else worth remembering — owner's notes go here, in your voice.",
       ),
-      "He was nervous in the waiting room but settled in the exam.",
+      'He was nervous in the waiting room but settled in the exam.',
     );
 
     await tester.ensureVisible(find.text('Save vet visit'));
@@ -170,5 +204,114 @@ void main() {
     expect(parsed.frontmatter.containsKey('reason'), isFalse,
         reason: 'empty reason is omitted from frontmatter');
     expect(parsed.body, contains('# Vet visit'));
+  });
+
+  // Phase 6 task 6.11 — when the user picks a follow-up date in the
+  // form, the save handler auto-creates a notification-mode reminder
+  // via ReminderService. The form's date picker is hard to drive
+  // from a widget test without dragging a calendar; the simpler
+  // proof is that the reminder repo gains a row of kind=vet_followup
+  // when the form's `_followUpDate` is set programmatically. We
+  // exercise the screen state directly via a friend-test pattern —
+  // pump the screen, locate the State, set _followUpDate, then tap
+  // Save.
+  testWidgets('Phase 6 task 6.11 — follow_up_date set → notification '
+      'reminder of kind=vet_followup is auto-created', (tester) async {
+    final stack = await buildChatTestStack(
+      llm: ScriptedLlmClient(scripts: const []),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          // Override the asset-backed templates with an in-memory
+          // map so the test doesn't need an asset bundle. Notifies
+          // surface the locked Phase 6.11 body shape.
+          notificationTemplatesProvider.overrideWithValue(
+            InMemoryNotificationTemplates({
+              ReminderKind.vetFollowUp: const NotificationTemplate(
+                title: 'Vet follow-up',
+                body:
+                    "Time for {pet_name}'s vet follow-up — book an appointment.",
+              ),
+            }),
+          ),
+          // Stub the platform schedulers so arm() doesn't try to
+          // reach Android/Workmanager plugins in the test binding.
+          alarmSchedulerProvider.overrideWithValue(
+            AlarmScheduler(bindings: _NoOpAlarmBindings()),
+          ),
+          workSchedulerProvider.overrideWithValue(
+            WorkScheduler(bindings: _NoOpWorkBindings()),
+          ),
+          ...stack.overrides,
+        ],
+        child: const MaterialApp(home: VetVisitFormScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Reach into the State to set the follow-up date programmatically
+    // — the date picker is awkward to drive from a widget test. The
+    // public setFollowUpDateForTesting hook is the supported seam.
+    final state = tester.state<State<VetVisitFormScreen>>(
+      find.byType(VetVisitFormScreen),
+    );
+    // ignore: avoid_dynamic_calls
+    (state as dynamic).setFollowUpDateForTesting(DateTime(2026, 12, 15));
+    await tester.pump();
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Reason for visit'),
+      'Annual checkup',
+    );
+    await tester.ensureVisible(find.text('Save vet visit'));
+    await tester.tap(find.text('Save vet visit'));
+    await tester.pumpAndSettle();
+
+    // Inspect the in-memory reminders table directly.
+    final rows = await stack.db.select(stack.db.reminders).get();
+    expect(rows, hasLength(1),
+        reason: 'follow_up_date present → exactly one reminder row');
+    expect(rows.single.kind, ReminderKind.vetFollowUp.id);
+    expect(rows.single.mode, 'notification');
+    // Fire time bumps to 9 AM local on the picked date.
+    expect(rows.single.whenTs.year, 2026);
+    expect(rows.single.whenTs.month, 12);
+    expect(rows.single.whenTs.day, 15);
+    expect(rows.single.whenTs.hour, 9);
+  });
+
+  testWidgets('Phase 6 task 6.11 — follow_up_date NOT set → no reminder '
+      'is created', (tester) async {
+    final stack = await buildChatTestStack(
+      llm: ScriptedLlmClient(scripts: const []),
+    );
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          apiKeyStorageProvider.overrideWithValue(
+            FakeApiKeyStorage(initial: 'sk-ant-test'),
+          ),
+          ...stack.overrides,
+        ],
+        child: const MaterialApp(home: VetVisitFormScreen()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.widgetWithText(TextField, 'Reason for visit'),
+      'Quick checkup',
+    );
+    await tester.ensureVisible(find.text('Save vet visit'));
+    await tester.tap(find.text('Save vet visit'));
+    await tester.pumpAndSettle();
+
+    final rows = await stack.db.select(stack.db.reminders).get();
+    expect(rows, isEmpty,
+        reason: 'no follow_up_date → save handler skips the reminder path');
   });
 }
