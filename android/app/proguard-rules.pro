@@ -26,3 +26,24 @@
 # names from runtime — minor risk of being stripped. Conservative
 # keep until Phase 6 verifies a tighter rule set.
 -keep class com.simolus3.** { *; }
+
+# Phase 5.6 on-device verification surfaced a P0 release-only crash
+# (Bug 3 — `JNI DETECTED ERROR IN APPLICATION: java_class == null`,
+# pending exception `ClassNotFoundException: ai.onnxruntime.TensorInfo`).
+# The flutter_onnxruntime plugin (v1.7.0) bundles
+# `com.microsoft.onnxruntime:onnxruntime-android:1.22.0` whose
+# native libonnxruntime.so calls JNI `FindClass("ai/onnxruntime/...")`
+# from convertToTensorInfo / Java_ai_onnxruntime_OrtSession_run.
+# AGP 8.x's release pipeline runs R8 with obfuscation by default
+# (visible in the crash log's `h1.a.onMethodCall` / `x0.e.i` /
+# `o1.c.run` obfuscated names), so the renamed Java classes can't
+# be found by their original string names from native code. Neither
+# the plugin nor the upstream Microsoft AAR ships a
+# `consumer-rules.pro` to propagate the keep rule, so we land it at
+# the app level. The blanket `**` is intentional — every class +
+# method on the ai.onnxruntime surface is a JNI candidate.
+-keep class ai.onnxruntime.** { *; }
+-keepclassmembers class ai.onnxruntime.** { *; }
+# Plugin's Kotlin glue is also reflectively dispatched via the
+# Flutter method channel; keep its public entry points.
+-keep class com.masicai.flutteronnxruntime.** { *; }
