@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import '../../harness/agent/messages.dart' as llm;
 import 'chat_error.dart';
 
@@ -18,12 +20,19 @@ class ChatMessage {
     required this.role,
     required this.text,
     this.escalatedCategory,
+    this.attachedImageBytes,
+    this.attachedImageMediaType,
   });
-  const ChatMessage.user(this.text)
-      : role = ChatRole.user,
+  const ChatMessage.user(
+    this.text, {
+    this.attachedImageBytes,
+    this.attachedImageMediaType,
+  })  : role = ChatRole.user,
         escalatedCategory = null;
   const ChatMessage.assistant(this.text, {this.escalatedCategory})
-      : role = ChatRole.assistant;
+      : attachedImageBytes = null,
+        attachedImageMediaType = null,
+        role = ChatRole.assistant;
 
   final ChatRole role;
   final String text;
@@ -33,6 +42,16 @@ class ChatMessage {
   /// so the chat surface can attach the vet-escalation badge per
   /// VOICE.md §6. Persists forever — see DECISIONS row 29.
   final String? escalatedCategory;
+
+  /// Phase 6 task 6.9 — bytes of an image the user attached to this
+  /// turn. Only populated on user messages. Lives in the LLM history's
+  /// ImageBlock; the projector below extracts it. The chat-bubble
+  /// renderer shows a thumbnail + a "Save as memory" affordance on
+  /// the assistant bubble that follows.
+  final Uint8List? attachedImageBytes;
+
+  /// Mime type for [attachedImageBytes] — typically `image/jpeg`.
+  final String? attachedImageMediaType;
 }
 
 /// Transient pill rendered while a tool call is in flight. Cleared on the
@@ -94,6 +113,8 @@ class ChatState {
     this.escalatedTurns = const {},
     this.streamingEscalation,
     this.recentMemorySave,
+    this.pendingAttachedImage,
+    this.pendingAttachedImageMediaType,
   });
 
   final List<llm.Message> history;
@@ -127,6 +148,13 @@ class ChatState {
   /// not a current-state flag).
   final MemorySavedEvent? recentMemorySave;
 
+  /// Phase 6 task 6.9 — pre-send composer attachment. Populated when
+  /// the user picks a photo via the composer's photo button; cleared
+  /// on send (the bytes move into the next user message). One photo
+  /// per turn in v1; multi-photo deferred to v1.2.
+  final Uint8List? pendingAttachedImage;
+  final String? pendingAttachedImageMediaType;
+
   /// Project the LLM-shape [history] to the user-visible chat messages —
   /// flatten text content per turn, drop tool-only turns. SessionBuilder
   /// wraps the user's typed input in `<context>…</context>` tags before
@@ -148,10 +176,27 @@ class ChatState {
         currentEscalation = escalatedTurns[i];
       }
       if (text.isEmpty) continue;
+      // Phase 6 task 6.9 — surface attached image bytes if present so
+      // the bubble renderer can show a thumbnail + the save-as-memory
+      // affordance on the assistant turn that follows. Only the first
+      // ImageBlock is read; v1 caps photos at one per turn.
+      Uint8List? imageBytes;
+      String? imageMediaType;
+      if (isUser) {
+        for (final b in m.content) {
+          if (b is llm.ImageBlock) {
+            imageBytes = b.bytes;
+            imageMediaType = b.mediaType;
+            break;
+          }
+        }
+      }
       yield ChatMessage(
         role: isUser ? ChatRole.user : ChatRole.assistant,
         text: isUser ? _stripContext(text) : text,
         escalatedCategory: !isUser ? currentEscalation : null,
+        attachedImageBytes: imageBytes,
+        attachedImageMediaType: imageMediaType,
       );
     }
   }
@@ -166,10 +211,13 @@ class ChatState {
     Map<int, String>? escalatedTurns,
     String? streamingEscalation,
     MemorySavedEvent? recentMemorySave,
+    Uint8List? pendingAttachedImage,
+    String? pendingAttachedImageMediaType,
     bool clearStreamingAssistant = false,
     bool clearError = false,
     bool clearLastFailedInput = false,
     bool clearStreamingEscalation = false,
+    bool clearPendingAttachedImage = false,
   }) {
     return ChatState(
       history: history ?? this.history,
@@ -187,6 +235,13 @@ class ChatState {
           ? null
           : (streamingEscalation ?? this.streamingEscalation),
       recentMemorySave: recentMemorySave ?? this.recentMemorySave,
+      pendingAttachedImage: clearPendingAttachedImage
+          ? null
+          : (pendingAttachedImage ?? this.pendingAttachedImage),
+      pendingAttachedImageMediaType: clearPendingAttachedImage
+          ? null
+          : (pendingAttachedImageMediaType ??
+              this.pendingAttachedImageMediaType),
     );
   }
 }

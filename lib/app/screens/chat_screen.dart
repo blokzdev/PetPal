@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../chat/chat_error.dart';
@@ -13,6 +14,7 @@ import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/journal_bloom.dart';
 import '../widgets/pet_empty_state.dart';
+import 'photo_capture_screen.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({super.key});
@@ -63,7 +65,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
   void _send() {
     final text = _input.text;
-    if (text.trim().isEmpty) return;
+    final hasAttachedImage = ref.read(chatProvider).pendingAttachedImage != null;
+    if (text.trim().isEmpty && !hasAttachedImage) return;
     _input.clear();
     ref.read(chatProvider.notifier).send(text);
     // Defer scroll until the new message has rendered.
@@ -76,6 +79,56 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         );
       }
     });
+  }
+
+  /// Phase 6 task 6.9 — composer photo button. Opens the same
+  /// camera/gallery chooser sheet shape as 6.6's photo capture flow,
+  /// then sets the bytes on `chatProvider.pendingAttachedImage`. The
+  /// composer renders a thumbnail strip above the TextField until
+  /// send (or × clears).
+  Future<void> _pickChatPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(PhosphorIconsRegular.camera),
+              title: const Text('Take a photo'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(PhosphorIconsRegular.bookOpen),
+              title: const Text('Pick from gallery'),
+              onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+            ),
+            const SizedBox(height: Spacing.s),
+          ],
+        ),
+      ),
+    );
+    if (source == null) return;
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: source,
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 90,
+      );
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      if (!mounted) return;
+      ref.read(chatProvider.notifier).attachImage(
+            bytes: bytes,
+            mediaType: picked.mimeType ?? 'image/jpeg',
+          );
+    } catch (_) {
+      // Best-effort UI; pickers can fail when the OS denies the
+      // action. Silent — the user can retry by tapping the button.
+    }
   }
 
   @override
@@ -185,6 +238,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             controller: _input,
             sending: state.sending,
             onSend: _send,
+            onAttachPhoto: state.sending ? null : _pickChatPhoto,
+            pendingAttachedImage: state.pendingAttachedImage,
+            onClearPendingImage: () =>
+                ref.read(chatProvider.notifier).clearAttachedImage(),
           ),
         ],
       ),
@@ -292,6 +349,8 @@ class _MessageList extends StatelessWidget {
           role: msg.role,
           text: msg.text,
           escalatedCategory: msg.escalatedCategory,
+          attachedImageBytes: msg.attachedImageBytes,
+          attachedImageMediaType: msg.attachedImageMediaType,
         );
       },
     );
@@ -365,6 +424,8 @@ class _Bubble extends StatelessWidget {
     required this.text,
     this.streaming = false,
     this.escalatedCategory,
+    this.attachedImageBytes,
+    this.attachedImageMediaType,
   });
   final ChatRole role;
   final String text;
@@ -375,6 +436,13 @@ class _Bubble extends StatelessWidget {
   /// preamble inside [text] is the prominent alert; the badge is the
   /// scrollback marker that survives forever (DECISIONS row 29).
   final String? escalatedCategory;
+
+  /// Phase 6 task 6.9 — bytes of an image the user attached to this
+  /// turn. Bubble shows a thumbnail; user bubbles get an inline
+  /// "Save as memory" button below the image that routes to
+  /// `/photos/capture` with the bytes prefilled (skips the picker).
+  final Uint8List? attachedImageBytes;
+  final String? attachedImageMediaType;
 
   @override
   Widget build(BuildContext context) {
@@ -420,13 +488,54 @@ class _Bubble extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
               ],
-              Text(
-                text,
-                style: TextStyle(
-                  color: isUser ? scheme.onPrimaryContainer : scheme.onSurface,
-                  fontStyle: streaming ? FontStyle.italic : FontStyle.normal,
+              // Phase 6 task 6.9 — attached photo thumbnail (user
+              // bubbles only; assistant turns don't carry images in
+              // v1). Tap the "Save as memory" button below to route
+              // to /photos/capture with the image prefilled.
+              if (attachedImageBytes != null) ...[
+                ClipRRect(
+                  borderRadius: Corners.s,
+                  child: Image.memory(
+                    attachedImageBytes!,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
+                  ),
                 ),
-              ),
+                const SizedBox(height: Spacing.s),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () {
+                      GoRouter.of(context).push(
+                        '/photos/capture',
+                        extra: PhotoCapturePrefill(
+                          bytes: attachedImageBytes!,
+                          mediaType:
+                              attachedImageMediaType ?? 'image/jpeg',
+                          captionDraft: text.isEmpty ? null : text,
+                        ),
+                      );
+                    },
+                    icon: const Icon(
+                      PhosphorIconsRegular.bookOpen,
+                      size: 16,
+                    ),
+                    label: const Text('Save as memory'),
+                  ),
+                ),
+                if (text.isNotEmpty) const SizedBox(height: Spacing.xs),
+              ],
+              if (text.isNotEmpty)
+                Text(
+                  text,
+                  style: TextStyle(
+                    color:
+                        isUser ? scheme.onPrimaryContainer : scheme.onSurface,
+                    fontStyle:
+                        streaming ? FontStyle.italic : FontStyle.normal,
+                  ),
+                ),
             ],
           ),
         ),
@@ -440,10 +549,17 @@ class _Composer extends StatelessWidget {
     required this.controller,
     required this.sending,
     required this.onSend,
+    required this.onAttachPhoto,
+    required this.pendingAttachedImage,
+    required this.onClearPendingImage,
   });
   final TextEditingController controller;
   final bool sending;
   final VoidCallback onSend;
+  // Phase 6 task 6.9 — composer photo affordance.
+  final VoidCallback? onAttachPhoto;
+  final Uint8List? pendingAttachedImage;
+  final VoidCallback onClearPendingImage;
 
   @override
   Widget build(BuildContext context) {
@@ -473,33 +589,57 @@ class _Composer extends StatelessWidget {
                 Spacing.m,
                 Spacing.s,
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: TextField(
-                      controller: controller,
-                      minLines: 1,
-                      maxLines: 5,
-                      enabled: !sending,
-                      textInputAction: TextInputAction.send,
-                      decoration: const InputDecoration(
-                        hintText: 'Tell PetPal what happened…',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (_) => sending ? null : onSend(),
+                  if (pendingAttachedImage != null) ...[
+                    _PendingPhotoChip(
+                      bytes: pendingAttachedImage!,
+                      onClear: onClearPendingImage,
                     ),
-                  ),
-                  const SizedBox(width: Spacing.s),
-                  IconButton.filled(
-                    onPressed: sending ? null : onSend,
-                    icon: sending
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : const Icon(PhosphorIconsRegular.paperPlaneTilt),
+                    const SizedBox(height: Spacing.s),
+                  ],
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      // Phase 6 task 6.9 — photo button. Disabled
+                      // mid-send to avoid racing the in-flight turn.
+                      IconButton(
+                        tooltip: 'Attach a photo',
+                        onPressed: onAttachPhoto,
+                        icon: const Icon(PhosphorIconsRegular.camera),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: controller,
+                          minLines: 1,
+                          maxLines: 5,
+                          enabled: !sending,
+                          textInputAction: TextInputAction.send,
+                          decoration: const InputDecoration(
+                            hintText: 'Tell PetPal what happened…',
+                            border: OutlineInputBorder(),
+                          ),
+                          onSubmitted: (_) => sending ? null : onSend(),
+                        ),
+                      ),
+                      const SizedBox(width: Spacing.s),
+                      IconButton.filled(
+                        onPressed: sending ? null : onSend,
+                        icon: sending
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              )
+                            : const Icon(
+                                PhosphorIconsRegular.paperPlaneTilt,
+                              ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -507,6 +647,59 @@ class _Composer extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Phase 6 task 6.9 — pending-photo chip in the composer. 56dp
+/// thumbnail + a small × that clears the pending attachment. Sits
+/// above the TextField so the user sees what they're about to send.
+class _PendingPhotoChip extends StatelessWidget {
+  const _PendingPhotoChip({required this.bytes, required this.onClear});
+  final Uint8List bytes;
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ClipRRect(
+          borderRadius: Corners.s,
+          child: Image.memory(
+            bytes,
+            width: 56,
+            height: 56,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (_, _, _) => const SizedBox(
+              width: 56,
+              height: 56,
+            ),
+          ),
+        ),
+        Positioned(
+          top: -8,
+          right: -8,
+          child: Material(
+            color: Theme.of(context).colorScheme.surfaceContainerHigh,
+            shape: const CircleBorder(),
+            elevation: 1,
+            child: InkWell(
+              customBorder: const CircleBorder(),
+              onTap: onClear,
+              child: Padding(
+                padding: const EdgeInsets.all(4),
+                child: Icon(
+                  PhosphorIconsRegular.x,
+                  size: 14,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

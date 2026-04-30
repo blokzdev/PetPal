@@ -11,7 +11,6 @@ import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/messages.dart' as agent_msg;
 import 'package:petpal/harness/observation/affective_observation.dart';
 import 'package:petpal/harness/observation/affective_observer.dart';
-import 'package:petpal/harness/retrieval/embedding_provider.dart';
 import 'package:petpal/harness/retrieval/hybrid_retriever.dart';
 import 'package:petpal/harness/retrieval/stub_embedding_provider.dart';
 
@@ -99,7 +98,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
 
       final result = await observer.observe(
@@ -120,7 +119,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
 
       await observer.observe(
@@ -150,7 +149,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -172,7 +171,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -196,7 +195,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -213,7 +212,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -231,7 +230,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -250,7 +249,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,
@@ -270,7 +269,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(petId: 1, caption: '   ');
       expect(result, isNull);
@@ -292,7 +291,7 @@ void main() {
       final observer = AffectiveObserver(
         llm: llm,
         retriever: HybridRetriever(db: db),
-        embeddings: StubEmbeddingProvider(),
+        embeddings: const StubEmbeddingProvider(),
       );
       final result = await observer.observe(
         petId: 1,

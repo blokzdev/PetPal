@@ -42,8 +42,28 @@ import '../widgets/red_flag_badge.dart';
 /// caption (the extractor returns null in those cases per 6.5).
 /// Post-save: pop back to home with a snackbar carrying a "View"
 /// action that pushes to the photo entry view.
+/// Phase 6 task 6.9 — optional prefill payload passed via go_router's
+/// `state.extra` when the photo capture screen is launched from the
+/// chat bubble's "Save as memory" affordance. When present, the
+/// screen skips the picker chooser, uses the provided bytes, and
+/// pre-fills the caption draft with the AI's description.
+class PhotoCapturePrefill {
+  const PhotoCapturePrefill({
+    required this.bytes,
+    this.mediaType = 'image/jpeg',
+    this.captionDraft,
+  });
+  final Uint8List bytes;
+  final String mediaType;
+  final String? captionDraft;
+}
+
 class PhotoCaptureScreen extends ConsumerStatefulWidget {
-  const PhotoCaptureScreen({super.key});
+  const PhotoCaptureScreen({super.key, this.prefill});
+
+  /// When non-null, skip the picker and seed the form with these bytes
+  /// and an optional caption draft.
+  final PhotoCapturePrefill? prefill;
 
   @override
   ConsumerState<PhotoCaptureScreen> createState() =>
@@ -106,6 +126,26 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
     super.didChangeDependencies();
     if (!_pickerOpened) {
       _pickerOpened = true;
+      // Phase 6 task 6.9 — when launched from the chat bubble's
+      // "Save as memory" affordance, prefill is non-null. Skip the
+      // picker chooser, seed bytes + caption draft, and kick off
+      // the extractor immediately.
+      final prefill = widget.prefill;
+      if (prefill != null) {
+        _captionTouched = prefill.captionDraft != null &&
+            prefill.captionDraft!.trim().isNotEmpty;
+        if (_captionTouched) _caption.text = prefill.captionDraft!;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            _imageBytes = prefill.bytes;
+            _mimeType = prefill.mediaType;
+            _extracting = true;
+          });
+          unawaited(_extract(prefill.bytes));
+        });
+        return;
+      }
       // Defer the picker chooser until after the first frame so the
       // AppBar / scaffold have rendered before the modal sheet
       // animates in.

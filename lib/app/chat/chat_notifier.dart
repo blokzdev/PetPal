@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/db/database.dart';
 import '../../harness/agent/agent_loop.dart';
+import '../../harness/agent/messages.dart' as llm;
 import '../../harness/agent/tool_dispatcher.dart';
 import '../../harness/session_builder.dart';
 import '../platform/haptics.dart';
@@ -23,9 +25,31 @@ class ChatNotifier extends Notifier<ChatState> {
   @override
   ChatState build() => const ChatState();
 
+  /// Phase 6 task 6.9 — composer hook to set/clear an attached photo
+  /// before send. The bytes ride along on the next user turn.
+  void attachImage({
+    required Uint8List bytes,
+    String mediaType = 'image/jpeg',
+  }) {
+    state = state.copyWith(
+      pendingAttachedImage: bytes,
+      pendingAttachedImageMediaType: mediaType,
+    );
+  }
+
+  void clearAttachedImage() {
+    state = state.copyWith(clearPendingAttachedImage: true);
+  }
+
   Future<void> send(String userText) async {
     final trimmed = userText.trim();
-    if (trimmed.isEmpty || state.sending) return;
+    // Phase 6 task 6.9 — allow send when text is empty IFF a photo
+    // is attached. The photo + an implicit "what is this?" intent
+    // is a valid turn.
+    final attachedImage = state.pendingAttachedImage;
+    if ((trimmed.isEmpty && attachedImage == null) || state.sending) return;
+    final attachedMediaType = state.pendingAttachedImageMediaType ??
+        'image/jpeg';
 
     state = state.copyWith(
       sending: true,
@@ -33,6 +57,7 @@ class ChatNotifier extends Notifier<ChatState> {
       activeTools: const [],
       clearError: true,
       clearLastFailedInput: true,
+      clearPendingAttachedImage: true,
     );
 
     AgentLoop loop;
@@ -77,6 +102,7 @@ class ChatNotifier extends Notifier<ChatState> {
         pet: pet,
         userInput: trimmed,
         tools: tools.definitions.toList(),
+        hasAttachedImage: attachedImage != null,
       );
 
       // The user message we're about to send lands at this index in the
@@ -99,6 +125,8 @@ class ChatNotifier extends Notifier<ChatState> {
         userInput: composed.augmentedUserInput,
         priorHistory: state.history,
         tools: composed.tools,
+        attachedImage: attachedImage,
+        attachedImageMediaType: attachedMediaType,
       )) {
         switch (event) {
           case AgentTextDelta(:final text):
@@ -167,12 +195,36 @@ class ChatNotifier extends Notifier<ChatState> {
               }
             }
           case AgentLoopDone(:final history):
+            // Phase 6 task 6.9 — chat-attached photos run a post-stream
+            // screenWithVision pass on the assistant's reply text. The
+            // AI's natural-language description IS the vision payload
+            // (single round-trip — the extractor isn't invoked here,
+            // saving the second Sonnet call). When a chat-typed
+            // pre-screen already flagged the turn, we keep the
+            // existing flag (chat-side wins per row 55's priority).
+            String? photoFlagCategory;
+            if (attachedImage != null && composed.redFlag == null) {
+              final assistantText = _lastAssistantText(history);
+              if (assistantText.isNotEmpty) {
+                final screener = ref.read(redFlagScreenerProvider);
+                final match = screener.screenWithVision(
+                  chatInput: trimmed.isEmpty ? null : trimmed,
+                  visionExtracted: assistantText,
+                );
+                photoFlagCategory = match?.category.id;
+              }
+            }
             final escalations = composed.redFlag != null
                 ? {
                     ...state.escalatedTurns,
                     newUserMessageIndex: composed.redFlag!.category.id,
                   }
-                : state.escalatedTurns;
+                : (photoFlagCategory != null
+                    ? {
+                        ...state.escalatedTurns,
+                        newUserMessageIndex: photoFlagCategory,
+                      }
+                    : state.escalatedTurns);
             state = state.copyWith(
               history: history,
               clearStreamingAssistant: true,
@@ -219,6 +271,22 @@ class ChatNotifier extends Notifier<ChatState> {
 
   String _truncate(String s) =>
       s.length > 200 ? '${s.substring(0, 200)}…' : s;
+
+  /// Last assistant message's flat text (concatenation of TextBlocks).
+  /// Empty when the most recent message isn't an assistant turn or
+  /// has no text content (tool-only turns).
+  String _lastAssistantText(List<llm.Message> history) {
+    for (var i = history.length - 1; i >= 0; i--) {
+      final m = history[i];
+      if (m.role != llm.Message.assistantRole) continue;
+      final text = m.content
+          .whereType<llm.TextBlock>()
+          .map((b) => b.text)
+          .join('\n');
+      return text;
+    }
+    return '';
+  }
 }
 
 final chatProvider = NotifierProvider<ChatNotifier, ChatState>(

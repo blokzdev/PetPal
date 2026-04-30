@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'llm_client.dart';
 import 'llm_stream_event.dart';
@@ -29,15 +30,21 @@ class AgentLoop {
   /// every assistant turn, and any tool-result echoes. Throws
   /// [AgentLoopHopLimitExceeded] if the assistant keeps calling tools past
   /// [maxToolHops].
+  ///
+  /// Phase 6 task 6.9 — pass [attachedImage] (+ [attachedImageMediaType])
+  /// to attach a single image to the new user turn alongside [userInput].
+  /// One image per turn in v1; multi-photo deferred to v1.2.
   Future<List<Message>> run({
     required String systemPrompt,
     required String userInput,
     required List<Message> priorHistory,
     List<ToolDefinition> tools = const [],
+    Uint8List? attachedImage,
+    String attachedImageMediaType = 'image/jpeg',
   }) async {
     final history = <Message>[
       ...priorHistory,
-      Message.userText(userInput),
+      _buildUserMessage(userInput, attachedImage, attachedImageMediaType),
     ];
 
     for (var hop = 0; hop < maxToolHops; hop++) {
@@ -74,10 +81,12 @@ class AgentLoop {
     required String userInput,
     required List<Message> priorHistory,
     List<ToolDefinition> tools = const [],
+    Uint8List? attachedImage,
+    String attachedImageMediaType = 'image/jpeg',
   }) async* {
     final history = <Message>[
       ...priorHistory,
-      Message.userText(userInput),
+      _buildUserMessage(userInput, attachedImage, attachedImageMediaType),
     ];
 
     for (var hop = 0; hop < maxToolHops; hop++) {
@@ -127,6 +136,26 @@ class AgentLoop {
   // Per-call event sink the streamed-turn helper writes through. Reset on
   // each turn so leftover events from a prior turn can't leak.
   final _StreamSink _streamSink = _StreamSink();
+
+  /// Build the new-turn user [Message]. Plain text when no image is
+  /// attached; TextBlock + ImageBlock multimodal otherwise. The image
+  /// block follows the LLM client encoder (Anthropic shape with
+  /// optional `cache_control: ephemeral` for prompt-cache eligibility
+  /// across follow-up turns referencing the same image).
+  Message _buildUserMessage(
+    String text,
+    Uint8List? image,
+    String mediaType,
+  ) {
+    if (image == null) return Message.userText(text);
+    return Message(
+      role: Message.userRole,
+      content: [
+        TextBlock(text),
+        ImageBlock(bytes: image, mediaType: mediaType),
+      ],
+    );
+  }
 
   /// Drive one streamed LLM turn end-to-end. Forwards text deltas,
   /// tool-use start, and emit events through [emit] (consumed by the

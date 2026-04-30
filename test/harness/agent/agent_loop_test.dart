@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/harness/agent/agent_loop.dart';
 import 'package:petpal/harness/agent/llm_client.dart';
@@ -169,5 +171,78 @@ void main() {
       ['a', 'b'],
     );
     expect(tools.calls.map((c) => c.id).toList(), ['a', 'b']);
+  });
+
+  // Phase 6 task 6.9 — multimodal user turn construction.
+  group('Phase 6 task 6.9 — attachedImage param', () {
+    test('plain text user turn (no image) wraps to a single TextBlock',
+        () async {
+      final client = _ScriptedClient([
+        const Message(
+          role: Message.assistantRole,
+          content: [TextBlock('ok')],
+        ),
+      ]);
+      final loop = AgentLoop(llm: client, tools: _RecordingTools());
+      final history = await loop.run(
+        systemPrompt: 's',
+        userInput: 'hello',
+        priorHistory: const [],
+      );
+      final user = history.first;
+      expect(user.content, hasLength(1));
+      expect(user.content.single, isA<TextBlock>());
+    });
+
+    test('attachedImage attaches an ImageBlock alongside the TextBlock',
+        () async {
+      final client = _ScriptedClient([
+        const Message(
+          role: Message.assistantRole,
+          content: [TextBlock('I see a dog.')],
+        ),
+      ]);
+      final loop = AgentLoop(llm: client, tools: _RecordingTools());
+      final imageBytes = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47]);
+      final history = await loop.run(
+        systemPrompt: 's',
+        userInput: 'is this a tick?',
+        priorHistory: const [],
+        attachedImage: imageBytes,
+        attachedImageMediaType: 'image/png',
+      );
+      final user = history.first;
+      expect(user.content, hasLength(2));
+      expect(user.content[0], isA<TextBlock>());
+      expect(user.content[1], isA<ImageBlock>());
+      final imgBlock = user.content[1] as ImageBlock;
+      expect(imgBlock.bytes, imageBytes);
+      expect(imgBlock.mediaType, 'image/png');
+    });
+
+    test('streamRun threads attachedImage through too', () async {
+      final client = _ScriptedClient([
+        const Message(
+          role: Message.assistantRole,
+          content: [TextBlock('done')],
+        ),
+      ]);
+      final loop = AgentLoop(llm: client, tools: _RecordingTools());
+      final imageBytes = Uint8List.fromList([0xFF, 0xD8, 0xFF]);
+      List<Message>? finalHistory;
+      await for (final event in loop.streamRun(
+        systemPrompt: 's',
+        userInput: 'photo question',
+        priorHistory: const [],
+        attachedImage: imageBytes,
+      )) {
+        if (event is AgentLoopDone) finalHistory = event.history;
+      }
+      expect(finalHistory, isNotNull);
+      final user = finalHistory!.first;
+      expect(user.content, hasLength(2));
+      expect(user.content[1], isA<ImageBlock>());
+      expect((user.content[1] as ImageBlock).bytes, imageBytes);
+    });
   });
 }

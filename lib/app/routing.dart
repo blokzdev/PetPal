@@ -67,9 +67,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       // from the home grid's "Add photo" tile (top-left); launches
       // the camera-vs-gallery chooser on entry, displays the
       // form-preview on pick.
+      // Phase 6 task 6.9 — `state.extra` may carry a
+      // `PhotoCapturePrefill` from the chat bubble's "Save as memory"
+      // affordance. When present, the screen skips the picker and
+      // seeds the form with the chat photo + AI's description.
       GoRoute(
         path: '/photos/capture',
-        builder: (context, state) => const PhotoCaptureScreen(),
+        builder: (context, state) {
+          final extra = state.extra;
+          return PhotoCaptureScreen(
+            prefill: extra is PhotoCapturePrefill ? extra : null,
+          );
+        },
       ),
       GoRoute(
         path: '/soul',

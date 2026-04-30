@@ -76,6 +76,13 @@ class SessionBuilder {
     required String userInput,
     int retrievalK = 6,
     List<ToolDefinition> tools = const [],
+    /// Phase 6 task 6.9 — true when the user attached a photo to this
+    /// turn. Augments the system prompt with a one-shot describe-not-
+    /// diagnose hardener so the AI's response stays observational.
+    /// The image bytes themselves are passed separately (AgentLoop's
+    /// `attachedImage` parameter); SessionBuilder doesn't need them
+    /// to compose the prompt.
+    bool hasAttachedImage = false,
   }) async {
     // Pre-screen the raw chat input BEFORE retrieval/augmentation —
     // CLAUDE.md §10 limits the screener to chat input only.
@@ -99,6 +106,7 @@ class SessionBuilder {
       soul: soul,
       skillFragments: [for (final m in matched) m.text],
       redFlag: redFlag,
+      hasAttachedImage: hasAttachedImage,
     );
 
     final queryVector =
@@ -141,6 +149,7 @@ class SessionBuilder {
     required String soul,
     required List<String> skillFragments,
     RedFlagMatch? redFlag,
+    bool hasAttachedImage = false,
   }) {
     // Bug-2 defense: lowercase-form fallback (matches the
     // `?? 'your pet'` pattern in reminder_service) so an empty
@@ -190,6 +199,38 @@ class SessionBuilder {
         'screener may have missed, open with the vet-escalation preamble '
         '(see VOICE.md §6) before any other content.',
       );
+
+    if (hasAttachedImage) {
+      buf
+        ..writeln()
+        ..writeln('# Attached photo (this turn only)')
+        ..writeln(
+          'The user attached a photo with this message. Describe what '
+          'you see honestly and helpfully. The same medical-safety '
+          'rules that govern chat apply — possibly more strictly:',
+        )
+        ..writeln(
+          '- NEVER diagnose. NEVER suggest medical conditions, even '
+          'tentatively ("could be...", "looks like..."). If the photo '
+          'shows something genuinely urgent (visible blood, collapse, '
+          'seizure, distended abdomen, breathing distress), open with '
+          'the vet-escalation preamble (VOICE.md §6) and stop.',
+        )
+        ..writeln(
+          '- Stay observational. Hedge demeanor ("looks relaxed", '
+          '"appears curious"). Don\'t project emotion or thought onto '
+          "the pet ('he's wondering...', 'she's loving...').",
+        )
+        ..writeln(
+          '- Don\'t invent objects, breeds, or context not in the photo. '
+          'If the user\'s message contradicts what you see, say so '
+          'gently and trust the user — they were there.',
+        )
+        ..writeln(
+          '- Keep the response short. The user is glancing at this from '
+          'a chat bubble, not reading a report.',
+        );
+    }
 
     if (redFlag != null) {
       buf

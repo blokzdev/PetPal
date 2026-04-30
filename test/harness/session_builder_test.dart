@@ -227,6 +227,43 @@ void main() {
     expect(turn.systemPrompt, isNot(contains("Ghost's identity")));
   });
 
+  group('Phase 6 task 6.9 — multimodal hardener directive', () {
+    test('hasAttachedImage=true injects the describe-not-diagnose directive',
+        () async {
+      final id = await petRepo.createPet(name: 'Milo', category: 'dog');
+      final pet = (await petRepo.getPet(id))!;
+      final turn = await builder.compose(
+        pet: pet,
+        userInput: 'is this a tick?',
+        hasAttachedImage: true,
+      );
+      expect(
+        turn.systemPrompt,
+        contains('# Attached photo (this turn only)'),
+      );
+      expect(turn.systemPrompt, contains('NEVER diagnose'));
+      expect(turn.systemPrompt, contains('Stay observational'));
+      expect(
+        turn.systemPrompt,
+        contains("Don't invent objects"),
+      );
+    });
+
+    test('hasAttachedImage=false (default) omits the directive',
+        () async {
+      final id = await petRepo.createPet(name: 'Milo', category: 'dog');
+      final pet = (await petRepo.getPet(id))!;
+      final turn = await builder.compose(
+        pet: pet,
+        userInput: 'random question',
+      );
+      expect(
+        turn.systemPrompt,
+        isNot(contains('# Attached photo (this turn only)')),
+      );
+    });
+  });
+
   group('red-flag screener integration (CLAUDE.md §10)', () {
     test('non-urgent input → no escalation directive, ComposedTurn.redFlag is null',
         () async {
