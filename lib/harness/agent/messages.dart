@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 /// Anthropic-style content blocks. A message is an ordered list of blocks
 /// rather than a flat string so the assistant can interleave text and
 /// tool-use, and tool results can be associated to their originating call.
@@ -8,6 +10,25 @@ sealed class ContentBlock {
 class TextBlock extends ContentBlock {
   const TextBlock(this.text);
   final String text;
+}
+
+/// Phase 6 task 6.4 — image content block. Carries raw image bytes
+/// + media type; the LLM client encoder converts to Anthropic's
+/// base64-source shape on the wire. `cacheControl: true` (the
+/// default) attaches `{type: 'ephemeral'}` for prompt-cache
+/// eligibility on multi-image conversations — important for the
+/// 6.9 chat photo-attached turn flow where the same image may be
+/// referenced across follow-up turns.
+class ImageBlock extends ContentBlock {
+  const ImageBlock({
+    required this.bytes,
+    this.mediaType = 'image/jpeg',
+    this.cacheControl = true,
+  });
+
+  final Uint8List bytes;
+  final String mediaType;
+  final bool cacheControl;
 }
 
 class ToolUseBlock extends ContentBlock {

@@ -311,6 +311,27 @@ class AnthropicClient implements LlmClient {
     switch (block) {
       case TextBlock(:final text):
         return {'type': 'text', 'text': text};
+      // Phase 6 task 6.4 — image block. Anthropic's vision shape is
+      // `{type: 'image', source: {type: 'base64', media_type, data}}`
+      // with optional `cache_control: {type: 'ephemeral'}` for
+      // prompt-cache eligibility on follow-up turns that reference
+      // the same image. Base64-encode the bytes inline; the byte
+      // size cap is enforced upstream (6.6 pre-write resize, 5 MB
+      // per-image API ceiling).
+      case ImageBlock(
+          :final bytes,
+          :final mediaType,
+          :final cacheControl,
+        ):
+        return {
+          'type': 'image',
+          'source': {
+            'type': 'base64',
+            'media_type': mediaType,
+            'data': base64Encode(bytes),
+          },
+          if (cacheControl) 'cache_control': {'type': 'ephemeral'},
+        };
       case ToolUseBlock(:final id, :final name, :final input):
         return {
           'type': 'tool_use',

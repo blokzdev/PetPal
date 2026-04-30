@@ -31,6 +31,7 @@ import '../harness/skills/asset_skill_source.dart';
 import '../harness/skills/enabled_filtering_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_manifest.dart';
+import '../harness/vision/vision_gate.dart';
 import '../harness/skills/skill_source.dart';
 import '../harness/synthesis/weekly_digest.dart';
 import '../harness/tools/scheduling_tools.dart';
@@ -143,6 +144,15 @@ final profilePhotoBytesProvider =
     FutureProvider.family<Uint8List?, int>((ref, petId) async {
   final repo = await ref.watch(petRepoProvider.future);
   return repo.readProfilePhotoBytes(petId: petId);
+});
+
+/// Phase 6 task 6.4 — entitlement gate for vision calls. The
+/// Phase 6 stub is always-allowed; Phase 7 task 7.10 overrides
+/// this provider with `RealVisionGate` (Pro entitlement +
+/// photo-credit balance) without a code re-shape at the call sites
+/// (6.5 extractor, 6.9 chat upload).
+final visionGateProvider = Provider<VisionGate>((ref) {
+  return const StubVisionGate();
 });
 
 /// Active pet's wiki entries, newest first. Invalidated by
