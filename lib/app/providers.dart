@@ -31,6 +31,7 @@ import '../harness/skills/asset_skill_source.dart';
 import '../harness/skills/enabled_filtering_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_manifest.dart';
+import '../harness/vision/photo_extractor.dart';
 import '../harness/vision/vision_gate.dart';
 import '../harness/skills/skill_source.dart';
 import '../harness/synthesis/weekly_digest.dart';
@@ -153,6 +154,17 @@ final profilePhotoBytesProvider =
 /// (6.5 extractor, 6.9 chat upload).
 final visionGateProvider = Provider<VisionGate>((ref) {
   return const StubVisionGate();
+});
+
+/// Phase 6 task 6.5 — photo extractor utility. Sonnet-backed
+/// structured-field extraction from image bytes; called from the
+/// 6.6 form-preview save flow + the 6.9 chat photo upload path.
+/// Routes through `visionGateProvider` for entitlement check
+/// (Phase 6 stub = always-allowed; Phase 7 = real entitlement).
+final photoExtractorProvider = Provider<PhotoExtractor>((ref) {
+  final llm = ref.watch(llmClientProvider);
+  final gate = ref.watch(visionGateProvider);
+  return PhotoExtractor(llm: llm, gate: gate);
 });
 
 /// Active pet's wiki entries, newest first. Invalidated by
