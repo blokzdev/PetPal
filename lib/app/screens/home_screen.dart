@@ -48,6 +48,7 @@ class HomeScreen extends ConsumerWidget {
         if (list.isNotEmpty) {
           hero = _PetGreetingHero(
             key: ValueKey('hero-${list.last.id}'),
+            petId: list.last.id,
             // Bug-2 defense: route the raw name through
             // displayPetName so an empty/whitespace name renders
             // as "Your pet" rather than a blank gradient.
@@ -84,41 +85,74 @@ class HomeScreen extends ConsumerWidget {
 ///
 /// The gradient runs primaryContainer (top, ~60% alpha) → surface
 /// (bottom). Soft, sky-like, leaves the AppBar reading clean.
-class _PetGreetingHero extends StatelessWidget {
-  const _PetGreetingHero({super.key, required this.petName});
+///
+/// Phase 6 task 6.2 — when the pet has a profile photo, it lands as
+/// a low-opacity backdrop (~25%) behind the gradient sweep so the
+/// displaySmall name stays legible. The image fills the hero zone
+/// (`BoxFit.cover`) and the gradient overlay desaturates / softens
+/// any photo so warm-cream / warm-graphite surface tones still win.
+class _PetGreetingHero extends ConsumerWidget {
+  const _PetGreetingHero({
+    super.key,
+    required this.petId,
+    required this.petName,
+  });
+  final int petId;
   final String petName;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            scheme.primaryContainer.withValues(alpha: 0.6),
-            scheme.surface,
-          ],
-        ),
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Spacing.l),
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Text(
-              petName,
-              textAlign: TextAlign.center,
-              style: text.displaySmall?.copyWith(
-                color: scheme.onPrimaryContainer,
-                fontWeight: FontWeight.w400,
+    final photoAsync = ref.watch(profilePhotoBytesProvider(petId));
+    final photoBytes = photoAsync.maybeWhen(
+      data: (bytes) => bytes,
+      orElse: () => null,
+    );
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        if (photoBytes != null)
+          Opacity(
+            opacity: 0.25,
+            child: Image.memory(
+              photoBytes,
+              fit: BoxFit.cover,
+              gaplessPlayback: true,
+              // Stale / corrupt profile photo bytes shouldn't break
+              // the hero zone — fall through to gradient-only.
+              errorBuilder: (_, _, _) => const SizedBox.shrink(),
+            ),
+          ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                scheme.primaryContainer.withValues(alpha: 0.6),
+                scheme.surface,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: Spacing.l),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  petName,
+                  textAlign: TextAlign.center,
+                  style: text.displaySmall?.copyWith(
+                    color: scheme.onPrimaryContainer,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
               ),
             ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

@@ -61,6 +61,11 @@ String serializeSoul({
     'species',
     'variety',
     'breed',
+    // Phase 6 task 6.2 — visual identity. Pointer to a binary file
+    // at `wiki/<petId>/profile/<filename>` (e.g. `<uuid>.jpg`). The
+    // file is dedicated (not a journal photo entry), not FTS5-
+    // indexed, set/cleared via PetRepo.{set,clear}ProfilePhoto.
+    'profile_photo',
     'sex',
     'neutered',
     'relationship',

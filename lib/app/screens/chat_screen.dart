@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -82,6 +84,19 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           data: (pets) => pets.isEmpty ? 'PetPal' : pets.last.name,
           orElse: () => 'PetPal',
         );
+    // Phase 6 task 6.2 — chat AppBar avatar reads bytes from the
+    // profile-photo provider for the active pet. `petId` is null
+    // when no pet exists; falls through to a name-only title.
+    final petId = ref.watch(petsProvider).maybeWhen(
+          data: (pets) => pets.isEmpty ? null : pets.last.id,
+          orElse: () => null,
+        );
+    final profilePhotoBytes = petId == null
+        ? null
+        : ref.watch(profilePhotoBytesProvider(petId)).maybeWhen(
+              data: (bytes) => bytes,
+              orElse: () => null,
+            );
     final state = ref.watch(chatProvider);
 
     // Auto-scroll on streaming deltas too — chat feels glitchy otherwise.
@@ -125,6 +140,12 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           );
     return AppScaffold(
       title: petName,
+      titleWidget: profilePhotoBytes == null
+          ? null
+          : _ChatAppBarTitle(
+              avatarBytes: profilePhotoBytes,
+              petName: petName,
+            ),
       body: Column(
         children: [
           Expanded(
@@ -540,6 +561,57 @@ class _ErrorBanner extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+
+/// Phase 6 task 6.2 — chat AppBar title with the pet's profile
+/// photo as a small circular avatar to the left of the name. Used
+/// as the AppScaffold `titleWidget:` slot when the active pet has
+/// a profile photo set; falls through to a plain text title
+/// otherwise (no avatar = no leading gap).
+class _ChatAppBarTitle extends StatelessWidget {
+  const _ChatAppBarTitle({
+    required this.avatarBytes,
+    required this.petName,
+  });
+
+  final Uint8List avatarBytes;
+  final String petName;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClipOval(
+          child: Image.memory(
+            avatarBytes,
+            width: 28,
+            height: 28,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            // Stale / corrupt avatar bytes fall through to a sage
+            // pawprint placeholder so the AppBar never empty-renders.
+            errorBuilder: (ctx, _, _) => Icon(
+              PhosphorIconsRegular.pawPrint,
+              size: 18,
+              color: Theme.of(ctx).colorScheme.primary,
+            ),
+          ),
+        ),
+        const SizedBox(width: Spacing.s),
+        Flexible(
+          child: Text(
+            petName,
+            overflow: TextOverflow.ellipsis,
+            style: theme.appBarTheme.titleTextStyle ??
+                theme.textTheme.titleLarge,
+          ),
+        ),
+      ],
     );
   }
 }

@@ -100,6 +100,15 @@ dependencies:
   # detail rendering — pre-fix the screens rendered raw markdown
   # source via SelectableText/monospace.
   flutter_markdown_plus: ^1.0.7
+  # Phase 6 task 6.2 — pet profile photo + 6.6 camera-as-memory.
+  # Official Flutter team package, 160/160 pub points, 2.52M weekly
+  # downloads. On Android 13+ the gallery picker uses the Android
+  # Photo Picker API and requires no manifest changes / permissions
+  # (DECISIONS row 54). Camera mode (6.6) needs CAMERA permission +
+  # the manifest changes from the plugin-bump checklist; landed
+  # there. v1 stays gallery-only via image_picker.pickImage(source:
+  # ImageSource.gallery) for 6.2 to keep 6.2 small.
+  image_picker: ^1.2.2
 
 dev_dependencies:
   flutter_test:

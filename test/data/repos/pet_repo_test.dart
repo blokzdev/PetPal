@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drift/native.dart';
@@ -5,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/repos/pet_repo.dart';
 import 'package:petpal/data/wiki_io.dart';
+import 'package:petpal/data/wiki_io_fs.dart';
 
 class _FakeWikiIo extends WikiIo {
   final Map<String, String> writes = {};
@@ -126,5 +128,157 @@ void main() {
     // Deliberate: the SOUL.md write the fake captured stays around. File
     // cleanup is owned by WikiIo (1.3+), not PetRepo.
     expect(wiki.writes.containsKey('wiki/$id/SOUL.md'), isTrue);
+  });
+
+  group('Phase 6 task 6.2 — profile photo', () {
+    // Real WikiIoFs against a tempdir — the binary IO methods need a
+    // real filesystem; the in-memory _FakeWikiIo above only handles
+    // text writes.
+    late Directory tempRoot;
+    late WikiIoFs fsWiki;
+    late PetRepo fsRepo;
+    late int petId;
+
+    setUp(() async {
+      tempRoot = Directory.systemTemp.createTempSync('petpal_profile_photo_');
+      fsWiki = WikiIoFs(tempRoot);
+      fsRepo = PetRepo(db: db, wiki: fsWiki, now: () => fixedNow);
+      petId = await fsRepo.createPet(name: 'Loki');
+    });
+
+    tearDown(() async {
+      if (tempRoot.existsSync()) tempRoot.deleteSync(recursive: true);
+    });
+
+    Uint8List bytes([int n = 1024, int fill = 0xff]) =>
+        Uint8List.fromList(List<int>.filled(n, fill));
+
+    test('setProfilePhoto writes the binary at wiki/<id>/profile/<id>.jpg '
+        'and merges profile_photo: into SOUL frontmatter', () async {
+      final filename = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(2048),
+      );
+
+      // Filename ends in .jpg (default mimeType is image/jpeg) and
+      // looks like <uuid>.jpg.
+      expect(filename, endsWith('.jpg'));
+      expect(filename.length, greaterThan(36));
+
+      // Binary landed.
+      final binary = File(
+        '${tempRoot.path}/wiki/$petId/profile/$filename',
+      );
+      expect(binary.existsSync(), isTrue);
+      expect(binary.lengthSync(), 2048);
+
+      // SOUL.md frontmatter has the pointer.
+      final soul = File('${tempRoot.path}/wiki/$petId/SOUL.md').readAsStringSync();
+      expect(soul, contains('profile_photo: $filename'));
+    });
+
+    test('readProfilePhotoBytes round-trips the bytes', () async {
+      await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(512),
+      );
+      final read = await fsRepo.readProfilePhotoBytes(petId: petId);
+      expect(read, isNotNull);
+      expect(read!.length, 512);
+    });
+
+    test('returns null when no profile photo set', () async {
+      final read = await fsRepo.readProfilePhotoBytes(petId: petId);
+      expect(read, isNull);
+    });
+
+    test('returns null when SOUL points at a missing file (stale '
+        'pointer — a future set/clear re-syncs)', () async {
+      // Hand-stamp a SOUL with a profile_photo: pointer to a file
+      // that doesn't exist on disk.
+      await fsWiki.writeAtomic(
+        'wiki/$petId/SOUL.md',
+        '---\nprofile_photo: ghost.jpg\n---\n',
+      );
+      final read = await fsRepo.readProfilePhotoBytes(petId: petId);
+      expect(read, isNull);
+    });
+
+    test('setProfilePhoto a second time deletes the prior binary AND '
+        'updates SOUL to point at the new one (no orphaned files)',
+        () async {
+      final first = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(1000, 0xaa),
+      );
+      final second = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(2000, 0xbb),
+      );
+      expect(first, isNot(second));
+      expect(
+        File('${tempRoot.path}/wiki/$petId/profile/$first').existsSync(),
+        isFalse,
+        reason: 'prior binary cleaned up before the new write',
+      );
+      expect(
+        File('${tempRoot.path}/wiki/$petId/profile/$second').existsSync(),
+        isTrue,
+      );
+      final soul = File('${tempRoot.path}/wiki/$petId/SOUL.md').readAsStringSync();
+      expect(soul, contains('profile_photo: $second'));
+      expect(soul, isNot(contains(first)));
+    });
+
+    test('clearProfilePhoto deletes the file AND strips the field from '
+        'SOUL frontmatter', () async {
+      final filename = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(),
+      );
+      await fsRepo.clearProfilePhoto(petId: petId);
+
+      expect(
+        File('${tempRoot.path}/wiki/$petId/profile/$filename').existsSync(),
+        isFalse,
+      );
+      final soul = File('${tempRoot.path}/wiki/$petId/SOUL.md').readAsStringSync();
+      expect(soul, isNot(contains('profile_photo')));
+    });
+
+    test('clearProfilePhoto on a pet with no profile photo is a no-op',
+        () async {
+      // Should not throw.
+      await fsRepo.clearProfilePhoto(petId: petId);
+      final soul = File('${tempRoot.path}/wiki/$petId/SOUL.md').readAsStringSync();
+      expect(soul, isNot(contains('profile_photo')));
+    });
+
+    test('mime-type → extension mapping: png maps to .png; unknown '
+        'falls back to .jpg', () async {
+      final png = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(),
+        mimeType: 'image/png',
+      );
+      expect(png, endsWith('.png'));
+
+      // Reset by clearing, then set again with an unknown type.
+      await fsRepo.clearProfilePhoto(petId: petId);
+      final fallback = await fsRepo.setProfilePhoto(
+        petId: petId,
+        imageBytes: bytes(),
+        mimeType: 'image/something-weird',
+      );
+      expect(fallback, endsWith('.jpg'));
+    });
+
+    test('profilePhotoPath produces the canonical '
+        'wiki/<petId>/profile/<filename> shape (NOT under photos/)', () {
+      expect(
+        profilePhotoPath(petId: 7, filename: 'abc.jpg'),
+        'wiki/7/profile/abc.jpg',
+      );
+    });
   });
 }

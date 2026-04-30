@@ -1,11 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/soul_file.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/pet_button.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
 
@@ -159,6 +164,17 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // Phase 6 task 6.2 — profile photo card. Lives above the
+            // Profile/About card so the visual identity (the photo)
+            // sits at the top of the editor, matching the home
+            // greeting backdrop's prominence. Watches
+            // profilePhotoBytesProvider for the active pet; renders a
+            // CircleAvatar thumbnail or a placeholder, with Change /
+            // Remove buttons that route through PetRepo.
+            _ProfilePhotoCard(
+              petId: ref.read(activePetIdProvider)(),
+            ),
+            const SizedBox(height: Spacing.s),
             // Single card surface with a SectionHeader divider between
             // Profile (frontmatter) and About (prose) — task 5.12
             // user-locked: 'Single card with section divider'. Lower
@@ -319,4 +335,157 @@ Object? _parseNum(String input) {
   if (trimmed.isEmpty) return null;
   final n = num.tryParse(trimmed);
   return n ?? trimmed;
+}
+
+/// Phase 6 task 6.2 — profile photo card. Watches
+/// `profilePhotoBytesProvider(petId)`. When bytes are present, shows
+/// a 96dp circular thumbnail with a Change button + Remove button.
+/// When absent, shows a placeholder with an Add button. Picker uses
+/// `image_picker.pickImage(source: ImageSource.gallery)` — gallery-
+/// only in v1; camera mode lands at task 6.6 with the manifest
+/// CAMERA permission.
+class _ProfilePhotoCard extends ConsumerStatefulWidget {
+  const _ProfilePhotoCard({required this.petId});
+  final int petId;
+
+  @override
+  ConsumerState<_ProfilePhotoCard> createState() =>
+      _ProfilePhotoCardState();
+}
+
+class _ProfilePhotoCardState extends ConsumerState<_ProfilePhotoCard> {
+  bool _busy = false;
+
+  Future<void> _pickFromGallery() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final picker = ImagePicker();
+      final picked = await picker.pickImage(
+        source: ImageSource.gallery,
+        // image_picker's max-side resize keeps the on-disk profile
+        // photo modest. The 6.6 pre-write resize is the canonical
+        // normaliser for memory-photos; for profile photos the
+        // picker-side cap is enough.
+        maxWidth: 2048,
+        maxHeight: 2048,
+        imageQuality: 90,
+      );
+      if (picked == null) return;
+      final bytes = await picked.readAsBytes();
+      final repo = await ref.read(petRepoProvider.future);
+      await repo.setProfilePhoto(
+        petId: widget.petId,
+        imageBytes: bytes,
+        mimeType: picked.mimeType ?? 'image/jpeg',
+      );
+      ref.invalidate(profilePhotoBytesProvider(widget.petId));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _remove() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      final repo = await ref.read(petRepoProvider.future);
+      await repo.clearProfilePhoto(petId: widget.petId);
+      ref.invalidate(profilePhotoBytesProvider(widget.petId));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final photoAsync = ref.watch(profilePhotoBytesProvider(widget.petId));
+    final bytes = photoAsync.maybeWhen(
+      data: (b) => b,
+      orElse: () => null,
+    );
+    return PetCard(
+      child: Row(
+        children: [
+          _Avatar(bytes: bytes, scheme: scheme),
+          const SizedBox(width: Spacing.m),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Profile photo',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  bytes == null
+                      ? 'A photo to recognise this pet across the app.'
+                      : 'Shown on Home and in Chat.',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurface.withValues(alpha: 0.7),
+                      ),
+                ),
+                const SizedBox(height: Spacing.s),
+                Row(
+                  children: [
+                    PetButton(
+                      label: bytes == null ? 'Add photo' : 'Change',
+                      onPressed: _busy ? null : _pickFromGallery,
+                      isLoading: _busy,
+                      icon: PhosphorIconsRegular.plus,
+                    ),
+                    if (bytes != null) ...[
+                      const SizedBox(width: Spacing.s),
+                      PetButton(
+                        label: 'Remove',
+                        variant: PetButtonVariant.text,
+                        onPressed: _busy ? null : _remove,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.bytes, required this.scheme});
+  final Uint8List? bytes;
+  final ColorScheme scheme;
+
+  @override
+  Widget build(BuildContext context) {
+    if (bytes == null) {
+      return Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          color: scheme.surfaceContainerHighest,
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          PhosphorIconsRegular.pawPrint,
+          size: 32,
+          color: scheme.onSurface.withValues(alpha: 0.5),
+        ),
+      );
+    }
+    return ClipOval(
+      child: Image.memory(
+        bytes!,
+        width: 72,
+        height: 72,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+      ),
+    );
+  }
 }

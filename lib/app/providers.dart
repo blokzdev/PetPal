@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:drift/drift.dart' show OrderingTerm;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -129,6 +131,18 @@ final petRepoProvider = FutureProvider<PetRepo>((ref) async {
 final petsProvider = FutureProvider<List<Pet>>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   return db.select(db.pets).get();
+});
+
+/// Phase 6 task 6.2 — profile photo bytes for the given pet, or null
+/// if no profile photo is set / SOUL is missing / the binary file is
+/// stale. Watched by the home greeting backdrop + chat AppBar avatar
+/// surfaces. Invalidate via
+/// `ref.invalidate(profilePhotoBytesProvider(petId))` after
+/// PetRepo.{set,clear}ProfilePhoto.
+final profilePhotoBytesProvider =
+    FutureProvider.family<Uint8List?, int>((ref, petId) async {
+  final repo = await ref.watch(petRepoProvider.future);
+  return repo.readProfilePhotoBytes(petId: petId);
 });
 
 /// Active pet's wiki entries, newest first. Invalidated by
