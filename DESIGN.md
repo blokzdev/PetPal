@@ -137,80 +137,304 @@ where it lives in the scheme.
 
 ### Light-mode warm surface scale
 
-A six-step warm-cream scale, hand-tuned to step up from `warmOffWhite`
-without M3-default lavender drift on a sage seed:
+Six steps, hand-tuned to step up from `warmOffWhite` without
+M3-default lavender drift on a sage seed. Monotonic in warmth (R/G
+channels rise as the band raises), so lifted surfaces read creamier,
+not cooler:
 
-- `lightSurfaceLowest` `#FFFFFF` — pure white, used only when
-  containers need to recede from the warm-off-white background
-  (input field fill, the chat thread's inset surface).
-- `lightSurfaceLow` `#FBFAF7` — one notch warmer than white; barely-
-  visible lift.
-- `lightSurface` `#F7F5F2` — the canonical scaffold background
-  (`warmOffWhite`).
-- `lightSurfaceContainer` `#F2EFE9` — default Card / PetCard fill.
-  This is where journal entries and form sections sit.
+- `lightSurfaceLowest` `#FFFFFF` — pure white. Used where containers
+  recede from the warm background (input fill, chat-thread inset).
+- `lightSurfaceLow` `#FBFAF7` — barely-visible lift above background.
+- `lightSurface` `#F7F5F2` — canonical scaffold background.
+- `lightSurfaceContainer` `#F2EFE9` — default Card / PetCard fill;
+  journal entries + form sections sit here.
 - `lightSurfaceContainerHigh` `#EDE9E1` — raised cards, dialogs,
   chat composer slab.
 - `lightSurfaceContainerHighest` `#E7E2D7` — empty-state badge
-  circles, skeleton-loading high-contrast bars.
-
-The scale is monotonic in warmth (R/G channels rise as the band
-raises), giving "lifted" surfaces a slightly creamier feel rather
-than the M3-default cooler gray.
+  circles, high-contrast skeleton bars.
 
 ### Dark-mode warm-graphite scale
 
-DECISIONS row 38 locked the dark mode as **honest warm graphite**, not
+DECISIONS row 38 locked dark mode as **honest warm graphite**, not
 sage-tinted dark and not pure black:
 
-- `darkSurfaceLowest` `#161512` — deepest band; chat thread
-  background.
-- `darkSurfaceLow` `#1F1E1C` — Cards behind cards.
-- `darkSurface` `#23211E` — scaffold background.
-- `darkSurfaceContainer` `#28261F` — default card fill.
-- `darkSurfaceContainerHigh` `#2D2B22` — raised cards.
-- `darkSurfaceContainerHighest` `#33302C` — high-contrast chrome
-  (empty-state badge circles, dialogs).
-- `darkOnSurface` `#EEE9E0` — text-on-dark; warm off-white,
-  mirroring the warmth of the light theme's text-on-surface
-  relationship.
+- `darkSurfaceLowest` `#161512` (deepest, chat thread) →
+  `darkSurfaceLow` `#1F1E1C` → `darkSurface` `#23211E` (scaffold) →
+  `darkSurfaceContainer` `#28261F` → `darkSurfaceContainerHigh`
+  `#2D2B22` → `darkSurfaceContainerHighest` `#33302C`.
+- `darkOnSurface` `#EEE9E0` — warm off-white text, mirroring the
+  light-mode warmth.
 
-Sage and coral remain accent colors in dark mode; the surface bands
-stay neutral-warm-graphite so journal/chat content reads cleanly. **Do
-not propose dark concepts that wash sage through the surface bands** —
-that's the rejected "sage-tinted dark" direction from row 38.
+Sage and coral remain accents in dark mode; surface bands stay
+neutral-warm-graphite so content reads cleanly. **Do not propose
+dark concepts that wash sage through the surface bands** — that's
+the rejected "sage-tinted dark" direction.
 
 ### M3-derived semantic tokens
 
 Where the brand explicitly diverges from M3 defaults (sage primary,
-warm-cream surfaces, coral tertiary), the scheme is hand-set. Where
-the brand has no opinion (error, scrim, outline, on-tone derivatives),
-FlexColorScheme's tonal harmony output is used as-is:
-
-- **`scheme.error`** — M3-default red. Used by save-error text in
-  forms, the chat error banner background. **Not** repurposed as a
-  brand color; PetPal's "warning" semantics live on coral
-  (aspirationally) or on the subdued `onSurfaceVariant` warning-
-  octagon (currently). Stitch should treat error-red as
-  failure-only, never as a CTA or accent.
-- **`scheme.outline` / `scheme.outlineVariant`** — derived; used for
-  hairline dividers (the chat composer top-edge divider, list-item
-  separators, chart grid lines).
-- **On-tones** (`onPrimary`, `onSurface`, etc.) — `onPrimary` is
-  manually pinned to `warmOffWhite` in light mode so FilledButton
-  labels read warm-cream against sage, not stark white. In dark
-  mode, `onPrimary` is `graphite` so a sage button on a dark surface
-  retains a legible dark label.
+warm-cream surfaces, coral tertiary), the scheme is hand-set;
+elsewhere FlexColorScheme's tonal harmony is used as-is.
+**`scheme.error`** is M3-default red, used for save-error text and
+the chat error banner — never repurposed as a brand color.
+**Outline tones** carry hairline dividers at low alpha. **`onPrimary`
+is manually pinned**: `warmOffWhite` in light mode (cream label on
+sage button, not stark white), `graphite` in dark mode (legible dark
+label on sage button against a warm-graphite surface).
 
 ### Color usage doctrine
 
-- **Sage carries the brand.** It's the only color that recurs across
-  hero moments, primary actions, focus states, and chart accents.
-- **Surfaces carry the warmth.** The scale is the dominant visual
-  signal; sage is sparing.
-- **Coral is reserved.** Even in light mode, coral never renders
-  large; the brand thesis treats it as warning-temperature attention.
-- **Error red is M3-default.** Failures are failures; PetPal does
-  not invent a brand-flavored error color.
-- **Outline tones are atmospheric.** Hairline dividers at low alpha;
-  never used as borders that draw the eye.
+Sage carries the brand (sparingly — hero moments, primary actions,
+focus states, chart accents). Surfaces carry the warmth (the scale
+is the dominant visual signal). Coral is reserved warning-
+temperature attention; never large, never a CTA. Error red is
+M3-default failure-only. Outline tones are atmospheric hairlines —
+never borders that draw the eye.
+
+---
+
+## 4. Typography Pairing with Intent
+
+PetPal pairs **Inter** (UI body) and **Source Serif 4** (journal
+accent). DECISIONS row 38 locked both as bundled variable TTFs (`wght`
+axis from 100 → 900) under `assets/fonts/`, with runtime weight
+selection via `TextStyle.fontVariations: [FontVariation('wght', X)]`
+so weight is continuous rather than stepped through static slots.
+
+### Inter — the utility-functional choice
+
+Inter is the default font for every Material 3 `TextTheme` slot.
+That means Inter renders: AppBar titles, ListTile titles + subtitles,
+form field labels + body text + hints, dialog content, snackbar
+copy, button labels, chip labels, chat bubble body text, tool pill
+labels, navigation destination labels, settings rows. The user's
+hands-on operating surface is entirely Inter.
+
+Type scale is M3 reference defaults (DECISIONS row 38) so platform
+components inherit correct sizing automatically. The slots in use
+across the app: `displaySmall` 36 for hero / home-greeting names;
+`titleLarge` 22 for AppBar titles; `titleMedium` / `titleSmall`
+weight-500 for section headers and ListTile titles; `bodyLarge` /
+`bodyMedium` weight-400 for flowing text (positive M3 letter-spacing
+keeps Inter warm, not tight); `labelLarge` / `labelMedium` /
+`labelSmall` weight-500 for buttons, chips, and micro-labels
+(timestamps, byte sizes, the "from {grounding-ref}" footer on the
+affective observation card).
+
+Weight-axis usage: theme uses 400 (regular) on body, 500 (medium) on
+titles + labels. Bold is reserved — markdown `**bold**` resolves to
+weight 600 (semibold), keeping emphasis visible without slamming into
+a heavy slab. [INTENT-INFERRED] The 600-not-700 choice reads as
+"deliberate journal emphasis," not marketing emphasis.
+
+### Source Serif 4 — the literary-deliberate choice
+
+Source Serif 4 is **scoped to journal-aesthetic surfaces**. The
+helper class `JournalText` (in `lib/app/design/typography.dart`)
+exposes two styles, deliberately not surfaced through the
+`TextTheme` so callers must reach for the journal accent
+explicitly:
+
+- `JournalText.entryTitle` — 24 / weight 600 / line-height 1.25.
+  Reads with weight; looks like a notebook heading, not a UI label.
+  Used on individual journal entry titles in the entry view, the
+  digest card on the journal browser, and the wiki entry markdown
+  renderer's `h1` style.
+- `JournalText.weeklySummaryTitle` — 28 / weight 600 / line-height
+  1.2. Slightly larger than a regular entry title; the weekly
+  summary is a cumulative artifact and the type signals that.
+
+Markdown body headings inside an entry render Source Serif 4 too
+(`h1` mirrors `entryTitle`, `h2` is the same family at 20pt), so
+prose written by the agent or the user reads as journal copy
+rather than UI text.
+
+### The pairing logic
+
+Serif when the user is meant to **slow down and engage with content
+as content**: journal entries, weekly summaries, the per-pet greeting
+on home (the name is in display Inter, but the cinematic-arrival
+treatment + serif body headings inside the entry give the same
+register on read). Sans when the user is **navigating or operating
+the app**: settings rows, form fields, chat composer, AppBar titles,
+buttons, chips, all chrome.
+
+The scoping is enforced by the `TextTheme` itself being all-Inter —
+serif requires an explicit `JournalText.*` call. Stitch concepts that
+propose serif on chrome (AppBar titles, button labels, settings rows,
+nav destinations) are drifting from this rule.
+
+[INTENT-INFERRED] The home greeting pet name uses Inter `displaySmall`,
+**not Source Serif 4**. Cinematic arrival comes from gradient + scale
++ space, not typeface. Concepts swapping to serif should be evaluated
+for whether literary weight outweighs the drift from current treatment.
+
+### Typography rhythm
+
+Display signals "moment" (home greeting, weekly digest). Title signals
+"section / object" (AppBar, list rows, card headers). Body signals
+"content" (entries, chat bubbles, settings copy). Label signals
+"metadata / control" (buttons, chips, micro-text). Concepts that
+invert the rhythm — label on a hero, body in a chip — read as drift.
+
+---
+
+## 5. Motion Vocabulary
+
+Motion serves the moment, never decorative. Spring-based for moments
+that should feel **alive**; ease-out for moments that should feel
+**deliberate**. DECISIONS row 38 locked the duration scale at M3
+standard; row 50 added the custom spring curve as part of Phase 5.6
+Feel Polish.
+
+### Duration tokens
+
+- `Motion.short` 200 ms — everyday navigation, AnimatedOpacity
+  fades, AnimatedScale on press, snackbar enter/exit, dropdown
+  reveals, the icon-button dispatch.
+- `Motion.medium` 300 ms — AnimatedSwitcher cross-fades between
+  empty / named-pet states on home, page transitions, the cross-
+  fade on the home greeting hero between empty and pet-loaded.
+- `Motion.long` 500 ms — hero moments only. The memory-saved bloom
+  uses this; the per-pet greeting initial mount uses this; the
+  weekly-summary editorial entrance uses this.
+
+### Curves
+
+- `Motion.standardCurve` = `Curves.easeOutCubic` — reads as "settles
+  in." Used on every transition that should feel deliberate, not
+  bouncy: snackbar landing, content fades, page transitions. The
+  default unless a moment earns the spring.
+- `Motion.heroCurve` = `Curves.easeOutCirc` — slightly more
+  anticipatory than standard. Reserved for hero moments where a
+  touch of personality is OK (the home greeting initial mount).
+- `Motion.springCurve` — custom curve adapter over a `SpringSimulation`
+  with stiffness 180, damping 22, mass 1. Damping ratio ≈ 0.82, one
+  barely-visible oscillation, settles in ~600 ms. Reads as "alive
+  but composed." Used on:
+  - PetButton press physics (scale 1.0 → 0.98 on press, spring back
+    on release; lives at the inner-content level so all three
+    variants — filled / outlined / text — inherit).
+  - JournalBloom moveY (0 → -24 dp rise during the memory-saved
+    confirmation).
+  - AnimatedSwitcher reveals on the add-pet form (relationship sub-
+    classification, lifecycle date kind swap, rescue-rehab dates).
+  - Home greeting hero AnimatedSwitcher between empty and named-pet
+    states.
+
+`Motion.springDescription` exposes the same physics as a raw
+`SpringDescription` for callsites that drive an `AnimationController`
+directly rather than passing a `Curve`.
+
+### Hero moments as motion experiences
+
+- **Memory-saved bloom** (`JournalBloom`, fires on
+  `write_wiki_entry` success). A `bookOpen` Phosphor icon overlays
+  the chat thread's bottom edge and runs a one-shot rise + fade:
+  fade-in 150 ms, hold while moveY 0 → -24 with springCurve over
+  350 ms, fade-out 200 ms. Pairs with a lightImpact haptic — the
+  buzz precedes the visual, so the icon lands as confirmation, not
+  anticipation. *Kinetic confirmation of capture.*
+- **Home greeting** (`_PetGreetingHero`). Photo backdrop at 25%
+  opacity (when present), sage `primaryContainer` → `surface`
+  vertical gradient, pet name centered in `displaySmall` Inter,
+  FittedBox-scaled. AnimatedSwitcher between empty and pet-loaded
+  uses `Motion.medium` + `springCurve`. *The pet's name is already
+  there waiting when the user arrives.*
+- **Weekly summary editorial entrance** (`_DigestCard`, journal
+  browser). Distinct card treatment — `JournalText.weeklySummaryTitle`
+  + a different visual register from regular journal tiles. Mount
+  motion is subtle; the visual lift carries the weight.
+  *Publication-style break in the journal flow.*
+- **Sub-classification picker reveal** (add-pet form). AnimatedSwitcher
+  swaps the secondary picker on relationship change with springCurve
+  so the swap feels physically connected to the tap.
+- **PetButton press physics** — see §6's `PetButton` entry.
+- **Modal sheet stretch overscroll** — `StretchingOverscrollIndicator`
+  on the species + breed picker bottom sheets. Phase 5.6 Commit C
+  lock; iOS-style bouncing rejected as wrong-platform, glow
+  indicator rejected as dated.
+
+### Motion philosophy
+
+Spring for the alive (presses, reveals, captures — moments the user
+should feel the app responding physically). Ease-out for the
+deliberate (page transitions, snackbar landings, content fades —
+composed, not reactive). Long durations are earned: default is short
+/ medium; `long` is reserved for the three hero moments (memory
+saved, home greeting, weekly summary entrance). Concepts that
+propose long durations on everyday navigation have drifted.
+
+---
+
+## 6. Component Primitives
+
+PetPal's primitives in `lib/app/widgets/` encode the warm-journal
+register so every screen inherits the brand without re-deciding
+component shape. DECISIONS row 51 rejected shadcn-style libraries
+because PetPal already has the equivalent — these primitives ARE
+the design system surface area.
+
+- **`AppScaffold`** — shared layout chassis. Three constructors:
+  default (`title:`, `body:`), `hero` (adds a 120 dp heroBuilder
+  region between AppBar and body, used by home for the per-pet
+  greeting), and `async<T>` (Riverpod-aware, default loading is a
+  `PetSkeleton` stack, default error is a `PetEmptyState` with
+  retry). AppBar treatment is flat at rest, `Elevation.low` when
+  scrolled-under, sage `surfaceTint`. Optional `petAccent` blend at
+  8% on the AppBar reserved for future per-pet palette
+  pull-through.
+- **`PetCard` / `PetCardButton`** — `surfaceContainer` fill,
+  `Radii.m` (16 dp), `Elevation.low`. Structural unit for grouped
+  content. Tappable variant clips an InkWell ripple inside the
+  rounded corners.
+- **`PetSectionHeader`** — `titleSmall` (Inter Medium 14) at
+  `onSurface@0.65`, `letterSpacing 0.6`. Distinct from content rows
+  without competing with the AppBar title. **The section-grouping
+  pattern is canonical** (task 5.12): a `PetCard` holding a
+  `PetSectionHeader` + grouped content is the structural rhythm for
+  every form, editor, and settings surface. Concepts that propose
+  full-bleed sections or standalone dividers are drifting.
+- **`PetButton`** — three variants matching M3 emphasis levels
+  (`filled` / `outlined` / `text`), pill shape (`StadiumBorder`).
+  Filled = sage fill + warm-off-white label. Loading state uses
+  `Stack` + `AnimatedOpacity` so width never changes (no layout
+  shift on tap). Press physics from §5. Labels stay static
+  (VOICE.md §1) — `label` is a plain `String`, not a builder.
+- **`PetEmptyState`** — canonical "nothing here yet" surface. 96 dp
+  `surfaceContainerHigh` circle around a 44 dp icon at
+  `onSurface@0.7`, `titleLarge` heading, `bodyMedium` body at
+  `onSurface@0.7` (the muted teaching tone VOICE.md §1 calls for),
+  optional CTA slot. LayoutBuilder wraps the content in a
+  centered scroll view so wrapping action chips don't overflow.
+- **`PetSkeleton` / `PetSkeletonListRow`** — opacity-pulse loading
+  primitive (~55% ↔ ~95% over 1500 ms, `Curves.easeInOut`). No
+  horizontal shimmer; reads as "calmly waiting." Three shapes
+  (`line` / `rectangle` / `circle`) compose into a ListTile-shaped
+  `PetSkeletonListRow` (40 dp leading circle optional, 1–2 stacked
+  lines, optional 56×28 trailing chip).
+- **`PetIcon`** — theme-aware `Icon` wrapper, defaults to
+  `onSurface@0.85`. Phosphor **regular weight** is the lock
+  (DECISIONS row 50) with three exceptions: `warningOctagon` for
+  medical red-flag escalation (visual weight for the medical
+  context), `key` for API-key states, `bookOpen` for journal
+  context (open-book reads as journal aesthetic; closed-book reads
+  as library shelf).
+- **`RedFlagBadge`** — subdued historical-record badge. Two
+  presentations: default (icon + label row) on chat scrollback +
+  photo entry headers + form previews; `.tile()` (icon-only chip)
+  overlaying photo timeline grid cells. Persists forever
+  (CLAUDE.md §10).
+- **`JournalBloom`** — hero-moment overlay fired on
+  `write_wiki_entry` success. See §5.
+
+### Composition rules
+
+- `PetCard` + `PetSectionHeader` is the structural rhythm for forms
+  and editors. Don't nest cards.
+- One primary `PetButton` per form / dialog. M3 emphasis says one
+  primary action.
+- `PetSkeletonListRow` matches the geometry of the real `ListTile`
+  it previews — don't fudge widths.
+- `AppScaffold` wraps every screen; never reach for a vanilla
+  `Scaffold`.
