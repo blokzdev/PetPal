@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../design/design.dart';
 import 'pet_button.dart';
@@ -226,7 +227,7 @@ class _AsyncAppScaffold<T> extends StatelessWidget {
   /// data didn't arrive" without the affordance to retry).
   Widget _defaultError(BuildContext context, Object error) {
     return PetEmptyState(
-      icon: Icons.error_outline,
+      icon: PhosphorIconsRegular.warningCircle,
       heading: "Couldn't load this",
       body: '$error',
       action: onRetry == null

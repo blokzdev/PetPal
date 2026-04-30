@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/pet_name.dart';
 import '../design/design.dart';
@@ -132,7 +133,7 @@ class _EmptyState extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.pets, size: 72, color: scheme.primary),
+        Icon(PhosphorIconsRegular.pawPrint, size: 72, color: scheme.primary),
         const SizedBox(height: 16),
         Text('PetPal', style: text.headlineMedium),
         const SizedBox(height: 8),
@@ -144,14 +145,14 @@ class _EmptyState extends StatelessWidget {
         const SizedBox(height: 32),
         FilledButton.icon(
           onPressed: () => GoRouter.of(context).push('/pets/add'),
-          icon: const Icon(Icons.add),
+          icon: const Icon(PhosphorIconsRegular.plus),
           label: const Text('Add your pet'),
         ),
         if (kDebugMode) ...[
           const SizedBox(height: 16),
           OutlinedButton.icon(
             onPressed: () => GoRouter.of(context).push('/dev'),
-            icon: const Icon(Icons.science_outlined),
+            icon: const Icon(PhosphorIconsRegular.flask),
             label: const Text('Dev tools'),
           ),
         ],
@@ -191,7 +192,7 @@ class _GreetingBody extends ConsumerWidget {
         // home action and must remain above-the-fold).
         FilledButton.icon(
           onPressed: () => GoRouter.of(context).push('/chat'),
-          icon: const Icon(Icons.chat_bubble),
+          icon: const Icon(PhosphorIconsRegular.chatCircle),
           label: Text('Chat with $name'),
         ),
         const SizedBox(height: Spacing.l),
@@ -219,27 +220,27 @@ class _DestinationsGrid extends StatelessWidget {
   static const _items = <_Destination>[
     _Destination(
       label: 'Journal',
-      icon: Icons.menu_book_outlined,
+      icon: PhosphorIconsRegular.bookOpen,
       route: '/wiki',
     ),
     _Destination(
       label: 'Profile',
-      icon: Icons.person_outline,
+      icon: PhosphorIconsRegular.userCircle,
       route: '/soul',
     ),
     _Destination(
       label: 'Reminders',
-      icon: Icons.alarm_outlined,
+      icon: PhosphorIconsRegular.bell,
       route: '/reminders',
     ),
     _Destination(
       label: 'Care guides',
-      icon: Icons.extension_outlined,
+      icon: PhosphorIconsRegular.puzzlePiece,
       route: '/skills',
     ),
     _Destination(
       label: 'Settings',
-      icon: Icons.settings_outlined,
+      icon: PhosphorIconsRegular.gear,
       route: '/settings',
     ),
   ];
@@ -251,7 +252,7 @@ class _DestinationsGrid extends StatelessWidget {
       if (kDebugMode)
         const _Destination(
           label: 'Dev',
-          icon: Icons.science_outlined,
+          icon: PhosphorIconsRegular.flask,
           route: '/dev',
         ),
     ];

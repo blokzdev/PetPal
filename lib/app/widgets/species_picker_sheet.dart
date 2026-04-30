@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/species_catalog.dart';
 import '../design/design.dart';
@@ -95,7 +96,7 @@ class _SpeciesPickerSheetState extends State<_SpeciesPickerSheet> {
                 autofocus: true,
                 decoration: const InputDecoration(
                   hintText: 'Search',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -175,7 +176,7 @@ class _BreedPickerSheetState extends State<_BreedPickerSheet> {
                 autofocus: true,
                 decoration: const InputDecoration(
                   hintText: 'Search breeds',
-                  prefixIcon: Icon(Icons.search),
+                  prefixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
                   border: OutlineInputBorder(),
                 ),
               ),
@@ -346,7 +347,7 @@ class _OtherTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const Icon(Icons.edit_outlined),
+      leading: const Icon(PhosphorIconsRegular.pencilSimple),
       title: const Text('Other (type your own)'),
       onTap: onTap,
     );

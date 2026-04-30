@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/app/widgets/journal_bloom.dart';
 import 'package:petpal/data/db/database.dart';
@@ -112,7 +113,7 @@ void main() {
       find.byType(TextField),
       'Milo loves frozen carrots',
     );
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(PhosphorIconsRegular.paperPlaneTilt));
     await tester.pumpAndSettle();
 
     // User bubble + finalised assistant text.
@@ -121,14 +122,14 @@ void main() {
 
     // Non-flagged turn → no escalation badge.
     expect(find.text('PetPal flagged this as urgent'), findsNothing);
-    expect(find.byIcon(Icons.warning_amber_rounded), findsNothing);
+    expect(find.byIcon(PhosphorIconsRegular.warningOctagon), findsNothing);
 
     // Task 5.12 — composer has the visual lift: a Material slab in
     // surfaceContainer wrapping the TextField + send IconButton,
     // with a hairline Divider on its top edge separating it from
     // the chat thread above. Asserted via a widget-predicate
     // match (the IconButton.filled has its own primary-tinted
-    // Material, so walking up from Icons.send finds that one
+    // Material, so walking up from PhosphorIcons.paperPlaneTilt finds that one
     // first; the composer's slab is the one painted in
     // surfaceContainer).
     final scheme = Theme.of(tester.element(find.byType(Scaffold).last))
@@ -178,13 +179,13 @@ void main() {
       find.byType(TextField),
       'I noticed blood in his stool this morning',
     );
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(PhosphorIconsRegular.paperPlaneTilt));
     await tester.pumpAndSettle();
 
     // Both the muted scrollback marker text and the warning icon must
     // attach to the assistant bubble.
     expect(find.text('PetPal flagged this as urgent'), findsOneWidget);
-    expect(find.byIcon(Icons.warning_amber_rounded), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsRegular.warningOctagon), findsOneWidget);
   });
 
   // ------------------------------------------------------------------
@@ -248,7 +249,7 @@ void main() {
       find.byType(TextField),
       'Milo loves frozen carrots — please log it.',
     );
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(PhosphorIconsRegular.paperPlaneTilt));
     // Don't pumpAndSettle past the bloom's 500ms animation — assert
     // the snackbar + bloom are visible mid-animation. One pump moves
     // through the tool round-trip; a couple more pumps catch the

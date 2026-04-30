@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../platform/schedule_health.dart';
 import '../../platform/settings_storage.dart';
@@ -50,7 +51,7 @@ class BatteryExemptionPrompt extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      icon: Icon(Icons.battery_alert_outlined, color: scheme.primary),
+      icon: Icon(PhosphorIconsRegular.batteryWarning, color: scheme.primary),
       title: const Text('Let reminders fire on time'),
       content: const Text(
         'Android may delay reminders to save battery. To make sure '

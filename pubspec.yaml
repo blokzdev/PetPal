@@ -68,6 +68,17 @@ dependencies:
   # sophistication beyond ColorScheme.fromSeed defaults.
   # Flutter Favorite, 160/160 pub points, rydmike (verified).
   flex_color_scheme: ^8.4.0
+  # Phase 5.6 Commit B — icon migration. Phosphor regular weight
+  # matches PetPal's warm-journal brand register. Three locked
+  # refinements vs default regular swap (DECISIONS row 50):
+  # warningOctagon for medical red-flag escalation badge, bookOpen
+  # for journal context, and `key` (not keySlash — keySlash absent
+  # from v2.1.0; user-confirmed substitution paired with the chat
+  # error banner's existing error tint). Phosphor's IconData
+  # instances are equality-stable so existing find.byIcon test
+  # patterns keep working. 23-month staleness flagged in row 50;
+  # static-icon-font wrapper, low surface for breakage.
+  phosphor_flutter: ^2.1.0
 
 dev_dependencies:
   flutter_test:

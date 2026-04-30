@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
@@ -152,7 +153,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byType(SingleChildScrollView),
-        matching: find.byIcon(Icons.pets),
+        matching: find.byIcon(PhosphorIconsRegular.pawPrint),
       ),
       findsNothing,
     );

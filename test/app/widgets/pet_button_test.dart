@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/theme.dart';
 import 'package:petpal/app/widgets/pet_button.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 Widget _wrap(Widget child) => MaterialApp(
       theme: buildLightTheme(),
@@ -123,11 +124,11 @@ void main() {
     await tester.pumpWidget(_wrap(
       PetButton(
         label: 'Add',
-        icon: Icons.add,
+        icon: PhosphorIconsRegular.plus,
         onPressed: () {},
       ),
     ));
-    expect(find.byIcon(Icons.add), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsRegular.plus), findsOneWidget);
     expect(find.text('Add'), findsOneWidget);
   });
 }

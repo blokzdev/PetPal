@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
@@ -37,7 +38,7 @@ class CareGuidesEmptyForTesting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const PetEmptyState(
-      icon: Icons.menu_book_outlined,
+      icon: PhosphorIconsRegular.bookOpen,
       heading: 'No care guides yet for your pet.',
       body: "We're adding more. Care guides activate during chat "
           'when you mention what they cover — like "puppy" or '

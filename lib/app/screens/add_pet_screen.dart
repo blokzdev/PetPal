@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/onboarding_templates.dart';
 import '../../data/relationship.dart';
@@ -506,7 +507,7 @@ class _SpeciesField extends StatelessWidget {
         decoration: const InputDecoration(
           labelText: 'Species',
           border: OutlineInputBorder(),
-          suffixIcon: Icon(Icons.search),
+          suffixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
         ),
         child: Text(
           label,
@@ -537,7 +538,7 @@ class _BreedField extends StatelessWidget {
         decoration: const InputDecoration(
           labelText: 'Breed',
           border: OutlineInputBorder(),
-          suffixIcon: Icon(Icons.search),
+          suffixIcon: Icon(PhosphorIconsRegular.magnifyingGlass),
         ),
         child: Text(
           label,
@@ -861,7 +862,7 @@ class _LifecycleDateField extends StatelessWidget {
             LifecycleDateKind.dob => OutlinedButton.icon(
                 key: const ValueKey('dob-picker'),
                 onPressed: onPickDob,
-                icon: const Icon(Icons.calendar_today),
+                icon: const Icon(PhosphorIconsRegular.calendar),
                 label: Text(_dobLabel(dob)),
               ),
             LifecycleDateKind.approxAge => TextFormField(
@@ -875,7 +876,7 @@ class _LifecycleDateField extends StatelessWidget {
             LifecycleDateKind.adoptionDate => OutlinedButton.icon(
                 key: const ValueKey('adoption-picker'),
                 onPressed: onPickAdoptionDate,
-                icon: const Icon(Icons.calendar_today),
+                icon: const Icon(PhosphorIconsRegular.calendar),
                 label: Text(_adoptionLabel(adoptionDate)),
               ),
           },
@@ -914,7 +915,7 @@ class _RescueRehabDates extends StatelessWidget {
       children: [
         OutlinedButton.icon(
           onPressed: onPickIntakeDate,
-          icon: const Icon(Icons.calendar_today),
+          icon: const Icon(PhosphorIconsRegular.calendar),
           label: Text(intakeDate == null
               ? 'Pick intake date'
               : 'Intake: ${fmt(intakeDate!)}'),
@@ -922,7 +923,7 @@ class _RescueRehabDates extends StatelessWidget {
         const SizedBox(height: Spacing.s),
         OutlinedButton.icon(
           onPressed: onPickExpectedReleaseDate,
-          icon: const Icon(Icons.calendar_today),
+          icon: const Icon(PhosphorIconsRegular.calendar),
           label: Text(expectedReleaseDate == null
               ? 'Pick expected release date'
               : 'Release: ${fmt(expectedReleaseDate!)}'),
@@ -1086,7 +1087,7 @@ class _FreeTierLimit extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Icon(Icons.pets, size: 56, color: scheme.primary),
+          Icon(PhosphorIconsRegular.pawPrint, size: 56, color: scheme.primary),
           const SizedBox(height: 16),
           Text(
             'You already have a pet on the free plan.',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
@@ -216,7 +217,7 @@ class EmptyChatForTesting extends StatelessWidget {
           ];
 
     return PetEmptyState(
-      icon: Icons.chat_bubble_outline,
+      icon: PhosphorIconsRegular.chatCircle,
       heading: heading,
       body: body,
       action: Wrap(
@@ -382,7 +383,7 @@ class _Bubble extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      Icons.warning_amber_rounded,
+                      PhosphorIconsRegular.warningOctagon,
                       size: 14,
                       color: scheme.onSurfaceVariant,
                     ),
@@ -477,7 +478,7 @@ class _Composer extends StatelessWidget {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
-                        : const Icon(Icons.send),
+                        : const Icon(PhosphorIconsRegular.paperPlaneTilt),
                   ),
                 ],
               ),
@@ -502,15 +503,15 @@ class _ErrorBanner extends StatelessWidget {
   IconData _iconFor(ChatErrorCategory c) {
     switch (c) {
       case ChatErrorCategory.auth:
-        return Icons.key_off;
+        return PhosphorIconsRegular.key;
       case ChatErrorCategory.rateLimit:
-        return Icons.hourglass_empty;
+        return PhosphorIconsRegular.hourglass;
       case ChatErrorCategory.offline:
-        return Icons.signal_wifi_off;
+        return PhosphorIconsRegular.cloudSlash;
       case ChatErrorCategory.server:
-        return Icons.cloud_off;
+        return PhosphorIconsRegular.cloudSlash;
       case ChatErrorCategory.generic:
-        return Icons.error_outline;
+        return PhosphorIconsRegular.warningCircle;
     }
   }
 

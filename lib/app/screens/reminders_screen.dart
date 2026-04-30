@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/onboarding_templates.dart';
 import '../../data/pet_name.dart';
@@ -59,7 +60,7 @@ class RemindersScreen extends ConsumerWidget {
             ? null
             : FloatingActionButton.extended(
                 onPressed: () => _openAdd(context, ref, pets.last.id),
-                icon: const Icon(Icons.add_alarm),
+                icon: const Icon(PhosphorIconsRegular.bellRinging),
                 label: const Text('Add reminder'),
               ),
         orElse: () => null,
@@ -196,14 +197,14 @@ class RemindersEmptyForTesting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PetEmptyState(
-      icon: Icons.alarm_outlined,
+      icon: PhosphorIconsRegular.bell,
       heading: 'No reminders for $petName yet.',
       body: 'Heartworm. Flea treatment. Vaccines. Set a reminder '
           "and PetPal will nudge you when it's due.",
       action: PetButton(
         label: 'Add reminder',
         onPressed: onAdd,
-        icon: Icons.add_alarm,
+        icon: PhosphorIconsRegular.bellRinging,
       ),
     );
   }
@@ -231,7 +232,7 @@ class _List extends ConsumerWidget {
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 24),
             child: Icon(
-              Icons.delete_outline,
+              PhosphorIconsRegular.trash,
               color: Theme.of(context).colorScheme.onErrorContainer,
             ),
           ),
@@ -259,15 +260,15 @@ class _List extends ConsumerWidget {
   IconData _iconFor(ReminderKind? kind) {
     switch (kind) {
       case ReminderKind.fleaTreatment:
-        return Icons.bug_report_outlined;
+        return PhosphorIconsRegular.bug;
       case ReminderKind.heartwormDose:
-        return Icons.medication_outlined;
+        return PhosphorIconsRegular.pill;
       case ReminderKind.vaccineDue:
-        return Icons.vaccines_outlined;
+        return PhosphorIconsRegular.syringe;
       case ReminderKind.weightCheck:
-        return Icons.monitor_weight_outlined;
+        return PhosphorIconsRegular.scales;
       case null:
-        return Icons.alarm_outlined;
+        return PhosphorIconsRegular.bell;
     }
   }
 
@@ -322,7 +323,7 @@ class _HealthBanners extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(
-                    Icons.info_outline,
+                    PhosphorIconsRegular.info,
                     size: 16,
                     color: scheme.onSurfaceVariant,
                   ),
@@ -510,7 +511,7 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
               ],
               OutlinedButton.icon(
                 onPressed: _pickDate,
-                icon: const Icon(Icons.calendar_today),
+                icon: const Icon(PhosphorIconsRegular.calendar),
                 label: Text(pickedLabel),
               ),
               const SizedBox(height: 24),

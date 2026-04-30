@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/db/connection.dart';
 import '../../data/db/database.dart';
@@ -203,7 +204,7 @@ class _DevScreenState extends State<DevScreen> {
                 children: [
                   FilledButton.icon(
                     onPressed: _busy ? null : _resetAndSeed,
-                    icon: const Icon(Icons.refresh),
+                    icon: const Icon(PhosphorIconsRegular.arrowClockwise),
                     label: const Text('Reset & seed Milo'),
                   ),
                 ],
@@ -220,7 +221,7 @@ class _DevScreenState extends State<DevScreen> {
               const SizedBox(height: 8),
               FilledButton.icon(
                 onPressed: canSearch ? _runSearch : null,
-                icon: const Icon(Icons.search),
+                icon: const Icon(PhosphorIconsRegular.magnifyingGlass),
                 label: const Text('Run hybrid search'),
               ),
               const SizedBox(height: 16),

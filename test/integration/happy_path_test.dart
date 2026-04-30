@@ -11,6 +11,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
@@ -90,7 +91,7 @@ void main() {
       find.byType(TextField),
       'Milo just ate frozen carrots and napped — please log it.',
     );
-    await tester.tap(find.byIcon(Icons.send));
+    await tester.tap(find.byIcon(PhosphorIconsRegular.paperPlaneTilt));
     await tester.pumpAndSettle();
 
     // The assistant's final text bubble shows up.

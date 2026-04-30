@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../data/db/database.dart';
@@ -80,12 +81,12 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Icon(Icons.ios_share),
+              : const Icon(PhosphorIconsRegular.shareNetwork),
         ),
         IconButton(
           tooltip: 'Refresh',
           onPressed: () => ref.invalidate(wikiEntriesProvider),
-          icon: const Icon(Icons.refresh),
+          icon: const Icon(PhosphorIconsRegular.arrowClockwise),
         ),
       ],
       value: entriesAsync,
@@ -122,13 +123,13 @@ class JournalEmptyForTesting extends StatelessWidget {
             "forget. Tell PetPal what's been happening, and "
             "they'll show up here.";
     return PetEmptyState(
-      icon: Icons.menu_book_outlined,
+      icon: PhosphorIconsRegular.bookOpen,
       heading: heading,
       body: body,
       action: PetButton(
         label: 'Open chat',
         onPressed: () => GoRouter.of(context).go('/chat'),
-        icon: Icons.chat_bubble_outline,
+        icon: PhosphorIconsRegular.chatCircle,
       ),
     );
   }
@@ -226,7 +227,7 @@ class _EntryTile extends StatelessWidget {
         iso,
         style: Theme.of(context).textTheme.bodySmall,
       ),
-      trailing: const Icon(Icons.chevron_right),
+      trailing: const Icon(PhosphorIconsRegular.caretRight),
       onTap: () => GoRouter.of(context).push(
         '/wiki/entry',
         extra: entry.path,

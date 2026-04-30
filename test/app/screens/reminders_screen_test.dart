@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/platform/haptics.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
@@ -234,7 +235,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(FloatingActionButton),
-        matching: find.byIcon(Icons.add_alarm),
+        matching: find.byIcon(PhosphorIconsRegular.bellRinging),
       ),
     );
     await tester.pumpAndSettle();
@@ -307,7 +308,7 @@ void main() {
     await tester.tap(
       find.descendant(
         of: find.byType(FloatingActionButton),
-        matching: find.byIcon(Icons.add_alarm),
+        matching: find.byIcon(PhosphorIconsRegular.bellRinging),
       ),
     );
     await tester.pumpAndSettle();

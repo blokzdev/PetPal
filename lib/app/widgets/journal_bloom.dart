@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../design/design.dart';
 
@@ -87,7 +88,7 @@ class _JournalBloomState extends State<JournalBloom>
             child: Opacity(
               opacity: _opacity.value,
               child: Icon(
-                Icons.menu_book_outlined,
+                PhosphorIconsRegular.bookOpen,
                 size: 28,
                 color: scheme.primary,
               ),

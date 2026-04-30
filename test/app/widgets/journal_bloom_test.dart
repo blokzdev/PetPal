@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/theme.dart';
 import 'package:petpal/app/widgets/journal_bloom.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Task 5.9 — JournalBloom invariants. The bloom is a single-shot
 /// rise + fade that fires `onComplete` when its AnimationController
@@ -19,7 +20,7 @@ void main() {
     await tester.pumpWidget(_wrap(JournalBloom(onComplete: () {})));
     // First frame — opacity is at the start of the tween (0). The
     // icon is nonetheless mounted; it just isn't yet visible.
-    expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
+    expect(find.byIcon(PhosphorIconsRegular.bookOpen), findsOneWidget);
     // Tear down the animation so the test exits cleanly.
     await tester.pumpAndSettle(const Duration(milliseconds: 600));
   });
