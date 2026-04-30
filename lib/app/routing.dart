@@ -9,6 +9,7 @@ import 'screens/chat_screen.dart';
 import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/photo_timeline_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/skill_browser_screen.dart';
@@ -52,6 +53,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/wiki',
         builder: (context, state) => const WikiBrowserScreen(),
+      ),
+      // Phase 6 task 6.3 — dedicated photo timeline at `/photos`.
+      // Reachable from the wiki browser's Photos type-header
+      // "View all in timeline" link in 6.3; from the home grid
+      // camera CTA's post-save flow in 6.6.
+      GoRoute(
+        path: '/photos',
+        builder: (context, state) => const PhotoTimelineScreen(),
       ),
       GoRoute(
         path: '/soul',

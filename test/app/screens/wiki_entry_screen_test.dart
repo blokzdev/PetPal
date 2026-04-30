@@ -29,24 +29,43 @@ class _StubWiki implements WikiIo {
   String soulPath(int petId) => 'wiki/$petId/SOUL.md';
 
   @override
-  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) =>
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) async =>
       throw UnimplementedError('photo write not used in this test');
+
+  /// Returns valid 1x1 PNG bytes for any path. The 6.3 photo entry
+  /// view feeds the FutureBuilder these bytes; image-decode runs
+  /// inside the test binding and the field-row asserts can resolve
+  /// regardless of the codec settling.
   @override
-  Future<Uint8List> readBytes(String relPath) =>
-      throw UnimplementedError('photo read not used in this test');
+  Future<Uint8List> readBytes(String relPath) async => Uint8List.fromList([
+        0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A,
+        0x00, 0x00, 0x00, 0x0D, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53, 0xDE,
+        0x00, 0x00, 0x00, 0x0C, 0x49, 0x44, 0x41, 0x54,
+        0x08, 0x99, 0x63, 0xF8, 0xCF, 0xC0, 0x00, 0x00,
+        0x00, 0x03, 0x00, 0x01, 0x59, 0xF6, 0x29, 0xD2,
+        0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4E, 0x44,
+        0xAE, 0x42, 0x60, 0x82,
+      ]);
+
   @override
   Future<void> deleteIfExists(String relPath) async {}
   @override
   Future<int> bytesForPet(int petId) async => 0;
 }
 
-Widget _wrap(WikiIo wiki) => ProviderScope(
+Widget _wrap(
+  WikiIo wiki, {
+  String path = 'wiki/1/vet/2026-04-25-rabies.md',
+}) =>
+    ProviderScope(
       overrides: [
         wikiIoProvider.overrideWith((ref) async => wiki),
       ],
       child: MaterialApp(
         theme: buildLightTheme(),
-        home: const WikiEntryScreen(path: 'wiki/1/vet/2026-04-25-rabies.md'),
+        home: WikiEntryScreen(path: path),
       ),
     );
 
@@ -142,5 +161,101 @@ A quiet week.
         reason: 'AppBar uses the locked digest title');
     expect(find.byType(Markdown), findsOneWidget);
     expect(find.textContaining('A quiet week.'), findsOneWidget);
+  });
+
+  group('Phase 6 task 6.3 — photo entry view dispatch', () {
+    // A photo sidecar — type=photos, with the locked 6.1-minimum
+    // frontmatter shape plus optional 6.5 extractor fields.
+    const photoSidecar = '''---
+type: photos
+image: abc-123.jpg
+ts: 2026-04-25T14:30:12
+byte_size: 24576
+setting: outdoors
+activity: walking
+demeanor: looks relaxed and curious
+notable_objects:
+  - leash
+  - frozen carrot
+enrichment_hints:
+  - "Was Loki excited the whole walk or just at the trailhead?"
+---
+
+Loki at the trailhead.
+''';
+
+    testWidgets('dispatches to the photo entry view (NOT the markdown '
+        'render path) when frontmatter has type: photos', (tester) async {
+      await tester.pumpWidget(_wrap(_StubWiki(photoSidecar)));
+      await tester.pumpAndSettle();
+
+      // Markdown widget MUST NOT mount on the photo path — the type
+      // dispatch routes to _PhotoEntryView instead.
+      expect(find.byType(Markdown), findsNothing,
+          reason: 'photo entries skip the markdown render path');
+
+      // The freeform caption from the sidecar body shows as plain
+      // text (SelectableText), not as a markdown widget.
+      expect(find.textContaining('Loki at the trailhead.'),
+          findsOneWidget);
+    });
+
+    testWidgets('photo entry view surfaces the additive frontmatter '
+        'fields (setting / activity / demeanor / notable_objects '
+        '/ enrichment_hints) as label-value rows', (tester) async {
+      await tester.pumpWidget(_wrap(_StubWiki(photoSidecar)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Setting'), findsOneWidget);
+      expect(find.text('outdoors'), findsOneWidget);
+      expect(find.text('Activity'), findsOneWidget);
+      expect(find.text('walking'), findsOneWidget);
+      expect(find.text('Demeanor'), findsOneWidget);
+      expect(find.textContaining('looks relaxed and curious'),
+          findsOneWidget);
+      expect(find.text('Notable'), findsOneWidget);
+      expect(find.textContaining('leash, frozen carrot'), findsOneWidget);
+      expect(find.text('Follow-up'), findsOneWidget);
+      // Bytes formatted as human-readable (24576 → 24 KB).
+      expect(find.text('Size'), findsOneWidget);
+      expect(find.textContaining('24 KB'), findsOneWidget);
+    });
+
+    testWidgets('photo entry view skips rows for absent fields — the '
+        '6.1-minimum sidecar (no extractor fields yet) renders only '
+        '"When" + "Size"', (tester) async {
+      const minimalSidecar = '''---
+type: photos
+image: abc-123.jpg
+ts: 2026-04-25T14:30:12
+byte_size: 1536
+---
+
+''';
+      await tester.pumpWidget(_wrap(_StubWiki(minimalSidecar)));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(Markdown), findsNothing);
+      // No extractor fields render.
+      expect(find.text('Setting'), findsNothing);
+      expect(find.text('Activity'), findsNothing);
+      expect(find.text('Demeanor'), findsNothing);
+      expect(find.text('Notable'), findsNothing);
+      expect(find.text('Follow-up'), findsNothing);
+      // Always-present fields still render.
+      expect(find.text('When'), findsOneWidget);
+      expect(find.text('Size'), findsOneWidget);
+    });
+
+    testWidgets('AppBar title is "Memory" for photo entries (path-shape '
+        'fallback — photo paths use UUIDs not <date>-<slug>)',
+        (tester) async {
+      await tester.pumpWidget(_wrap(
+        _StubWiki(photoSidecar),
+        path: 'wiki/1/photos/abc-123.md',
+      ));
+      await tester.pumpAndSettle();
+      expect(find.text('Memory'), findsOneWidget);
+    });
   });
 }

@@ -200,13 +200,28 @@ class _TypeHeader extends StatelessWidget {
       width: double.infinity,
       color: scheme.surfaceContainerHighest,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(
-        '${_humanTypeLabel(type)} · $count',
-        style: TextStyle(
-          color: scheme.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.4,
-        ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              '${_humanTypeLabel(type)} · $count',
+              style: TextStyle(
+                color: scheme.onSurfaceVariant,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.4,
+              ),
+            ),
+          ),
+          // Phase 6 task 6.3 — Photos type-header carries a link to
+          // the dedicated grid timeline at `/photos`. Other type
+          // headers stay header-only. Single touch-target; the
+          // section header itself stays read-only / glance-only.
+          if (type == 'photos')
+            TextButton(
+              onPressed: () => GoRouter.of(context).push('/photos'),
+              child: const Text('View all'),
+            ),
+        ],
       ),
     );
   }
