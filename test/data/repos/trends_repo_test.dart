@@ -36,7 +36,7 @@ void main() {
     tempRoot = Directory.systemTemp.createTempSync('petpal_trends_');
     db = AppDatabase(NativeDatabase.memory());
     wiki = WikiIoFs(tempRoot);
-    final stub = const StubEmbeddingProvider(dim: 16);
+    const stub = StubEmbeddingProvider(dim: 16);
     final worker = EmbeddingWorker(db: db, provider: stub);
     wikiRepo = WikiRepo(db: db, wiki: wiki, embeddings: worker);
     petRepo = PetRepo(db: db, wiki: wiki);
@@ -59,7 +59,7 @@ void main() {
         title: 'Vet checkup',
         body:
             '---\ntype: weight\nweight_kg: 14.2\n---\n\nLoki at the vet.\n',
-        ts: DateTime(2026, 3, 1),
+        ts: DateTime(2026, 3, 2),
       );
       await wikiRepo.writeEntry(
         petId: petId,
@@ -73,7 +73,7 @@ void main() {
         type: 'weight',
         title: 'Spring check',
         body: '---\ntype: weight\nweight_kg: 13.9\n---\n\nMud-season weigh.\n',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
 
       final history = await trends.weightHistory(petId);
@@ -90,14 +90,14 @@ void main() {
         type: 'weight',
         title: 'Vague note',
         body: '---\ntype: weight\n---\n\nForgot to write the number.\n',
-        ts: DateTime(2026, 3, 1),
+        ts: DateTime(2026, 3, 2),
       );
       await wikiRepo.writeEntry(
         petId: petId,
         type: 'weight',
         title: 'Real measurement',
         body: '---\ntype: weight\nweight_kg: 14.2\n---\n\nKitchen scale.\n',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
 
       final history = await trends.weightHistory(petId);
@@ -112,7 +112,7 @@ void main() {
         type: 'weight',
         title: 'Pounds-style',
         body: '---\ntype: weight\nweight_kg: "14.2 kg"\n---\n\nLater note.\n',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
       final history = await trends.weightHistory(petId);
       expect(history.single.kg, 14.2);
@@ -130,14 +130,14 @@ void main() {
         type: 'weight',
         title: 'Cat weigh',
         body: '---\ntype: weight\nweight_kg: 4.5\n---\n\nCat scale.\n',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
       await wikiRepo.writeEntry(
         petId: petId,
         type: 'weight',
         title: 'Dog weigh',
         body: '---\ntype: weight\nweight_kg: 14.2\n---\n\nDog scale.\n',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
       final dogHistory = await trends.weightHistory(petId);
       final catHistory = await trends.weightHistory(otherId);
@@ -154,7 +154,7 @@ void main() {
         type: 'behavior',
         title: 'Bath day',
         body: 'Loki was scratching all morning after the bath.',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
       await wikiRepo.writeEntry(
         petId: petId,
@@ -220,7 +220,7 @@ void main() {
         type: 'behavior',
         title: 'Cat',
         body: 'Mochi vomited a hairball.',
-        ts: DateTime(2026, 4, 1),
+        ts: DateTime(2026, 4, 2),
       );
       final dogFreq = await trends.symptomFrequencies(petId);
       final catFreq = await trends.symptomFrequencies(otherId);

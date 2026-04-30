@@ -200,4 +200,159 @@ void main() {
     expect(result.skipped, isTrue);
     expect(result.reason, contains('no usable text'));
   });
+
+  group('Phase 6 task 6.13 — smarter digest enrichment', () {
+    test('the system prompt instructs on trends, anomalies, photo '
+        'memories, and gentle observations', () async {
+      await wikiRepo.writeEntry(
+        petId: petId,
+        type: 'food',
+        title: 'A note',
+        body: 'Some content.',
+        ts: DateTime(2026, 4, 22),
+      );
+      final llm = _ScriptedLlm(
+        const Message(
+          role: 'assistant',
+          content: [TextBlock('## Summary\n- ok')],
+        ),
+      );
+      final runner = WeeklyDigestRunner(
+        db: db,
+        wiki: wiki,
+        wikiRepo: wikiRepo,
+        llm: llm,
+      );
+      await runner.run(petId: petId, now: DateTime(2026, 4, 25));
+      final sys = llm.systemPromptsSeen.single;
+      expect(sys, contains('Trends'));
+      expect(sys, contains('Anomalies'));
+      expect(sys, contains('Photo memories'));
+      expect(sys, contains('Gentle observations'));
+      expect(sys, contains('not a vet'));
+    });
+
+    test('weight observations + delta block are included in the user '
+        'turn when the pet has weight history', () async {
+      // Six weight entries over six weeks — three this week, three
+      // prior — so the delta path triggers. (The runner queries
+      // ALL weight history and computes the delta over the digest
+      // window vs the prior window; entries outside both windows
+      // still show up in the all-time list but don't drive the
+      // delta.)
+      final asOf = DateTime(2026, 4, 25);
+      final entries = [
+        (asOf.subtract(const Duration(days: 13)), 14.0),
+        (asOf.subtract(const Duration(days: 11)), 14.1),
+        (asOf.subtract(const Duration(days: 9)), 14.2),
+        (asOf.subtract(const Duration(days: 5)), 13.8),
+        (asOf.subtract(const Duration(days: 3)), 13.7),
+        (asOf.subtract(const Duration(days: 1)), 13.6),
+      ];
+      for (var i = 0; i < entries.length; i++) {
+        final e = entries[i];
+        await wikiRepo.writeEntry(
+          petId: petId,
+          type: 'weight',
+          title: 'Weigh-in $i',
+          body: '---\ntype: weight\nweight_kg: ${e.$2}\n---\n\nNote.\n',
+          ts: e.$1,
+        );
+      }
+      final llm = _ScriptedLlm(
+        const Message(
+          role: 'assistant',
+          content: [TextBlock('## Summary\n- ok')],
+        ),
+      );
+      final runner = WeeklyDigestRunner(
+        db: db,
+        wiki: wiki,
+        wikiRepo: wikiRepo,
+        llm: llm,
+      );
+      await runner.run(petId: petId, now: asOf);
+      final userText = llm.historiesSeen.single.single.content
+          .whereType<TextBlock>()
+          .single
+          .text;
+      expect(userText, contains('Structured signal block'));
+      expect(userText, contains('Weight observations'));
+      expect(userText, contains('14.00 kg'));
+      expect(userText, contains('Weight delta'));
+      expect(userText, contains('Direction: down'));
+    });
+
+    test('photo entries this week appear in the user-turn payload as '
+        'anchor moments', () async {
+      // The runner type-classifies entries by their `type` column,
+      // not by parsing frontmatter from disk. We seed a photo-typed
+      // entry directly via WikiRepo.writeEntry.
+      await wikiRepo.writeEntry(
+        petId: petId,
+        type: 'photos',
+        title: 'Loki at the trailhead',
+        body: '---\ntype: photos\nimage: abc-123.jpg\n---\n\n'
+            'Loki at the trailhead.\n',
+        ts: DateTime(2026, 4, 23),
+      );
+      final llm = _ScriptedLlm(
+        const Message(
+          role: 'assistant',
+          content: [TextBlock('## Summary\n- ok')],
+        ),
+      );
+      final runner = WeeklyDigestRunner(
+        db: db,
+        wiki: wiki,
+        wikiRepo: wikiRepo,
+        llm: llm,
+      );
+      await runner.run(petId: petId, now: DateTime(2026, 4, 25));
+      final userText = llm.historiesSeen.single.single.content
+          .whereType<TextBlock>()
+          .single
+          .text;
+      expect(userText, contains('Photo memories this week'));
+      expect(userText, contains('Loki at the trailhead'));
+    });
+
+    test('symptom keyword hits surface in the trend block', () async {
+      // Two entries that mention scratching keyword — FTS5 indexes
+      // the body so the trend block picks it up.
+      await wikiRepo.writeEntry(
+        petId: petId,
+        type: 'behavior',
+        title: 'Itchy day',
+        body: 'Loki was scratching all morning.',
+        ts: DateTime(2026, 4, 22),
+      );
+      await wikiRepo.writeEntry(
+        petId: petId,
+        type: 'behavior',
+        title: 'Itchy again',
+        body: 'More scratching this evening.',
+        ts: DateTime(2026, 4, 23),
+      );
+      final llm = _ScriptedLlm(
+        const Message(
+          role: 'assistant',
+          content: [TextBlock('## Summary\n- ok')],
+        ),
+      );
+      final runner = WeeklyDigestRunner(
+        db: db,
+        wiki: wiki,
+        wikiRepo: wikiRepo,
+        llm: llm,
+      );
+      await runner.run(petId: petId, now: DateTime(2026, 4, 25));
+      final userText = llm.historiesSeen.single.single.content
+          .whereType<TextBlock>()
+          .single
+          .text;
+      expect(userText, contains('Symptom keyword counts'));
+      expect(userText, contains('Scratching: 2'));
+    });
+  });
 }
