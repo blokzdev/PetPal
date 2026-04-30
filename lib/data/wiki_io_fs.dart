@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -54,5 +55,39 @@ class WikiIoFs extends WikiIo {
     }
     files.sort();
     return files;
+  }
+
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) async {
+    final file = File(_abs(relPath));
+    await file.parent.create(recursive: true);
+    final tmp = File('${file.path}.tmp');
+    await tmp.writeAsBytes(bytes, flush: true);
+    await tmp.rename(file.path);
+  }
+
+  @override
+  Future<Uint8List> readBytes(String relPath) =>
+      File(_abs(relPath)).readAsBytes();
+
+  @override
+  Future<void> deleteIfExists(String relPath) async {
+    final file = File(_abs(relPath));
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+  @override
+  Future<int> bytesForPet(int petId) async {
+    final dir = Directory(_abs(petDir(petId)));
+    if (!await dir.exists()) return 0;
+    var total = 0;
+    await for (final entity in dir.list(recursive: true)) {
+      if (entity is File) {
+        total += await entity.length();
+      }
+    }
+    return total;
   }
 }

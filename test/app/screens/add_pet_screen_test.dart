@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,17 @@ class _CapturingWiki implements WikiIo {
 
   @override
   String soulPath(int petId) => 'wiki/$petId/SOUL.md';
+
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) =>
+      throw UnimplementedError('photo write not used in this test');
+  @override
+  Future<Uint8List> readBytes(String relPath) =>
+      throw UnimplementedError('photo read not used in this test');
+  @override
+  Future<void> deleteIfExists(String relPath) async {}
+  @override
+  Future<int> bytesForPet(int petId) async => 0;
 }
 
 /// Rich in-memory template that mirrors the placeholder set the real

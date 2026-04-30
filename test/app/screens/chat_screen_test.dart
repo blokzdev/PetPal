@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,6 +37,16 @@ class _NoopWiki implements WikiIo {
   String petDir(int petId) => 'wiki/$petId';
   @override
   String soulPath(int petId) => 'wiki/$petId/SOUL.md';
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) =>
+      throw UnimplementedError('photo write not used in this test');
+  @override
+  Future<Uint8List> readBytes(String relPath) =>
+      throw UnimplementedError('photo read not used in this test');
+  @override
+  Future<void> deleteIfExists(String relPath) async {}
+  @override
+  Future<int> bytesForPet(int petId) async => 0;
 }
 
 List<Override> _commonOverrides({required ScriptedLlmClient llm}) => [

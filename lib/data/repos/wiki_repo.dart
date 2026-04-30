@@ -5,6 +5,7 @@ import 'package:drift/drift.dart';
 
 import '../../harness/retrieval/embedding_worker.dart';
 import '../db/database.dart';
+import '../photo_id.dart';
 import '../wiki_io.dart';
 import '../wiki_slug.dart';
 
@@ -156,6 +157,96 @@ class WikiRepo {
     await _embeddings?.enqueue(entryId: id, body: body);
     return id;
   }
+
+  /// Phase 6 task 6.1 — write a photo entry: the `.jpg` (or other
+  /// image) binary plus its sidecar `.md`. The sidecar is the indexed
+  /// `Entry` (the binary lives next to it on disk but never in the
+  /// `entries` table) — its frontmatter carries an `image:` pointer to
+  /// the binary's filename. FTS5 indexes the sidecar's caption body.
+  ///
+  /// Atomic-write semantics: writes the `.jpg` first, then the sidecar
+  /// `.md`. If the `.md` write throws, the orphaned `.jpg` is deleted
+  /// so storage accounting stays honest (sidecar is the source of
+  /// truth for "this photo exists").
+  ///
+  /// Storage budget (locked thresholds):
+  ///   warn at  500 MB / pet → result includes `warningBytes`
+  ///   reject at  1 GB / pet → write doesn't run, returns `error =
+  ///                          PhotoSaveError.storageFull`
+  /// The pre-write check is intentionally not transactional with the
+  /// write — single-user app, no parallel-save race in v1. Pre-write
+  /// resize lands at task 6.6 to keep the budget honest (~600 KB per
+  /// saved photo); 6.1 just persists raw bytes.
+  Future<PhotoSaveResult> writePhoto({
+    required int petId,
+    required Uint8List imageBytes,
+    required String caption,
+    DateTime? ts,
+    String mimeType = 'image/jpeg',
+    String? photoId,
+    // Budget thresholds default to the locked constants. Overrides
+    // exist for testability (the budget paths are otherwise hard to
+    // exercise without 500 MB of scratch files); production callers
+    // never set them.
+    int warnBytes = photoStorageWarnBytes,
+    int hardLimitBytes = photoStorageHardLimitBytes,
+  }) async {
+    final usedBefore = await _wiki.bytesForPet(petId);
+    final incomingBytes = imageBytes.length;
+    if (usedBefore + incomingBytes >= hardLimitBytes) {
+      return PhotoSaveResult.failed(
+        PhotoSaveError.storageFull,
+        bytesUsed: usedBefore,
+      );
+    }
+
+    final id = photoId ?? newPhotoId();
+    final ext = _extForMimeType(mimeType);
+    final binaryPath = photoBinaryPath(petId: petId, photoId: id, ext: ext);
+    final sidecarPath = photoSidecarPath(petId: petId, photoId: id);
+    final timestamp = ts ?? DateTime.now();
+    final sidecarBody = _composePhotoSidecar(
+      imageFilename: '$id.$ext',
+      ts: timestamp,
+      byteSize: incomingBytes,
+      caption: caption,
+    );
+
+    // Binary lands first. If the sidecar write fails after this, we
+    // clean up the orphan so a follow-up call sees a consistent state.
+    await _wiki.writeBytesAtomic(binaryPath, imageBytes);
+    try {
+      // Empty captions fall back to "Photo" for the indexed title —
+      // surfaces cleanly in the journal browser tile + FTS5 row
+      // without leaking the UUID. The user can edit the caption in
+      // 6.6's form preview to set a real title.
+      await _writeAt(
+        path: sidecarPath,
+        petId: petId,
+        type: 'photos',
+        title: caption.trim().isEmpty ? 'Photo' : caption.trim(),
+        body: sidecarBody,
+        ts: timestamp,
+      );
+    } catch (_) {
+      // Best-effort cleanup. If this also fails, log via the next
+      // bytesForPet read — the orphan stays until rebuildIndex picks
+      // it up. We don't escalate the cleanup error; the original
+      // sidecar-write failure is what the caller needs to see.
+      await _wiki.deleteIfExists(binaryPath);
+      rethrow;
+    }
+
+    final usedAfter = usedBefore + incomingBytes + sidecarBody.length;
+    final warning = usedAfter >= warnBytes ? usedAfter : null;
+    return PhotoSaveResult.success(
+      sidecarPath: sidecarPath,
+      binaryPath: binaryPath,
+      photoId: id,
+      bytesUsed: usedAfter,
+      warningBytes: warning,
+    );
+  }
 }
 
 String _hash(String body) =>
@@ -172,6 +263,146 @@ String entryPath({
       '${ts.month.toString().padLeft(2, '0')}-'
       '${ts.day.toString().padLeft(2, '0')}';
   return 'wiki/$petId/$type/$date-${slugify(title)}.md';
+}
+
+/// Photo storage budget thresholds (Phase 6 task 6.1, ROADMAP lock).
+/// Soft warn at 500 MB so the UI can surface a banner; hard reject at
+/// 1 GB so a runaway pet doesn't fill the device. Pre-write resize at
+/// 6.6 keeps the running budget honest (~600 KB / saved photo).
+const int photoStorageWarnBytes = 500 * 1024 * 1024;
+const int photoStorageHardLimitBytes = 1024 * 1024 * 1024;
+
+/// Wiki-relative path to a photo's binary file. The file extension
+/// derives from the mime type — JPEG saves as `.jpg`, PNG as `.png`.
+/// The 6.6 pre-write resize normalises everything to JPEG so most
+/// real photos land at `.jpg`.
+String photoBinaryPath({
+  required int petId,
+  required String photoId,
+  String ext = 'jpg',
+}) =>
+    'wiki/$petId/photos/$photoId.$ext';
+
+/// Wiki-relative path to a photo's sidecar `.md`. The sidecar is the
+/// indexed entry; its frontmatter `image:` pointer carries the
+/// matching binary filename. `parseEntryPath()` returns null for this
+/// shape (no date prefix); photo entries don't fit the
+/// `<YYYY-MM-DD>-<slug>.md` template.
+String photoSidecarPath({required int petId, required String photoId}) =>
+    'wiki/$petId/photos/$photoId.md';
+
+String _extForMimeType(String mime) {
+  switch (mime.toLowerCase()) {
+    case 'image/jpeg':
+    case 'image/jpg':
+      return 'jpg';
+    case 'image/png':
+      return 'png';
+    case 'image/webp':
+      return 'webp';
+    case 'image/heic':
+    case 'image/heif':
+      return 'heic';
+    default:
+      // Fall back to jpg — Anthropic's vision API also accepts the
+      // less-common types (webp, gif) but the 6.6 resize normalises
+      // to jpeg before they reach disk.
+      return 'jpg';
+  }
+}
+
+/// Compose a photo sidecar body from its 6.1-minimum frontmatter +
+/// freeform caption. The optional fields (`setting`, `activity`,
+/// `demeanor`, `notable_objects`, `enrichment_hints`, `red_flag_match`)
+/// are additive at 6.5 / 6.7 via `mergeFrontmatter` — leaving them off
+/// at 6.1 keeps the sidecar small and the schema additive.
+String _composePhotoSidecar({
+  required String imageFilename,
+  required DateTime ts,
+  required int byteSize,
+  required String caption,
+}) {
+  final iso =
+      '${ts.year.toString().padLeft(4, '0')}-'
+      '${ts.month.toString().padLeft(2, '0')}-'
+      '${ts.day.toString().padLeft(2, '0')}T'
+      '${ts.hour.toString().padLeft(2, '0')}:'
+      '${ts.minute.toString().padLeft(2, '0')}:'
+      '${ts.second.toString().padLeft(2, '0')}';
+  final safeCaption = caption.trim();
+  return '---\n'
+      'type: photos\n'
+      'image: $imageFilename\n'
+      'ts: $iso\n'
+      'byte_size: $byteSize\n'
+      '---\n'
+      '\n'
+      '$safeCaption${safeCaption.isEmpty ? '' : '\n'}';
+}
+
+/// Outcome of a [WikiRepo.writePhoto] call. Sealed via factory
+/// constructors so callers can pattern-match success / warning /
+/// error without try/catch around foreseeable failure modes.
+class PhotoSaveResult {
+  const PhotoSaveResult._({
+    required this.success,
+    this.sidecarPath,
+    this.binaryPath,
+    this.photoId,
+    this.bytesUsed = 0,
+    this.warningBytes,
+    this.error,
+  });
+
+  factory PhotoSaveResult.success({
+    required String sidecarPath,
+    required String binaryPath,
+    required String photoId,
+    required int bytesUsed,
+    int? warningBytes,
+  }) =>
+      PhotoSaveResult._(
+        success: true,
+        sidecarPath: sidecarPath,
+        binaryPath: binaryPath,
+        photoId: photoId,
+        bytesUsed: bytesUsed,
+        warningBytes: warningBytes,
+      );
+
+  factory PhotoSaveResult.failed(
+    PhotoSaveError error, {
+    required int bytesUsed,
+  }) =>
+      PhotoSaveResult._(
+        success: false,
+        bytesUsed: bytesUsed,
+        error: error,
+      );
+
+  final bool success;
+  final String? sidecarPath;
+  final String? binaryPath;
+  final String? photoId;
+
+  /// Total bytes used by the pet's wiki dir AFTER this write (or
+  /// pre-rejection bytes if [success] is false).
+  final int bytesUsed;
+
+  /// Non-null when the post-write usage crossed the 500 MB warn
+  /// threshold. The caller surfaces a banner; the write still
+  /// succeeded.
+  final int? warningBytes;
+
+  /// Non-null on failure (storage full, IO error). [success] is then
+  /// false and the binary + sidecar weren't written.
+  final PhotoSaveError? error;
+}
+
+enum PhotoSaveError {
+  /// Pre-write check rejected: pet's bytes-used + incoming bytes
+  /// would exceed [photoStorageHardLimitBytes].
+  storageFull,
 }
 
 /// Parsed view of an entry path: `wiki/<petId>/<type>/<YYYY-MM-DD>-<slug>.md`.

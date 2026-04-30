@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/data/db/database.dart';
@@ -26,6 +28,17 @@ class _FakeWikiIo extends WikiIo {
     final prefix = '${petDir(petId)}/';
     return writes.keys.where((k) => k.startsWith(prefix)).toList();
   }
+
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) =>
+      throw UnimplementedError('photo write not used in pet_repo tests');
+  @override
+  Future<Uint8List> readBytes(String relPath) =>
+      throw UnimplementedError('photo read not used in pet_repo tests');
+  @override
+  Future<void> deleteIfExists(String relPath) async {}
+  @override
+  Future<int> bytesForPet(int petId) async => 0;
 }
 
 void main() {
