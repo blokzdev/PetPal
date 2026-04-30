@@ -90,6 +90,16 @@ dependencies:
   #   back-gesture support. flutter.dev (verified).
   flutter_animate: ^4.5.2
   animations: ^2.2.0
+  # Pre-Phase-6 polish — markdown rendering on detail screens.
+  # `flutter_markdown` was discontinued by Google (May 2024); the
+  # official continuation is `flutter_markdown_plus` by Foresight
+  # Mobile (verified, 160/160 pub points, 246k downloads, defaults
+  # to GitHub-flavored markdown). Same API surface as the
+  # discontinued original, so the integration is a clean swap.
+  # Used by wiki_entry_screen for journal entry + weekly summary
+  # detail rendering — pre-fix the screens rendered raw markdown
+  # source via SelectableText/monospace.
+  flutter_markdown_plus: ^1.0.7
 
 dev_dependencies:
   flutter_test:
