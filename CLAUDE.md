@@ -315,6 +315,7 @@ integration_test/
 - **Commit after each task.** Conventional commit messages (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
 - **Tick off completed tasks** in `ROADMAP.md` in place — change `[ ]` to `[x]`.
 - **Append to `DECISIONS.md`** whenever you make a non-obvious choice. Categories: storage, agent, scheduling, monetization, sync, ui, privacy.
+- **Append to `V1X_BACKLOG.md` whenever you defer a v1 feature** to v1.1 / v1.2 / v1.x. Same commit as the deferral decision — don't ship a deferral that exists only in a DECISIONS row + conversation history. The backlog is the single source of truth for "what gets built post-launch." Each entry carries source phase / decision, DECISIONS row reference, scope estimate, dependencies, and load-bearing notes. PRODUCT.md keeps a one-line summary pointer; deeper specifics live in the backlog.
 - **Hit ambiguity → stop and ask.** Don't guess.
 - **Plan needs to change → propose, wait for approval, then edit `ROADMAP.md`.** Never silently re-plan.
 - **End of phase → hard stop.** Summarize: what changed, what to verify on the Android device, what's next. Do not auto-start the next phase.
