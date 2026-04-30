@@ -72,6 +72,14 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
     return AppScaffold.async<List<Entry>>(
       title: title,
       actions: [
+        // Phase 6 task 6.10 — log a structured vet-visit entry. The
+        // form lives at /vet/new; saves a structured-frontmatter
+        // markdown file under wiki/<petId>/vet/.
+        IconButton(
+          tooltip: 'Log a vet visit',
+          onPressed: () => GoRouter.of(context).push('/vet/new'),
+          icon: const Icon(PhosphorIconsRegular.firstAidKit),
+        ),
         IconButton(
           tooltip: 'Export journal',
           onPressed: _exporting ? null : _export,

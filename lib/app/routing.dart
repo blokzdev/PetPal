@@ -15,6 +15,7 @@ import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/skill_browser_screen.dart';
 import 'screens/soul_editor_screen.dart';
+import 'screens/vet_visit_form_screen.dart';
 import 'screens/wiki_browser_screen.dart';
 import 'screens/wiki_entry_screen.dart';
 
@@ -95,6 +96,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/reminders',
         builder: (context, state) => const RemindersScreen(),
+      ),
+      // Phase 6 task 6.10 — vet-visit structured entry creator. Form-
+      // driven; writes a structured-frontmatter entry to
+      // wiki/<petId>/vet/<YYYY-MM-DD>-<reason>.md. Reachable from the
+      // journal browser AppBar.
+      GoRoute(
+        path: '/vet/new',
+        builder: (context, state) => const VetVisitFormScreen(),
       ),
       // Phase 5.6 Commit C — `/wiki/entry` adopts a Material
       // SharedAxisTransition (X axis) via `pageBuilder:` so tapping
