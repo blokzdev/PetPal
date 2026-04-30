@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/pet_name.dart';
+import '../../harness/observation/affective_observation.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
@@ -207,6 +208,7 @@ class _GreetingBody extends ConsumerWidget {
     // emitting orphan apostrophes ("PetPal remembers 's life...")
     // or trailing-space CTAs ("Chat with ").
     final name = displayPetName(pet.name as String?);
+    final observation = ref.watch(recentAffectiveObservationProvider);
     // Free tier (DECISIONS row 8) — chat with the most recently-created pet.
     return SingleChildScrollView(
       child: Column(
@@ -220,6 +222,16 @@ class _GreetingBody extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),
+        // Phase 6 task 6.8 — affective observation card. Surfaces
+        // when a just-saved photo memory's pipeline returned a
+        // grounded high-confidence observation. Sits below the
+        // tagline, above the chat CTA — visible on land but doesn't
+        // displace the primary action. Dismissible; cleared by the
+        // notifier so re-navigating to home doesn't resurface it.
+        if (observation != null) ...[
+          const SizedBox(height: Spacing.l),
+          _AffectiveObservationCard(observation: observation),
+        ],
         const SizedBox(height: Spacing.xl),
         // Primary CTA — stays prominent above the destinations grid
         // (5.12 user-locked intent: 'Chat with Loki' is the most-used
@@ -236,6 +248,77 @@ class _GreetingBody extends ConsumerWidget {
         // square the grid in dev builds, but never in release.
         const _DestinationsGrid(),
       ],
+      ),
+    );
+  }
+}
+
+/// Phase 6 task 6.8 — surfaces a single warm grounded observation
+/// after a photo save. Soft sage-tinted card; a leaf icon (Phosphor
+/// regular, the journal-aesthetic register); the observation text in
+/// body-medium; a small "from {grounding_ref}" footer; close button
+/// dismisses via `recentAffectiveObservationProvider.notifier`.
+///
+/// VOICE.md §2 register applies — the card never claims emotion as
+/// fact; the observer's prompt does the hedging, the card just
+/// renders what arrives.
+class _AffectiveObservationCard extends ConsumerWidget {
+  const _AffectiveObservationCard({required this.observation});
+  final AffectiveObservation observation;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return PetCard(
+      padding: const EdgeInsets.fromLTRB(
+        Spacing.m,
+        Spacing.m,
+        Spacing.s,
+        Spacing.m,
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(
+              PhosphorIconsRegular.leaf,
+              size: 18,
+              color: scheme.primary,
+            ),
+          ),
+          const SizedBox(width: Spacing.s),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  observation.text,
+                  style: textTheme.bodyMedium,
+                ),
+                const SizedBox(height: Spacing.xs),
+                Text(
+                  'from ${observation.groundingRef}',
+                  style: textTheme.labelSmall?.copyWith(
+                    color: scheme.onSurface.withValues(alpha: 0.6),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Dismiss',
+            icon: Icon(
+              PhosphorIconsRegular.x,
+              size: 16,
+              color: scheme.onSurface.withValues(alpha: 0.7),
+            ),
+            onPressed: () => ref
+                .read(recentAffectiveObservationProvider.notifier)
+                .dismiss(),
+          ),
+        ],
       ),
     );
   }

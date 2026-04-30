@@ -10,6 +10,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import '../../data/repos/wiki_repo.dart';
 import '../../data/soul_file.dart';
 import '../../harness/guardrails/red_flag_screener.dart';
+import '../../harness/observation/affective_observation.dart';
 import '../../harness/vision/photo_extractor.dart';
 import '../design/design.dart';
 import '../platform/haptics.dart';
@@ -303,6 +304,16 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
       // Invalidate downstream views so the new photo surfaces.
       ref.invalidate(wikiEntriesProvider);
 
+      // Phase 6 task 6.8 — fire the affective observation pipeline
+      // async if the toggle is ON and the frequency cap allows.
+      // unawaited(): never block Save on this. The observation, if
+      // any, lands on `recentAffectiveObservationProvider` which the
+      // home screen surfaces below the hero.
+      unawaited(_maybeFireAffectiveObservation(
+        petId: petId,
+        caption: _caption.text.trim(),
+      ));
+
       // Light haptic + snackbar + pop home (matches the 5.9
       // memory-saved hero pattern).
       ref.read(hapticsProvider).light();
@@ -342,6 +353,74 @@ class _PhotoCaptureScreenState extends ConsumerState<PhotoCaptureScreen> {
     final merged = mergeFrontmatter(parsed.frontmatter, patch);
     final next = serializeSoul(frontmatter: merged, body: parsed.body);
     await wiki.writeAtomic(sidecarPath, next);
+  }
+
+  /// Phase 6 task 6.8 — three-gate affective observation fire.
+  ///
+  /// Gate 1: Settings toggle ON. Default ON (DECISIONS row 41 e).
+  /// Gate 2: Frequency cap. Reads the per-pet
+  ///   `affective_count_at_last_fire_<petId>` int from
+  ///   SettingsStorage; the photo count comes from the live
+  ///   wikiEntriesProvider (already invalidated above this call so
+  ///   the new photo is reflected). Allow fire iff
+  ///   `currentPhotoCount - countAtLastFire >= 5`. The first save
+  ///   (countAtLastFire == null, photoCount == 1) is allowed —
+  ///   captures the "welcome moment" without making the user wait
+  ///   for five photos before any observation lands.
+  /// Gate 3: The observer's own grounding + confidence gates inside
+  ///   `AffectiveObserver.observe`.
+  ///
+  /// On a successful fire we update the per-pet counter and post the
+  /// observation onto `recentAffectiveObservationProvider`.
+  Future<void> _maybeFireAffectiveObservation({
+    required int petId,
+    required String caption,
+  }) async {
+    if (caption.isEmpty) return;
+
+    // Gate 1 — toggle.
+    final toggleAsync = ref.read(showAffectiveObservationsProvider);
+    final toggle = toggleAsync.maybeWhen(
+      data: (v) => v,
+      orElse: () => true,
+    );
+    if (!toggle) return;
+
+    final settings = ref.read(settingsStorageProvider);
+    final counterKey = 'affective_count_at_last_fire_$petId';
+    final countAtLastFire = await settings.getInt(counterKey);
+
+    // Gate 2 — frequency cap. Photo count = entries of type=photos.
+    final entriesAsync = ref.read(wikiEntriesProvider);
+    final photoCount = entriesAsync.maybeWhen(
+      data: (entries) =>
+          entries.where((e) => e.type == 'photos').length,
+      orElse: () => 0,
+    );
+    if (photoCount == 0) return;
+    if (countAtLastFire != null &&
+        photoCount - countAtLastFire < 5) {
+      return;
+    }
+
+    // Gate 3 — observer's grounding + confidence checks.
+    AffectiveObservation? observation;
+    try {
+      final observer =
+          await ref.read(affectiveObserverProvider.future);
+      observation = await observer.observe(
+        petId: petId,
+        caption: caption,
+      );
+    } catch (_) {
+      observation = null;
+    }
+    if (observation == null) return;
+
+    // All three gates passed — surface + persist counter.
+    await settings.setInt(counterKey, photoCount);
+    if (!mounted) return;
+    ref.read(recentAffectiveObservationProvider.notifier).post(observation);
   }
 
   static List<String> _splitObjects(String raw) =>

@@ -64,6 +64,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final digestAsync = ref.watch(weeklyDigestEnabledProvider);
+    final affectiveAsync =
+        ref.watch(showAffectiveObservationsProvider);
     // Task 5.12 — section grouping. The screen has one functional
     // section today (Weekly summary). Promoting the section header
     // to PetSectionHeader (5.2 token) and grouping the rows in a
@@ -129,6 +131,41 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   onTap: _running ? null : _runDigest,
                 ),
               ],
+            ),
+          ),
+          const SizedBox(height: Spacing.l),
+          // Phase 6 task 6.8 — affective observations toggle. Default
+          // ON per DECISIONS row 41 (e). Three compounding gates keep
+          // the actual fire rate low (~1 per 20–30 saves) so default-
+          // ON makes the warm moment surface for users who'd value
+          // it without being intrusive.
+          const PetSectionHeader(title: 'Photo observations'),
+          PetCard(
+            padding: EdgeInsets.zero,
+            child: affectiveAsync.when(
+              data: (enabled) => SwitchListTile(
+                title: const Text('Show occasional observations'),
+                subtitle: const Text(
+                  'After you save a photo, PetPal might notice a '
+                  'connection to a past memory — "looks more relaxed '
+                  'than at the vet visit last month". Rare, never '
+                  'medical. Off to mute.',
+                ),
+                value: enabled,
+                onChanged: (next) async {
+                  await ref
+                      .read(showAffectiveObservationsProvider.notifier)
+                      .set(next);
+                },
+              ),
+              loading: () => const ListTile(
+                title: Text('Show occasional observations'),
+                subtitle: Text('Loading…'),
+              ),
+              error: (e, _) => ListTile(
+                title: const Text('Show occasional observations'),
+                subtitle: Text('Could not read setting: $e'),
+              ),
             ),
           ),
         ],

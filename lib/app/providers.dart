@@ -31,6 +31,8 @@ import '../harness/skills/asset_skill_source.dart';
 import '../harness/skills/enabled_filtering_skill_source.dart';
 import '../harness/skills/skill_loader.dart';
 import '../harness/skills/skill_manifest.dart';
+import '../harness/observation/affective_observation.dart';
+import '../harness/observation/affective_observer.dart';
 import '../harness/vision/photo_extractor.dart';
 import '../harness/vision/vision_gate.dart';
 import '../harness/skills/skill_source.dart';
@@ -166,6 +168,95 @@ final photoExtractorProvider = Provider<PhotoExtractor>((ref) {
   final gate = ref.watch(visionGateProvider);
   return PhotoExtractor(llm: llm, gate: gate);
 });
+
+/// Phase 6 task 6.8 — Haiku-tuned LLM client for the affective
+/// observation layer. DECISIONS row 41 (f) split: Sonnet for the
+/// extractor (accuracy on structured fields); Haiku for the affective
+/// add-on (cost-sensitive — fires at most 1-per-5-saves, doesn't
+/// need Sonnet's nuance). Same Anthropic transport, different model.
+final haikuLlmClientProvider = Provider<LlmClient>((ref) {
+  final keyAsync = ref.watch(apiKeyProvider);
+  final key = keyAsync.maybeWhen(data: (k) => k, orElse: () => null);
+  if (key == null || key.isEmpty) {
+    throw StateError(
+      'No API key — onboarding incomplete. Cannot construct '
+      'haikuLlmClientProvider.',
+    );
+  }
+  final client = AnthropicClient(apiKey: key, model: 'claude-haiku-4-5');
+  ref.onDispose(client.close);
+  return client;
+});
+
+/// Phase 6 task 6.8 — affective observation runner. Optional warm-
+/// observation pipeline that fires after a saved photo memory. Behind
+/// the [showAffectiveObservationsProvider] toggle (default ON);
+/// frequency-cap enforced by callers via SettingsStorage.
+final affectiveObserverProvider =
+    FutureProvider<AffectiveObserver>((ref) async {
+  final llm = ref.watch(haikuLlmClientProvider);
+  final retriever = await ref.watch(hybridRetrieverProvider.future);
+  final embeddings = await ref.watch(embeddingProviderProvider.future);
+  return AffectiveObserver(
+    llm: llm,
+    retriever: retriever,
+    embeddings: embeddings,
+  );
+});
+
+/// Phase 6 task 6.8 — Settings toggle "Show occasional observations".
+/// Default ON per DECISIONS row 41 (e) — with three compounding gates
+/// the actual fire rate is very low (~1 per 20–30 saves), so default-
+/// ON makes the warm moment surface for users who'd value it without
+/// risking intrusiveness. Flip OFF to mute the entire layer.
+final showAffectiveObservationsProvider =
+    AsyncNotifierProvider<_ShowAffectiveObservationsNotifier, bool>(
+  _ShowAffectiveObservationsNotifier.new,
+);
+
+class _ShowAffectiveObservationsNotifier extends AsyncNotifier<bool> {
+  static const _key = 'show_affective_observations';
+
+  @override
+  Future<bool> build() async {
+    final storage = ref.read(settingsStorageProvider);
+    final v = await storage.getBool(_key);
+    return v ?? true;
+  }
+
+  Future<void> set(bool value) async {
+    state = const AsyncValue.loading();
+    final storage = ref.read(settingsStorageProvider);
+    await storage.setBool(_key, value);
+    state = AsyncValue.data(value);
+  }
+}
+
+/// Phase 6 task 6.8 — most-recent affective observation, surfaced
+/// after a photo save. Cleared by the home-screen card after the user
+/// dismisses or after a TTL the card enforces. Lives in app state
+/// (not on disk) — observations are ephemeral by design; the user
+/// either reads them in the moment or doesn't.
+///
+/// Use-as-a-mailbox pattern: the photo capture screen pushes the
+/// observation here on save; the home screen reads + clears.
+final recentAffectiveObservationProvider =
+    NotifierProvider<_RecentAffectiveObservationNotifier,
+        AffectiveObservation?>(_RecentAffectiveObservationNotifier.new);
+
+class _RecentAffectiveObservationNotifier
+    extends Notifier<AffectiveObservation?> {
+  @override
+  AffectiveObservation? build() => null;
+
+  void post(AffectiveObservation observation) {
+    state = observation;
+  }
+
+  void dismiss() {
+    state = null;
+  }
+}
 
 /// Active pet's wiki entries, newest first. Invalidated by
 /// `ref.invalidate(wikiEntriesProvider)` after chat-tool writes (or any
