@@ -67,13 +67,17 @@ void main() {
     // the empty-state ↔ named-pet transition fades cleanly. The
     // child carries a stable ValueKey ('empty' here) so the switcher
     // sees an identity change when the user adds their first pet.
+    // Phase 5.6 Commit C upgraded the duration to Motion.medium
+    // (300 ms) and the in-curve to Motion.springCurve so the
+    // identity change reads as a settled-in transition rather than
+    // a flat fade.
     final switcher = tester.widget<AnimatedSwitcher>(
       find.ancestor(
         of: find.text('Add your pet'),
         matching: find.byType(AnimatedSwitcher),
       ).first,
     );
-    expect(switcher.duration, const Duration(milliseconds: 200));
+    expect(switcher.duration, const Duration(milliseconds: 300));
   });
 
   testWidgets('Unonboarded user lands on the welcome page', (tester) async {

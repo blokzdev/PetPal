@@ -416,7 +416,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
               ),
               const SizedBox(height: Spacing.s),
               AnimatedSwitcher(
-                duration: Motion.short,
+                duration: Motion.medium,
+                switchInCurve: Motion.springCurve,
+                switchOutCurve: Motion.standardCurve,
                 child: _SubClassificationField(
                   key: ValueKey(_relationship),
                   relationship: _relationship,
@@ -765,7 +767,9 @@ class _AboutPetCard extends StatelessWidget {
                   onPickAdoptionDate: onPickAdoptionDate,
                 ),
                 AnimatedSwitcher(
-                  duration: Motion.short,
+                  duration: Motion.medium,
+                  switchInCurve: Motion.springCurve,
+                  switchOutCurve: Motion.standardCurve,
                   child: relationship == Relationship.rescueRehab
                       ? Padding(
                           key: const ValueKey('rescue-rehab-dates'),
@@ -857,7 +861,9 @@ class _LifecycleDateField extends StatelessWidget {
         ),
         const SizedBox(height: Spacing.s),
         AnimatedSwitcher(
-          duration: Motion.short,
+          duration: Motion.medium,
+          switchInCurve: Motion.springCurve,
+          switchOutCurve: Motion.standardCurve,
           child: switch (kind) {
             LifecycleDateKind.dob => OutlinedButton.icon(
                 key: const ValueKey('dob-picker'),

@@ -35,8 +35,8 @@ class HomeScreen extends ConsumerWidget {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: AnimatedSwitcher(
-              duration: Motion.short,
-              switchInCurve: Motion.standardCurve,
+              duration: Motion.medium,
+              switchInCurve: Motion.springCurve,
               switchOutCurve: Motion.standardCurve,
               child: KeyedSubtree(
                 key: ValueKey(keyValue),

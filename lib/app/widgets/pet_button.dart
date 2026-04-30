@@ -33,11 +33,21 @@ class PetButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final effectiveOnPressed = isLoading ? null : onPressed;
-    final child = _PetButtonContent(
-      label: label,
-      icon: icon,
-      isLoading: isLoading,
-      spinnerColor: _spinnerColor(scheme),
+    // Phase 5.6 Commit C — press physics. The press-scale gesture
+    // wraps the inner content (NOT the entire FilledButton/etc.) so
+    // the Material splash + ripple keeps its full hit-rect; the
+    // visual scale-down lives on the label/icon area and reads as
+    // "the button squeezed under the tap" without breaking the
+    // ink-well boundary. All three variants inherit because they
+    // all share `_PetButtonContent`.
+    final child = _PressScale(
+      enabled: effectiveOnPressed != null,
+      child: _PetButtonContent(
+        label: label,
+        icon: icon,
+        isLoading: isLoading,
+        spinnerColor: _spinnerColor(scheme),
+      ),
     );
     switch (variant) {
       case PetButtonVariant.filled:
@@ -57,6 +67,45 @@ class PetButton extends StatelessWidget {
       case PetButtonVariant.text:
         return scheme.primary;
     }
+  }
+}
+
+/// Press-down scale gesture detector. Drives an `AnimatedScale`
+/// between 1.0 (rest) and 0.98 (pressed) with `Motion.springCurve`
+/// for the spring-back on release. Phase 5.6 Commit C — DECISIONS
+/// row 50 lock. Routes through `Listener` rather than
+/// `GestureDetector` so it doesn't compete with the Material
+/// InkWell's own gesture pipeline; pointer events are observed
+/// translucently and the FilledButton/OutlinedButton/TextButton's
+/// onPressed still fires normally.
+class _PressScale extends StatefulWidget {
+  const _PressScale({required this.child, required this.enabled});
+
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<_PressScale> createState() => _PressScaleState();
+}
+
+class _PressScaleState extends State<_PressScale> {
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.enabled) return widget.child;
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => setState(() => _pressed = true),
+      onPointerUp: (_) => setState(() => _pressed = false),
+      onPointerCancel: (_) => setState(() => _pressed = false),
+      child: AnimatedScale(
+        scale: _pressed ? 0.98 : 1.0,
+        duration: Motion.short,
+        curve: Motion.springCurve,
+        child: widget.child,
+      ),
+    );
   }
 }
 

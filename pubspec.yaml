@@ -79,6 +79,17 @@ dependencies:
   # patterns keep working. 23-month staleness flagged in row 50;
   # static-icon-font wrapper, low surface for breakage.
   phosphor_flutter: ^2.1.0
+  # Phase 5.6 Commit C — motion-layer.
+  # - flutter_animate: replaces manual AnimationController +
+  #   TweenSequence at JournalBloom; declarative chains everywhere
+  #   else hero motion adopts. gskinner (verified), API matured.
+  # - animations: Google's official Material motion package.
+  #   SharedAxisTransition on /wiki/entry to convey "drilling
+  #   deeper into the same content"; other routes stay on the
+  #   PredictiveBackPageTransitionsBuilder default for system
+  #   back-gesture support. flutter.dev (verified).
+  flutter_animate: ^4.5.2
+  animations: ^2.2.0
 
 dev_dependencies:
   flutter_test:

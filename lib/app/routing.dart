@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -68,16 +69,38 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/reminders',
         builder: (context, state) => const RemindersScreen(),
       ),
+      // Phase 5.6 Commit C — `/wiki/entry` adopts a Material
+      // SharedAxisTransition (X axis) via `pageBuilder:` so tapping
+      // a journal entry from the wiki browser conveys "drilling
+      // deeper into the same content" rather than the default
+      // bottom-up slide. Other routes stay on
+      // PredictiveBackPageTransitionsBuilder (set in app_theme.dart's
+      // pageTransitionsTheme) for system back-gesture support.
       GoRoute(
         path: '/wiki/entry',
-        builder: (context, state) {
+        pageBuilder: (context, state) {
           final path = state.extra as String?;
-          if (path == null) {
-            return const Scaffold(
-              body: Center(child: Text('Missing entry path.')),
-            );
-          }
-          return WikiEntryScreen(path: path);
+          final child = path == null
+              ? const Scaffold(
+                  body: Center(child: Text('Missing entry path.')),
+                )
+              : WikiEntryScreen(path: path);
+          return CustomTransitionPage<void>(
+            key: state.pageKey,
+            child: child,
+            // CustomTransitionPage's default transitionDuration +
+            // reverseTransitionDuration are both 300 ms, equal to
+            // Motion.medium — leaving them at the default keeps the
+            // intent design-token-aligned without re-stating.
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SharedAxisTransition(
+                animation: animation,
+                secondaryAnimation: secondaryAnimation,
+                transitionType: SharedAxisTransitionType.horizontal,
+                child: child,
+              );
+            },
+          );
         },
       ),
       // Phase 1 verification screen — exercises the full harness. Linked
