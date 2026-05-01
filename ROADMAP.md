@@ -396,7 +396,7 @@ flagging itself as undercooked.
   reasoning, and the orphan-tile mapping (Add photo → Quick Capture
   on Home, Journal/Profile/Settings → tabs, Reminders → Home
   section, Care guides → Profile sub-page, Settings → Hub sub-page).
-- [ ] 6.6.A.1 **Adopt go_router `StatefulShellRoute`** — DECISIONS
+- [x] 6.6.A.1 **Adopt go_router `StatefulShellRoute`** — DECISIONS
   row pins the routing-layer architectural choice (vs. `IndexedStack`
   alternative). Refactor `lib/app/routing.dart`: top-level routes
   for the four tabs become `StatefulShellRoute` branches; nested
