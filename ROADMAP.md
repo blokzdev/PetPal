@@ -509,7 +509,7 @@ flagging itself as undercooked.
 
 ### Group D — System-Wide (3 tasks)
 
-- [ ] 6.6.D.1 **Wire coral to medical-warning surfaces** —
+- [x] 6.6.D.1 **Wire coral to medical-warning surfaces** —
   `RedFlagBadge` icon shifts to coral; vet entry `EditorialCard`
   gets coral left-border accent (Group B); MEDICAL NOTE callout
   on vet entry detail uses coral icon + tinted left border (Group

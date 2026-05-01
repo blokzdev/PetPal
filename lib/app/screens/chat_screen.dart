@@ -475,19 +475,25 @@ class _Bubble extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (isFlagged) ...[
+                // Phase 6.6 task 6.6.D.1 — chat scrollback escalation
+                // marker uses coral (scheme.tertiary), the systemic
+                // medical-attention register per DECISIONS row 64.
+                // 'Subdued in stature' lock from CLAUDE.md §10 is
+                // preserved by the small icon + small label register
+                // — not by muting the color away from coral.
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
                       PhosphorIconsRegular.warningOctagon,
                       size: 14,
-                      color: scheme.onSurfaceVariant,
+                      color: scheme.tertiary,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'PetPal flagged this as urgent',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
+                            color: scheme.tertiary,
                             fontWeight: FontWeight.w500,
                           ),
                     ),

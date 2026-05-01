@@ -214,17 +214,22 @@ class _EntryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // Phase 6.6 task 6.6.B.2 — entry tile uses EditorialCard.
     // Kicker = "{TYPE} · {MON DAY}" (e.g. "FOOD · APR 25"); title =
-    // entry.title; onTap routes to /wiki/entry. Body preview is not
-    // wired for v1 (Entry rows don't carry body content; per-tile
-    // disk reads would be expensive for the list). Coral left-
-    // border on flagged entries lands in task 6.6.D.1 (the system-
-    // wide coral wiring task), since the flagged signal lives in
-    // the on-disk frontmatter (`red_flag_match`) and surfacing it
-    // requires either a Drift index extension or a batched
-    // sidecar read — both are scoped to D.1.
+    // entry.title; onTap routes to /wiki/entry.
+    //
+    // Phase 6.6 task 6.6.D.1 — vet entries carry the coral
+    // medical-attention register at the card level (DECISIONS row
+    // 64). Surfacing the per-frontmatter `red_flag_match` signal on
+    // every tile would require a Drift schema extension or a
+    // batched sidecar read; the type-based heuristic is the
+    // pragmatic v1 — vet entries are inherently medical context, so
+    // 'all vet entries get coral' lines up with the system register
+    // without a migration. Photo entries with `red_flag_match`
+    // surface the marker via RedFlagBadge inside the entry view
+    // (also coral via D.1).
     return EditorialCard(
       kicker: _kickerFor(entry),
       title: entry.title,
+      flagged: entry.type == 'vet',
       onTap: () => GoRouter.of(context).push(
         '/wiki/entry',
         extra: entry.path,

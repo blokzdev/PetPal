@@ -37,20 +37,27 @@ class RedFlagBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    // Phase 6.6 task 6.6.D.1 — wire coral (scheme.tertiary, the
+    // system medical-attention register per DECISIONS row 64) to
+    // the red-flag badge. The original `onSurfaceVariant` gray
+    // looked incoherent next to card-level coral context (vet
+    // EditorialCard left-border + MEDICAL NOTE callout). One
+    // register wins; coral is medical-attention primary. The
+    // 'subdued in stature' lock from CLAUDE.md §10 is preserved
+    // by the small icon size + small label register — not by
+    // muting the color.
+    final coral = scheme.tertiary;
     if (_tile) {
       return Container(
         padding: const EdgeInsets.all(4),
         decoration: BoxDecoration(
-          // Subdued — matches the scrollback marker treatment, not a
-          // ripe-red alert. The intent is "leave a historical mark",
-          // not "draw attention every time the user scrolls past".
           color: scheme.surface.withValues(alpha: 0.85),
           shape: BoxShape.circle,
         ),
         child: Icon(
           PhosphorIconsRegular.warningOctagon,
           size: 16,
-          color: scheme.onSurfaceVariant,
+          color: coral,
         ),
       );
     }
@@ -60,14 +67,14 @@ class RedFlagBadge extends StatelessWidget {
         Icon(
           PhosphorIconsRegular.warningOctagon,
           size: 14,
-          color: scheme.onSurfaceVariant,
+          color: coral,
         ),
         const SizedBox(width: Spacing.xs),
         Flexible(
           child: Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: scheme.onSurfaceVariant,
+                  color: coral,
                   fontWeight: FontWeight.w500,
                 ),
           ),

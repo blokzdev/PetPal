@@ -571,6 +571,11 @@ class _RecentMemoriesSection extends ConsumerWidget {
               EditorialCard(
                 kicker: _kickerFor(e),
                 title: e.title,
+                // Phase 6.6 task 6.6.D.1 — vet entries carry the
+                // coral medical-attention register on the card
+                // level. Same type-based heuristic as the journal
+                // browser (DECISIONS row 64).
+                flagged: e.type == 'vet',
                 onTap: () => GoRouter.of(context).push(
                   '/wiki/entry',
                   extra: e.path,
