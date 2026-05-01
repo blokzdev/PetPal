@@ -275,12 +275,19 @@ class EmptyChatForTesting extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasName = petName.isNotEmpty && petName != 'PetPal';
+    // Phase 6.6 task 6.6.C.6 — "Keep Chronicling" register on the
+    // chat empty heading. Shifts from "describes what the chat IS"
+    // ("Chat with PetPal about Loki") to "describes what the user
+    // is here to do" ("Keep chronicling Loki"). Aligns with the
+    // home greeting body refresh — same active user-verb framing.
+    // No-name fallback stays directional ("Tell PetPal about your
+    // pet.") since "Keep chronicling your pet" reads awkwardly.
     final heading = hasName
-        ? 'Chat with PetPal about $petName.'
-        : 'Chat with PetPal about your pet.';
+        ? 'Keep chronicling $petName.'
+        : 'Tell PetPal about your pet.';
     final body = hasName
-        ? "Try one of these, or just type what's been happening:"
-        : "Try one of these, or just type what's been happening:";
+        ? "Type what's been happening, or try one of these:"
+        : "Type what's been happening, or try one of these:";
 
     final prompts = hasName
         ? <String>[

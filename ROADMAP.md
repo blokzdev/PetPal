@@ -501,7 +501,7 @@ flagging itself as undercooked.
   Enjoy the quiet moments together." Routes through VOICE.md §5
   per-pet interpolation rule. Stays warm without saccharine
   (VOICE.md §1).
-- [ ] 6.6.C.6 **Microcopy refresh** — adopt "Keep Chronicling" CTA
+- [x] 6.6.C.6 **Microcopy refresh** — adopt "Keep Chronicling" CTA
   register and other voice gold from Stitch curation across home
   greeting body / chat empty / button labels (where they're
   per-pet — buttons stay static per VOICE.md §5 unless they're

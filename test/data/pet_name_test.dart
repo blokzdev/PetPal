@@ -50,10 +50,15 @@ void main() {
     // adjacently ("Chat with $name", "memory-first companion for
     // $name"). With the helper installed, neither shape can produce
     // orphan punctuation or trailing spaces.
+    //
+    // Phase 6.6 task 6.6.C.6 — production tagline shifted to the
+    // "Keep Chronicling" register. The regression invariant the
+    // test pins is the empty-name defense; the exact host string
+    // tracks the production tagline so a future drift surfaces.
     test('possessive: empty name yields "Your pet\'s life"', () {
       final n = displayPetName('');
-      expect("PetPal remembers $n's life so you don't have to.",
-          "PetPal remembers Your pet's life so you don't have to.");
+      expect("Keep chronicling $n's life. PetPal remembers every entry.",
+          "Keep chronicling Your pet's life. PetPal remembers every entry.");
     });
     test('adjacent: empty name yields "Chat with Your pet"', () {
       final n = displayPetName('');

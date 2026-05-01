@@ -186,11 +186,14 @@ void main() {
       findsNothing,
     );
 
-    // Old "PetPal remembers Loki's life so you don't have to." line
-    // stays in the body — the hero is name-only, the tagline is
-    // body-only. Two separate registers.
+    // Phase 6.6 task 6.6.C.6 — "Keep Chronicling" register on the
+    // home greeting body (Stitch curation). Active user-verb
+    // framing replaces the passive brand-promise. Hero is name-only
+    // (separate register); tagline is body-only.
     expect(
-      find.text("PetPal remembers Loki's life so you don't have to."),
+      find.text(
+        "Keep chronicling Loki's life. PetPal remembers every entry.",
+      ),
       findsOneWidget,
     );
   });
@@ -220,18 +223,20 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Tagline: "PetPal remembers Your pet's life..." — NOT
-    // "PetPal remembers 's life..." with the orphan apostrophe.
+    // Tagline: "Keep chronicling Your pet's life. ..." — NOT
+    // "Keep chronicling 's life..." with the orphan apostrophe.
+    // Phase 6.6 task 6.6.C.6 — "Keep Chronicling" register; the
+    // displayPetName helper still owns the empty-name defense.
     expect(
       find.text(
-        "PetPal remembers Your pet's life so you don't have to.",
+        "Keep chronicling Your pet's life. PetPal remembers every entry.",
       ),
       findsOneWidget,
       reason: 'displayPetName must replace empty pet.name with the '
           '"Your pet" fallback in the home tagline.',
     );
     expect(
-      find.text("PetPal remembers 's life so you don't have to."),
+      find.text("Keep chronicling 's life. PetPal remembers every entry."),
       findsNothing,
       reason: 'orphan apostrophe must never reach the tagline.',
     );

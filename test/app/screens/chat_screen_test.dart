@@ -114,10 +114,11 @@ void main() {
     await tester.tap(find.text('Chat with Milo'));
     await tester.pumpAndSettle();
 
-    // Empty-state heading (task 5.7 redesign). Per VOICE.md §5 the
-    // heading interpolates the pet name. Three suggestion chips lower
+    // Empty-state heading — Phase 6.6 task 6.6.C.6 "Keep
+    // Chronicling" register. Per VOICE.md §5 the heading
+    // interpolates the pet name. Three suggestion chips lower
     // activation energy on first use.
-    expect(find.text('Chat with PetPal about Milo.'), findsOneWidget);
+    expect(find.text('Keep chronicling Milo.'), findsOneWidget);
     expect(find.byType(ActionChip), findsNWidgets(3));
 
     // Type and send.

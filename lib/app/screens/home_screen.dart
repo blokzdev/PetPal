@@ -229,9 +229,18 @@ class _GreetingBody extends ConsumerWidget {
       children: [
         // Pet name + the previous Icons.pets header have moved into
         // the AppScaffold.hero zone above (task 5.10). The body opens
-        // directly with the tagline so the name doesn't repeat.
+        // with the greeting tagline so the name doesn't repeat.
+        //
+        // Phase 6.6 task 6.6.C.6 — "Keep Chronicling" register
+        // (Stitch curation): shifts the tagline from passive
+        // brand-promise ("PetPal remembers ...") to active
+        // user-verb framing ("Keep chronicling ..."). Reinforces
+        // the "journal compounds" thesis on the user's primary
+        // landing surface. Empty home + welcome screen keep the
+        // original brand tagline as the bootstrap promise — only
+        // the named-pet greeting body shifts register.
         Text(
-          "PetPal remembers $name's life so you don't have to.",
+          "Keep chronicling $name's life. PetPal remembers every entry.",
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),

@@ -144,7 +144,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Chat with PetPal about Loki.'), findsOneWidget);
+      // Phase 6.6 task 6.6.C.6 — "Keep Chronicling" register on
+      // the chat empty heading. Active user-verb framing replaces
+      // "Chat with PetPal about Loki." Body / chip register
+      // unchanged — chips are concrete examples.
+      expect(find.text('Keep chronicling Loki.'), findsOneWidget);
       // Three chips, all interpolating Loki's name (third chip uses
       // the name in a question form).
       expect(find.byType(ActionChip), findsNWidgets(3));
@@ -182,8 +186,11 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
+      // Phase 6.6 task 6.6.C.6 — no-name fallback stays directional
+      // ("Tell PetPal about your pet.") since "Keep chronicling
+      // your pet" reads awkwardly without a real name.
       expect(
-        find.text('Chat with PetPal about your pet.'),
+        find.text('Tell PetPal about your pet.'),
         findsOneWidget,
       );
       // Generic prompts — no Loki, no species assumptions.
@@ -211,7 +218,7 @@ void main() {
 
       // Heading still renders; SingleChildScrollView lets the rest
       // scroll into view. No "RenderFlex overflowed" exception.
-      expect(find.text('Chat with PetPal about Loki.'), findsOneWidget);
+      expect(find.text('Keep chronicling Loki.'), findsOneWidget);
       expect(find.byType(PetEmptyState), findsOneWidget);
     });
   });
