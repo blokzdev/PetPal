@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../data/db/database.dart';
 import '../../data/pet_name.dart';
 import '../../data/repos/reminder_repo.dart';
 import '../../harness/observation/affective_observation.dart';
@@ -11,7 +12,9 @@ import '../../harness/scheduling/reminder_kinds.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/editorial_card.dart';
 import '../widgets/pet_card.dart';
+import '../widgets/pet_section_header.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -244,6 +247,11 @@ class _GreetingBody extends ConsumerWidget {
           label: Text('Chat with $name'),
         ),
         const SizedBox(height: Spacing.l),
+        // Phase 6.6 task 6.6.B.3 — Recent memories section. Top 3
+        // entries from wikiEntriesProvider rendered as EditorialCards;
+        // tapping a card routes to /wiki/entry. Auto-hides when the
+        // pet has no entries yet so the home surface stays calm.
+        const _RecentMemoriesSection(),
         // Phase 6.6 task 6.6.A.3 — Reminders inline section per
         // DECISIONS row 61. Replaces the home grid's "Reminders"
         // tile; tapping the header routes to the Home-branch nested
@@ -268,6 +276,99 @@ class _GreetingBody extends ConsumerWidget {
         ],
       ],
       ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.B.3 — Recent memories section on Home.
+///
+/// Top 3 entries from `wikiEntriesProvider` (newest first;
+/// `wikiEntriesProvider` already orders desc by `ts`). Each entry
+/// renders as an `EditorialCard` (B.1 primitive) — kicker + serif
+/// title; tapping routes to `/wiki/entry`. Auto-hides when the pet
+/// has no entries yet (calm empty surface, no explainer).
+///
+/// Section header is `PetSectionHeader` (B.0 small-caps + sage tint).
+/// Layout:
+///
+///   RECENT MEMORIES
+///   ┌─────────────────────────────────────────┐
+///   │ FOOD · APR 25                           │
+///   │ Carrot trial                            │
+///   └─────────────────────────────────────────┘
+///   ┌─────────────────────────────────────────┐
+///   │ VET VISITS · APR 22                     │
+///   │ Annual checkup                          │
+///   └─────────────────────────────────────────┘
+///   ...
+///
+/// Group C.1 will refine the home redesign around this section
+/// (Quick Capture tiles + This Week card); B.3 lands the section in
+/// its current shape.
+class _RecentMemoriesSection extends ConsumerWidget {
+  const _RecentMemoriesSection();
+
+  static const _monthAbbrev = [
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+  ];
+
+  static String _kickerFor(Entry e) {
+    final type = _humanTypeLabelHome(e.type).toUpperCase();
+    final month = _monthAbbrev[e.ts.month - 1];
+    return '$type · $month ${e.ts.day}';
+  }
+
+  /// Compact type-label translation for the home recent memories
+  /// kicker. Mirrors `_humanTypeLabel` in the journal browser; copied
+  /// inline rather than imported because the journal browser's
+  /// helper is `private` to that file. If a third callsite arrives,
+  /// promote to `lib/data/entry_labels.dart`.
+  static String _humanTypeLabelHome(String type) {
+    switch (type) {
+      case 'digest':
+        return 'Weekly summary';
+      case 'vet':
+        return 'Vet visits';
+      case 'food':
+        return 'Food';
+      case 'weight':
+        return 'Weight';
+      case 'behavior':
+        return 'Behavior';
+      case 'photos':
+        return 'Photo';
+      default:
+        return type.isEmpty
+            ? type
+            : '${type[0].toUpperCase()}${type.substring(1)}';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entriesAsync = ref.watch(wikiEntriesProvider);
+    return entriesAsync.maybeWhen(
+      data: (entries) {
+        if (entries.isEmpty) return const SizedBox.shrink();
+        final top3 = entries.take(3).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const PetSectionHeader(title: 'Recent memories'),
+            for (final e in top3)
+              EditorialCard(
+                kicker: _kickerFor(e),
+                title: e.title,
+                onTap: () => GoRouter.of(context).push(
+                  '/wiki/entry',
+                  extra: e.path,
+                ),
+              ),
+          ],
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }

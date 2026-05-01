@@ -452,7 +452,7 @@ flagging itself as undercooked.
   in the metadata row. Pet name in the metadata row when multi-pet
   arrives in Phase 7 (today single-pet, label suppressed). Coral
   left-border on entries with `red_flag_match` frontmatter.
-- [ ] 6.6.B.3 **Apply `EditorialCard` to Home recent entries
+- [x] 6.6.B.3 **Apply `EditorialCard` to Home recent entries
   section** — Home gains a "Recent memories" editorial section
   beneath the per-pet greeting hero. Top 3 entries via
   `wikiEntriesProvider`. Tapping a card routes to `/wiki/entry`.
