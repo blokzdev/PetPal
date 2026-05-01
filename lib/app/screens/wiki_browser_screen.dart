@@ -239,22 +239,25 @@ class _EntryTile extends StatelessWidget {
 /// accent — 5.7's narrative empty state and 5.10's display-class name
 /// also signal "this is journal, not utility."
 ///
-/// Layout:
-///   - Outer Material card in surfaceContainer (one tint above the list
-///     surface) so the digest cluster reads as elevated copy without a
-///     hard border. Margins match the surrounding ListTile rhythm.
-///   - Top: small uppercase letter-spaced kicker ("WEEKLY DIGEST") in
-///     onSurfaceVariant — magazine convention.
-///   - Middle: title in Source Serif 4 via JournalText.weeklySummaryTitle
-///     (the dedicated 5.1 token, sized one notch larger than per-entry
-///     titles), name-interpolated. Reads as warm but not saccharine.
-///   - Bottom: the date range derived from `entry.ts` (end-of-week per
-///     WeeklyDigestRunner) minus six days for the window start, rendered
-///     in bodyMedium onSurfaceVariant.
+/// Phase 6.6 task 6.6.B.4 — rebuilt to consume `EditorialCard`. The
+/// digest card was the original ad-hoc editorial pattern (5.11);
+/// productizing into `EditorialCard` lets the journal browser, home
+/// recent memories, and weekly summary HIGHLIGHTS share one
+/// primitive.
 ///
-/// No body preview. The journal browser stays cheap (no per-row
-/// wiki_io.read calls) and tapping the card opens the entry viewer
-/// where the full markdown renders.
+/// Locks preserved across the rebuild:
+///   - Kicker = "WEEKLY SUMMARY" (small caps + letter-spacing).
+///   - Title = "{pet}'s week" (or "This week" if no name) in
+///     `JournalText.weeklySummaryTitle` register (~28pt serif).
+///   - Body slot carries the date range "Apr 20–26" (mixed-case
+///     month abbrev preserved — readable inside flowing prose; the
+///     uppercased kicker carries the small-caps register above).
+///   - InkWell tap routes to `/wiki/entry` with the digest path.
+///
+/// No body preview of the synthesised digest copy itself — the
+/// journal browser stays cheap (no per-row wiki_io.read calls) and
+/// tapping the card opens the entry viewer where the full markdown
+/// renders.
 class _DigestCard extends StatelessWidget {
   const _DigestCard({required this.entry, required this.petName});
   final Entry entry;
@@ -278,61 +281,17 @@ class _DigestCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
     final subject = (petName == null || petName!.isEmpty)
         ? 'This'
         : "$petName's";
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: Spacing.m,
-        vertical: Spacing.s,
-      ),
-      child: Material(
-        type: MaterialType.card,
-        color: scheme.surfaceContainer,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(Radii.m),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: () => GoRouter.of(context).push(
-            '/wiki/entry',
-            extra: entry.path,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: Spacing.l,
-              vertical: Spacing.l,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'WEEKLY SUMMARY',
-                  style: text.labelSmall?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                    letterSpacing: 1.4,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  '$subject week',
-                  style: JournalText.weeklySummaryTitle(
-                    color: scheme.onSurface,
-                  ),
-                ),
-                const SizedBox(height: Spacing.xs),
-                Text(
-                  _formatRange(entry.ts),
-                  style: text.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+    return EditorialCard(
+      kicker: 'WEEKLY SUMMARY',
+      title: '$subject week',
+      titleStyle: JournalText.weeklySummaryTitle(color: scheme.onSurface),
+      body: _formatRange(entry.ts),
+      onTap: () => GoRouter.of(context).push(
+        '/wiki/entry',
+        extra: entry.path,
       ),
     );
   }

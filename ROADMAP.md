@@ -456,7 +456,7 @@ flagging itself as undercooked.
   section** — Home gains a "Recent memories" editorial section
   beneath the per-pet greeting hero. Top 3 entries via
   `wikiEntriesProvider`. Tapping a card routes to `/wiki/entry`.
-- [ ] 6.6.B.4 **Apply `EditorialCard` to weekly summary HIGHLIGHTS
+- [x] 6.6.B.4 **Apply `EditorialCard` to weekly summary HIGHLIGHTS
   section** — `_DigestCard` (today's ad-hoc serif-title-card) is
   rebuilt to consume `EditorialCard`; HIGHLIGHTS rendering inside
   the digest's body uses nested `EditorialCard`s.
