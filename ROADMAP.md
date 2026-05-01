@@ -478,7 +478,7 @@ flagging itself as undercooked.
   entries (coral icon + tinted left border + small-caps "MEDICAL
   NOTE" label). Markdown body styling stays as-is (Source Serif 4
   on `h1`/`h2` from Phase 5.6).
-- [ ] 6.6.C.3 **Weekly summary detail refresh** — editorial header
+- [x] 6.6.C.3 **Weekly summary detail refresh** — editorial header
   (serif `weeklySummaryTitle` + small-caps date), INSIGHT callout
   pattern (sage icon + tinted left border + small-caps "INSIGHT"
   label) for the synthesis runner's anomaly + trend observations,

@@ -11,6 +11,7 @@ import '../../data/wiki_io.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/editorial_card.dart';
 import '../widgets/red_flag_badge.dart';
 
 /// Convert a wiki entry path into a user-facing AppBar title. Per
@@ -149,6 +150,17 @@ class WikiEntryScreen extends ConsumerWidget {
             // header doesn't duplicate it. `MarkdownBody` (vs the
             // scrolling `Markdown`) lets the header scroll with
             // the content inside one SingleChildScrollView.
+            //
+            // Phase 6.6 task 6.6.C.3 — digest entries get the
+            // editorial register: weeklySummaryTitle for the header
+            // + INSIGHT callouts for trend/anomaly sections +
+            // nested EditorialCards for highlight bullets. Non-
+            // digest entries keep the default markdown body render.
+            final isDigest = type == 'digest';
+            final body = _stripLeadingH1IfMatchesTitle(
+              parsed.body.trimLeft(),
+              _humanEntryTitle(path),
+            );
             return SingleChildScrollView(
               padding: const EdgeInsets.all(Spacing.m),
               child: Column(
@@ -160,14 +172,14 @@ class WikiEntryScreen extends ConsumerWidget {
                     const _MedicalNoteCallout(),
                   ],
                   const SizedBox(height: Spacing.l),
-                  MarkdownBody(
-                    data: _stripLeadingH1IfMatchesTitle(
-                      parsed.body.trimLeft(),
-                      _humanEntryTitle(path),
+                  if (isDigest)
+                    _DigestBodyRender(body: body)
+                  else
+                    MarkdownBody(
+                      data: body,
+                      selectable: true,
+                      styleSheet: _entryMarkdownStyle(context),
                     ),
-                    selectable: true,
-                    styleSheet: _entryMarkdownStyle(context),
-                  ),
                 ],
               ),
             );
@@ -251,13 +263,16 @@ class _EntryHeader extends StatelessWidget {
     } else {
       meta = _humanType(type);
     }
+    // Phase 6.6 task 6.6.C.3 — digest entries get the larger
+    // weeklySummaryTitle register; the weekly summary is a
+    // cumulative artifact and earns the bigger serif.
+    final titleStyle = type == 'digest'
+        ? JournalText.weeklySummaryTitle(color: scheme.onSurface)
+        : JournalText.entryTitle(color: scheme.onSurface);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: JournalText.entryTitle(color: scheme.onSurface),
-        ),
+        Text(title, style: titleStyle),
         const SizedBox(height: Spacing.s),
         Text(
           meta,
@@ -344,6 +359,268 @@ class _MedicalNoteCallout extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.3 — digest body renderer.
+///
+/// Pre-passes the digest's markdown body, splits it into segments
+/// at h2 boundaries, then classifies each segment by its heading:
+///
+///   - **INSIGHT** keywords (Trends / Anomalies / Insight /
+///     Insights / Watch list / Watchlist) → renders as a
+///     sage-bordered `_InsightCallout` with the heading + body
+///     bullets/prose. Per DECISIONS row 58 — sage carries the
+///     synthesis register; coral stays reserved for medical-
+///     attention.
+///   - **HIGHLIGHTS** keywords (Highlights / Notable / Recurring /
+///     Recurring patterns) → bullet items become individual
+///     `EditorialCard`s (Group B.1 primitive). Each bullet's
+///     first sentence becomes the title; remaining text becomes
+///     the body. Non-bullet body text gets surfaced inside the
+///     section's leading EditorialCard as body content.
+///   - Other sections → default `MarkdownBody` render, preserving
+///     the standard markdown styling.
+///
+/// Sections are classified by case-insensitive keyword match on the
+/// h2 heading text. Non-h2 prose at the top of the body (before any
+/// h2) renders as default markdown. Empty bodies render nothing.
+class _DigestBodyRender extends StatelessWidget {
+  const _DigestBodyRender({required this.body});
+
+  final String body;
+
+  static final _h2 = RegExp(r'^##\s+(.+)$', multiLine: true);
+
+  static const _insightKeywords = [
+    'trends',
+    'anomalies',
+    'insight',
+    'insights',
+    'watch list',
+    'watchlist',
+  ];
+
+  static const _highlightKeywords = [
+    'highlights',
+    'notable',
+    'recurring',
+    'recurring patterns',
+  ];
+
+  bool _isInsight(String h) {
+    final lower = h.toLowerCase();
+    return _insightKeywords.any((k) => lower.contains(k));
+  }
+
+  bool _isHighlight(String h) {
+    final lower = h.toLowerCase();
+    return _highlightKeywords.any((k) => lower.contains(k));
+  }
+
+  /// Splits the body into ordered (heading?, content) segments at
+  /// h2 boundaries. The first segment carries any prose that
+  /// appears before the first h2 (heading: null).
+  List<({String? heading, String content})> _segment(String b) {
+    final segments = <({String? heading, String content})>[];
+    final matches = _h2.allMatches(b).toList();
+    if (matches.isEmpty) {
+      if (b.trim().isNotEmpty) {
+        segments.add((heading: null, content: b.trim()));
+      }
+      return segments;
+    }
+    // Pre-h2 prose (if any).
+    if (matches.first.start > 0) {
+      final pre = b.substring(0, matches.first.start).trim();
+      if (pre.isNotEmpty) {
+        segments.add((heading: null, content: pre));
+      }
+    }
+    for (var i = 0; i < matches.length; i++) {
+      final m = matches[i];
+      final heading = m.group(1)?.trim() ?? '';
+      final contentStart = m.end;
+      final contentEnd =
+          i + 1 < matches.length ? matches[i + 1].start : b.length;
+      final content = b.substring(contentStart, contentEnd).trim();
+      segments.add((heading: heading, content: content));
+    }
+    return segments;
+  }
+
+  /// Extracts top-level bullets (`- text` or `* text`) from a
+  /// section's content. Continuation lines (indented) join the
+  /// preceding bullet. Non-bullet text becomes a leading "preamble"
+  /// returned alongside the bullets. Static so `_HighlightSection`
+  /// can reuse without constructing a `_DigestBodyRender`.
+  static ({String preamble, List<String> bullets}) extractBullets(String c) {
+    final lines = c.split('\n');
+    final bullets = <String>[];
+    final preambleBuf = StringBuffer();
+    String? currentBullet;
+    for (final line in lines) {
+      final m = RegExp(r'^[-*]\s+(.+)$').firstMatch(line.trimRight());
+      if (m != null) {
+        if (currentBullet != null) bullets.add(currentBullet.trim());
+        currentBullet = m.group(1)!.trim();
+      } else if (currentBullet != null && line.startsWith(' ')) {
+        currentBullet = '$currentBullet ${line.trim()}';
+      } else if (currentBullet == null) {
+        preambleBuf.writeln(line);
+      } else {
+        // Blank or non-indented line after a bullet — keeps the
+        // bullet open; subsequent lines either continue or start
+        // a new bullet.
+        if (line.trim().isEmpty) {
+          // commit whatever we have; reset
+          bullets.add(currentBullet.trim());
+          currentBullet = null;
+        }
+      }
+    }
+    if (currentBullet != null) bullets.add(currentBullet.trim());
+    return (preamble: preambleBuf.toString().trim(), bullets: bullets);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final segments = _segment(body);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final s in segments) ...[
+          if (s.heading != null && _isInsight(s.heading!))
+            _InsightCallout(heading: s.heading!, body: s.content)
+          else if (s.heading != null && _isHighlight(s.heading!))
+            _HighlightSection(heading: s.heading!, content: s.content)
+          else
+            // Default render: re-emit the heading (if any) and the
+            // section content as standard markdown.
+            MarkdownBody(
+              data: s.heading != null
+                  ? '## ${s.heading}\n\n${s.content}'
+                  : s.content,
+              selectable: true,
+              styleSheet: _entryMarkdownStyle(context),
+            ),
+          const SizedBox(height: Spacing.m),
+        ],
+      ],
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.3 — INSIGHT callout for digest body
+/// trend / anomaly / insight sections. Sage left-border (4 dp) +
+/// sage icon + small-caps "{HEADING}" kicker + body content
+/// rendered as markdown (so bullet lists keep their structure).
+class _InsightCallout extends StatelessWidget {
+  const _InsightCallout({required this.heading, required this.body});
+
+  final String heading;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      type: MaterialType.card,
+      color: scheme.surfaceContainer,
+      shape: const RoundedRectangleBorder(borderRadius: Corners.s),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: scheme.primary),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(Spacing.m),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          PhosphorIconsRegular.sparkle,
+                          size: 16,
+                          color: scheme.primary,
+                        ),
+                        const SizedBox(width: Spacing.xs),
+                        Text(
+                          heading.toUpperCase(),
+                          style: textTheme.labelSmall?.copyWith(
+                            color: scheme.primary,
+                            letterSpacing: 1.4,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: Spacing.s),
+                    MarkdownBody(
+                      data: body,
+                      selectable: true,
+                      styleSheet: _entryMarkdownStyle(context),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.3 — HIGHLIGHTS section for digest bodies.
+/// Bullet items become individual `EditorialCard`s (B.1 primitive)
+/// stacked under the section heading. Non-bullet preamble text
+/// renders as markdown above the cards.
+class _HighlightSection extends StatelessWidget {
+  const _HighlightSection({required this.heading, required this.content});
+
+  final String heading;
+  final String content;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final extracted = _DigestBodyRender.extractBullets(content);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.m),
+          child: Text(
+            heading.toUpperCase(),
+            style: textTheme.labelSmall?.copyWith(
+              color: scheme.primary.withValues(alpha: 0.85),
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(height: Spacing.s),
+        if (extracted.preamble.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: Spacing.m),
+            child: MarkdownBody(
+              data: extracted.preamble,
+              selectable: true,
+              styleSheet: _entryMarkdownStyle(context),
+            ),
+          ),
+        for (final bullet in extracted.bullets)
+          EditorialCard(
+            title: bullet,
+          ),
+      ],
     );
   }
 }
