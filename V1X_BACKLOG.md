@@ -108,6 +108,45 @@ Each entry uses the same shape:
   v1 ships without it. v1.1 can land horses without schema change
   to existing categories.
 
+### In-app notifications screen
+
+- **Source:** Phase 6.6 scoping; Hub future-contents reservation.
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Medium.
+- **Dependencies:** v1 reminders stack (Phase 4 — system notifications
+  already fire via `flutter_local_notifications`); v1 Hub destination
+  (Phase 6.6 — surface for the inbox to live under).
+- **Notes:** v1 fires reminders + escalations as system notifications
+  only; there is no in-app inbox / history view. v1.1 adds an
+  inbox screen surfaced from Hub (mirrors Stitch's "Notifications"
+  config; per the Hub-vs-tab decision in Phase 6.6, lives as a Hub
+  sub-page rather than a top-level destination). Schema: read /
+  unread state per delivered notification, payload archive (kind +
+  fired-at + linked entry path), tap-to-deeplink to the relevant
+  entry / reminder / digest. Surfaces Hub-icon badge count when
+  unread > 0. Out of scope for v1 because system notifications
+  cover the immediate-attention case and an inbox without real
+  signal on which kinds users want to revisit risks shipping a
+  half-used surface; v1.1 lands once we see actual notification
+  taps + dismissal patterns.
+
+### Hub future contents — Privacy & Data, Help / Support
+
+- **Source:** Phase 6.6 scoping; Hub future-contents reservation.
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome); 59 follow-up
+  (Phase 6.6 Hub v1 contents — Settings + Export + About).
+- **Scope:** Small (per sub-page).
+- **Dependencies:** v1 Hub destination (Phase 6.6).
+- **Notes:** Phase 6.6 Hub v1 ships with Settings + Export + About.
+  Reserved for v1.1 (additive sub-pages; no IA change): **Privacy &
+  Data** (data deletion, export-all, encryption status — currently
+  partial in Settings; v1.1 promotes to its own page) and **Help /
+  Support** (FAQ, contact link, troubleshooting). In-app
+  Notifications inbox tracked separately above. Phase 7 reserves Hub
+  for Account / Subscription / Sync status alongside the paywall.
+  v1.1 sub-pages don't require routing-level changes — they nest
+  under Hub's existing route.
+
 ---
 
 ## v1.2 candidate
@@ -258,6 +297,78 @@ Each entry uses the same shape:
   poultry registries). Authoring effort is the cost; UX is
   unchanged from Tier 1.
 
+### Vitals tracker
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Medium.
+- **Dependencies:** v1 SOUL.md frontmatter (`weight_kg` already
+  ships); v1 trends repo (`lib/data/repos/trends_repo.dart` —
+  weight history + symptom keyword counts already wired); v1
+  trend chart primitives (`lib/app/widgets/charts/`).
+- **Notes:** v1 captures weight as `type: weight` entries that the
+  6.12 trends repo parses into a line chart. v1.2 expands to
+  structured **vitals** beyond weight: heart rate, body condition
+  score (1–9 scale, vet-shorthand), hydration, temperature,
+  respiratory rate. Each lands as either a structured frontmatter
+  field on a vet-visit entry OR as its own typed entry shape (TBD
+  — depends on whether users measure vitals at home vs. only
+  during vet visits). UI: per-pet HEALTH SUMMARY section (Phase
+  6.6 already lays out the section) shows latest values + sparkline
+  per measure. Trigger to revisit: real signal on which vitals
+  users actually want structured tracking for vs. which stay as
+  freeform body prose. Body-condition-scoring stays locked OUT
+  per DECISIONS row 25's clinical-vision gate even in v1.2 —
+  user-entered BCS is fine; AI-inferred BCS from photos is not.
+
+### Symptom Tracker
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Medium / Large depending on structure depth.
+- **Dependencies:** v1 trends repo symptom-frequency surface
+  (FTS5 keyword counts in `TrendsRepo.symptomFrequencies`); v1
+  red-flag screener; AI-tags v1.x (this entry; structured tag
+  layer would feed the symptom tracker).
+- **Notes:** v1 surfaces symptom frequency as five-keyword FTS5
+  counts (Vomiting / Diarrhea / Lethargy / Scratching / Limping)
+  on the SOUL profile chart. v1.2 expands to **structured symptom
+  logging**: a chat-side or quick-capture-side flow where the
+  user logs a symptom episode with severity + duration + body
+  location + linked photo. Episodes accumulate into a
+  per-symptom timeline shown on the HEALTH SUMMARY section.
+  Trigger to revisit: usage signal showing which symptoms users
+  log freeform repeatedly (the FTS5 count is a proxy — the right
+  symptom set comes from real journal data). Structured symptom
+  logs feed the weekly digest's "anomalies" surface and let the
+  6.7 vision red-flag screener cross-reference structured history
+  vs. extracted vision findings.
+
+### Activity tracking
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Medium.
+- **Dependencies:** v1 entry catalog (would add `type: activity`);
+  v1 chat tool catalog (`write_wiki_entry` already accepts
+  arbitrary type strings; adding the structured shape is the
+  scope).
+- **Notes:** v1 has no first-class concept of activity — walks /
+  play / training sessions land as `type: behavior` entries with
+  freeform prose. v1.2 adds structured `type: activity` with
+  duration + activity-kind enum (walk / run / fetch / training /
+  swim / play) + optional distance + optional location. UI: per-
+  pet activity timeline + weekly minutes total + streak feedback
+  (the engagement-loop angle, not gamification — the user sees
+  patterns, not points). Trigger to revisit: real signal on
+  whether activity tracking has standalone retention value or
+  whether it's a feature subsumed by structured symptom + weight
+  (i.e., the activity is implicit in the freeform story). Stays
+  out of v1 because v1's lightweight chat-driven journal already
+  captures activity as prose; promoting to structured shape needs
+  evidence the structured layer adds value beyond what FTS5
+  retrieval surfaces.
+
 ---
 
 ## v1.x (no specific window)
@@ -371,6 +482,137 @@ Each entry uses the same shape:
   "still on prednisone") and the existing FTS5 search finds
   them, tags add ceremony without value; if users want to
   *filter* by recurring concepts, tags pull their weight.
+
+### Medical as top-level destination
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Medium.
+- **Dependencies:** v1 vet-visit structured entry (Phase 6.10);
+  v1 auto-follow-up reminders (Phase 6.11); v1.2 vitals tracker
+  (this backlog) — would feed naturally into a Medical surface.
+- **Notes:** v1 surfaces vet visits as a `type: vet` filter inside
+  the journal browser; medical content lives mixed with all other
+  entries and is reachable only through the journal IA. v1.x
+  considers promoting Medical to its own top-level destination
+  (sibling to Journal, Profile, Hub) consolidating vet visits +
+  prescriptions + vitals + medical-flagged photos into one IA
+  surface. Holds Phase 6.6's "memory is the moat — medical lives
+  inside the journal, not the other way around" anti-pattern
+  hard until real signal warrants the IA promotion. Trigger:
+  usage data showing users reach for medical content frequently
+  enough that mixing it with Journal entries causes friction (e.g.
+  vet-visit retrieval rate >> behavioral-entry retrieval rate),
+  AND that the v1.2 vitals tracker accumulates enough structured
+  data to fill a dedicated surface. If trigger fires, the
+  bottom-nav swap is small (replace Hub or split Journal — TBD by
+  Phase 6.6's settled IA); the content move is bigger (the
+  Medical destination's empty state + day-one population pattern
+  needs to land cleanly so a new user without medical history
+  doesn't see a barren tab).
+
+### Multi-user "Pet Family" / family-sharing
+
+- **Source:** Phase 6.6 scoping (cofounder review). Extends the
+  v1.1 "Caregiver / family sharing preview" entry above with a
+  multi-edit framing.
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Large.
+- **Dependencies:** Phase 7 cloud sync backend (DECISIONS row 36);
+  per-pet identity model (currently single-device, single-user);
+  invite + auth flow.
+- **Notes:** The v1.1 "Caregiver / family sharing preview" entry
+  scopes **read-only** sharing — PDF export, vet-facing summary,
+  invite a sitter / vet to view. This entry scopes the broader
+  **multi-user "Pet Family"** model: multiple humans (partners,
+  caregivers, family members) with edit access to the same pet's
+  journal. Schema: per-pet `members: [{user_id, role}]` where role
+  ∈ {owner, caregiver, viewer}; entry attribution
+  (`authored_by: user_id`) so the journal preserves who wrote
+  what; conflict resolution at sync layer. Phase 7 sync is the
+  load-bearing dependency. Out of v1 scope because single-device
+  single-user is the simplest correct shape for the compounding-
+  memory thesis; multi-user adds permission semantics + sync
+  conflict resolution that v1 doesn't need. Trigger: real signal
+  from v1 / v1.1 users that a partner / caregiver wants
+  write-access (vs. just read). Coordinated with the v1.1
+  read-only sharing preview; doesn't supersede it.
+
+### Bottom nav variant configurations Stitch surfaced
+
+- **Source:** Phase 6.5 Stage 2 curation (Stitch sessions).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome); Phase 6.6
+  rows that lock the chosen 4-tab Home / Journal / Profile / Hub
+  shape.
+- **Scope:** Reference only — no scope.
+- **Dependencies:** Real-usage signal post-launch.
+- **Notes:** Stitch surfaced 6 different bottom-nav configurations
+  across 13 mockup screens (varying tab counts 3–5, varying
+  destinations including Care, Health, Add, Photos, Stories).
+  Phase 6.6 designed from PetPal's actual IA rather than
+  reconciling Stitch's varied configs (DECISIONS row 58). This
+  entry preserves the Stitch alternates as design exploration
+  artifacts: if post-launch usage signal shows the chosen 4-tab
+  shape isn't serving users, the Stitch alternates are the
+  starting point for revisiting (rather than re-running Stitch).
+  No implementation scope here — this is an archival / reference
+  entry. The captured alternates: 3-tab Home/Journal/More;
+  4-tab with Photos as separate tab; 4-tab with Health as
+  separate tab; 5-tab adding Care guides + Photos; FAB-centered
+  4-tab; bottom-sheet drawer instead of nav.
+
+### Center Capture FAB in bottom nav
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome); Phase 6.6
+  follow-up rows.
+- **Scope:** Small (~3–4 tasks).
+- **Dependencies:** v1 bottom nav (Phase 6.6); usage signal.
+- **Notes:** Considered for Phase 6.6 and rejected for v1.
+  Reasoning: capture is multi-modal (Photo / Note / Medical) and a
+  single FAB requires either an extra-tap action sheet (worse than
+  Stitch's inline Home Quick Capture tiles which are zero-extra-
+  tap) or arbitrary mode-pick. Visual weight of a center-mounted
+  FAB conflicts with the warm-journal thesis — pulls toward
+  social-app-action register (Instagram, Facebook). PetPal's
+  primary loop is chat-driven, not capture-driven. Quick Capture
+  tiles on Home + photo button in chat composer + camera entry
+  point cover the use cases. Trigger to revisit: post-launch
+  usage signal showing frequent capture intent from non-Home tabs
+  (especially Journal browser → "I want to add a memory while
+  browsing"). Scope if revisited: small — a single-action FAB
+  opening camera-as-memory directly (the primary capture mode),
+  not a multi-action sheet (the multi-action design is what
+  failed the v1 evaluation). Photo mode only because a FAB needs
+  one obvious action; if Note + Medical also need fast access,
+  they stay on Home Quick Capture or chat composer.
+
+### Engagement metrics
+
+- **Source:** Phase 6.6 scoping (cofounder review).
+- **DECISIONS:** 58 (Phase 6.5 Stage 2 curation outcome).
+- **Scope:** Small.
+- **Dependencies:** Phase 7 backend service (DECISIONS row 36 — the
+  PetPal-hosted LLM proxy is the natural place to also collect
+  opt-in engagement signal); user opt-in surface (Settings —
+  privacy lock).
+- **Notes:** v1 ships zero engagement instrumentation — no DAU,
+  no retention metrics, no feature-usage telemetry. This is
+  intentional for the privacy positioning ("memory is private by
+  default" — PRODUCT.md "Not a social network"). v1.x adds
+  **opt-in** engagement metrics for product decisions: which
+  features users reach for, where they drop off in onboarding,
+  which entry types accumulate vs. stay near-zero. Schema:
+  privacy-preserving event log (no entry content, no chat content,
+  no pet-identifying data) — only feature-tap counts + screen-
+  visit counts + session duration buckets. Default OFF; opt-in via
+  Settings → Privacy & Data with plain-language explanation of
+  what's collected and what isn't. Routes through the Phase 7
+  backend (extending the LLM proxy is cheaper than a separate
+  analytics surface). Trigger to revisit: post-launch product
+  decisions need data we don't have (e.g., "is the photo timeline
+  used? do users actually open weekly summaries? does the
+  affective observation card get tapped or dismissed?").
 
 ---
 
