@@ -519,7 +519,7 @@ flagging itself as undercooked.
   red — failures are failures, distinct register from
   medical-attention). Resolves DESIGN.md's `[INTENT-INFERRED]`
   flag.
-- [ ] 6.6.D.2 **Dark mode parity** — verify coral + sage editorial
+- [x] 6.6.D.2 **Dark mode parity** — verify coral + sage editorial
   treatments don't wash through the warm-graphite surface scale
   (DECISIONS row 38 lock); all Group B + C surfaces render
   correctly under `buildDarkColorScheme`; coral readability on
