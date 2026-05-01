@@ -391,7 +391,7 @@ flagging itself as undercooked.
 
 ### Group A — Navigation IA (5 tasks)
 
-- [ ] 6.6.A.0 **Lock 4-tab bottom nav structure** — DECISIONS row
+- [x] 6.6.A.0 **Lock 4-tab bottom nav structure** — DECISIONS row
   pinning Home / Journal / Profile / Hub, the Hub-vs-Settings
   reasoning, and the orphan-tile mapping (Add photo → Quick Capture
   on Home, Journal/Profile/Settings → tabs, Reminders → Home
