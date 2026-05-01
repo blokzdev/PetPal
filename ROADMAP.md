@@ -445,7 +445,7 @@ flagging itself as undercooked.
   for compatibility but card-level coral takes primary). The
   primitive's docstring carries the locked shape spec (the user
   confirmed no separate spec doc; intent lives in code).
-- [ ] 6.6.B.2 **Apply `EditorialCard` to journal browser** —
+- [x] 6.6.B.2 **Apply `EditorialCard` to journal browser** —
   `lib/app/screens/wiki_browser_screen.dart` `_EntryTile` consumes
   `EditorialCard`. Date-grouped sections (replacing the existing
   type-grouped layout — TBD by Phase 6.6 visual brief). Type icon

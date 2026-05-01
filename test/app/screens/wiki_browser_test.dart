@@ -72,11 +72,14 @@ void main() {
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Journal')));
     await tester.pumpAndSettle();
 
-    // Group headers + entry titles.
+    // Group headers + entry titles. Phase 6.6.B.2 — entries render
+    // as EditorialCards with kicker "{TYPE} · {MON DAY}".
     expect(find.text('Food · 1'), findsOneWidget);
     expect(find.text('Vet visits · 1'), findsOneWidget);
     expect(find.text('Carrot trial'), findsOneWidget);
     expect(find.text('Annual checkup'), findsOneWidget);
+    expect(find.text('FOOD · APR 25'), findsOneWidget);
+    expect(find.text('VET VISITS · APR 26'), findsOneWidget);
 
     // Tap the food entry.
     await tester.tap(find.text('Carrot trial'));
@@ -192,26 +195,18 @@ void main() {
     expect(find.text('Apr 20–26'), findsOneWidget);
     expect(find.text('Weekly digest 2026-04-26'), findsNothing);
 
-    // Regular vet entry still renders as a ListTile (with its
-    // ISO-date subtitle), proving the dispatch is type-driven.
+    // Phase 6.6.B.2 — non-digest entries now also use EditorialCard
+    // (the productized primitive). Vet entry kicker reflects type +
+    // abbreviated date.
     expect(find.text('Annual checkup'), findsOneWidget);
-    expect(find.text('2026-04-26'), findsOneWidget);
+    expect(find.text('VET VISITS · APR 26'), findsOneWidget);
     expect(
       find.ancestor(
         of: find.text('Annual checkup'),
         matching: find.byType(ListTile),
       ),
-      findsOneWidget,
-      reason: 'non-digest entries keep the ListTile treatment',
-    );
-    expect(
-      find.ancestor(
-        of: find.text("Milo's week"),
-        matching: find.byType(ListTile),
-      ),
       findsNothing,
-      reason: 'digest cards are NOT ListTiles — they\'re the '
-          'editorial Material card with InkWell',
+      reason: 'non-digest entries no longer use ListTile (B.2)',
     );
 
     // Tapping the editorial card navigates to /wiki/entry with the

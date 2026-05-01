@@ -7,6 +7,7 @@ import '../../data/db/database.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/editorial_card.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
 
@@ -197,18 +198,32 @@ class _EntryTile extends StatelessWidget {
   const _EntryTile({required this.entry});
   final Entry entry;
 
+  static const _monthAbbrev = [
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+  ];
+
+  String _kickerFor(Entry e) {
+    final type = _humanTypeLabel(e.type).toUpperCase();
+    final month = _monthAbbrev[e.ts.month - 1];
+    return '$type · $month ${e.ts.day}';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final iso = '${entry.ts.year.toString().padLeft(4, '0')}-'
-        '${entry.ts.month.toString().padLeft(2, '0')}-'
-        '${entry.ts.day.toString().padLeft(2, '0')}';
-    return ListTile(
-      title: Text(entry.title),
-      subtitle: Text(
-        iso,
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-      trailing: const Icon(PhosphorIconsRegular.caretRight),
+    // Phase 6.6 task 6.6.B.2 — entry tile uses EditorialCard.
+    // Kicker = "{TYPE} · {MON DAY}" (e.g. "FOOD · APR 25"); title =
+    // entry.title; onTap routes to /wiki/entry. Body preview is not
+    // wired for v1 (Entry rows don't carry body content; per-tile
+    // disk reads would be expensive for the list). Coral left-
+    // border on flagged entries lands in task 6.6.D.1 (the system-
+    // wide coral wiring task), since the flagged signal lives in
+    // the on-disk frontmatter (`red_flag_match`) and surfacing it
+    // requires either a Drift index extension or a batched
+    // sidecar read — both are scoped to D.1.
+    return EditorialCard(
+      kicker: _kickerFor(entry),
+      title: entry.title,
       onTap: () => GoRouter.of(context).push(
         '/wiki/entry',
         extra: entry.path,
