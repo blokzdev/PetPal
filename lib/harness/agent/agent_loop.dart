@@ -34,6 +34,15 @@ class AgentLoop {
   /// Phase 6 task 6.9 — pass [attachedImage] (+ [attachedImageMediaType])
   /// to attach a single image to the new user turn alongside [userInput].
   /// One image per turn in v1; multi-photo deferred to v1.2.
+  ///
+  /// **NOT a registered tool.** [attachedImage] is a UI-driven turn
+  /// parameter — the user's photo attachment is a UI gesture, not an
+  /// agent-issued action. Earlier planning docs (ROADMAP 6.9 + DECISIONS
+  /// row 40) called this "the `attach_photo` tool" before implementation;
+  /// the build correctly reshaped to a parameter path so the model can't
+  /// hallucinate `attach_photo` tool calls. See DECISIONS row 55's
+  /// "Chat-attached photos defer to task 6.9" paragraph for the
+  /// reconciled framing.
   Future<List<Message>> run({
     required String systemPrompt,
     required String userInput,
