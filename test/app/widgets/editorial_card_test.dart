@@ -30,7 +30,7 @@ void main() {
     await tester.pumpWidget(wrap(
       const EditorialCard(
         kicker: 'WEEKLY SUMMARY',
-        title: "This week with Loki",
+        title: 'This week with Loki',
       ),
     ));
     expect(find.text('WEEKLY SUMMARY'), findsOneWidget);

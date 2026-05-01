@@ -57,11 +57,14 @@ void main() {
         reason: 'weekly summary should default to off (Pro-tier)');
 
     // Task 5.12 — section grouping migrated to PetSectionHeader +
-    // PetCard. The header text appears once (above the card); the
-    // SwitchListTile + the run-now ListTile both live inside a
-    // single Card surface (no surfaceContainerHigh band header).
-    expect(find.text('Weekly summary'), findsWidgets,
-        reason: 'PetSectionHeader title still reads "Weekly summary"');
+    // PetCard. Phase 6.6 task 6.6.B.0 — section header now renders
+    // uppercased ("WEEKLY SUMMARY"); the SwitchListTile inside the
+    // card keeps the mixed-case title ("Weekly summary"). Two
+    // separate text instances under one card surface.
+    expect(find.text('WEEKLY SUMMARY'), findsOneWidget,
+        reason: 'PetSectionHeader title renders in small-caps register');
+    expect(find.text('Weekly summary'), findsOneWidget,
+        reason: 'SwitchListTile title keeps mixed case');
     expect(
       find.ancestor(
         of: find.widgetWithText(SwitchListTile, 'Weekly summary'),

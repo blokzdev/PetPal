@@ -83,11 +83,13 @@ void main() {
     // Task 5.12 — SOUL editor groups frontmatter under 'Profile'
     // and the prose body under 'About <pet>'. Both PetSectionHeaders
     // render inside a single PetCard surface (user-locked: 'Single
-    // card with section divider').
-    expect(find.text('Profile'), findsWidgets,
-        reason: 'PetSectionHeader Profile must appear');
-    expect(find.text('About Milo'), findsOneWidget,
-        reason: 'PetSectionHeader About <pet> interpolates the name');
+    // card with section divider'). Phase 6.6 task 6.6.B.0 — section
+    // headers render uppercased ('PROFILE', 'ABOUT MILO').
+    expect(find.text('PROFILE'), findsOneWidget,
+        reason: 'PetSectionHeader Profile renders in small-caps register');
+    expect(find.text('ABOUT MILO'), findsOneWidget,
+        reason: 'PetSectionHeader About <pet> interpolates the name in '
+            'small-caps register');
     final cardCount = tester.widgetList(find.byType(Card)).length;
     expect(cardCount, greaterThanOrEqualTo(1),
         reason: 'form lives inside a PetCard surface');

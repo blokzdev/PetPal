@@ -427,7 +427,7 @@ flagging itself as undercooked.
 
 ### Group B — Editorial Card System (5 tasks)
 
-- [ ] 6.6.B.0 **`PetSectionHeader` refresh** — small caps
+- [x] 6.6.B.0 **`PetSectionHeader` refresh** — small caps
   (TextTransform / `letterSpacing 1.0–1.2` + reduced size) + sage
   tint (`scheme.primary` at low alpha or `onSurface@0.6` blended
   with `primary@0.4` — TBD by visual A/B). Existing callers don't

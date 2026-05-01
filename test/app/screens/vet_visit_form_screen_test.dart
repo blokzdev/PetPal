@@ -88,7 +88,8 @@ void main() {
     expect(find.text('Diagnosis (what the vet said)'), findsOneWidget);
     expect(find.text('Prescriptions (one per line)'), findsOneWidget);
     expect(find.text('Follow-up (optional)'), findsOneWidget);
-    expect(find.text('Notes'), findsOneWidget);
+    // Phase 6.6 task 6.6.B.0 — section headers render uppercased.
+    expect(find.text('NOTES'), findsOneWidget);
   });
 
   testWidgets('Save writes a vet entry whose frontmatter carries the '
