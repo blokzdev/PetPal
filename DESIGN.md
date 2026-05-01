@@ -112,16 +112,11 @@ where it lives in the scheme.
   flooding.
 
 - **Coral `#E89B7A` (`PetPalColors.coral` → `scheme.tertiary`).** Warm
-  peach-coral. The brand thesis reserves it for medical-warning
-  escalation, where its warmer-than-sage temperature reads as "draw
-  attention, but with care." [INTENT-INFERRED — see "Implementation
-  drift" below; coral is wired into the scheme as `tertiary` but no
-  widget currently reads it. The red-flag escalation badge today
-  uses `scheme.onSurfaceVariant` (muted gray) and the chat error
-  banner uses `scheme.error` (M3-default red), so coral's medical-
-  warning role is currently aspirational. This is one of the
-  documented thesis-vs-implementation conflicts the commit message
-  flags.]
+  peach-coral. Reserved for medical-warning escalation, where its
+  warmer-than-sage temperature reads as "draw attention, but with
+  care." Resolved to system-wide wiring in Phase 6.6 task D.1 — see
+  the Phase 6.6 amendment paragraph in the red-flag badge section
+  below for the full resolution path.
 
 - **Warm off-white `#F7F5F2` (`PetPalColors.warmOffWhite` →
   `scheme.surface` in light mode).** The single most visible token.
