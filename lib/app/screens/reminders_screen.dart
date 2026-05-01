@@ -194,11 +194,18 @@ class RemindersEmptyForTesting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Phase 6.6 task 6.6.C.5 — Stitch register, the reference shape:
+    // "$petName's schedule is clear. Enjoy the quiet moments
+    // together." Pet-name-first present-fact + warm reframe. The
+    // category teaching (heartworm / flea / vaccines) carries into
+    // the second body sentence so the empty state still teaches
+    // what kinds of reminders are useful.
     return PetEmptyState(
       icon: PhosphorIconsRegular.bell,
-      heading: 'No reminders for $petName yet.',
-      body: 'Heartworm. Flea treatment. Vaccines. Set a reminder '
-          "and PetPal will nudge you when it's due.",
+      heading: "$petName's schedule is clear.",
+      body: 'Enjoy the quiet moments together. When something '
+          'comes due — heartworm, flea treatment, vaccines — set a '
+          'reminder and PetPal will nudge you.',
       action: PetButton(
         label: 'Add reminder',
         onPressed: onAdd,

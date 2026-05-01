@@ -73,8 +73,17 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('PetPal'), findsNWidgets(2));
+    // Phase 6.6 task 6.6.C.5 — Stitch register on home empty state.
+    // Pre-pet (no name to interpolate, VOICE.md §5), so 'Your pet'
+    // serves as the placeholder. The brand tagline still anchors
+    // the welcome screen (5.6 narrative welcome lock — see the
+    // separate "Unonboarded user lands on the welcome page" test).
     expect(
-      find.text("PetPal remembers your pet's life so you don't have to."),
+      find.textContaining("Your pet's life starts collecting here."),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('PetPal remembers them all'),
       findsOneWidget,
     );
     expect(find.text('Add your pet'), findsOneWidget);

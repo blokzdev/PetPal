@@ -37,13 +37,15 @@ class CareGuidesEmptyForTesting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Phase 6.6 task 6.6.C.5 — Stitch register, global variant
+    // (no name interpolation per VOICE.md §5 — this is a
+    // cross-pet screen). Present-fact + how-it-works reframe.
     return const PetEmptyState(
       icon: PhosphorIconsRegular.bookOpen,
-      heading: 'No care guides yet for your pet.',
-      body: "We're adding more. Care guides activate during chat "
-          'when you mention what they cover — like "puppy" or '
-          '"senior cat" — so the right one shows up at the right '
-          'time, not as a wall of articles.',
+      heading: 'Care guides are quiet for now.',
+      body: "They activate during chat — mention 'puppy' or "
+          "'senior cat' and the right one shows up. More guides "
+          'land in updates.',
     );
   }
 }

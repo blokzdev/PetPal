@@ -27,20 +27,26 @@ void main() {
         ),
       );
 
-  group('journal empty state — narrative invitation', () {
-    testWidgets('renders the picked locked copy', (tester) async {
+  group('journal empty state — Stitch register (per-pet)', () {
+    testWidgets('renders pet-name-first present-fact + warm reframe',
+        (tester) async {
       await tester.pumpWidget(wrap(
         const _JournalEmptyHarness(petName: 'Loki'),
       ));
       await tester.pumpAndSettle();
 
-      // Heading states the empty fact, name interpolated.
-      expect(find.text('No memories about Loki yet.'), findsOneWidget);
-      // Body frames the journal as the place where the pet's life
-      // accumulates — distinguishes "narrative invitation" from
-      // "minimal one-CTA" and "instructional sample list".
+      // Phase 6.6 task 6.6.C.5 — Stitch register: pet-name-first
+      // possessive + present-tense state-of-the-surface, followed
+      // by a warm forward-action reframe (the journal builds itself).
       expect(
-        find.textContaining("Loki's life will accumulate"),
+        find.text("Loki's journal hasn't begun yet."),
+        findsOneWidget,
+      );
+      // Body teaches by enumerating concretes (vet visits, weight,
+      // small wins) and frames the build as something the user
+      // helps PetPal do.
+      expect(
+        find.textContaining('the journal builds itself here'),
         findsOneWidget,
       );
       // CTA opens chat (not a generic "Add memory" or no-CTA).
@@ -54,16 +60,19 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('No memories yet.'), findsOneWidget);
       expect(
-        find.textContaining("your pet's life will accumulate"),
+        find.text("Your pet's journal hasn't begun yet."),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('the journal builds itself here'),
         findsOneWidget,
       );
     });
   });
 
-  group('reminders empty state — action-first with category examples', () {
-    testWidgets('teaches what kinds of reminders are useful',
+  group('reminders empty state — Stitch register (reference shape)', () {
+    testWidgets('renders the locked Stitch reference register',
         (tester) async {
       var addPressed = 0;
       await tester.pumpWidget(wrap(
@@ -74,12 +83,20 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      // Heading is per-pet (VOICE.md §5).
-      expect(find.text('No reminders for Loki yet.'), findsOneWidget);
-      // Category examples in the body — distinguishes "action-first
-      // with categories" from "tight one-line" and "concrete list".
+      // Phase 6.6 task 6.6.C.5 — Stitch reference register:
+      // "$petName's schedule is clear. Enjoy the quiet moments
+      // together." Heading interpolates name (VOICE.md §5);
+      // body opens with the warm reframe.
+      expect(find.text("Loki's schedule is clear."), findsOneWidget);
       expect(
-        find.textContaining('Heartworm. Flea treatment. Vaccines.'),
+        find.textContaining('Enjoy the quiet moments together.'),
+        findsOneWidget,
+      );
+      // Category teaching (heartworm / flea / vaccines) carries
+      // forward inside the body so the empty state still teaches
+      // what kinds of reminders are useful.
+      expect(
+        find.textContaining('heartworm, flea treatment, vaccines'),
         findsOneWidget,
       );
       // CTA mirrors the FAB so the empty state has its own primary
@@ -94,13 +111,16 @@ void main() {
     });
   });
 
-  group('care guides empty state — global, no name interpolation', () {
+  group('care guides empty state — Stitch register (global)', () {
     testWidgets('reads as static (no pet name in heading or body)',
         (tester) async {
       await tester.pumpWidget(wrap(const CareGuidesEmptyForTesting()));
       await tester.pumpAndSettle();
 
-      expect(find.text('No care guides yet for your pet.'), findsOneWidget);
+      // Phase 6.6 task 6.6.C.5 — global variant of Stitch register:
+      // present-fact + how-it-works reframe, no name interpolation
+      // (VOICE.md §5 — care guides browser is cross-pet).
+      expect(find.text('Care guides are quiet for now.'), findsOneWidget);
       // Body explains how care guides activate during chat — sets
       // expectations for the user.
       expect(

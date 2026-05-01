@@ -111,13 +111,16 @@ void main() {
     await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Journal')));
     await tester.pumpAndSettle();
 
-    // Empty state — task 5.7 redesign. Narrative invitation framing:
-    // heading states the empty fact, body frames the journal as the
-    // place where the pet's life accumulates, CTA opens chat.
-    // VOICE.md §5: per-pet destination → name interpolation.
-    expect(find.text('No memories about Milo yet.'), findsOneWidget);
+    // Empty state — Phase 6.6 task 6.6.C.5 Stitch register on the
+    // journal empty: pet-name-first present-fact + warm reframe
+    // (the journal builds itself). VOICE.md §5: per-pet
+    // destination → name interpolation. CTA opens chat (unchanged).
     expect(
-      find.textContaining("Milo's life will accumulate"),
+      find.text("Milo's journal hasn't begun yet."),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('the journal builds itself here'),
       findsOneWidget,
     );
     expect(find.widgetWithText(FilledButton, 'Open chat'), findsOneWidget);

@@ -77,18 +77,19 @@ class JournalEmptyForTesting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Phase 6.6 task 6.6.C.5 — Stitch register: pet-name-first
+    // present-fact + warm reframe ("the journal begins"). Per-pet
+    // destination, so VOICE.md §5 interpolation applies.
     final heading = petName == null
-        ? 'No memories yet.'
-        : 'No memories about $petName yet.';
+        ? "Your pet's journal hasn't begun yet."
+        : "$petName's journal hasn't begun yet.";
     final body = petName == null
-        ? "This is where your pet's life will accumulate — vet "
-            "visits, weight changes, the things you'd otherwise "
-            "forget. Tell PetPal what's been happening, and "
-            "they'll show up here."
-        : "This is where $petName's life will accumulate — vet "
-            "visits, weight changes, the things you'd otherwise "
-            "forget. Tell PetPal what's been happening, and "
-            "they'll show up here.";
+        ? "Tell PetPal what's been happening — vet visits, weight "
+            'changes, small wins — and the journal builds itself '
+            'here.'
+        : "Tell PetPal what's been happening — vet visits, weight "
+            'changes, small wins — and the journal builds itself '
+            'here.';
     return PetEmptyState(
       icon: PhosphorIconsRegular.bookOpen,
       heading: heading,

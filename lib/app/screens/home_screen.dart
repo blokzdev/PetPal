@@ -177,8 +177,16 @@ class _EmptyState extends StatelessWidget {
         const SizedBox(height: 16),
         Text('PetPal', style: text.headlineMedium),
         const SizedBox(height: 8),
+        // Phase 6.6 task 6.6.C.5 — Stitch register: present-fact +
+        // warm reframe / forward action. Pre-pet state can't
+        // interpolate a name (VOICE.md §5), so the first sentence
+        // uses 'Your pet' as the placeholder. Existing brand tagline
+        // stays on the welcome screen — this surface is the empty
+        // home, not the welcome.
         Text(
-          "PetPal remembers your pet's life so you don't have to.",
+          "Your pet's life starts collecting here. "
+          'Vet visits, weight changes, small wins — '
+          'PetPal remembers them all.',
           textAlign: TextAlign.center,
           style: text.bodyMedium,
         ),

@@ -130,12 +130,18 @@ void main() {
 
     // App-bar interpolates the active pet's name (VOICE.md §5).
     expect(find.text("Milo's reminders"), findsOneWidget);
-    // Empty state.
-    // Empty state — task 5.7 redesign. Heading is per-pet (VOICE.md
-    // §5), body teaches what kinds of reminders to set.
-    expect(find.text('No reminders for Milo yet.'), findsOneWidget);
+    // Empty state — Phase 6.6 task 6.6.C.5 Stitch register
+    // (reference shape): "$petName's schedule is clear. Enjoy
+    // the quiet moments together." Heading interpolates name
+    // (VOICE.md §5); category teaching survives in the body so
+    // the empty state still teaches what kinds of reminders to set.
+    expect(find.text("Milo's schedule is clear."), findsOneWidget);
     expect(
-      find.textContaining('Heartworm. Flea treatment. Vaccines.'),
+      find.textContaining('Enjoy the quiet moments together.'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('heartworm, flea treatment, vaccines'),
       findsOneWidget,
     );
     // CTA mirrors the FAB so the empty state has its own primary

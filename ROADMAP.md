@@ -494,7 +494,7 @@ flagging itself as undercooked.
   subtitle pattern from Stitch). Care guides (today reachable from
   `/skills`) move under GUIDES & SKILLS section per DECISIONS row
   62; per-pet contextual + species-filtered.
-- [ ] 6.6.C.5 **Empty state refinement** — adopt Stitch microcopy
+- [x] 6.6.C.5 **Empty state refinement** — adopt Stitch microcopy
   register on the four empty states (`_EmptyState` on home,
   `JournalEmptyForTesting` on journal, reminders empty, care
   guides empty). Reference register: "Luna's schedule is clear.
