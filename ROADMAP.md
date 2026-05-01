@@ -527,7 +527,7 @@ flagging itself as undercooked.
   light-mode contrast — verify on the `darkSurfaceContainer`
   band). If contrast falls short, the light/dark coral split
   lands here as a follow-up DECISIONS row.
-- [ ] 6.6.D.3 **Phase 6.6 wrap-up + on-device verification
+- [x] 6.6.D.3 **Phase 6.6 wrap-up + on-device verification
   REQUIRED.** §14 verify: `flutter analyze --fatal-infos` exit 0,
   `flutter test --reporter expanded` exit 0, APK build via CI
   (sandbox can't run Android SDK). Walkthrough script (locks at
