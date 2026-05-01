@@ -13,6 +13,7 @@ import 'screens/hub_screen.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/photo_capture_screen.dart';
 import 'screens/photo_timeline_screen.dart';
+import 'screens/profile_view_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
 import 'screens/skill_browser_screen.dart';
@@ -184,16 +185,21 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
 
           // ─── Branch 2: Profile ────────────────────────────────────
+          // Phase 6.6 task 6.6.C.4 — `/soul` now renders the read-
+          // only sectioned `ProfileViewScreen`; the existing form-
+          // driven `SoulEditorScreen` lives at `/soul/edit` and is
+          // reached via the AppBar pencil. Care guides at
+          // `/soul/guides` (DECISIONS row 62).
           StatefulShellBranch(
             routes: [
               GoRoute(
                 path: '/soul',
-                builder: (context, state) => const SoulEditorScreen(),
+                builder: (context, state) => const ProfileViewScreen(),
                 routes: [
-                  // Phase 6.6 task 6.6.A.3 — Care guides move under
-                  // Profile branch (DECISIONS row 62 — per-pet
-                  // contextual + species-filtered). Legacy `/skills`
-                  // redirects here.
+                  GoRoute(
+                    path: 'edit',
+                    builder: (context, state) => const SoulEditorScreen(),
+                  ),
                   GoRoute(
                     path: 'guides',
                     builder: (context, state) => const SkillBrowserScreen(),

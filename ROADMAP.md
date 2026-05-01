@@ -484,7 +484,7 @@ flagging itself as undercooked.
   label) for the synthesis runner's anomaly + trend observations,
   structured HIGHLIGHTS section using nested `EditorialCard`s
   (Group B).
-- [ ] 6.6.C.4 **Pet profile layered restructure** —
+- [x] 6.6.C.4 **Pet profile layered restructure** —
   `lib/app/screens/soul_editor_screen.dart`. Read-only sectioned
   view as default: ABOUT / DETAILS / HEALTH SUMMARY / RECENT
   MEMORIES / GUIDES & SKILLS. Edit pencil on the AppBar opens the

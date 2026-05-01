@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/main.dart';
@@ -56,11 +57,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Phase 6 task 6.6 — the Add photo tile lands at top-left of the
-    // destinations grid, pushing Profile into row 2 / col 1 which can
-    // sit below the test viewport (800×600). Scroll into view first.
-    await tester.ensureVisible(find.descendant(of: find.byType(NavigationBar), matching: find.text('Profile')));
-    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Profile')));
+    // Phase 6.6 task 6.6.C.4 — /soul now renders the read-only
+    // sectioned ProfileViewScreen; the editor lives at /soul/edit
+    // and is reached via the AppBar pencil. Tap Profile tab, then
+    // tap the pencil to land on the editor.
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Profile'),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(PhosphorIconsRegular.pencilSimple));
     await tester.pumpAndSettle();
 
     // Form populates from the parsed frontmatter. Field order:

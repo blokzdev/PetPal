@@ -81,7 +81,7 @@ A quiet week otherwise.
     expect(find.text('TRENDS'), findsOneWidget);
     // Body line shows.
     expect(
-      find.textContaining("trended down for 3 weeks"),
+      find.textContaining('trended down for 3 weeks'),
       findsOneWidget,
     );
     // "Notes" section keeps default markdown rendering — h2 text is
