@@ -433,7 +433,7 @@ flagging itself as undercooked.
   with `primary@0.4` — TBD by visual A/B). Existing callers don't
   change shape; only the rendered chrome shifts. Update tests that
   pin the current `letterSpacing 0.6` + `onSurface@0.65` values.
-- [ ] 6.6.B.1 **`EditorialCard` primitive** — new
+- [x] 6.6.B.1 **`EditorialCard` primitive** — new
   `lib/app/widgets/editorial_card.dart`. Composition: optional
   leading thumbnail (square, `Radii.s` clip), `JournalText.entryTitle`
   serif title (Source Serif 4, weight 600), optional small-caps
