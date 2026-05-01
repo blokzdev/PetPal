@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/providers.dart';
+import 'package:petpal/app/widgets/pet_card.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/main.dart';
@@ -69,7 +70,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Land on Home → Open journal.
-    await tester.tap(find.text('Journal'));
+    await tester.tap(find.widgetWithText(PetCardButton, 'Journal'));
     await tester.pumpAndSettle();
 
     // Group headers + entry titles.
@@ -105,7 +106,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Journal'));
+    await tester.tap(find.widgetWithText(PetCardButton, 'Journal'));
     await tester.pumpAndSettle();
 
     // Empty state — task 5.7 redesign. Narrative invitation framing:
@@ -176,7 +177,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Journal'));
+    await tester.tap(find.widgetWithText(PetCardButton, 'Journal'));
     await tester.pumpAndSettle();
 
     // Group headers stay — both 'digest' and 'vet' clusters render.
@@ -272,7 +273,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Journal'));
+    await tester.tap(find.widgetWithText(PetCardButton, 'Journal'));
     await tester.pumpAndSettle();
 
     expect(find.text('Apr 27 – May 3'), findsOneWidget);

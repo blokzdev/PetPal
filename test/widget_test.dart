@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
+import 'package:petpal/app/widgets/pet_card.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/main.dart';
@@ -272,6 +273,11 @@ void main() {
     // label (the previous 'Open journal' / 'Edit profile' verbose
     // labels collapsed to 'Journal' / 'Profile' to fit the tile
     // grid).
+    // Phase 6.6 task 6.6.A.2 — bottom nav now also renders
+    // "Journal" / "Profile" / "Hub" labels, so scoping the
+    // home-grid assertion to PetCardButton disambiguates from the
+    // nav chrome. Task 6.6.A.3 removes the home grid entirely;
+    // this whole test gets rewritten or deleted then.
     for (final label in const [
       'Journal',
       'Profile',
@@ -279,7 +285,7 @@ void main() {
       'Care guides',
       'Settings',
     ]) {
-      expect(find.text(label), findsOneWidget,
+      expect(find.widgetWithText(PetCardButton, label), findsOneWidget,
           reason: 'destination "$label" is missing');
     }
 

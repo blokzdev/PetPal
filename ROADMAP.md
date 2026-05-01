@@ -404,7 +404,7 @@ flagging itself as undercooked.
   `/pets/add`, etc.) become branch-nested `GoRoute`s. Each branch
   preserves its own back-stack + scroll position; back-button pops
   within branch first, exits app at branch root.
-- [ ] 6.6.A.2 **Bottom nav widget** — `lib/app/widgets/pet_bottom_nav.dart`.
+- [x] 6.6.A.2 **Bottom nav widget** — `lib/app/widgets/pet_bottom_nav.dart`.
   Phosphor outline icons (4 destinations); Inter labels; sage active
   state with subtle pill background behind icon + label; static bar
   (not floating — floating pill skews Material You per DESIGN.md
