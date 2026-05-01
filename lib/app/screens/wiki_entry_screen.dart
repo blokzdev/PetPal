@@ -142,16 +142,206 @@ class WikiEntryScreen extends ConsumerWidget {
                 body: parsed.body.trimLeft(),
               );
             }
-            return Markdown(
-              data: parsed.body.trimLeft(),
-              selectable: true,
-              styleSheet: _entryMarkdownStyle(context),
+            // Phase 6.6 task 6.6.C.2 — entry header (serif title +
+            // small-caps date) above the markdown body, plus the
+            // MEDICAL NOTE callout for vet entries. Body's leading
+            // `# H1` (when present) is stripped so the explicit
+            // header doesn't duplicate it. `MarkdownBody` (vs the
+            // scrolling `Markdown`) lets the header scroll with
+            // the content inside one SingleChildScrollView.
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(Spacing.m),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _EntryHeader(path: path, type: type),
+                  if (type == 'vet') ...[
+                    const SizedBox(height: Spacing.m),
+                    const _MedicalNoteCallout(),
+                  ],
+                  const SizedBox(height: Spacing.l),
+                  MarkdownBody(
+                    data: _stripLeadingH1IfMatchesTitle(
+                      parsed.body.trimLeft(),
+                      _humanEntryTitle(path),
+                    ),
+                    selectable: true,
+                    styleSheet: _entryMarkdownStyle(context),
+                  ),
+                ],
+              ),
             );
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => const Center(
           child: Text("Couldn't open the journal."),
+        ),
+      ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.2 — strips a leading `# {title}\n` line
+/// from a markdown body when it matches the entry's resolved title
+/// (case-insensitive, whitespace-tolerant). Vet entries from 6.10
+/// always embed `# {reason}` at the top of the body; the new entry
+/// header renders the title separately, so the matching H1 is
+/// duplicate. Non-matching H1s are preserved — a body that opens
+/// with an unrelated H1 (a freeform note titled "Just a body" on a
+/// path-slug-titled "Rabies" entry) should still see its H1
+/// rendered by the markdown body.
+String _stripLeadingH1IfMatchesTitle(String body, String title) {
+  final m = RegExp(r'^#\s+([^\n]*)\n+').firstMatch(body);
+  if (m == null) return body;
+  final headingText = m.group(1)?.trim() ?? '';
+  if (headingText.toLowerCase() == title.trim().toLowerCase()) {
+    return body.substring(m.end);
+  }
+  return body;
+}
+
+/// Phase 6.6 task 6.6.C.2 — entry header for the markdown render
+/// path. Serif title (via `JournalText.entryTitle`) on top, small-
+/// caps metadata row below (`{TYPE} · {MON DAY YYYY}`). Mirrors the
+/// editorial register the journal-browser tiles + home recent-
+/// memories cards use, applied to the detail view.
+class _EntryHeader extends StatelessWidget {
+  const _EntryHeader({required this.path, required this.type});
+
+  final String path;
+  final Object? type;
+
+  static const _monthAbbrev = [
+    'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+    'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+  ];
+
+  String _humanType(Object? t) {
+    if (t is! String || t.isEmpty) return 'NOTE';
+    switch (t) {
+      case 'digest':
+        return 'WEEKLY SUMMARY';
+      case 'vet':
+        return 'VET VISIT';
+      case 'food':
+        return 'FOOD';
+      case 'weight':
+        return 'WEIGHT';
+      case 'behavior':
+        return 'BEHAVIOR';
+      case 'photos':
+        return 'PHOTO';
+      default:
+        return t.toUpperCase();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final title = _humanEntryTitle(path);
+    final parsed = parseEntryPath(path);
+    final ts = parsed?.ts;
+    String? meta;
+    if (ts != null) {
+      meta = '${_humanType(type)} · '
+          '${_monthAbbrev[ts.month - 1]} ${ts.day} ${ts.year}';
+    } else {
+      meta = _humanType(type);
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: JournalText.entryTitle(color: scheme.onSurface),
+        ),
+        const SizedBox(height: Spacing.s),
+        Text(
+          meta,
+          style: textTheme.labelSmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+            letterSpacing: 1.2,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.2 — MEDICAL NOTE callout for vet entries.
+///
+/// Renders below the entry header on `type: vet` entries. Coral
+/// left-border (4 dp) + coral icon + small-caps "MEDICAL NOTE"
+/// kicker + plain-language framing copy. Per DECISIONS row 64
+/// coral is the systemic medical-attention register; this callout
+/// is one of the five surfaces D.1 wires.
+///
+/// Copy register per VOICE.md §1: warm, direct, treats the user
+/// as an adult. Not alarmist (vet entries are routine — a record,
+/// not an alert).
+class _MedicalNoteCallout extends StatelessWidget {
+  const _MedicalNoteCallout();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      type: MaterialType.card,
+      color: scheme.surfaceContainer,
+      shape: const RoundedRectangleBorder(borderRadius: Corners.s),
+      clipBehavior: Clip.antiAlias,
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(width: 4, color: scheme.tertiary),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(Spacing.m),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      PhosphorIconsRegular.firstAidKit,
+                      color: scheme.tertiary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: Spacing.s),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'MEDICAL NOTE',
+                            style: textTheme.labelSmall?.copyWith(
+                              color: scheme.tertiary,
+                              letterSpacing: 1.4,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: Spacing.xs),
+                          Text(
+                            "Part of this pet's medical record. Hand "
+                            'this entry to a new vet to bring them up '
+                            'to speed.',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color:
+                                  scheme.onSurface.withValues(alpha: 0.75),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -212,11 +402,27 @@ class _PhotoEntryView extends StatelessWidget {
             const SizedBox(height: Spacing.s),
           ],
           if (binaryPath != null)
-            ClipRRect(
-              borderRadius: Corners.s,
-              child: FutureBuilder<Uint8List>(
-                future: wiki.readBytes(binaryPath),
-                builder: (context, snap) {
+            // Phase 6.6 task 6.6.C.2 — subtle sage frame around the
+            // photo (no device-mockup framing per the user-locked
+            // brief). Hairline sage border + the existing rounded
+            // clip; reads as "framed photo on a journal page"
+            // without the laptop-product-shot register a thicker
+            // frame would imply.
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: Corners.s,
+                border: Border.all(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.25),
+                ),
+              ),
+              child: ClipRRect(
+                borderRadius: Corners.s,
+                child: FutureBuilder<Uint8List>(
+                  future: wiki.readBytes(binaryPath),
+                  builder: (context, snap) {
                   if (snap.connectionState != ConnectionState.done) {
                     return AspectRatio(
                       aspectRatio: 1,
@@ -236,7 +442,8 @@ class _PhotoEntryView extends StatelessWidget {
                     gaplessPlayback: true,
                     errorBuilder: (_, _, _) => _ImageMissing(),
                   );
-                },
+                  },
+                ),
               ),
             ),
           if (body.isNotEmpty) ...[

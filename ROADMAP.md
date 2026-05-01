@@ -470,7 +470,7 @@ flagging itself as undercooked.
   inline section on Home, tap header → `/home/reminders` sub-page);
   per-pet greeting hero stays (Phase 6.2 photo backdrop + sage
   gradient + displaySmall name).
-- [ ] 6.6.C.2 **Journal entry detail refresh** —
+- [x] 6.6.C.2 **Journal entry detail refresh** —
   `lib/app/screens/wiki_entry_screen.dart`. Header structure: serif
   `JournalText.entryTitle` + small-caps date metadata. Photo
   treatment (when entry has an image): subtle sage frame, no

@@ -92,7 +92,7 @@ Loki was calm throughout.
 
     // Markdown widget mounts (vs the pre-fix `SelectableText` with
     // monospace).
-    expect(find.byType(Markdown), findsOneWidget);
+    expect(find.byType(MarkdownBody), findsOneWidget);
 
     // Raw markdown source MUST NOT appear as literal text.
     expect(find.text('## Visit Summary'), findsNothing,
@@ -126,7 +126,7 @@ unchanged.
     await tester.pumpWidget(_wrap(_StubWiki(raw)));
     await tester.pumpAndSettle();
 
-    expect(find.byType(Markdown), findsOneWidget);
+    expect(find.byType(MarkdownBody), findsOneWidget);
     expect(find.text('# Just a body'), findsNothing);
     expect(find.textContaining('Just a body'), findsOneWidget);
     expect(find.textContaining('parseSoul should pass it through'),
@@ -157,9 +157,15 @@ A quiet week.
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Weekly summary'), findsOneWidget,
-        reason: 'AppBar uses the locked digest title');
-    expect(find.byType(Markdown), findsOneWidget);
+    // Phase 6.6 task 6.6.C.2 — entry header in the body now also
+    // renders the human title ("Weekly summary"), so the title
+    // appears twice: once in the AppBar (the existing locked
+    // VOICE.md §6 surface) and once in the body header (the new
+    // editorial register).
+    expect(find.text('Weekly summary'), findsNWidgets(2),
+        reason: 'AppBar + body header both render the locked digest '
+            'title');
+    expect(find.byType(MarkdownBody), findsOneWidget);
     expect(find.textContaining('A quiet week.'), findsOneWidget);
   });
 
@@ -191,7 +197,7 @@ Loki at the trailhead.
 
       // Markdown widget MUST NOT mount on the photo path — the type
       // dispatch routes to _PhotoEntryView instead.
-      expect(find.byType(Markdown), findsNothing,
+      expect(find.byType(MarkdownBody), findsNothing,
           reason: 'photo entries skip the markdown render path');
 
       // The freeform caption from the sidecar body shows as plain
@@ -235,7 +241,7 @@ byte_size: 1536
       await tester.pumpWidget(_wrap(_StubWiki(minimalSidecar)));
       await tester.pumpAndSettle();
 
-      expect(find.byType(Markdown), findsNothing);
+      expect(find.byType(MarkdownBody), findsNothing);
       // No extractor fields render.
       expect(find.text('Setting'), findsNothing);
       expect(find.text('Activity'), findsNothing);
