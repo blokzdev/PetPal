@@ -416,7 +416,7 @@ flagging itself as undercooked.
   `/dev` debug route stays accessible from a debug-only entry on
   Home. Onboarding redirect target stays `/onboarding` (outside the
   shell — full-screen until the user has a pet).
-- [ ] 6.6.A.4 **Verify deep-link integrity, back-stack, tab state
+- [x] 6.6.A.4 **Verify deep-link integrity, back-stack, tab state
   preservation** — chat scroll position is the canonical test case
   (today's only stateful surface that matters); journal scroll
   position becomes a second test once entries accumulate. Deep
