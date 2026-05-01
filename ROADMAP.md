@@ -463,7 +463,7 @@ flagging itself as undercooked.
 
 ### Group C — Screen-Specific Visual Refinement (6 tasks)
 
-- [ ] 6.6.C.1 **Home redesign** — Quick Capture tiles row (Photo /
+- [x] 6.6.C.1 **Home redesign** — Quick Capture tiles row (Photo /
   Note / Medical, replacing the 6-tile destination grid); This Week
   card above the tiles (recent memories count + most-recent digest
   if any); Reminders section below tiles (per DECISIONS row 61 —

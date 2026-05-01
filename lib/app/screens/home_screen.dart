@@ -238,7 +238,7 @@ class _GreetingBody extends ConsumerWidget {
           _AffectiveObservationCard(observation: observation),
         ],
         const SizedBox(height: Spacing.xl),
-        // Primary CTA — stays prominent above the destinations grid
+        // Primary CTA — stays prominent above everything below
         // (5.12 user-locked intent: 'Chat with Loki' is the most-used
         // home action and must remain above-the-fold).
         FilledButton.icon(
@@ -247,19 +247,33 @@ class _GreetingBody extends ConsumerWidget {
           label: Text('Chat with $name'),
         ),
         const SizedBox(height: Spacing.l),
-        // Phase 6.6 task 6.6.B.3 — Recent memories section. Top 3
-        // entries from wikiEntriesProvider rendered as EditorialCards;
-        // tapping a card routes to /wiki/entry. Auto-hides when the
-        // pet has no entries yet so the home surface stays calm.
-        const _RecentMemoriesSection(),
+        // Phase 6.6 task 6.6.C.1 — Quick Capture tiles row.
+        // Replaces the old destinations grid in spirit: 3 fast-paths
+        // for the highest-frequency capture intents. Photo →
+        // /photos/capture (camera-as-memory flow); Note → /chat
+        // (the Note tile routes to chat as the existing freeform
+        // text-capture path — see commit message for the scope
+        // tradeoff); Medical → /vet/new (vet-visit form).
+        const _QuickCaptureRow(),
+        const SizedBox(height: Spacing.l),
+        // Phase 6.6 task 6.6.C.1 — This Week card. Surfaces a
+        // glance-able count of recent memories + a link to the
+        // most-recent weekly digest if one exists. Auto-hides when
+        // the pet has neither this week, keeping the home calm
+        // for empty-state pets.
+        const _ThisWeekCard(),
         // Phase 6.6 task 6.6.A.3 — Reminders inline section per
         // DECISIONS row 61. Replaces the home grid's "Reminders"
         // tile; tapping the header routes to the Home-branch nested
         // sub-page at `/home/reminders`. Section auto-hides when
         // there are no upcoming reminders so the home surface stays
-        // calm. Group C.1 layers Quick Capture tiles + This Week
-        // card around it.
+        // calm.
         _RemindersSection(petId: pet.id as int),
+        // Phase 6.6 task 6.6.B.3 — Recent memories section. Top 3
+        // entries from wikiEntriesProvider rendered as EditorialCards;
+        // tapping a card routes to /wiki/entry. Auto-hides when the
+        // pet has no entries yet so the home surface stays calm.
+        const _RecentMemoriesSection(),
         // Phase 6.6 — Debug-only Dev affordance for the verification
         // screen. The home grid that used to host this is gone; the
         // empty-state already exposes /dev for unonboarded states,
@@ -276,6 +290,186 @@ class _GreetingBody extends ConsumerWidget {
         ],
       ],
       ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.1 — Quick Capture tiles row.
+///
+/// Three fast-paths for high-frequency capture intents: Photo,
+/// Note, Medical. Replaces the old 6-tile destinations grid in
+/// spirit (the destinations themselves moved to bottom-nav tabs
+/// per row 59's orphan map; what stayed was the "I want to capture
+/// something right now" intent, narrowed to its three highest-
+/// frequency modes).
+///
+/// Routes:
+///   - Photo → `/photos/capture` (camera-as-memory flow, Phase 6.6).
+///   - Note → `/chat` (chat is the existing freeform text-capture
+///     path; the agent's `write_wiki_entry` tool persists the note).
+///   - Medical → `/vet/new` (structured vet-visit creator).
+class _QuickCaptureRow extends StatelessWidget {
+  const _QuickCaptureRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _QuickCaptureTile(
+            label: 'Photo',
+            icon: PhosphorIconsRegular.camera,
+            route: '/photos/capture',
+          ),
+        ),
+        SizedBox(width: Spacing.s),
+        Expanded(
+          child: _QuickCaptureTile(
+            label: 'Note',
+            icon: PhosphorIconsRegular.notePencil,
+            route: '/chat',
+          ),
+        ),
+        SizedBox(width: Spacing.s),
+        Expanded(
+          child: _QuickCaptureTile(
+            label: 'Medical',
+            icon: PhosphorIconsRegular.firstAidKit,
+            route: '/vet/new',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _QuickCaptureTile extends StatelessWidget {
+  const _QuickCaptureTile({
+    required this.label,
+    required this.icon,
+    required this.route,
+  });
+
+  final String label;
+  final IconData icon;
+  final String route;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return PetCardButton(
+      onPressed: () => GoRouter.of(context).push(route),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 28, color: scheme.primary),
+            const SizedBox(height: Spacing.s),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Phase 6.6 task 6.6.C.1 — This Week card.
+///
+/// Surfaces a glance-able count of memories the user logged in the
+/// last 7 days, plus a tap-through to the most-recent weekly digest
+/// when one exists. Auto-hides when neither signal is present so the
+/// home surface stays calm for empty-state or low-activity pets.
+class _ThisWeekCard extends ConsumerWidget {
+  const _ThisWeekCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final entriesAsync = ref.watch(wikiEntriesProvider);
+    return entriesAsync.maybeWhen(
+      data: (entries) {
+        final since = DateTime.now().subtract(const Duration(days: 7));
+        final inWindow =
+            entries.where((e) => e.ts.isAfter(since)).toList();
+        final memoryCount = inWindow.where((e) => e.type != 'digest').length;
+        final digest = inWindow
+            .where((e) => e.type == 'digest')
+            .cast<Entry?>()
+            .firstWhere((_) => true, orElse: () => null);
+        if (memoryCount == 0 && digest == null) {
+          return const SizedBox.shrink();
+        }
+        final scheme = Theme.of(context).colorScheme;
+        final textTheme = Theme.of(context).textTheme;
+        final memoryLine = memoryCount == 0
+            ? 'No new memories yet this week.'
+            : memoryCount == 1
+                ? '1 memory this week'
+                : '$memoryCount memories this week';
+        return PetCard(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'THIS WEEK',
+                style: textTheme.labelSmall?.copyWith(
+                  color: scheme.primary.withValues(alpha: 0.85),
+                  letterSpacing: 1.2,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: Spacing.s),
+              Text(
+                memoryLine,
+                style: textTheme.titleMedium,
+              ),
+              if (digest != null) ...[
+                const SizedBox(height: Spacing.s),
+                InkWell(
+                  borderRadius: Corners.s,
+                  onTap: () => GoRouter.of(context).push(
+                    '/wiki/entry',
+                    extra: digest.path,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: Spacing.xs,
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          PhosphorIconsRegular.bookOpen,
+                          size: 16,
+                          color: scheme.primary,
+                        ),
+                        const SizedBox(width: Spacing.s),
+                        Expanded(
+                          child: Text(
+                            'Open this week\'s summary',
+                            style: textTheme.bodyMedium?.copyWith(
+                              color: scheme.primary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Icon(
+                          PhosphorIconsRegular.caretRight,
+                          size: 14,
+                          color: scheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
     );
   }
 }
