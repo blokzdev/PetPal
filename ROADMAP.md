@@ -371,6 +371,206 @@ deliberate handoff back to the user.
 
 ---
 
+## Phase 6.6 — Visual & Navigation Refresh
+
+**Goal:** land the Phase 6.5 Stage 2 curation outcome (DECISIONS row
+58) as code. Four adopted directions: bottom nav (4-tab Home / Journal
+/ Profile / Hub via go_router `StatefulShellRoute`), editorial card
+system (productized `EditorialCard` primitive + small-caps + sage-tint
+section header refresh), screen-specific visual refinement across
+home / journal entry / weekly summary / pet profile, and system-wide
+coral wiring as the medical-warning register (resolves the
+`[INTENT-INFERRED]` flag from DESIGN.md). **Last visual phase before
+launch** (DECISIONS row to land in this prep): Phase 7 is monetization
++ cloud sync + multi-pet UI; Phase 8 is launch ops; no further polish
+phases land before ship. Hard scope wall — no additions mid-phase.
+
+**Goal of phase boundary:** "I'd hand my phone to a friend and say
+'this is the app I've been working on'" without the visual surface
+flagging itself as undercooked.
+
+### Group A — Navigation IA (5 tasks)
+
+- [ ] 6.6.A.0 **Lock 4-tab bottom nav structure** — DECISIONS row
+  pinning Home / Journal / Profile / Hub, the Hub-vs-Settings
+  reasoning, and the orphan-tile mapping (Add photo → Quick Capture
+  on Home, Journal/Profile/Settings → tabs, Reminders → Home
+  section, Care guides → Profile sub-page, Settings → Hub sub-page).
+- [ ] 6.6.A.1 **Adopt go_router `StatefulShellRoute`** — DECISIONS
+  row pins the routing-layer architectural choice (vs. `IndexedStack`
+  alternative). Refactor `lib/app/routing.dart`: top-level routes
+  for the four tabs become `StatefulShellRoute` branches; nested
+  detail routes (`/wiki/entry`, `/photos/capture`, `/vet/new`,
+  `/pets/add`, etc.) become branch-nested `GoRoute`s. Each branch
+  preserves its own back-stack + scroll position; back-button pops
+  within branch first, exits app at branch root.
+- [ ] 6.6.A.2 **Bottom nav widget** — `lib/app/widgets/pet_bottom_nav.dart`.
+  Phosphor outline icons (4 destinations); Inter labels; sage active
+  state with subtle pill background behind icon + label; static bar
+  (not floating — floating pill skews Material You per DESIGN.md
+  §2 anti-patterns). Hub icon: `squaresFour` (Phosphor regular)
+  per the locked DECISIONS row.
+- [ ] 6.6.A.3 **Migrate routes to bottom-nav-aware structure** —
+  home grid removed (the 6 tiles repurposed per A.0's orphan map);
+  bottom nav becomes the persistent shell across all tab branches;
+  `/dev` debug route stays accessible from a debug-only entry on
+  Home. Onboarding redirect target stays `/onboarding` (outside the
+  shell — full-screen until the user has a pet).
+- [ ] 6.6.A.4 **Verify deep-link integrity, back-stack, tab state
+  preservation** — chat scroll position is the canonical test case
+  (today's only stateful surface that matters); journal scroll
+  position becomes a second test once entries accumulate. Deep
+  links to `/wiki/entry?path=...` route through the Journal branch;
+  `/photos/capture` routes through Home branch (since capture is a
+  Home Quick Capture action). Verify back-button pops within
+  branch first, then swaps to previous branch, then exits.
+
+### Group B — Editorial Card System (5 tasks)
+
+- [ ] 6.6.B.0 **`PetSectionHeader` refresh** — small caps
+  (TextTransform / `letterSpacing 1.0–1.2` + reduced size) + sage
+  tint (`scheme.primary` at low alpha or `onSurface@0.6` blended
+  with `primary@0.4` — TBD by visual A/B). Existing callers don't
+  change shape; only the rendered chrome shifts. Update tests that
+  pin the current `letterSpacing 0.6` + `onSurface@0.65` values.
+- [ ] 6.6.B.1 **`EditorialCard` primitive** — new
+  `lib/app/widgets/editorial_card.dart`. Composition: optional
+  leading thumbnail (square, `Radii.s` clip), `JournalText.entryTitle`
+  serif title (Source Serif 4, weight 600), optional small-caps
+  metadata row (date / type / pet name), bodyMedium body with
+  truncation (3-line max with fade), optional trailing badge slot
+  (consumed by `RedFlagBadge` for medical-flagged entries; coral
+  left-border accent on flagged entries — the medical context
+  primary; per DECISIONS row 60 the inner badge stays `RedFlagBadge`
+  for compatibility but card-level coral takes primary). The
+  primitive's docstring carries the locked shape spec (the user
+  confirmed no separate spec doc; intent lives in code).
+- [ ] 6.6.B.2 **Apply `EditorialCard` to journal browser** —
+  `lib/app/screens/wiki_browser_screen.dart` `_EntryTile` consumes
+  `EditorialCard`. Date-grouped sections (replacing the existing
+  type-grouped layout — TBD by Phase 6.6 visual brief). Type icon
+  in the metadata row. Pet name in the metadata row when multi-pet
+  arrives in Phase 7 (today single-pet, label suppressed). Coral
+  left-border on entries with `red_flag_match` frontmatter.
+- [ ] 6.6.B.3 **Apply `EditorialCard` to Home recent entries
+  section** — Home gains a "Recent memories" editorial section
+  beneath the per-pet greeting hero. Top 3 entries via
+  `wikiEntriesProvider`. Tapping a card routes to `/wiki/entry`.
+- [ ] 6.6.B.4 **Apply `EditorialCard` to weekly summary HIGHLIGHTS
+  section** — `_DigestCard` (today's ad-hoc serif-title-card) is
+  rebuilt to consume `EditorialCard`; HIGHLIGHTS rendering inside
+  the digest's body uses nested `EditorialCard`s.
+
+### Group C — Screen-Specific Visual Refinement (6 tasks)
+
+- [ ] 6.6.C.1 **Home redesign** — Quick Capture tiles row (Photo /
+  Note / Medical, replacing the 6-tile destination grid); This Week
+  card above the tiles (recent memories count + most-recent digest
+  if any); Reminders section below tiles (per DECISIONS row 61 —
+  inline section on Home, tap header → `/home/reminders` sub-page);
+  per-pet greeting hero stays (Phase 6.2 photo backdrop + sage
+  gradient + displaySmall name).
+- [ ] 6.6.C.2 **Journal entry detail refresh** —
+  `lib/app/screens/wiki_entry_screen.dart`. Header structure: serif
+  `JournalText.entryTitle` + small-caps date metadata. Photo
+  treatment (when entry has an image): subtle sage frame, no
+  device-mockup framing. MEDICAL NOTE callout pattern for vet
+  entries (coral icon + tinted left border + small-caps "MEDICAL
+  NOTE" label). Markdown body styling stays as-is (Source Serif 4
+  on `h1`/`h2` from Phase 5.6).
+- [ ] 6.6.C.3 **Weekly summary detail refresh** — editorial header
+  (serif `weeklySummaryTitle` + small-caps date), INSIGHT callout
+  pattern (sage icon + tinted left border + small-caps "INSIGHT"
+  label) for the synthesis runner's anomaly + trend observations,
+  structured HIGHLIGHTS section using nested `EditorialCard`s
+  (Group B).
+- [ ] 6.6.C.4 **Pet profile layered restructure** —
+  `lib/app/screens/soul_editor_screen.dart`. Read-only sectioned
+  view as default: ABOUT / DETAILS / HEALTH SUMMARY / RECENT
+  MEMORIES / GUIDES & SKILLS. Edit pencil on the AppBar opens the
+  existing editor unchanged. Trend charts (Phase 6.12) relocate
+  into HEALTH SUMMARY. Phase 6.2 photo card folds into the
+  sectioned header (large circle photo + serif name + small-caps
+  subtitle pattern from Stitch). Care guides (today reachable from
+  `/skills`) move under GUIDES & SKILLS section per DECISIONS row
+  62; per-pet contextual + species-filtered.
+- [ ] 6.6.C.5 **Empty state refinement** — adopt Stitch microcopy
+  register on the four empty states (`_EmptyState` on home,
+  `JournalEmptyForTesting` on journal, reminders empty, care
+  guides empty). Reference register: "Luna's schedule is clear.
+  Enjoy the quiet moments together." Routes through VOICE.md §5
+  per-pet interpolation rule. Stays warm without saccharine
+  (VOICE.md §1).
+- [ ] 6.6.C.6 **Microcopy refresh** — adopt "Keep Chronicling" CTA
+  register and other voice gold from Stitch curation across home
+  greeting body / chat empty / button labels (where they're
+  per-pet — buttons stay static per VOICE.md §5 unless they're
+  on a per-pet destination).
+
+### Group D — System-Wide (3 tasks)
+
+- [ ] 6.6.D.1 **Wire coral to medical-warning surfaces** —
+  `RedFlagBadge` icon shifts to coral; vet entry `EditorialCard`
+  gets coral left-border accent (Group B); MEDICAL NOTE callout
+  on vet entry detail uses coral icon + tinted left border (Group
+  C); photo entry red-flag badge area uses coral icon (today
+  `onSurfaceVariant`); chat scrollback escalation marker shifts
+  to coral. Vet form save error keeps `scheme.error` (M3-default
+  red — failures are failures, distinct register from
+  medical-attention). Resolves DESIGN.md's `[INTENT-INFERRED]`
+  flag.
+- [ ] 6.6.D.2 **Dark mode parity** — verify coral + sage editorial
+  treatments don't wash through the warm-graphite surface scale
+  (DECISIONS row 38 lock); all Group B + C surfaces render
+  correctly under `buildDarkColorScheme`; coral readability on
+  dark surfaces (the warm-peach hex `#E89B7A` was tuned for
+  light-mode contrast — verify on the `darkSurfaceContainer`
+  band). If contrast falls short, the light/dark coral split
+  lands here as a follow-up DECISIONS row.
+- [ ] 6.6.D.3 **Phase 6.6 wrap-up + on-device verification
+  REQUIRED.** §14 verify: `flutter analyze --fatal-infos` exit 0,
+  `flutter test --reporter expanded` exit 0, APK build via CI
+  (sandbox can't run Android SDK). Walkthrough script (locks at
+  6.6.A.0): tap each of the 4 bottom-nav tabs and confirm tab
+  state preserves across switch; deep-link from Recent Memories
+  card → entry → back lands on the Journal tab not Home; chat
+  scroll position survives a tab switch; the journal browser
+  renders as `EditorialCard`s with coral left-border on flagged
+  entries; pet profile renders as 5 sectioned read-only view;
+  edit pencil opens the existing editor unchanged; weekly summary
+  renders editorial-style with INSIGHT callouts; vet entry detail
+  shows MEDICAL NOTE callout; coral consistent across red-flag
+  surfaces; dark mode parity holds. **Hard stop here.** Phase 7
+  (monetization) does NOT auto-start.
+
+**Cuts to v1.x** (with V1X_BACKLOG entries — see `V1X_BACKLOG.md`):
+- *Center Capture FAB in bottom nav.* Multi-modal capture doesn't
+  fit a single FAB; FAB visual weight pulls toward social-app
+  register; primary loop is chat-driven, not capture-driven.
+  Trigger: post-launch usage signal showing capture intent from
+  non-Home tabs.
+- *Stitch's 6 alternate bottom-nav configurations.* Archived as
+  reference for post-launch revisit; no scope.
+- *Medical as top-level destination.* Mixed-with-journal IA holds
+  until real signal warrants the IA promotion.
+- *In-app notifications inbox + Hub future contents (Privacy &
+  Data, Help/Support).* Hub v1 ships with Settings + Export +
+  About; v1.1 sub-pages don't require IA changes.
+- *Vitals tracker, Symptom tracker, Activity tracking.* v1.2
+  candidate scope; need real-usage signal to lock the structured
+  shape.
+- *Multi-user "Pet Family" / family-sharing.* v1.x; depends on
+  Phase 7 sync + per-pet identity model.
+- *Engagement metrics.* v1.x; opt-in privacy-preserving signal
+  routed through Phase 7 backend.
+
+**On-device verification (REQUIRED at 6.6.D.3) — see Group D.3
+walkthrough.**
+
+**STOP.**
+
+---
+
 ## Phase 7 — Monetization, Cloud Sync, Multi-Pet UI
 
 **Goal:** ship the v1 monetization model from DECISIONS row 36 — PetPal-hosted LLM proxy funding the free 200-msg/mo allowance, Pro subscription with sync + unlimited pets + unmetered text + 30 vision/mo + weekly + monthly synthesis + unlimited reminders, BYOK as a free-tier modifier that bypasses the proxy, photo credit packs for vision overage, multi-pet UI behind the paywall, accessibility pass. (Renamed from old Phase 5; multi-pet moved here from Phase 6 candidate list per DECISIONS row 34; full task-list overhaul per DECISIONS row 36.)
