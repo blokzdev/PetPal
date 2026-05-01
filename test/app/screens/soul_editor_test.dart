@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/providers.dart';
-import 'package:petpal/app/widgets/pet_card.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/main.dart';
 
@@ -60,8 +59,8 @@ void main() {
     // Phase 6 task 6.6 — the Add photo tile lands at top-left of the
     // destinations grid, pushing Profile into row 2 / col 1 which can
     // sit below the test viewport (800×600). Scroll into view first.
-    await tester.ensureVisible(find.widgetWithText(PetCardButton, 'Profile'));
-    await tester.tap(find.widgetWithText(PetCardButton, 'Profile'));
+    await tester.ensureVisible(find.descendant(of: find.byType(NavigationBar), matching: find.text('Profile')));
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Profile')));
     await tester.pumpAndSettle();
 
     // Form populates from the parsed frontmatter. Field order:

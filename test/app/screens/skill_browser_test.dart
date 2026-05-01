@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/harness/skills/skill_manifest.dart';
@@ -79,8 +81,14 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home → Care guides.
-    await tester.ensureVisible(find.text('Care guides'));
-    await tester.tap(find.text('Care guides'));
+    // Phase 6.6 task 6.6.A.3 — Care guides moved under Profile per
+    // DECISIONS row 62. Programmatic navigation reaches the
+    // Profile-branch nested route directly; legacy `/skills`
+    // redirects to `/soul/guides`.
+    unawaited(
+      GoRouter.of(tester.element(find.byType(NavigationBar)))
+          .push('/soul/guides'),
+    );
     await tester.pumpAndSettle();
 
     expect(find.text('Puppy'), findsOneWidget);

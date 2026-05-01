@@ -1,56 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../data/db/database.dart';
-import '../../data/wiki_export.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
 
-class WikiBrowserScreen extends ConsumerStatefulWidget {
+/// Phase 6.6 task 6.6.A.3 — Export AppBar action removed (DECISIONS
+/// row 60: Export relocated to Hub for IA-single-rooting). The
+/// journal browser keeps the vet-visit creator action + the refresh
+/// action; the refresh action's responsibility is local to the
+/// browser, so it stays.
+class WikiBrowserScreen extends ConsumerWidget {
   const WikiBrowserScreen({super.key});
 
   @override
-  ConsumerState<WikiBrowserScreen> createState() =>
-      _WikiBrowserScreenState();
-}
-
-class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
-  bool _exporting = false;
-
-  Future<void> _export() async {
-    setState(() => _exporting = true);
-    try {
-      final wiki = await ref.read(wikiIoProvider.future);
-      final activePetId = ref.read(activePetIdProvider);
-      final tempDir = await getTemporaryDirectory();
-      final zip = await exportPetWikiAsZip(
-        wiki: wiki,
-        petId: activePetId(),
-        outputDir: tempDir,
-      );
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(zip.path, mimeType: 'application/zip')],
-          subject: 'PetPal journal export',
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      appSnackBar(context, 'Export failed: $e');
-    } finally {
-      if (mounted) setState(() => _exporting = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final entriesAsync = ref.watch(wikiEntriesProvider);
     // Per-pet destination → interpolate the active pet's name into the
     // app bar title (VOICE.md §5).
@@ -79,17 +48,6 @@ class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
           tooltip: 'Log a vet visit',
           onPressed: () => GoRouter.of(context).push('/vet/new'),
           icon: const Icon(PhosphorIconsRegular.firstAidKit),
-        ),
-        IconButton(
-          tooltip: 'Export journal',
-          onPressed: _exporting ? null : _export,
-          icon: _exporting
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(PhosphorIconsRegular.shareNetwork),
         ),
         IconButton(
           tooltip: 'Refresh',

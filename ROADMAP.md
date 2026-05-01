@@ -410,7 +410,7 @@ flagging itself as undercooked.
   (not floating — floating pill skews Material You per DESIGN.md
   §2 anti-patterns). Hub icon: `squaresFour` (Phosphor regular)
   per the locked DECISIONS row.
-- [ ] 6.6.A.3 **Migrate routes to bottom-nav-aware structure** —
+- [x] 6.6.A.3 **Migrate routes to bottom-nav-aware structure** —
   home grid removed (the 6 tiles repurposed per A.0's orphan map);
   bottom nav becomes the persistent shell across all tab branches;
   `/dev` debug route stays accessible from a debug-only entry on

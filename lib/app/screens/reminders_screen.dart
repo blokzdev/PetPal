@@ -85,7 +85,7 @@ class RemindersScreen extends ConsumerWidget {
       health: ref.read(scheduleHealthServiceProvider),
     );
     // Reset the list — the new row should appear.
-    ref.invalidate(_remindersListProvider);
+    ref.invalidate(remindersForPetProvider);
   }
 }
 
@@ -107,11 +107,9 @@ class _NoPet extends StatelessWidget {
   }
 }
 
-final _remindersListProvider =
-    FutureProvider.family<List<ReminderRow>, int>((ref, petId) async {
-  final service = await ref.watch(reminderServiceProvider.future);
-  return service.listForPet(petId);
-});
+// Phase 6.6 task 6.6.A.3 — the `remindersForPetProvider` was
+// promoted to `lib/app/providers.dart` so the Home inline Reminders
+// section (DECISIONS row 61) can share the same data path.
 
 final _scheduleHealthProvider = FutureProvider.autoDispose((ref) async {
   return ref.watch(scheduleHealthServiceProvider).check();
@@ -124,7 +122,7 @@ class _Body extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reminders = ref.watch(_remindersListProvider(pet.id as int));
+    final reminders = ref.watch(remindersForPetProvider(pet.id as int));
     final health = ref.watch(_scheduleHealthProvider);
 
     return Column(
@@ -239,7 +237,7 @@ class _List extends ConsumerWidget {
           confirmDismiss: (_) async {
             final service = await ref.read(reminderServiceProvider.future);
             await service.cancel(r.id);
-            ref.invalidate(_remindersListProvider);
+            ref.invalidate(remindersForPetProvider);
             // Task 5.8 — light haptic on completing/cancelling a
             // reminder. Fires after the cancel succeeds, before the
             // animation plays out, so the buzz syncs with the row's

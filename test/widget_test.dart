@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
-import 'package:petpal/app/widgets/pet_card.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/main.dart';
@@ -243,64 +242,18 @@ void main() {
   });
 
   // -----------------------------------------------------------------
-  // Task 5.12 — home destinations land as a 2-col PetCard grid below
-  // the primary CTA (user-locked). The five tile labels (Journal,
-  // Profile, Reminders, Care guides, Settings) replace the previous
-  // OutlinedButton.icon stack; the chat CTA stays as a FilledButton
-  // above the grid.
+  // Phase 6.6 task 6.6.A.3 — home destinations grid removed. The 6
+  // tiles repurposed per DECISIONS row 59's orphan map:
+  //   - Journal / Profile / Settings → bottom-nav tabs (Hub absorbs
+  //     Settings as a sub-page).
+  //   - Reminders → inline section on Home (`_RemindersSection`,
+  //     visible when there are upcoming reminders).
+  //   - Add photo → Quick Capture (Group C.1; not in A.3).
+  //   - Care guides → Profile sub-page (`/soul/guides`; Group C.4
+  //     lands the GUIDES & SKILLS section).
+  // The pre-A.3 "home destinations render as a 2-col PetCardButton
+  // grid below the chat CTA" test was deleted — its subject (the
+  // grid) no longer exists. The other home tests in this file
+  // (empty state, named-pet hero, Bug-2 regression) still apply.
   // -----------------------------------------------------------------
-  testWidgets('home destinations render as a 2-col PetCardButton grid '
-      'below the chat CTA', (tester) async {
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          apiKeyStorageProvider.overrideWithValue(
-            FakeApiKeyStorage(initial: 'sk-ant-test'),
-          ),
-          ..._dataOverrides(withPetNamed: 'Loki'),
-        ],
-        child: const PetPalApp(),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    // The chat CTA stays as a FilledButton above the grid.
-    expect(find.widgetWithText(FilledButton, 'Chat with Loki'),
-        findsOneWidget);
-
-    // The five destinations all render as cards. Tap-handler comes
-    // from PetCardButton, not OutlinedButton — assert by type +
-    // label (the previous 'Open journal' / 'Edit profile' verbose
-    // labels collapsed to 'Journal' / 'Profile' to fit the tile
-    // grid).
-    // Phase 6.6 task 6.6.A.2 — bottom nav now also renders
-    // "Journal" / "Profile" / "Hub" labels, so scoping the
-    // home-grid assertion to PetCardButton disambiguates from the
-    // nav chrome. Task 6.6.A.3 removes the home grid entirely;
-    // this whole test gets rewritten or deleted then.
-    for (final label in const [
-      'Journal',
-      'Profile',
-      'Reminders',
-      'Care guides',
-      'Settings',
-    ]) {
-      expect(find.widgetWithText(PetCardButton, label), findsOneWidget,
-          reason: 'destination "$label" is missing');
-    }
-
-    // The OutlinedButton.icon stack is gone — no OutlinedButton
-    // should be present on home in release-mode-equivalent state.
-    // (Debug-only adds a Dev tile, also a PetCardButton, not an
-    // OutlinedButton — so this assertion holds in test mode.)
-    expect(find.byType(OutlinedButton), findsNothing,
-        reason: 'home destinations should be cards, not outlined '
-            'buttons (5.12)');
-
-    // The grid uses GridView.count with crossAxisCount: 2.
-    final grid = tester.widget<GridView>(find.byType(GridView));
-    final delegate =
-        grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-    expect(delegate.crossAxisCount, 2);
-  });
 }

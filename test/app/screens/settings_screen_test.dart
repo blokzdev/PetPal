@@ -40,10 +40,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Home → Settings.
-    // Adding the Reminders button (task 4.10) pushed Settings below the
-    // viewport in the test harness — scroll it in before tapping.
-    await tester.ensureVisible(find.text('Settings'));
+    // Phase 6.6 task 6.6.A.3 — bottom nav replaces the home grid.
+    // Tap the Hub tab → tap the Settings ListTile inside Hub.
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Hub'),
+    ));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 
@@ -108,9 +111,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Adding the Reminders button (task 4.10) pushed Settings below the
-    // viewport in the test harness — scroll it in before tapping.
-    await tester.ensureVisible(find.text('Settings'));
+    // Phase 6.6 task 6.6.A.3 — Hub tab → Settings sub-page.
+    await tester.tap(find.descendant(
+      of: find.byType(NavigationBar),
+      matching: find.text('Hub'),
+    ));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Settings'));
     await tester.pumpAndSettle();
 

@@ -13,7 +13,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/providers.dart';
-import 'package:petpal/app/widgets/pet_card.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/main.dart';
@@ -112,8 +111,8 @@ void main() {
     // 3. Navigate to wiki browser via Home.
     await tester.pageBack();
     await tester.pumpAndSettle();
-    expect(find.widgetWithText(PetCardButton, 'Journal'), findsOneWidget);
-    await tester.tap(find.widgetWithText(PetCardButton, 'Journal'));
+    expect(find.descendant(of: find.byType(NavigationBar), matching: find.text('Journal')), findsOneWidget);
+    await tester.tap(find.descendant(of: find.byType(NavigationBar), matching: find.text('Journal')));
     await tester.pumpAndSettle();
 
     // Entry visible in the browser, grouped under `food`.

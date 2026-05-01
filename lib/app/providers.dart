@@ -411,6 +411,17 @@ final scheduleHealthServiceProvider = Provider<ScheduleHealthService>(
   (ref) => const PlatformScheduleHealthService(),
 );
 
+/// Phase 6.6 task 6.6.A.3 — pet's reminders, ordered by repo insertion.
+/// Promoted from `reminders_screen.dart` (was private) so the Home
+/// inline Reminders section (DECISIONS row 61) can share the same
+/// data path. Callers should `ref.invalidate(remindersForPetProvider)`
+/// after a create / cancel so the next watch refetches.
+final remindersForPetProvider =
+    FutureProvider.family<List<ReminderRow>, int>((ref, petId) async {
+  final service = await ref.watch(reminderServiceProvider.future);
+  return service.listForPet(petId);
+});
+
 /// Top-level facade over reminder create/cancel/list. Wraps repo +
 /// scheduler + template renderer so callers (tools + UI) don't have
 /// to wire those individually.

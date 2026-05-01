@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:petpal/app/platform/haptics.dart';
 import 'package:petpal/app/providers.dart';
@@ -114,8 +116,16 @@ void main() {
     await tester.pumpAndSettle();
 
     // Home → Reminders.
-    await tester.ensureVisible(find.text('Reminders'));
-    await tester.tap(find.text('Reminders'));
+    // Phase 6.6 task 6.6.A.3 — bottom nav replaces the home grid;
+    // the inline Reminders section on Home only renders when the pet
+    // has upcoming reminders, which doesn't help reach the empty
+    // sub-page. Use the go_router programmatic path to navigate to
+    // the Home-branch nested `/home/reminders` route directly. This
+    // mirrors what a system-notification deep-link would do.
+    unawaited(
+      GoRouter.of(tester.element(find.byType(NavigationBar)))
+          .push('/home/reminders'),
+    );
     await tester.pumpAndSettle();
 
     // App-bar interpolates the active pet's name (VOICE.md §5).
@@ -173,8 +183,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Reminders'));
-    await tester.tap(find.text('Reminders'));
+    // Phase 6.6 task 6.6.A.3 — bottom nav replaces the home grid;
+    // the inline Reminders section on Home only renders when the pet
+    // has upcoming reminders, which doesn't help reach the empty
+    // sub-page. Use the go_router programmatic path to navigate to
+    // the Home-branch nested `/home/reminders` route directly. This
+    // mirrors what a system-notification deep-link would do.
+    unawaited(
+      GoRouter.of(tester.element(find.byType(NavigationBar)))
+          .push('/home/reminders'),
+    );
     await tester.pumpAndSettle();
 
     expect(
@@ -225,8 +243,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Reminders'));
-    await tester.tap(find.text('Reminders'));
+    // Phase 6.6 task 6.6.A.3 — bottom nav replaces the home grid;
+    // the inline Reminders section on Home only renders when the pet
+    // has upcoming reminders, which doesn't help reach the empty
+    // sub-page. Use the go_router programmatic path to navigate to
+    // the Home-branch nested `/home/reminders` route directly. This
+    // mirrors what a system-notification deep-link would do.
+    unawaited(
+      GoRouter.of(tester.element(find.byType(NavigationBar)))
+          .push('/home/reminders'),
+    );
     await tester.pumpAndSettle();
 
     // Tap FAB → add screen. Both the FAB and the empty-state PetButton
@@ -299,8 +325,16 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.ensureVisible(find.text('Reminders'));
-    await tester.tap(find.text('Reminders'));
+    // Phase 6.6 task 6.6.A.3 — bottom nav replaces the home grid;
+    // the inline Reminders section on Home only renders when the pet
+    // has upcoming reminders, which doesn't help reach the empty
+    // sub-page. Use the go_router programmatic path to navigate to
+    // the Home-branch nested `/home/reminders` route directly. This
+    // mirrors what a system-notification deep-link would do.
+    unawaited(
+      GoRouter.of(tester.element(find.byType(NavigationBar)))
+          .push('/home/reminders'),
+    );
     await tester.pumpAndSettle();
 
     // Open the add-reminder form via the FAB (disambiguated from the

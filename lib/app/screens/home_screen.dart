@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/pet_name.dart';
+import '../../data/repos/reminder_repo.dart';
 import '../../harness/observation/affective_observation.dart';
+import '../../harness/scheduling/reminder_kinds.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
@@ -242,14 +244,164 @@ class _GreetingBody extends ConsumerWidget {
           label: Text('Chat with $name'),
         ),
         const SizedBox(height: Spacing.l),
-        // Destinations grid — task 5.12 (user-locked: 2-column card
-        // grid below the CTA). Five tiles fill 2×3 with the last row
-        // half-empty; debug-only dev screen drops a sixth tile to
-        // square the grid in dev builds, but never in release.
-        const _DestinationsGrid(),
+        // Phase 6.6 task 6.6.A.3 — Reminders inline section per
+        // DECISIONS row 61. Replaces the home grid's "Reminders"
+        // tile; tapping the header routes to the Home-branch nested
+        // sub-page at `/home/reminders`. Section auto-hides when
+        // there are no upcoming reminders so the home surface stays
+        // calm. Group C.1 layers Quick Capture tiles + This Week
+        // card around it.
+        _RemindersSection(petId: pet.id as int),
+        // Phase 6.6 — Debug-only Dev affordance for the verification
+        // screen. The home grid that used to host this is gone; the
+        // empty-state already exposes /dev for unonboarded states,
+        // and named-pet states can reach it via deep link in debug
+        // builds. A small inline button keeps it accessible without
+        // re-introducing grid chrome.
+        if (kDebugMode) ...[
+          const SizedBox(height: Spacing.l),
+          OutlinedButton.icon(
+            onPressed: () => GoRouter.of(context).push('/dev'),
+            icon: const Icon(PhosphorIconsRegular.flask),
+            label: const Text('Dev tools'),
+          ),
+        ],
       ],
       ),
     );
+  }
+}
+
+/// Phase 6.6 task 6.6.A.3 — Reminders inline section on Home.
+///
+/// Surfaces the next 3 upcoming reminders via the
+/// `remindersForPetProvider` (chronological, soonest-first; only
+/// reminders whose `whenTs` is in the future). The section header
+/// is tap-targeted and routes to `/home/reminders` (Home branch
+/// nested sub-page) so the user can see all reminders without
+/// switching tabs (DECISIONS row 61).
+///
+/// **Group B.0 will refresh the section header** (small caps + sage
+/// tint per DECISIONS row 58); A.3's transitional treatment uses an
+/// existing `PetSectionHeader` wrapped in InkWell. **Group C.1 will
+/// layer Quick Capture tiles + This Week card around this section**
+/// — A.3 lands the IA-level change (section exists), Group C lands
+/// the visual brief.
+///
+/// When the pet has no upcoming reminders the section renders
+/// nothing (`SizedBox.shrink()`) — a calm empty surface beats an
+/// empty-state explainer for a section that's secondary to the
+/// chat CTA.
+class _RemindersSection extends ConsumerWidget {
+  const _RemindersSection({required this.petId});
+
+  final int petId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final remindersAsync = ref.watch(remindersForPetProvider(petId));
+    return remindersAsync.maybeWhen(
+      data: (reminders) {
+        final now = DateTime.now();
+        final upcoming = reminders
+            .where((r) => r.whenTs.isAfter(now))
+            .toList()
+          ..sort((a, b) => a.whenTs.compareTo(b.whenTs));
+        if (upcoming.isEmpty) return const SizedBox.shrink();
+        final top3 = upcoming.take(3).toList();
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            InkWell(
+              borderRadius: Corners.s,
+              onTap: () => GoRouter.of(context).push('/home/reminders'),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: Spacing.m,
+                  vertical: Spacing.s,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Reminders',
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withValues(alpha: 0.65),
+                              letterSpacing: 0.6,
+                            ),
+                      ),
+                    ),
+                    Icon(
+                      PhosphorIconsRegular.caretRight,
+                      size: 16,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.5),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            for (final r in top3) _ReminderRow(reminder: r),
+          ],
+        );
+      },
+      orElse: () => const SizedBox.shrink(),
+    );
+  }
+}
+
+class _ReminderRow extends StatelessWidget {
+  const _ReminderRow({required this.reminder});
+
+  final ReminderRow reminder;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final kind = ReminderKind.fromId(reminder.kind);
+    final label = kind?.label ?? 'Reminder';
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: ListTile(
+        leading: Icon(
+          _iconForKind(kind),
+          color: scheme.onSurface.withValues(alpha: 0.8),
+        ),
+        title: Text(label),
+        subtitle: Text(_formatDate(reminder.whenTs)),
+      ),
+    );
+  }
+
+  IconData _iconForKind(ReminderKind? kind) {
+    switch (kind) {
+      case ReminderKind.fleaTreatment:
+        return PhosphorIconsRegular.bug;
+      case ReminderKind.heartwormDose:
+        return PhosphorIconsRegular.pill;
+      case ReminderKind.vaccineDue:
+        return PhosphorIconsRegular.syringe;
+      case ReminderKind.weightCheck:
+        return PhosphorIconsRegular.scales;
+      case ReminderKind.vetFollowUp:
+        return PhosphorIconsRegular.firstAidKit;
+      case null:
+        return PhosphorIconsRegular.bell;
+    }
+  }
+
+  String _formatDate(DateTime ts) {
+    return '${ts.year.toString().padLeft(4, '0')}-'
+        '${ts.month.toString().padLeft(2, '0')}-'
+        '${ts.day.toString().padLeft(2, '0')}';
   }
 }
 
@@ -324,101 +476,11 @@ class _AffectiveObservationCard extends ConsumerWidget {
   }
 }
 
-/// 2-column responsive card grid of nav destinations. Each tile is
-/// a [PetCardButton] (icon + label) routing through go_router. Layout
-/// uses GridView.count (not Wrap) so tiles size equally and tap
-/// targets stay predictable. The grid is shrink-wrapped + non-
-/// scrollable because the body already lives inside a
-/// SingleChildScrollView; nesting two scrollables here would steal
-/// flings from the outer scroll.
-class _DestinationsGrid extends StatelessWidget {
-  const _DestinationsGrid();
-
-  static const _items = <_Destination>[
-    // Phase 6 task 6.6 — camera-as-memory tile lands top-left,
-    // displacing Journal. Routes to /photos/capture which launches
-    // the picker chooser (camera vs gallery) and lands on the
-    // form-preview screen post-pick.
-    _Destination(
-      label: 'Add photo',
-      icon: PhosphorIconsRegular.camera,
-      route: '/photos/capture',
-    ),
-    _Destination(
-      label: 'Journal',
-      icon: PhosphorIconsRegular.bookOpen,
-      route: '/wiki',
-    ),
-    _Destination(
-      label: 'Profile',
-      icon: PhosphorIconsRegular.userCircle,
-      route: '/soul',
-    ),
-    _Destination(
-      label: 'Reminders',
-      icon: PhosphorIconsRegular.bell,
-      route: '/reminders',
-    ),
-    _Destination(
-      label: 'Care guides',
-      icon: PhosphorIconsRegular.puzzlePiece,
-      route: '/skills',
-    ),
-    _Destination(
-      label: 'Settings',
-      icon: PhosphorIconsRegular.gear,
-      route: '/settings',
-    ),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final items = [
-      ..._items,
-      if (kDebugMode)
-        const _Destination(
-          label: 'Dev',
-          icon: PhosphorIconsRegular.flask,
-          route: '/dev',
-        ),
-    ];
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: Spacing.s,
-      crossAxisSpacing: Spacing.s,
-      childAspectRatio: 1.4,
-      children: [
-        for (final dest in items)
-          PetCardButton(
-            onPressed: () => GoRouter.of(context).push(dest.route),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(dest.icon, size: 28),
-                  const SizedBox(height: Spacing.s),
-                  Text(
-                    dest.label,
-                    style: Theme.of(context).textTheme.bodyLarge,
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-class _Destination {
-  const _Destination({
-    required this.label,
-    required this.icon,
-    required this.route,
-  });
-  final String label;
-  final IconData icon;
-  final String route;
-}
+// Phase 6.6 task 6.6.A.3 — `_DestinationsGrid` + `_Destination`
+// removed. The 6 home tiles repurposed per DECISIONS row 59's
+// orphan map: Journal / Profile / Settings → bottom-nav tabs;
+// Reminders → inline section above (`_RemindersSection`); Add
+// photo → Quick Capture (Group C.1); Care guides → Profile
+// sub-page at /soul/guides (Group C.4 lands the GUIDES & SKILLS
+// section). Settings reaches its existing `/settings` route via
+// the Hub tab's ListTile.
