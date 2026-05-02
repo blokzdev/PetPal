@@ -14,6 +14,7 @@ import '../widgets/charts/symptom_chart.dart';
 import '../widgets/charts/weight_chart.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_card.dart';
+import '../widgets/pet_empty_state.dart';
 import '../widgets/pet_section_header.dart';
 
 /// Editor for the active pet's SOUL.md. The frontmatter shape is fixed
@@ -46,6 +47,13 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
   bool _saving = false;
   String? _saveError;
   String? _path;
+  // P0 fix — stash the resolved pet id at load time so build() doesn't
+  // re-deref `activePetIdProvider` (which throws StateError when pets is
+  // empty / loading / errored). Pre-fix, the body Column re-called
+  // `ref.read(activePetIdProvider)()` for `_ProfilePhotoCard` and
+  // `_TrendsSection` AFTER `_load()` had already caught the same throw —
+  // crashing the whole build into a release-mode gray ErrorWidget.
+  int? _petId;
 
   @override
   void initState() {
@@ -70,8 +78,12 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
   Future<void> _load() async {
     try {
       final wiki = await ref.read(wikiIoProvider.future);
-      final activePetId = ref.read(activePetIdProvider);
-      _path = wiki.soulPath(activePetId());
+      // `activePetIdProvider` throws StateError when no pet exists.
+      // Catching it here keeps the screen from crashing on the no-pet
+      // path; the build branches to a graceful empty-state below.
+      final petId = ref.read(activePetIdProvider)();
+      _petId = petId;
+      _path = wiki.soulPath(petId);
       String raw;
       try {
         raw = await wiki.read(_path!);
@@ -158,6 +170,27 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
         body: const Center(child: CircularProgressIndicator()),
       );
     }
+    // P0 fix — graceful empty-state when load failed (most commonly
+    // because no pet exists yet, which makes `activePetIdProvider`
+    // throw StateError). Pre-fix the body Column re-derefed the
+    // provider and crashed the build into a release-mode gray
+    // ErrorWidget. Render a clear "add a pet" affordance instead.
+    if (_petId == null || _path == null) {
+      return AppScaffold(
+        title: title,
+        body: PetEmptyState(
+          icon: PhosphorIconsRegular.warningCircle,
+          heading: "Couldn't open this profile",
+          body: 'Add a pet to start their profile.',
+          action: PetButton(
+            label: 'Add a pet',
+            onPressed: () => GoRouter.of(context).push('/pets/add'),
+            icon: PhosphorIconsRegular.plus,
+          ),
+        ),
+      );
+    }
+    final petId = _petId!;
     final aboutLabel = petName == null ? 'About this pet' : 'About $petName';
     return AppScaffold(
       title: title,
@@ -173,15 +206,18 @@ class _SoulEditorScreenState extends ConsumerState<SoulEditorScreen> {
             // profilePhotoBytesProvider for the active pet; renders a
             // CircleAvatar thumbnail or a placeholder, with Change /
             // Remove buttons that route through PetRepo.
-            _ProfilePhotoCard(
-              petId: ref.read(activePetIdProvider)(),
-            ),
+            //
+            // Uses the stashed `_petId` (resolved during `_load()`)
+            // rather than re-deref'ing `activePetIdProvider` here.
+            // The provider throws StateError on empty pets; the
+            // empty-state guard above handles that path.
+            _ProfilePhotoCard(petId: petId),
             const SizedBox(height: Spacing.s),
             // Phase 6 task 6.12 — weight + symptom trend charts.
             // Sit between the profile-photo card and the
             // Profile/About card so the user lands on visual identity
             // first, then trends, then editing the structured fields.
-            _TrendsSection(petId: ref.read(activePetIdProvider)()),
+            _TrendsSection(petId: petId),
             const SizedBox(height: Spacing.s),
             // Single card surface with a SectionHeader divider between
             // Profile (frontmatter) and About (prose) — task 5.12
