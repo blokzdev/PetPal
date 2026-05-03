@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:petpal/app/entitlement/entitlement.dart';
+import 'package:petpal/app/entitlement/entitlement_notifier.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/sqlite_vec.dart';
 import 'package:petpal/main.dart';
@@ -128,4 +131,133 @@ void main() {
     );
     expect(s.value, isTrue);
   });
+
+  // ── Phase 7 task E.1.b — Plan card tests ─────────────────────────
+
+  group('Phase 7 task E.1.b — Plan card', () {
+    Future<void> pumpSettingsWithEntitlement(
+      WidgetTester tester, {
+      required Override entitlementOverride,
+    }) async {
+      // Tall viewport so the Plan card + section + ambient counter
+      // all render in one frame.
+      tester.view.physicalSize = const Size(800, 2000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
+      final settings = InMemorySettingsStorage();
+      final stack = await buildChatTestStack(
+        llm: ScriptedLlmClient(scripts: const []),
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            apiKeyStorageProvider.overrideWithValue(
+              FakeApiKeyStorage(initial: 'sk-ant-test'),
+            ),
+            settingsStorageProvider.overrideWithValue(settings),
+            entitlementOverride,
+            ...stack.overrides,
+          ],
+          child: const PetPalApp(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.descendant(
+        of: find.byType(NavigationBar),
+        matching: find.text('Hub'),
+      ));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Settings'));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('Free anonymous → "Free plan" badge + Upgrade CTA + '
+        'ambient counter (VOICE.md §6 ex. 11 register)',
+        (tester) async {
+      await pumpSettingsWithEntitlement(
+        tester,
+        entitlementOverride:
+            entitlementProvider.overrideWith(_FreeEntitlementNotifier.new),
+      );
+
+      expect(find.text('PLAN'), findsOneWidget,
+          reason: 'PetSectionHeader uppercases the title');
+      expect(find.text('Free plan'), findsOneWidget);
+      expect(find.text('Upgrade'), findsOneWidget,
+          reason: 'free-tier badge row carries the upgrade CTA');
+      // Ambient counter (per VOICE.md §6 example 11). 0/200 → ample
+      // headroom register.
+      expect(
+        find.textContaining('PetPal handles 200 chats a month'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('Pro user → "PetPal Pro · Monthly" + no counter + '
+        'no Upgrade CTA', (tester) async {
+      await pumpSettingsWithEntitlement(
+        tester,
+        entitlementOverride:
+            entitlementProvider.overrideWith(_ProMonthlyNotifier.new),
+      );
+
+      expect(find.text('PetPal Pro · Monthly'), findsOneWidget);
+      // Pro is unmetered → counter row must NOT render (VOICE.md §7
+      // principle: no metering language in chat / Settings counter
+      // is for free tier ambient info only).
+      expect(find.text('Monthly chat allowance'), findsNothing);
+      expect(find.text('Upgrade'), findsNothing,
+          reason: 'Pro user must not see the upgrade CTA');
+    });
+
+    testWidgets('BYOK user → "Free plan + BYOK" + no counter '
+        '(BYOK lifts the cost-driven cap)', (tester) async {
+      await pumpSettingsWithEntitlement(
+        tester,
+        entitlementOverride:
+            entitlementProvider.overrideWith(_ByokNotifier.new),
+      );
+
+      expect(find.text('Free plan + BYOK'), findsOneWidget);
+      // BYOK lifts the text cap → counter row must NOT render.
+      expect(find.text('Monthly chat allowance'), findsNothing);
+    });
+
+    testWidgets('Restore purchases tile renders for every plan state',
+        (tester) async {
+      await pumpSettingsWithEntitlement(
+        tester,
+        entitlementOverride:
+            entitlementProvider.overrideWith(_FreeEntitlementNotifier.new),
+      );
+      expect(find.text('Restore purchases'), findsOneWidget);
+    });
+  });
+}
+
+class _FreeEntitlementNotifier extends EntitlementNotifier {
+  @override
+  Future<Entitlement> build() async => Entitlement.freeAnonymous();
+}
+
+class _ProMonthlyNotifier extends EntitlementNotifier {
+  @override
+  Future<Entitlement> build() async => Entitlement(
+        state: EntitlementState.proMonthly,
+        userId: 'user-pro',
+        renewalDate: DateTime(2026, 6, 15),
+        counterPeriodStart: DateTime(2026, 5),
+      );
+}
+
+class _ByokNotifier extends EntitlementNotifier {
+  @override
+  Future<Entitlement> build() async => Entitlement(
+        state: EntitlementState.byok,
+        userId: 'user-byok',
+        counterPeriodStart: DateTime(2026, 5),
+      );
 }

@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../design/design.dart';
+import '../entitlement/entitlement.dart';
+import '../entitlement/quota_exception.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
+import '../widgets/paywall_dispatcher.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
 
@@ -127,6 +130,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Spacing.l,
         ),
         children: [
+          // Phase 7 task E.1.b — Plan section. Pro/free badge +
+          // ambient text counter (free + BYOK only; Pro is
+          // unmetered) + restore-purchases. VOICE.md §6 example 11
+          // for the counter copy; §7 for the additive register.
+          const PetSectionHeader(title: 'Plan'),
+          const _PlanCard(),
+          const SizedBox(height: Spacing.l),
           const PetSectionHeader(title: 'Weekly summary'),
           PetCard(
             padding: EdgeInsets.zero,
@@ -240,5 +250,195 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ],
       ),
     );
+  }
+}
+
+/// Phase 7 task E.1.b — Plan / billing card.
+///
+/// Surfaces the active entitlement state (Pro / Free / BYOK), the
+/// VOICE.md §6 example 11 ambient text counter (free + BYOK only;
+/// Pro is unmetered), and the Restore purchases trigger. The
+/// "Upgrade to Pro" CTA dispatches to the paywall via
+/// dispatchPaywall(TextQuotaExceeded(...)) — same routing as the
+/// chat error CTA so future paywall layout changes land in one
+/// place.
+class _PlanCard extends ConsumerStatefulWidget {
+  const _PlanCard();
+
+  @override
+  ConsumerState<_PlanCard> createState() => _PlanCardState();
+}
+
+class _PlanCardState extends ConsumerState<_PlanCard> {
+  bool _restoring = false;
+
+  Future<void> _restore() async {
+    setState(() => _restoring = true);
+    try {
+      final service = await ref.read(billingServiceProvider.future);
+      await service.restorePurchases();
+    } finally {
+      if (mounted) setState(() => _restoring = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final entitlement = ref.watch(entitlementProvider).maybeWhen(
+          data: (e) => e,
+          orElse: Entitlement.freeAnonymous,
+        );
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          // ── Plan badge row ───────────────────────────────────────
+          ListTile(
+            leading: Icon(
+              entitlement.isPro
+                  ? PhosphorIconsRegular.sparkle
+                  : PhosphorIconsRegular.user,
+              color: entitlement.isPro
+                  ? scheme.primary
+                  : scheme.onSurface.withValues(alpha: 0.6),
+            ),
+            title: Text(_planTitle(entitlement)),
+            subtitle: Text(
+              _planSubtitle(entitlement),
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+            trailing: entitlement.isPro
+                ? null
+                : TextButton(
+                    onPressed: () => dispatchPaywall(
+                      context,
+                      TextQuotaExceeded(entitlement),
+                    ),
+                    child: const Text('Upgrade'),
+                  ),
+          ),
+          // ── Ambient text counter (free + BYOK; Pro is unmetered) ─
+          // VOICE.md §6 example 11 + §7 principle #2: ambient
+          // information, NOT a meter ticking down.
+          if (entitlement.isTextMetered) ...[
+            const Divider(height: 1, thickness: 1, indent: 16),
+            ListTile(
+              leading: Icon(
+                PhosphorIconsRegular.chatCircle,
+                color: scheme.onSurface.withValues(alpha: 0.6),
+              ),
+              title: const Text('Monthly chat allowance'),
+              subtitle: Text(
+                _counterCopy(entitlement),
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurface.withValues(alpha: 0.65),
+                ),
+              ),
+            ),
+          ],
+          // ── Restore purchases ────────────────────────────────────
+          const Divider(height: 1, thickness: 1, indent: 16),
+          ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.arrowCounterClockwise,
+              color: scheme.onSurface.withValues(alpha: 0.6),
+            ),
+            title: const Text('Restore purchases'),
+            subtitle: Text(
+              'Recover your Pro subscription or care packs from a '
+              'previous install.',
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+            trailing: _restoring
+                ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(PhosphorIconsRegular.caretRight),
+            onTap: _restoring ? null : _restore,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _planTitle(Entitlement e) {
+    switch (e.state) {
+      case EntitlementState.proMonthly:
+        return 'PetPal Pro · Monthly';
+      case EntitlementState.proAnnual:
+        return 'PetPal Pro · Annual';
+      case EntitlementState.byok:
+        return 'Free plan + BYOK';
+      case EntitlementState.free:
+      case EntitlementState.freeAnonymous:
+        return 'Free plan';
+    }
+  }
+
+  String _planSubtitle(Entitlement e) {
+    switch (e.state) {
+      case EntitlementState.proMonthly:
+      case EntitlementState.proAnnual:
+        final renewal = e.renewalDate;
+        if (renewal == null) return 'Active.';
+        return 'Renews ${_formatDate(renewal)}.';
+      case EntitlementState.byok:
+        return 'Your own Anthropic key handles chat — '
+            "PetPal's monthly cap doesn't apply.";
+      case EntitlementState.free:
+      case EntitlementState.freeAnonymous:
+        return 'Pro lifts every limit — chat, sync, photos, more.';
+    }
+  }
+
+  /// VOICE.md §6 example 11 lock — ambient register.
+  /// "PetPal handles 200 chats a month on the free plan. You've
+  /// had 127 so far this month — plenty of room. Pro lifts the
+  /// limit if you'd rather not think about it."
+  String _counterCopy(Entitlement e) {
+    final cap = e.textCap;
+    if (cap == null) return 'Unmetered.';
+    final count = e.monthlyTextCount;
+    final remaining = cap - count;
+    if (remaining > cap ~/ 4) {
+      return 'PetPal handles $cap chats a month on the free plan. '
+          "You've had $count so far this month — plenty of room. "
+          "Pro lifts the limit if you'd rather not think about it.";
+    }
+    if (remaining > 0) {
+      return 'PetPal handles $cap chats a month on the free plan. '
+          "You've had $count so far this month, so $remaining left. "
+          "Pro lifts the limit if you'd rather not think about it.";
+    }
+    return "You've used all $cap of this month's free chats. "
+        'Pro lifts the limit, or switch to BYOK in Settings to '
+        'keep chatting now.';
+  }
+
+  String _formatDate(DateTime d) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[d.month - 1]} ${d.day}, ${d.year}';
   }
 }

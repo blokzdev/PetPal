@@ -8,10 +8,12 @@ import '../../data/repos/reminder_repo.dart';
 import '../../data/soul_file.dart';
 import '../../harness/scheduling/reminder_kinds.dart';
 import '../design/design.dart';
+import '../entitlement/quota_exception.dart';
 import '../platform/haptics.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/battery_exemption_prompt.dart';
+import '../widgets/paywall_dispatcher.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
 import '../widgets/pet_skeleton.dart';
@@ -452,6 +454,14 @@ class _AddReminderScreenState extends ConsumerState<_AddReminderScreen> {
       // the form pops back to the list.
       ref.read(hapticsProvider).light();
       Navigator.of(context).pop(true);
+    } on ReminderQuotaExceeded catch (e) {
+      // Phase 7 task E.1.b — 5-cap reminder quota hit. Pop the form
+      // (the user can't save it without upgrading) and dispatch
+      // the paywall. Per VOICE.md §6 example 9 / §7 additive
+      // framing — Pro lifts the cap.
+      if (!mounted) return;
+      Navigator.of(context).pop(false);
+      dispatchPaywall(context, e);
     } catch (e) {
       if (!mounted) return;
       setState(() {
