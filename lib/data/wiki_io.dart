@@ -41,4 +41,18 @@ abstract class WikiIo {
   /// Drives storage budget tracking (Phase 6 task 6.1: warn at 500 MB,
   /// hard limit 1 GB v1). Returns 0 if the dir doesn't exist.
   Future<int> bytesForPet(int petId);
+
+  /// Phase 7 task H.1.d.wipe — delete every wiki file (recursive
+  /// nuke of the entire wiki root).
+  ///
+  /// Used by the account-deletion local-wipe step per DECISIONS row
+  /// 90: when the user confirms account deletion, the device's
+  /// cached wiki content is removed alongside the Drift database
+  /// reset and the sign-out. Idempotent — re-invoking when the wiki
+  /// root is already empty is a no-op.
+  ///
+  /// Test fakes that don't persist anywhere can implement as a
+  /// no-op. The production [WikiIoFs] removes the entire root
+  /// directory and recreates an empty one so subsequent writes work.
+  Future<void> deleteAll();
 }

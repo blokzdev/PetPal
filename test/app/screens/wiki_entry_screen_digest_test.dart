@@ -40,6 +40,8 @@ class _StubWiki implements WikiIo {
 
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }
 
 Widget _wrap(WikiIo wiki) => ProviderScope(

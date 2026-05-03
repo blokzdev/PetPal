@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../data/wiki_export.dart';
 import '../account/account_deletion_client.dart';
+import '../account/local_data_wipe.dart';
 import '../auth/auth_session_notifier.dart';
 import '../design/design.dart';
 import '../providers.dart';
@@ -116,6 +117,26 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         );
       }
       final retentionEnd = await client.requestDeletion();
+
+      // Phase 7 task H.1.d.wipe — server cascade succeeded; nuke
+      // the local Drift DB + wiki files before signing out so the
+      // device truly contains no trace of the deleted account.
+      // Wipe failures are logged but never re-thrown — the
+      // server-side deletion is the load-bearing step; surfacing a
+      // local failure would tell the user "your account is deleted
+      // but your device is in a half-broken state," which is not
+      // actionable. (Per LocalDataWipe contract — DECISIONS row 90.)
+      try {
+        final wikiIo = await ref.read(wikiIoProvider.future);
+        await ref.read(localDataWipeProvider).wipe(
+              wikiIo: wikiIo,
+              invalidateDatabase: () =>
+                  ref.invalidate(appDatabaseProvider),
+              invalidateWikiIo: () => ref.invalidate(wikiIoProvider),
+            );
+      } catch (_) {
+        // Defensive — wipe() catches its own errors via onError.
+      }
 
       // Server cascade succeeded — sign out locally so the JWT is
       // cleared from this device's secure storage and the auth

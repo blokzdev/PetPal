@@ -37,6 +37,8 @@ class _NoopWiki implements WikiIo {
   Future<void> deleteIfExists(String relPath) async {}
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }
 
 List<Override> _dataOverrides({String? withPetNamed}) => [

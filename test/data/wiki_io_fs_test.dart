@@ -64,4 +64,34 @@ void main() {
     expect(io.petDir(7), 'wiki/7');
     expect(io.soulPath(7), 'wiki/7/SOUL.md');
   });
+
+  // Phase 7 task H.1.d.wipe — deleteAll nukes the entire wiki root.
+  group('deleteAll', () {
+    test('removes every file across multiple pets', () async {
+      await io.writeAtomic('wiki/1/SOUL.md', 'a');
+      await io.writeAtomic('wiki/1/vet/2026-04-12.md', 'b');
+      await io.writeAtomic('wiki/2/SOUL.md', 'c');
+
+      await io.deleteAll();
+
+      expect(await io.listForPet(1), isEmpty);
+      expect(await io.listForPet(2), isEmpty);
+    });
+
+    test('idempotent — re-invoking on empty root is a no-op', () async {
+      await io.deleteAll();
+      await io.deleteAll(); // no throw
+      expect(tempRoot.existsSync(), isTrue);
+    });
+
+    test('recreates the empty root so subsequent writes work', () async {
+      await io.writeAtomic('wiki/1/SOUL.md', 'a');
+      await io.deleteAll();
+
+      // Post-wipe, the root must exist and writes must succeed.
+      expect(tempRoot.existsSync(), isTrue);
+      await io.writeAtomic('wiki/1/SOUL.md', 'fresh');
+      expect(await io.read('wiki/1/SOUL.md'), 'fresh');
+    });
+  });
 }

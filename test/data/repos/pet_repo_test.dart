@@ -41,6 +41,8 @@ class _FakeWikiIo extends WikiIo {
   Future<void> deleteIfExists(String relPath) async {}
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }
 
 void main() {

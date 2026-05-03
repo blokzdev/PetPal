@@ -53,6 +53,8 @@ class CapturingWikiIo implements WikiIo {
   Future<void> deleteIfExists(String relPath) async {}
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }
 
 /// Build the minimal data-layer + retrieval-layer overrides chat tests

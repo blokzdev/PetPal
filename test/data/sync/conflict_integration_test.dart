@@ -261,4 +261,6 @@ class _CapturingWikiIo implements WikiIo {
 
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }

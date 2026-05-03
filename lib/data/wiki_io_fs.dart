@@ -90,4 +90,15 @@ class WikiIoFs extends WikiIo {
     }
     return total;
   }
+
+  @override
+  Future<void> deleteAll() async {
+    if (await root.exists()) {
+      await root.delete(recursive: true);
+    }
+    // Recreate the empty root so subsequent writes via writeAtomic
+    // don't have to re-create the directory tree from scratch + so
+    // the WikiIoFs invariant ("root exists") holds post-wipe.
+    await root.create(recursive: true);
+  }
 }

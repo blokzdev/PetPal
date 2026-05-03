@@ -45,6 +45,8 @@ class _CapturingWiki implements WikiIo {
   Future<void> deleteIfExists(String relPath) async {}
   @override
   Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }
 
 /// Rich in-memory template that mirrors the placeholder set the real
