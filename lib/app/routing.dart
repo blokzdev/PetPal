@@ -18,6 +18,7 @@ import 'screens/photo_timeline_screen.dart';
 import 'screens/profile_view_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/delete_account_screen.dart';
 import 'screens/sign_in_screen.dart';
 import 'screens/skill_browser_screen.dart';
 import 'screens/soul_editor_screen.dart';
@@ -80,6 +81,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sign-in',
         builder: (context, state) => const SignInScreen(),
+      ),
+      // Phase 7 task H.1.d — account delete cascade. Full-screen
+      // takeover (no bottom nav distraction during a hard-to-undo
+      // moment). Routes here from Settings → Plan → "Delete
+      // account" tile, signed-in only.
+      GoRoute(
+        path: '/account/delete',
+        builder: (context, state) => const DeleteAccountScreen(),
       ),
       // Phase 7 task E.1 — paywall surfaces. Live OUTSIDE the
       // StatefulShellRoute (full-screen takeover; no bottom nav

@@ -422,6 +422,37 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
                 : const Icon(PhosphorIconsRegular.caretRight),
             onTap: _restoring ? null : _restore,
           ),
+          // ── Delete account (Phase 7 task H.1.d) ──────────────────
+          // Signed-in only — anonymous users have nothing on the
+          // server to delete. Sits at the bottom of the Plan card
+          // by intent: deletion is the destination of last resort,
+          // not a peer of the everyday tiles above. Coral register
+          // would conflict with the medical-attention reservation
+          // (DECISIONS row 64); use scheme.error instead, which is
+          // the canonical "destructive action" channel in M3.
+          if (ref.watch(isSignedInProvider)) ...[
+            const Divider(height: 1, thickness: 1, indent: 16),
+            ListTile(
+              leading: Icon(
+                PhosphorIconsRegular.trash,
+                color: scheme.error,
+              ),
+              title: Text(
+                'Delete account',
+                style: TextStyle(color: scheme.error),
+              ),
+              subtitle: Text(
+                'Permanently remove your account from PetPal. You '
+                'have 30 days to undo from another device.',
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurface.withValues(alpha: 0.65),
+                ),
+              ),
+              trailing: const Icon(PhosphorIconsRegular.caretRight),
+              onTap: () =>
+                  GoRouter.of(context).push('/account/delete'),
+            ),
+          ],
         ],
       ),
     );
