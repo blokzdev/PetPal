@@ -1,8 +1,10 @@
 # PetPal — Phase 7 setup guide
 
 Everything you (the human) need to do on the dashboards / CLI / file
-system, in order. Stop at "Stage 2 catch-up" — anything past there
-waits on later phase commits.
+system, in order. Phase 7 is code-complete (DECISIONS rows 89 + 90
+mark the last sub-piece closes); the only remaining gate is the
+two-device on-device verification — this guide is the prerequisite
+for that pass.
 
 For the deeper Supabase A.2 deploy details, see
 [`docs/phase7/A2-deployment.md`](./phase7/A2-deployment.md). This
@@ -32,9 +34,7 @@ Accounts you'll need:
 
 ---
 
-## 2. Supabase — dev project (Group A.2)
-
-Follow the existing checklist:
+## 2. Supabase — dev project (Group A.2 + G + H)
 
 ```bash
 cd /path/to/PetPal
@@ -50,16 +50,37 @@ From Settings → API, copy:
 - `anon public` key
 - `service_role secret` key (treat like a password)
 
-Then locally:
+### 2a. Push migrations + secrets + Edge Functions
 
 ```bash
 supabase link --project-ref abcdefgh        # the slug from Project URL
-supabase db push                             # applies 0001_phase7_init.sql + 0002_sync_objects.sql
+supabase db push                             # applies 0001 + 0002 + 0003
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase functions deploy llm-proxy
+supabase functions deploy account-delete
+supabase functions deploy cancel-account-delete
+supabase functions deploy daily-reconciliation-cron
 ```
 
-Then in the Supabase Dashboard → **Storage** → **New bucket**:
+Migrations applied (in order):
+
+- `0001_phase7_init.sql` — entitlements, anonymous_counters, banned
+  tokens/users, proxy_request_log, deleted_accounts_log, RLS, cron
+  helpers (`reset_monthly_counters`, `purge_stale_anonymous_counters`,
+  `purge_stale_proxy_logs`).
+- `0002_sync_objects.sql` — sync_challenges + wiki_sync_objects +
+  storage RLS policies for the `wiki` bucket.
+- `0003_pending_deletion_user_id.sql` — operational `user_id` column
+  on `deleted_accounts_log` so the daily-reconciliation cron can
+  check `auth.users.last_sign_in_at` for the undo path (DECISIONS
+  row 90).
+
+`play-billing-webhook` is intentionally not deployed yet — see §6 +
+§4's Webhook URL note.
+
+### 2b. Storage bucket
+
+In the Supabase Dashboard → **Storage** → **New bucket**:
 
 - Name: `wiki` (must match exactly — the H.1.b RLS policies + the
   `SupabaseSyncBackend` are hard-coded to this name)
@@ -71,27 +92,87 @@ Then in the Supabase Dashboard → **Storage** → **New bucket**:
 - Allowed MIME types: leave unrestricted (blobs upload as
   `application/octet-stream`)
 
-In the Supabase SQL Editor (Dashboard → SQL Editor), enable `pg_cron`
-and run:
+### 2c. Auth — magic-link redirect URL (REQUIRED)
+
+In the Supabase Dashboard → **Authentication → URL Configuration →
+Additional Redirect URLs**, add **exactly**:
+
+```
+petpal://login-callback
+```
+
+Without this, magic-link tap returns `400 invalid_request` and
+sign-in silently fails. The exact-string match is enforced by
+Supabase Auth; trailing slashes / capitalization variants are
+rejected.
+
+### 2d. SQL crons + daily-account-purge
+
+In the Supabase Dashboard → **Database → Extensions**, enable
+`pg_cron` **and** `pg_net` (the latter is required for §2d's
+HTTP-invocation cron).
+
+In the SQL Editor:
 
 ```sql
+-- Internal SQL crons (counter reset + storage hygiene)
 select cron.schedule('reset-monthly-counters', '0 2 * * *',
   $$ select public.reset_monthly_counters() $$);
 select cron.schedule('purge-stale-anonymous-counters', '0 3 * * *',
   $$ select public.purge_stale_anonymous_counters() $$);
 select cron.schedule('purge-stale-proxy-logs', '0 4 * * *',
   $$ select public.purge_stale_proxy_logs() $$);
+
+-- Daily account-deletion purge (calls the Edge Function via HTTP).
+-- Replace <SERVICE_ROLE_JWT> with the service_role key from
+-- Settings → API. The Edge Function's verify_jwt=true requires a
+-- service-role JWT in the Authorization header.
+alter database postgres
+  set "app.daily_cron_jwt" = '<SERVICE_ROLE_JWT>';
+
+select cron.schedule('daily-account-purge', '0 5 * * *',
+  $$
+    select net.http_post(
+      url := 'https://abcdefgh.supabase.co/functions/v1/daily-reconciliation-cron',
+      headers := jsonb_build_object(
+        'Authorization', 'Bearer ' || current_setting('app.daily_cron_jwt'),
+        'Content-Type', 'application/json'
+      ),
+      body := '{}'::jsonb
+    );
+  $$);
 ```
 
-Verify with a curl ping (should return `{"error":{"code":"unauthorized"...}}`):
+Verify cron registration:
+
+```sql
+select * from cron.job;
+```
+
+Expected: 4 rows (`reset-monthly-counters`,
+`purge-stale-anonymous-counters`, `purge-stale-proxy-logs`,
+`daily-account-purge`).
+
+### 2e. Smoke-test the deploys
 
 ```bash
+# llm-proxy — should return unauthorized 401
 curl -X POST "https://abcdefgh.supabase.co/functions/v1/llm-proxy" \
   -H "content-type: application/json" -d '{}' | jq
+
+# account-delete + cancel-account-delete — same shape
+curl -X POST "https://abcdefgh.supabase.co/functions/v1/account-delete" \
+  -H "content-type: application/json" -d '{}' | jq
+
+# daily-reconciliation-cron — manual fire with service-role JWT;
+# expect {scanned:0, undone:0, purged:0, errors:[]} on a clean dev project
+curl -X POST "https://abcdefgh.supabase.co/functions/v1/daily-reconciliation-cron" \
+  -H "Authorization: Bearer <SERVICE_ROLE_JWT>" \
+  -H "Content-Type: application/json" -d '{}' | jq
 ```
 
-For prod: repeat the whole section against a separate `petpal-prod`
-project (Pro tier).
+For prod: repeat 2a–2e against a separate `petpal-prod` project (Pro
+tier, $25/mo).
 
 ---
 
@@ -120,11 +201,18 @@ flutter build apk --release --split-per-abi --dart-define-from-file=dart-defines
 For CI, set the same names as repository secrets and pass them
 through.
 
-> **Note:** Phase 7 code reads these via `String.fromEnvironment(...)`
-> at the seams that need them (currently only `ProxyTransport` once
-> the provider wiring lands for it — Stage 2 work). Until then, you
-> can run without dart-defines and the app stays on the BYOK path
-> with the user's manually entered Anthropic key.
+> **Behavior without dart-defines.** The app reads these via
+> `String.fromEnvironment(...)` at construction time. Without them,
+> `supabaseRuntimeConfigProvider` returns null, which has cascading
+> effects: sign-in is unavailable (Settings → "Sign in" tile is
+> hidden), sync card stays in `signedOut` state, and the chat
+> surface renders the `_ChatUnavailableBanner` ("Chat needs a
+> connection to Claude. Add your Anthropic key in Settings to start
+> chatting"). The user must then manually enable BYOK in Settings →
+> Plan card → BYOK toggle to chat at all. **Two-device verification
+> requires the dart-defines pointing at a real Supabase project** —
+> sign-in, sync, account-delete, paywall hard-wall, and the proxy
+> path are all gated on it.
 
 ---
 
@@ -180,36 +268,58 @@ backend reconciliation is a no-op).
 ## 5. BYOK developer testing
 
 For local dev without burning your real Anthropic budget on the proxy
-path, you can run as a BYOK user:
+path, you can run as a BYOK user. Onboarding is no longer the entry
+point for this — F.1 (DECISIONS row 74) replaced the API-key prompt
+with a 2-page welcome → privacy flow, and BYOK now lives as an
+opt-in toggle in Settings.
 
-1. Onboard the app fresh.
-2. When the API-key entry screen lands, paste a developer-tier
-   Anthropic key (a separate key from the master one you used in
-   step 2's `supabase secrets set` — keep them separate so you can
-   revoke independently).
+1. Onboard the app fresh (welcome page → privacy disclosure → done).
+   You'll land on the home screen signed-out.
+2. **Settings → Plan card → BYOK toggle**. Flip it ON. A modal sheet
+   prompts for an Anthropic key; the validator runs a format regex
+   (`sk-ant-[A-Za-z0-9_-]{40,}`) + a live ping to
+   `api.anthropic.com/v1/models` before accepting.
 3. App now routes through `DirectTransport` straight to
    `api.anthropic.com`. No Supabase round-trip; no quota; no Pro
-   features (sync, multi-pet, vision, synthesis are all Pro-gated).
+   features (sync, multi-pet, vision, synthesis are all Pro-gated —
+   BYOK only lifts the cost-driven text + vision quotas).
 
 **Where to get the dev key:** Anthropic Console → API Keys → Create
 new key. Tag it `petpal-dev-byok` so it's distinguishable from the
-proxy master key.
+proxy master key set in §2a's `supabase secrets`.
+
+**Existing-key auto-promote.** If you already had a key stored from
+a pre-F.1 build (`flutter_secure_storage` `api_key` slot),
+`EntitlementNotifier.build()` silently promotes you to BYOK on first
+launch — no re-entry needed. Same migration runs for the
+`welcome_completed` flag so you don't re-hit onboarding.
 
 ---
 
-## 6. Stage 2 catch-up — what's not yet ready for setup
+## 6. What shipped since this doc was first written
 
-These need code that hasn't shipped yet. Don't try to configure them
-now:
+Phase 7 was incomplete when this guide was first authored at commit
+`8a2e70e`. The original §6 listed six "Stage 2 catch-up" rows
+deferred to later commits. Five have shipped:
+
+| Feature | Shipped in | Reference |
+|---|---|---|
+| Cloud sync provider (Supabase Storage) | Group G.1 + G.2 | DECISIONS rows 83 + 84 |
+| E2EE passphrase derivation (Argon2id) | Group G.2 | DECISIONS row 71 |
+| Magic-link auth (Supabase) | Group H.1.a–c | DECISIONS row 70 (redirect URL config moved to §2c above) |
+| Multi-pet UI | Group E.2 | DECISIONS row 36 |
+| Account deletion + 30-day undo + hard-purge cron | Group H.1.d + H.1.d-follow-ups | DECISIONS rows 77, 87, 90 (`account-delete`, `cancel-account-delete`, `daily-reconciliation-cron` Edge Functions in §2a above) |
+
+**Still deferred:**
 
 | Feature | Blocked by | Where you'll set it up |
 |---|---|---|
-| Server-side IAP receipt verification | `play-billing-verify` Edge Function (later C-group commit) | Play Console RTDN webhook URL |
-| Cloud sync provider | Group G.1 architectural decision (Supabase Storage vs other) | Likely same `supabase secrets` + a new bucket |
-| E2EE passphrase derivation | Group G.2 implementation | In-app onboarding flow (no dashboard config) |
-| Auth (Supabase magic-link email) | Group H.1.a (this commit) | Supabase Dashboard → Authentication → Email templates (already partly seeded by `supabase/templates/magic_link.html`) **AND** Authentication → URL Configuration → "Additional Redirect URLs" must include `petpal://login-callback` exactly — without this, magic-link tap returns 400 invalid_request |
-| Multi-pet UI | Group E.2 | No dashboard config; pure Flutter |
-| Account deletion + data export | Group H.1 | Settings screen + Supabase function (will need an `account-delete` Edge Function) |
+| Server-side IAP receipt verification | `play-billing-verify` Edge Function (Phase 8 prerequisite) | Play Console RTDN webhook URL — see §4 "Webhook URL" |
+
+DECISIONS rows 89 + 90 close H.2.b (accessibility audit) +
+H.1.d-follow-ups respectively. The only Phase-7 gate that remains
+is the two-device on-device verification — which this guide is the
+prerequisite for.
 
 ---
 
@@ -244,25 +354,64 @@ switch the default model.)
 
 ---
 
-## 8. Quick sanity checklist before each on-device test session
+## 8. Quick sanity checklist before two-device verification
 
-- [ ] `petpal-dev` project deployed + cron jobs scheduled
-- [ ] `ANTHROPIC_API_KEY` secret set on Supabase
-- [ ] `dart-defines.json` exists locally with dev project URL + anon
-      key
-- [ ] Play Console: 5 product IDs registered, internal-testing track
-      active, your Google account added as tester
-- [ ] Test device: signed into Google account that's a registered
-      tester
-- [ ] APK installed via internal-track download (NOT a sideload —
-      IAP only flows through Play-installed builds)
+**Supabase project (per §2):**
 
-If any of these is missing, IAP purchases will silently fail or get
-rejected by Play with cryptic errors.
+- [ ] `petpal-dev` (or `petpal-prod`) project provisioned + linked
+- [ ] All three migrations applied (`supabase migration list` shows
+      0001 + 0002 + 0003 as remote-committed)
+- [ ] `ANTHROPIC_API_KEY` secret set (`supabase secrets list`
+      includes it)
+- [ ] **All four** Edge Functions deployed: `llm-proxy`,
+      `account-delete`, `cancel-account-delete`,
+      `daily-reconciliation-cron`
+- [ ] `wiki` Storage bucket created (private, default size limit)
+- [ ] **Magic-link redirect URL** `petpal://login-callback` added
+      to Auth → URL Configuration → Additional Redirect URLs
+- [ ] `pg_cron` + `pg_net` extensions enabled
+- [ ] **All four** crons scheduled: `reset-monthly-counters`,
+      `purge-stale-anonymous-counters`, `purge-stale-proxy-logs`,
+      `daily-account-purge` — confirm via `select * from cron.job`
+- [ ] `app.daily_cron_jwt` Postgres setting holds the service-role
+      JWT
+- [ ] Manual smoke-test of `daily-reconciliation-cron` returns
+      `{scanned:0, undone:0, purged:0, errors:[]}` against an
+      empty project
+
+**Flutter (per §3):**
+
+- [ ] `dart-defines.json` exists locally with dev project URL +
+      anon key
+- [ ] `dart-defines.json` is gitignored (verify with
+      `git check-ignore dart-defines.json`)
+
+**Play Console (per §4):**
+
+- [ ] 5 product IDs registered (`pro_monthly`, `pro_annual`,
+      `photo_credits_50`, `care_pack_reactive_dog`,
+      `expert_pack_senior_dog`)
+- [ ] Both subs in the same "PetPal Pro" subscription group
+- [ ] Internal-testing track active
+- [ ] Your Google account (and your test partner's, for
+      device B) added as license tester + internal-track tester
+
+**Test devices (two needed for full verification):**
+
+- [ ] Device A: signed into Google account that's a registered
+      tester; APK installed via internal-track download
+- [ ] Device B: same — different Google account is fine, but the
+      tester pool must include it
+- [ ] Sideload-installed APKs **will not** receive IAP responses
+      from Play; install via the internal track only
+
+If any of these is missing, the corresponding ODV step will fail
+with cryptic errors (e.g. magic-link → 400 invalid_request, IAP →
+silent purchase failure, account-delete → audit row never hard-
+purged).
 
 ---
 
-That's everything actionable today. Most of it (sections 4 + 5 + 7)
-you can defer until you actually want to test IAPs / cost-monitoring
-on-device. Section 2 + 3 are the only ones blocking your next
-dev-iteration loop.
+That's everything actionable for two-device on-device verification.
+§5 (BYOK dev testing) + §7 (cost alerts) are deferrable. §1 + §2 +
+§3 + §4 are the load-bearing prerequisites.
