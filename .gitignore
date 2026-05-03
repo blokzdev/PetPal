@@ -48,6 +48,9 @@ app.*.map.json
 # Local override of secrets / API keys that escape secure_storage during dev.
 .env
 .env.local
+# Phase 7 — Supabase project URL + anon key for `flutter run --dart-define-from-file`.
+# Real values stay out of git; see docs/SETUP.md §3.
+dart-defines.json
 # Per-developer Android signing keys (release keystore lives outside the repo).
 android/key.properties
 android/app/upload-keystore.jks
