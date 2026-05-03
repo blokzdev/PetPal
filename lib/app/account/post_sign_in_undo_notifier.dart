@@ -56,6 +56,16 @@ class PostSignInUndoNotifier extends Notifier<PostSignInUndoState> {
 
   @override
   PostSignInUndoState build() {
+    // `fireImmediately: true` is load-bearing for the cold-start path
+    // — `AuthSessionNotifier.build()` is async, so on app launch with
+    // a saved session the auth provider resolves to AsyncData(session)
+    // before AppShell mounts and reads `postSignInUndoProvider`. With
+    // `fireImmediately: false` the listener would never see the
+    // already-live session and the cancel call would never fire on
+    // cold-start. The same-user guard below treats a fresh
+    // `_lastSignedInUserId == null` initial seed as a genuine
+    // sign-in event; AsyncLoading initial fires with `.value == null`
+    // and no-ops cleanly. Token-refresh re-emissions stay guarded.
     ref.listen(
       authSessionProvider,
       (_, next) {
@@ -72,7 +82,7 @@ class PostSignInUndoNotifier extends Notifier<PostSignInUndoState> {
           _lastSignedInUserId = null;
         }
       },
-      fireImmediately: false,
+      fireImmediately: true,
     );
     return const PostSignInUndoIdle();
   }
@@ -85,6 +95,10 @@ class PostSignInUndoNotifier extends Notifier<PostSignInUndoState> {
     }
     try {
       final wasPending = await client.cancelDeletion();
+      // Disposal-safety: notifier may be torn down during the await
+      // (test teardown, sign-out cascade). Setting state on a
+      // disposed Notifier throws — exit quietly instead.
+      if (!ref.mounted) return;
       if (wasPending) {
         _eventCounter++;
         state = PostSignInUndoCancelled(eventId: _eventCounter);
@@ -93,6 +107,7 @@ class PostSignInUndoNotifier extends Notifier<PostSignInUndoState> {
       // user wouldn't expect a toast for "you didn't actually have
       // a pending deletion."
     } catch (e) {
+      if (!ref.mounted) return;
       state = PostSignInUndoError(e.toString());
     }
   }

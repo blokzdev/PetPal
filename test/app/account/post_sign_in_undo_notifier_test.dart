@@ -181,4 +181,88 @@ void main() {
 
     expect(container.read(postSignInUndoProvider), isA<PostSignInUndoIdle>());
   });
+
+  // Phase 7 audit fix — cold-start gap.
+  // App-restart with a saved session: the auth provider resolves to
+  // AsyncData(session) before AppShell mounts and reads the
+  // postSignInUndoProvider. With `fireImmediately: true` the listener
+  // sees the already-live session on first attach and triggers the
+  // cancel call. With the old `fireImmediately: false` this case
+  // would silently no-op and the cron-side check would be the only
+  // safety net.
+  test('cold-start with already-signed-in session + pending deletion → '
+      'fires cancel + emits Cancelled', () async {
+    final gateway = InMemoryAuthGateway(initial: session('user-a'));
+    final client = FakeAccountDeletionClient(wasPending: true);
+    final container = makeContainer(gateway: gateway, client: client);
+
+    // Read the provider — this attaches the listener with
+    // fireImmediately: true so the existing session is picked up.
+    container.read(postSignInUndoProvider);
+    // Resolve the auth provider's async build so all microtasks drain.
+    await container.read(authSessionProvider.future);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+
+    expect(
+      client.cancelCallCount,
+      1,
+      reason: 'cold-start session must trigger cancelDeletion',
+    );
+    expect(
+      container.read(postSignInUndoProvider),
+      isA<PostSignInUndoCancelled>(),
+    );
+  });
+
+  // Phase 7 audit fix — disposal safety.
+  // The cancel call is async; if the notifier is disposed during the
+  // await (test teardown, sign-out cascade, etc.), the post-await
+  // `state = ...` would throw "Cannot use 'state' after the Notifier
+  // was disposed". The `ref.mounted` guards added in fix 1 short-
+  // circuit cleanly instead.
+  test('notifier disposed mid-flight → no throw', () async {
+    final gateway = InMemoryAuthGateway();
+    final completer = Completer<bool>();
+    final client = _BlockingDeletionClient(completer);
+    final container = makeContainer(gateway: gateway, client: client);
+
+    container.read(postSignInUndoProvider);
+    await container.read(authSessionProvider.future);
+
+    // Trigger the sign-in event → cancel call begins + awaits the
+    // completer.
+    gateway.simulateDeepLinkSignIn(session('user-a'));
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+    expect(client.startedCalls, 1);
+
+    // Dispose the container while the cancel is still in flight.
+    container.dispose();
+
+    // Complete the future post-disposal. Without `ref.mounted` guards
+    // this would throw — the test passes by simply not throwing.
+    completer.complete(true);
+    await Future<void>.delayed(Duration.zero);
+    await Future<void>.delayed(Duration.zero);
+  });
+}
+
+/// Fake deletion client whose `cancelDeletion()` blocks on a
+/// caller-supplied [Completer]. Used to simulate a cancel call still
+/// in flight when the surrounding ProviderContainer is disposed.
+class _BlockingDeletionClient implements AccountDeletionClient {
+  _BlockingDeletionClient(this._completer);
+  final Completer<bool> _completer;
+  int startedCalls = 0;
+
+  @override
+  Future<DateTime> requestDeletion() async =>
+      throw UnimplementedError('not used in disposal-safety test');
+
+  @override
+  Future<bool> cancelDeletion() {
+    startedCalls++;
+    return _completer.future;
+  }
 }
