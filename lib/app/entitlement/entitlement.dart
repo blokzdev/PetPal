@@ -55,9 +55,12 @@ enum EntitlementState {
   /// Pro-tier monthly vision cap per row 36. Null for non-Pro.
   int? get visionCap => isPro ? 30 : null;
 
-  /// Free-tier reminder cap per row 36. Null for Pro + BYOK
-  /// (unlimited).
-  int? get reminderCap => isPro || this == byok ? null : 5;
+  /// Free-tier reminder cap per row 36. Null for Pro (unlimited).
+  /// BYOK keeps the 5-cap — reminders are server-cost-trivial UX,
+  /// not a cost-driven gate, and BYOK lifts COST-driven caps only.
+  /// (Row 36: "BYOK does NOT unlock sync, multi-pet, and unlimited
+  /// reminders — those are Pro-only.")
+  int? get reminderCap => isPro ? null : 5;
 
   /// Free-tier pet count cap per row 36. Null for Pro (unlimited).
   /// BYOK keeps the 1-pet cap (multi-pet is a Pro UX feature, not

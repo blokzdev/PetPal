@@ -8,6 +8,8 @@ import '../../harness/agent/agent_loop.dart';
 import '../../harness/agent/messages.dart' as llm;
 import '../../harness/agent/tool_dispatcher.dart';
 import '../../harness/session_builder.dart';
+import '../entitlement/entitlement.dart';
+import '../entitlement/quota_exception.dart';
 import '../platform/haptics.dart';
 import '../providers.dart';
 import 'chat_error.dart';
@@ -120,6 +122,26 @@ class ChatNotifier extends Notifier<ChatState> {
         );
       }
 
+      // Phase 7 task D.1 — pre-call quota gate.
+      //
+      // Skip the round-trip when the cached entitlement says the
+      // user has exhausted their text cap. UX optimization only —
+      // server-side enforcement on the proxy (DECISIONS row 75)
+      // remains the canonical authority via 402 mapping below.
+      //
+      // **Red-flag-screened turns are exempt** (row 75 lock):
+      // safety must never have a "did I use my budget for this"
+      // gate, so when `composed.redFlag != null` we let the call
+      // through unconditionally + skip the optimistic increment
+      // on the success path.
+      final entitlement = ref.read(entitlementProvider).value ??
+          Entitlement.freeAnonymous();
+      if (composed.redFlag == null &&
+          entitlement.isTextMetered &&
+          entitlement.isTextQuotaExhausted) {
+        throw TextQuotaExceeded(entitlement);
+      }
+
       await for (final event in loop.streamRun(
         systemPrompt: composed.systemPrompt,
         userInput: composed.augmentedUserInput,
@@ -225,6 +247,34 @@ class ChatNotifier extends Notifier<ChatState> {
                         newUserMessageIndex: photoFlagCategory,
                       }
                     : state.escalatedTurns);
+
+            // Phase 7 task D.1 — optimistic client-side text counter
+            // increment. Server proxy is canonical (row 75); this
+            // local mirror is for UX (Settings counter display +
+            // pre-call gate above firing pre-emptively).
+            //
+            // Per row 75's safety carve-out, **red-flag-screened
+            // turns are exempt** — `composed.redFlag` non-null
+            // means the chat-side screener fired; the proxy will
+            // also exempt that turn so its counter and ours stay
+            // aligned.
+            //
+            // Vision turns (attached image) are NOT incremented
+            // here — vision quota is a separate counter, gated by
+            // `RealVisionGate` at the photo-extractor boundary
+            // (also D.1).
+            if (entitlement.isTextMetered &&
+                composed.redFlag == null &&
+                attachedImage == null) {
+              await ref
+                  .read(entitlementProvider.notifier)
+                  .setOptimistic(
+                    entitlement.copyWith(
+                      monthlyTextCount: entitlement.monthlyTextCount + 1,
+                    ),
+                  );
+            }
+
             state = state.copyWith(
               history: history,
               clearStreamingAssistant: true,

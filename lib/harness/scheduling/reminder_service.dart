@@ -1,3 +1,5 @@
+import '../../app/entitlement/entitlement.dart';
+import '../../app/entitlement/quota_exception.dart';
 import '../../data/repos/reminder_repo.dart';
 import '../../platform/alarm_scheduler.dart';
 import 'notification_template.dart';
@@ -40,27 +42,53 @@ class ReminderService {
     required ReminderScheduler scheduler,
     required NotificationTemplates templates,
     required Future<String?> Function(int petId) petNameLookup,
+    Entitlement Function()? entitlementSource,
   })  : _repo = repo,
         _scheduler = scheduler,
         _templates = templates,
-        _petName = petNameLookup;
+        _petName = petNameLookup,
+        _entitlementSource = entitlementSource;
 
   final ReminderRepo _repo;
   final ReminderScheduler _scheduler;
   final NotificationTemplates _templates;
   final Future<String?> Function(int) _petName;
 
+  /// Phase 7 task D.1 — pulls the active entitlement at create-time
+  /// to enforce the 5-reminder free-tier cap. Optional so existing
+  /// tests that don't care about quota can pass `null`; production
+  /// wires this via the provider.
+  final Entitlement Function()? _entitlementSource;
+
   /// Create + arm. For `notification` mode, renders a template into
   /// the payload so the dispatcher's fire-time post is purely
   /// data-driven (no template lookup at fire time — pet-name changes
   /// don't propagate to existing reminders, accepted tradeoff for
   /// Phase 4).
+  ///
+  /// Phase 7 task D.1 — throws [ReminderQuotaExceeded] when the
+  /// entitlement caps reminders at 5 (free tier) and the pet
+  /// already has 5. Pro + BYOK paths have `cap == null` and skip
+  /// this gate. Existing tests pass `entitlementSource: null` and
+  /// hit the no-gate path.
   Future<CreateReminderResult> create({
     required int petId,
     required String kind,
     required DateTime when,
     ScheduleMode mode = ScheduleMode.notification,
   }) async {
+    final entSrc = _entitlementSource;
+    if (entSrc != null) {
+      final ent = entSrc();
+      final cap = ent.reminderCap;
+      if (cap != null) {
+        final existing = await _repo.listForPet(petId);
+        if (existing.length >= cap) {
+          throw ReminderQuotaExceeded(ent);
+        }
+      }
+    }
+
     Map<String, Object?> payload = const {};
     if (mode == ScheduleMode.notification) {
       final rendered = await _renderForKind(petId: petId, kind: kind);

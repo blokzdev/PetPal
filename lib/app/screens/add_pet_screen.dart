@@ -7,6 +7,7 @@ import '../../data/onboarding_templates.dart';
 import '../../data/relationship.dart';
 import '../../data/species_catalog.dart';
 import '../design/design.dart';
+import '../entitlement/entitlement.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/pet_card.dart';
@@ -227,6 +228,27 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     });
     try {
       final repo = await ref.read(petRepoProvider.future);
+      // Phase 7 task D.1 — pet count gate. Free + BYOK = 1 pet
+      // cap (multi-pet is a Pro UX feature, not a cost-driven
+      // gate). Per VOICE.md §6 example 9 ("You already have a
+      // pet on the free plan. Adding a second pet is part of
+      // Pro."). Pro users have `petCap == null` and skip the
+      // gate.
+      final entitlement = ref.read(entitlementProvider).value ??
+          Entitlement.freeAnonymous();
+      final cap = entitlement.petCap;
+      if (cap != null) {
+        final existing = await repo.listPets();
+        if (existing.length >= cap) {
+          if (!mounted) return;
+          setState(() {
+            _saving = false;
+            _saveError = 'You already have a pet on the free plan. '
+                'Adding a second pet is part of Pro.';
+          });
+          return;
+        }
+      }
       final templates = ref.read(onboardingTemplatesProvider);
       final breed = _breed.text.trim().isEmpty ? null : _breed.text.trim();
       final speciesValue = _resolvedSpeciesValue();

@@ -233,13 +233,18 @@ final profilePhotoBytesProvider =
   return repo.readProfilePhotoBytes(petId: petId);
 });
 
-/// Phase 6 task 6.4 — entitlement gate for vision calls. The
-/// Phase 6 stub is always-allowed; Phase 7 task 7.10 overrides
-/// this provider with `RealVisionGate` (Pro entitlement +
-/// photo-credit balance) without a code re-shape at the call sites
-/// (6.5 extractor, 6.9 chat upload).
+/// Phase 7 task D.1 — entitlement gate for vision calls. Replaces
+/// the Phase 6 always-allowed stub. Pulls the active entitlement
+/// from `entitlementProvider` at check time via `ref.read` (NOT
+/// watch — gates fire per-action, not per-state-change; using
+/// watch would unnecessarily rebuild the gate on every counter
+/// increment).
 final visionGateProvider = Provider<VisionGate>((ref) {
-  return const StubVisionGate();
+  return RealVisionGate(
+    entitlementSource: () =>
+        ref.read(entitlementProvider).value ??
+        Entitlement.freeAnonymous(),
+  );
 });
 
 /// Phase 6 task 6.5 — photo extractor utility. Sonnet-backed
@@ -517,6 +522,12 @@ final reminderServiceProvider = FutureProvider<ReminderService>((ref) async {
     scheduler: scheduler,
     templates: templates,
     petNameLookup: (id) async => (await petRepo.getPet(id))?.name,
+    // Phase 7 task D.1 — pulls entitlement at create-time to enforce
+    // the 5-reminder free-tier cap. Pull (read) not push (watch) so
+    // the service stays stable across counter-increment rebuilds;
+    // the gate fires per-action, reading the current value.
+    entitlementSource: () =>
+        ref.read(entitlementProvider).value ?? Entitlement.freeAnonymous(),
   );
 });
 

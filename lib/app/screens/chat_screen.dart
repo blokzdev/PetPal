@@ -737,6 +737,11 @@ class _ErrorBanner extends StatelessWidget {
         return PhosphorIconsRegular.cloudSlash;
       case ChatErrorCategory.server:
         return PhosphorIconsRegular.cloudSlash;
+      // Phase 7 task D.1 — quota-exceeded uses the sparkle/upgrade
+      // register, not the warning register. The icon hints at "you
+      // can keep going by upgrading" — not "something broke."
+      case ChatErrorCategory.quotaExceeded:
+        return PhosphorIconsRegular.sparkle;
       case ChatErrorCategory.generic:
         return PhosphorIconsRegular.warningCircle;
     }

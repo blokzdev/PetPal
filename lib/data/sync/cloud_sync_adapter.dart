@@ -1,3 +1,6 @@
+import '../../app/entitlement/entitlement.dart';
+import '../../app/entitlement/quota_exception.dart';
+
 /// Cloud sync surface — placeholder interface, no implementation yet.
 ///
 /// Per DECISIONS row 11, the choice of backend (custom server, git+gpg,
@@ -69,5 +72,49 @@ class NoopCloudSyncAdapter implements CloudSyncAdapter {
     final now = DateTime.now();
     status = SyncStatus(state: SyncState.idle, lastSyncAt: now);
     return SyncResult(changedPaths: const [], completedAt: now);
+  }
+}
+
+/// Phase 7 task D.1 — entitlement-gated sync decorator.
+///
+/// Wraps any [CloudSyncAdapter] (today: [NoopCloudSyncAdapter]; G.2:
+/// the real Supabase Storage adapter) and throws [SyncQuotaExceeded]
+/// before push/pull when the active entitlement isn't Pro.
+///
+/// Sync is **Pro-only** per DECISIONS row 36. BYOK does NOT unlock
+/// sync — sync is a server-cost feature, not a cost-driven cap.
+/// The gate fires on every push/pull; status reads pass through
+/// untouched (UI may want to show "sync requires Pro" without
+/// throwing).
+class EntitlementGatedSyncAdapter implements CloudSyncAdapter {
+  EntitlementGatedSyncAdapter({
+    required CloudSyncAdapter inner,
+    required Entitlement Function() entitlementSource,
+  })  : _inner = inner,
+        _entitlementSource = entitlementSource;
+
+  final CloudSyncAdapter _inner;
+  final Entitlement Function() _entitlementSource;
+
+  @override
+  SyncStatus get status => _inner.status;
+
+  @override
+  Future<SyncResult> push({required int petId}) async {
+    _enforceProGate();
+    return _inner.push(petId: petId);
+  }
+
+  @override
+  Future<SyncResult> pull({required int petId}) async {
+    _enforceProGate();
+    return _inner.pull(petId: petId);
+  }
+
+  void _enforceProGate() {
+    final ent = _entitlementSource();
+    if (!ent.isPro) {
+      throw SyncQuotaExceeded(ent);
+    }
   }
 }

@@ -1,24 +1,21 @@
 /// Phase 6 task 6.4 — VisionGate stub. Both 6.5 (extractor) and 6.9
 /// (chat upload) call through this gate before issuing a vision
-/// request to the LLM. Phase 7 task 7.10 plugs in the real
-/// entitlement check (Pro tier active, photo-credit balance > 0)
+/// request to the LLM. Phase 7 task D.1 plugged in the real
+/// entitlement check (Pro tier active OR photo-credit balance > 0)
 /// without a code re-shape — the abstract surface stays.
 ///
 /// v1 contract (DECISIONS row 36):
-/// - Free tier (BYOK off): vision quota is part of the 200
-///   message/month allowance; vision turns count as 1 message
-///   each. The free user with no key configured can spend their
-///   monthly quota on vision turns until 200 is hit.
-/// - Free tier (BYOK on): unlimited vision (BYOK lifts the
-///   quota in exchange for the user supplying their own
-///   Anthropic key).
-/// - Pro: unmetered text + 30 vision/mo + photo-credit packs
-///   for overage. The 30/mo cap is enforced in the gate's Pro
-///   branch landing in Phase 7.
-///
-/// Phase 6 stub: always allowed. The gate exists now so 6.5 + 6.6
-/// + 6.9 wire through it; Phase 7 swaps the implementation.
+/// - Anonymous / free signed-in (no BYOK): NO vision feature.
+///   Vision is Pro-only. Gate blocks with the upgrade prompt.
+/// - Free + BYOK: unmetered (calls go direct to Anthropic with
+///   the user's key; this gate's allow path lets the request
+///   through; the user pays Anthropic).
+/// - Pro: 30 vision/mo cap (counter on Supabase) + photo-credit
+///   balance for overage. The combined check fires only when
+///   BOTH are exhausted.
 library;
+
+import '../../app/entitlement/entitlement.dart';
 
 abstract class VisionGate {
   /// Check whether a vision call is allowed at this moment for
@@ -43,18 +40,69 @@ class VisionGateDecision {
   final bool isAllowed;
 
   /// User-facing copy when [isAllowed] is false. Null when allowed.
-  /// Phase 7 fills this with quota / paywall messaging keyed off
-  /// the entitlement state.
   final String? reason;
 }
 
-/// Always-allowed implementation for Phase 6. Phase 7 task 7.10
-/// replaces this with `RealVisionGate` (entitlement service +
-/// photo-credit-balance enforcement) wired through the same
-/// `visionGateProvider`.
+/// Always-allowed implementation. Used in tests + as the v1 default
+/// when the entitlement source isn't yet wired (e.g. during the
+/// brief startup window before [entitlementProvider] resolves).
 class StubVisionGate implements VisionGate {
   const StubVisionGate();
 
   @override
   Future<VisionGateDecision> check() async => VisionGateDecision.allowed;
+}
+
+/// Phase 7 task D.1 — production VisionGate.
+///
+/// Reads the active entitlement at check time (pull, not push) so
+/// the gate's verdict reflects the most recent reconciliation.
+/// Caller is responsible for pumping the entitlement state into
+/// the provider; this gate just consults what's there.
+///
+/// Decision matrix:
+///   - Pro + cap NOT exhausted (cap met but credits remain) →
+///     allowed. The credit-balance decrement happens at the proxy
+///     side per row 82; the client doesn't decrement here.
+///   - Pro + cap AND credit balance exhausted → blocked with
+///     "buy a credit pack" copy (VOICE.md §6 example 13).
+///   - Free + BYOK → allowed (user pays Anthropic directly).
+///   - Free anonymous / Free signed-in (no BYOK) → blocked with
+///     "vision is part of Pro" copy.
+class RealVisionGate implements VisionGate {
+  const RealVisionGate({required this.entitlementSource});
+
+  /// Pulls the current [Entitlement]. Production wires this to
+  /// `() => ref.read(entitlementProvider).value ?? Entitlement.freeAnonymous()`.
+  /// Tests inject a static getter.
+  final Entitlement Function() entitlementSource;
+
+  @override
+  Future<VisionGateDecision> check() async {
+    final ent = entitlementSource();
+    switch (ent.state) {
+      case EntitlementState.proMonthly:
+      case EntitlementState.proAnnual:
+        if (ent.isVisionQuotaExhausted) {
+          // Per VOICE.md §6 example 13.
+          return VisionGateDecision.blocked(
+            "Photo analysis: 30 a month on Pro. You've used this month's "
+            "allowance. Top up with 50 more for \$2.99 — they don't "
+            'expire, so unused ones roll into next month.',
+          );
+        }
+        return VisionGateDecision.allowed;
+      case EntitlementState.byok:
+        // BYOK lifts the cost-driven cap; vision call is between
+        // user and Anthropic.
+        return VisionGateDecision.allowed;
+      case EntitlementState.free:
+      case EntitlementState.freeAnonymous:
+        // Vision is a Pro feature per row 36.
+        return VisionGateDecision.blocked(
+          'Photo analysis is part of Pro — \$7.99/mo lifts every limit '
+          'and unlocks photo memories.',
+        );
+    }
+  }
 }

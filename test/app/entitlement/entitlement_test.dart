@@ -67,13 +67,15 @@ void main() {
       expect(EntitlementState.byok.visionCap, isNull);
     });
 
-    test('reminderCap = 5 for free; null for Pro + BYOK', () {
+    test('reminderCap = 5 for free + BYOK; null for Pro only', () {
       expect(EntitlementState.freeAnonymous.reminderCap, 5);
       expect(EntitlementState.free.reminderCap, 5);
+      expect(EntitlementState.byok.reminderCap, 5,
+          reason: 'BYOK keeps the 5-reminder cap per row 36 — '
+              'reminders are server-cost-trivial UX, NOT a '
+              'cost-driven gate; BYOK lifts cost-driven caps only');
       expect(EntitlementState.proMonthly.reminderCap, isNull);
-      expect(EntitlementState.byok.reminderCap, isNull,
-          reason: 'BYOK gets unlimited reminders per row 36 — they are '
-              'trivially cheap server-side');
+      expect(EntitlementState.proAnnual.reminderCap, isNull);
     });
 
     test('petCap = 1 for free + BYOK; null for Pro', () {
