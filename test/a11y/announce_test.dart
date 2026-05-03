@@ -28,17 +28,29 @@ void main() {
     test('appSnackBar calls SemanticsService.announce by default', () {
       final src = File('lib/app/widgets/app_scaffold.dart').readAsStringSync();
       // The wire — must announce the message in the active reading
-      // direction (Directionality.of(context)) so TalkBack reads it
-      // aloud as it appears on screen.
+      // direction so TalkBack reads it aloud as it appears on screen.
+      // Audit fix (post-H.2.b) replaced `Directionality.of(context)`
+      // with the defensive `Directionality.maybeOf(context) ??
+      // TextDirection.ltr` form; the substring assertion below
+      // matches both shapes by anchoring on the announce call only.
       expect(
-        src.contains(
-          'SemanticsService.announce(message, Directionality.of(context))',
-        ),
+        src.contains('SemanticsService.announce('),
         isTrue,
         reason:
             'appSnackBar dropped its SemanticsService.announce wire — '
             'Phase 7 H.2.b regression. TalkBack would not read the '
             'snackbar text without this.',
+      );
+      // And the Directionality lookup must be the defensive maybeOf
+      // form per the audit fix — strict `Directionality.of(context)`
+      // throws if any future caller dispatches from a context
+      // without a Directionality ancestor.
+      expect(
+        src.contains('Directionality.maybeOf(context)'),
+        isTrue,
+        reason:
+            'appSnackBar must use Directionality.maybeOf with an LTR '
+            'fallback — strict .of(context) throws on missing ancestor',
       );
     });
 

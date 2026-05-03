@@ -261,7 +261,16 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> appSnackBar(
   bool announce = true,
 }) {
   if (announce) {
-    SemanticsService.announce(message, Directionality.of(context));
+    // `Directionality.maybeOf` + LTR fallback guards against future
+    // callers from a context without a Directionality ancestor (e.g.
+    // a snackbar dispatched from a bare overlay or a unit-test
+    // pumping outside MaterialApp). Every current call site sits
+    // inside MaterialApp so the maybeOf path returns the inherited
+    // direction; the fallback is purely defensive.
+    SemanticsService.announce(
+      message,
+      Directionality.maybeOf(context) ?? TextDirection.ltr,
+    );
   }
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
