@@ -1,12 +1,14 @@
 # Phase 7 wrap
 
-Code-complete-with-deferrals close. The Pro tier monetization
-architecture, multi-pet UI, magic-link sign-in, E2EE sync,
-account-delete cascade, and crash-analytics scaffold all shipped.
-Three explicit deferrals route forward to Phase 8 prerequisites
-or v1.0.x patch commits. Two-device on-device verification is
-required before Phase 7 can be marked formally complete; it's
-fundamentally a human-action gate (cannot be codeable).
+Code-complete close. The Pro tier monetization architecture,
+multi-pet UI, magic-link sign-in, E2EE sync, account-delete cascade
+(including the daily-reconciliation cron + post-sign-in undo + local
+data wipe), accessibility audit, and crash-analytics scaffold all
+shipped. The previous two code deferrals (H.2.b accessibility +
+H.1.d sub-pieces) closed in follow-up commits per DECISIONS rows 89
++ 90. Two-device on-device verification is the only remaining gate
+before Phase 7 can be marked formally complete — fundamentally a
+human-action gate that cannot be substituted by code.
 
 ## What shipped
 
@@ -87,26 +89,44 @@ fundamentally a human-action gate (cannot be codeable).
   CrashAnalytics` is the v1 production default (nothing
   transmits until a concrete provider lands in Phase 8+).
 
-## Deferred — three explicit gates before Phase 7 → Phase 8
+## Closed in follow-up commits
 
 **1. H.2.b — comprehensive accessibility audit**
-(DECISIONS row 88). Per-screen audit: contrast, screen-reader
-labels, text-scaling resilience, touch-target sizes. Must land
-before `flutter build appbundle --release` in Phase 8 task 8.6
-— Play Store's pre-launch accessibility scanner gates the AAB.
+(DECISIONS row 89; closed). 5 axis-batched commits — Pass A
+Semantics labels + tooltips on icon-only controls, Pass B WCAG AA
+contrast assertions on both schemes, Pass C text-scaling
+resilience on shared chassis (1.0×/1.5×/2.0×), Pass D 48dp
+tap-target regression fix on Compare-plans link, Pass E
+`SemanticsService.announce` on `appSnackBar`. TalkBack manual
+verification (chat composer at 2.0×, per-screen `meetsGuideline`
+sweeps, real screen-reader walkthrough across 21 surfaces) defers
+to the on-device verification gate below.
 
-**2. H.1.d sub-pieces** (DECISIONS row 87).
-  - Daily cron + hard-purge of wiki blobs / entitlement /
-    counters / proxy_request_log / auth.users at the end of the
-    30-day window. The `deleted_accounts_log_retention_idx` is
-    already in place — the cron is mechanical.
-  - Post-sign-in undo prompt within the retention window.
-  - Local Drift + wiki-files wipe at delete-tap.
+**2. H.1.d sub-pieces** (DECISIONS row 90; closed). 5 commits:
+  - Migration 0003 + `account-delete` writes operational `user_id`
+    column + 11 Deno tests for `account-delete` (was 0).
+  - `daily-reconciliation-cron` Edge Function + 11 Deno tests:
+    scans `deleted_accounts_log` for rows past 30-day retention,
+    undoes on recent sign-in (`last_sign_in_at >
+    delete_requested_at`), hard-purges otherwise (Storage `wiki/
+    <user_id>/*.enc` → `proxy_request_log` explicit DELETE →
+    `auth.admin.deleteUser` cascades to entitlements + sync tables
+    → `UPDATE deleted_accounts_log SET hard_purged_at, user_id =
+    NULL`).
+  - `cancel-account-delete` Edge Function (proactive client-driven
+    undo) + 7 Deno tests; `AccountDeletionClient.cancelDeletion`
+    + `PostSignInUndoNotifier` + `AppShell` snackbar wire on
+    Cancelled events.
+  - `WikiIo.deleteAll()` + `LocalDataWipe` orchestrator (wiki
+    files → Drift file → provider invalidation; defensive against
+    partial failure) + delete-screen wire.
+  - `A2-deployment.md` updated with cron registration steps
+    (pg_cron + pg_net + `app.daily_cron_jwt` setting + nightly
+    05:00 UTC schedule + verification curl).
 
-  The cron is load-bearing for Phase 8's data-safety form;
-  local wipe + undo prompt can ride v1.0.x patch updates.
+## Deferred — one explicit gate before Phase 7 → Phase 8
 
-**3. Two-device on-device verification** (CLAUDE.md §14 lock —
+**Two-device on-device verification** (CLAUDE.md §14 lock —
 code cannot substitute). The full verification checklist lives
 in ROADMAP.md under H.3:
   - Sign in via magic-link on device A → subscribe with Play
