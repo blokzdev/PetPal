@@ -373,6 +373,129 @@ Each entry uses the same shape:
 
 ## v1.x (no specific window)
 
+### Phase 9 — Post-launch on-device inference + per-message provider switching
+
+- **Source:** Scoped during Phase 7 verification round (pre-H.1
+  kickoff session, 2026-05-03).
+- **DECISIONS:** 85.
+- **Scope:** Large (own phase, ~4–7 weeks post-launch — base
+  3–5 weeks for Local Inference + 1–2 weeks for per-message
+  switching sub-scope).
+- **Dependencies:** Real-world launch data (device-class
+  distribution from telemetry, proxy cost reality from steady-state
+  free-tier usage, user demand signal). Existing `LlmTransport`
+  abstraction at `lib/harness/agent/llm_transport.dart` (Phase 7
+  task 7.A.3) — third concrete implementation slots in alongside
+  `DirectTransport` and `ProxyTransport`.
+- **Trigger to revisit:** ~4–8 weeks post-launch when usage data
+  accumulates; OR earlier if proxy costs prove unsustainable
+  (survival-feature angle — Phase 9 priority rises if Anthropic
+  spend per free-tier user runs hot).
+- **Notes:**
+
+  **Locked decisions** (DECISIONS row 85; future Claude must not
+  re-litigate these):
+
+    1. **Three-tier LLM provider model.** Local Inference (new,
+       Phase 9) + Cloud Proxy (existing, Phase 7) + BYOK
+       (existing, Phase 7). The seam is the existing
+       `LlmTransport` abstraction.
+    2. **Onboarding default = Option A** — device-capability
+       diagnostic determines the default suggestion. Capable
+       devices (~8 GB+ RAM + recent SoC class, quality bar set
+       via Phase 9 empirical benchmarking) default to Local.
+       Below-bar but functional: default to Cloud Proxy with
+       Local opt-in + warning. Genuinely unsupported: Cloud
+       Proxy only, Local grayed.
+    3. **Quality-bar warning UX is non-negotiable on below-bar
+       Local opt-in** (per VOICE.md §2 disclosure principles).
+       Three surfaces: opt-in moment, Settings provider
+       switcher tier indicator, first-run quality test.
+    4. **Per-message provider switching is Phase 9 sub-scope,
+       not separate phase.** Phase 10 fallback if scope expansion
+       proves untenable when Phase 9 kickoff scoping happens.
+    5. **Five design discipline anchors for per-message
+       switching:** (a) default invisible (picker hidden by
+       default; long-press / advanced toggle to surface);
+       (b) transitions explicit (between-turn label "Switched to
+       Cloud for this response" — no silent provider routing);
+       (c) quota architectural (Cloud counter increments on
+       every Cloud-routed turn regardless of conversation entry;
+       regenerations don't double-count when original is
+       replaced; BYOK precedence; Local always free);
+       (d) harness transition handling explicit (mixed-provider
+       conversation history accepted; per-turn provider
+       attribution visible); (e) brand thesis preserved
+       (provider indicators small/muted/between turns; "AI in
+       service" not "AI tool you operate").
+
+  **Phase 9 kickoff scoping questions** (open, not pre-decided):
+
+    - **Quality bar empirical determination** — benchmarking
+      matrix of candidate models × device tiers × harness-
+      critical tasks (tool-calling reliability, structured
+      output, context handling, red-flag screener
+      compatibility, retrieval-grounded recall).
+    - **Harness transition handling** — re-process prior turns
+      on switch, or accept mixed-provider history? Likely the
+      latter, with provider attribution visible per-turn — but
+      the answer informs context-budget math.
+    - **Per-conversation default provider vs per-message** —
+      sticky-for-thread default, changeable mid-conversation
+      but typically isn't?
+    - **Quota-aware suggestion patterns** — "47 Cloud messages
+      left this month. Want Cloud or stick with Local?"
+    - **Failure-mode escape valves** — Local hangs/fails →
+      "Try again" auto-suggests Cloud as fallback.
+    - **Tool-calling fallback strategy** — required for small
+      models that can't reliably structured-output-call; Local
+      may need a constrained-decoding shim or a tool-call-free
+      degraded mode for the harness's tool catalog.
+    - **Bundling vs download** — bundling bloats APK 300 MB+;
+      likely download with cached model registry, but model
+      versioning + update UX needs scoping.
+
+  **Candidate model families** (final picks set at Phase 9
+  kickoff, informed by then-current model landscape):
+  SmolLM2/3, Gemma 3 nano (E2B/E4B), Gemma 4, Phi-3/4 mini,
+  Qwen 2.5 small, MiniCPM.
+
+  **Candidate inference frameworks:** MediaPipe GenAI Tasks,
+  LiteRT, llama.cpp via fllama, ONNX Runtime.
+
+  **Side benefits:**
+
+    - **Offline mode** — PetPal works without internet for chat
+      + reasoning. Aligns with the offline-first positioning
+      that already extends to embeddings (DECISIONS row 20)
+      and storage (DECISIONS row 1).
+    - **Survival-feature angle** — if proxy economics prove
+      uncomfortable post-launch (high spend per free-tier user,
+      low Pro conversion), Phase 9 prioritization shifts up;
+      Local Inference becomes a cost-relief lever as well as a
+      privacy/offline lever.
+
+  **Stays anchored:**
+
+    - DECISIONS row 25 holds — no clinical / vision-medical
+      inference, even on Local. The harness's species and
+      breed delegation to user-stated `SOUL.md` content is
+      provider-agnostic.
+    - DECISIONS row 36 holds — Local Inference is the third
+      pricing modifier alongside Cloud Proxy + BYOK; the
+      monetization model continues to read as "free local
+      memory + cost-bounded Pro quotas + BYOK escape valve +
+      Local Inference for capable devices."
+    - VOICE.md §2 disclosure register applies to all warnings;
+      §6 example tone applies to provider-switching copy.
+
+  **Why v1.x and not v1.1 / v1.2:** v1.1 is small fixes /
+  real-user signal absorption; this is full-phase scope.
+  v1.2 candidate locks at ~6 months post-launch; Phase 9 may
+  happen sooner if proxy economics force it. Cleanest fit is
+  v1.x with an explicit "trigger to revisit" tied to launch
+  data signals.
+
 ### Multi-provider LLM support (Gemini alongside Anthropic)
 
 - **Source:** post-Phase-5.5 wrap-up, pre-Phase-6 kickoff.

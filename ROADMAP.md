@@ -649,3 +649,17 @@ Lays the seam every other group consumes. Decision-then-implementation.
 **On-device verification:** install via Play internal track on a fresh device, run sandboxed billing flow.
 
 **STOP. Ready for launch decision.**
+
+---
+
+## Phase 9 (post-launch) — On-device inference + per-message provider switching
+
+**Status:** Scoped post-launch. Triggers on real device-distribution and proxy-cost data accumulating ~4–8 weeks after Phase 8 ships, OR earlier if proxy economics prove unsustainable. Not a pre-committed task plan — Phase 9 kickoff scoping happens at trigger time.
+
+**Locked decisions:** see DECISIONS row 85.
+
+**Detailed scope, kickoff scoping questions, candidate model families, candidate inference frameworks:** see `V1X_BACKLOG.md` — *Phase 9 — Post-launch on-device inference + per-message provider switching* under v1.x.
+
+**One-line summary:** Adds Local Inference as a third `LlmTransport` alongside `DirectTransport` (BYOK) and `ProxyTransport` (Cloud); device-capability diagnostic determines onboarding default; per-message provider switching is Phase 9 sub-scope (Phase 10 fallback).
+
+**STOP. Phase 9 task plan is post-launch work, not pre-committed.**
