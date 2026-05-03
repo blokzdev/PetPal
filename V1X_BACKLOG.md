@@ -561,6 +561,43 @@ Each entry uses the same shape:
   separate tab; 5-tab adding Care guides + Photos; FAB-centered
   4-tab; bottom-sheet drawer instead of nav.
 
+### Expert Pack IAP ($14.99–$39.99 tier)
+
+- **Source:** Phase 7 Stage 1 scope refinement.
+- **DECISIONS:** 36 (monetization model — pack pricing tiers locked);
+  80 (care pack from-scratch build stays in Phase 7); 81 (expert
+  pack defer — this entry's source row).
+- **Scope:** Medium. Single expert pack at a time once revisited;
+  IAP infrastructure already in place from Phase 7 Group C (care
+  pack ships in v1, expert pack reuses the same `requiresPro` skill-
+  loader gate + `in_app_purchase` plumbing).
+- **Dependencies:** Phase 7 Group C IAP infrastructure (in place
+  post-Phase-7); usage-signal data showing which species / conditions
+  warrant the substantive content authoring (e.g., "Senior Dog Care",
+  "Aggressive-Reactive Dog Rehab", "Diabetic Cat Daily Management").
+- **Notes:** Original Phase 7 task 7.8 deferred during Stage 1
+  planning. Care pack alone (Group C.3, $2.99–$4.99) validates the
+  marketplace shape — Pro-gated content, IAP unlock, skill-loader
+  integration. Expert pack scales the marketplace post-launch once
+  v1 usage signals which packs to author first. **Trigger to
+  revisit.** Three concrete signals: (1) Care pack purchase rate at
+  ≥ 5% of Pro subscribers (proves users will pay for content
+  packs); (2) explicit user requests for deeper content on a
+  specific species/condition (Settings feedback, support tickets,
+  Play Store reviews); (3) Pro retention curve flattens (suggests
+  the unmetered text + sync + vision + synthesis bundle isn't
+  enough on its own to keep users converted). **Authoring scope per
+  pack.** ~3-5 days of authoring + clinical review (we're not
+  diagnosing, but expert packs cover behavior modification, daily
+  management, decision frameworks — content quality matters).
+  Locked frame: clinical-adjacent but never diagnostic per
+  DECISIONS row 25. **Pricing rationale.** $14.99-$39.99 reflects
+  multi-hour authoring depth; matches the Audible single-book
+  / Khan-Academy-deep-course price band; user expectations for
+  "expert" content carry that anchor. **No marketplace UI work
+  needed at first revisit** — same paywall + IAP flow as care pack;
+  only difference is the price tag and the manifest contents.
+
 ### Center Capture FAB in bottom nav
 
 - **Source:** Phase 6.6 scoping (cofounder review).
