@@ -18,6 +18,7 @@ import 'package:petpal/platform/billing/product_ids.dart';
 void main() {
   late _FakeIap iap;
   late List<Entitlement> optimisticUpdates;
+  late List<int> creditGrants;
   late BillingService service;
   late StreamSubscription<BillingEvent> sub;
   late List<BillingEvent> events;
@@ -42,10 +43,14 @@ void main() {
   setUp(() {
     iap = _FakeIap();
     optimisticUpdates = [];
+    creditGrants = [];
     service = BillingService(
       iap: iap,
       onOptimisticEntitlement: (ent) async {
         optimisticUpdates.add(ent);
+      },
+      onPhotoCreditsGranted: (credits) async {
+        creditGrants.add(credits);
       },
     );
     events = [];
@@ -290,8 +295,9 @@ void main() {
       expect(optimisticUpdates, isEmpty);
     });
 
-    test('non-Pro purchase (photo credits) does NOT update entitlement '
-        'state — that lands in C.2', () async {
+    test('photo credit pack purchase does NOT change Pro state '
+        '(state stays free; only photoCreditsBalance increments via '
+        'the C.2 callback path)', () async {
       await initReady();
 
       iap.streamController.add([
@@ -303,12 +309,115 @@ void main() {
       ]);
       await Future<void>.delayed(Duration.zero);
 
-      // Purchased event still fires (UI shows success toast).
+      // Purchased event fires (UI shows success toast).
       expect(events.whereType<BillingPurchased>(), hasLength(1));
-      // But no optimistic Pro emit — credits balance handled by C.2.
+      // No state-change entitlement emit (the credits-grant callback
+      // runs instead — see C.2 tests below).
       expect(optimisticUpdates, isEmpty);
-      // completePurchase still called.
+      // Credits-grant callback fired with the right quantity.
+      expect(creditGrants, hasLength(1));
+      expect(creditGrants.first, 50);
+      // completePurchase still called (auto-consume on Android +
+      // explicit completePurchase together — both required).
       expect(iap.completedPurchases, hasLength(1));
+    });
+  });
+
+  group('Phase 7 task C.2 — buyPhotoCredits', () {
+    test('triggers buyConsumable with the photoCredits50 product',
+        () async {
+      await initReady();
+
+      final ok = await service.buyPhotoCredits();
+      expect(ok, isTrue);
+      expect(iap.lastConsumableProductId, ProductIds.photoCredits50);
+    });
+
+    test('returns false + emits unavailable when billing unavailable',
+        () async {
+      iap.available = false;
+      await service.initialize();
+      await pumpEventQueue();
+      events.clear();
+
+      final ok = await service.buyPhotoCredits();
+      await pumpEventQueue();
+      expect(ok, isFalse);
+      expect(events.last, isA<BillingUnavailable>());
+    });
+
+    test('returns false + emits BillingError when product not loaded',
+        () async {
+      iap.available = true;
+      iap.productResponse = ProductDetailsResponse(
+        productDetails: const [], // no products loaded
+        notFoundIDs: ProductIds.all.toList(),
+      );
+      await service.initialize();
+      await pumpEventQueue();
+      events.clear();
+
+      final ok = await service.buyPhotoCredits();
+      await pumpEventQueue();
+      expect(ok, isFalse);
+      expect(events.last, isA<BillingError>());
+      expect((events.last as BillingError).message,
+          contains(ProductIds.photoCredits50));
+    });
+
+    test('PURCHASED on photoCredits50 → 50-credit grant via callback',
+        () async {
+      await initReady();
+
+      iap.streamController.add([
+        _purchaseDetails(
+          ProductIds.photoCredits50,
+          PurchaseStatus.purchased,
+          pendingComplete: true,
+        ),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(creditGrants, hasLength(1));
+      expect(creditGrants.first, 50);
+    });
+
+    test('callback omitted on construction → grant is silently '
+        'skipped (no exception)', () async {
+      // Build a service with no credit-grant callback. PURCHASED
+      // events on credit packs still fire BillingPurchased + complete
+      // the purchase, but the credits-grant path is a no-op.
+      final localIap = _FakeIap();
+      final localService = BillingService(
+        iap: localIap,
+        onOptimisticEntitlement: (_) async {},
+        // intentionally omit onPhotoCreditsGranted
+      );
+      final localEvents = <BillingEvent>[];
+      final localSub = localService.events.listen(localEvents.add);
+      localIap.available = true;
+      localIap.productResponse = ProductDetailsResponse(
+        productDetails: [_stubProduct(ProductIds.photoCredits50, '\$2.99')],
+        notFoundIDs: const [],
+      );
+      await localService.initialize();
+      await pumpEventQueue();
+
+      localIap.streamController.add([
+        _purchaseDetails(
+          ProductIds.photoCredits50,
+          PurchaseStatus.purchased,
+          pendingComplete: true,
+        ),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(localEvents.whereType<BillingPurchased>(), hasLength(1));
+      expect(localIap.completedPurchases, hasLength(1));
+      // No creditGrants array on the local service — the assertion
+      // is just "no exception thrown."
+      await localSub.cancel();
+      await localService.dispose();
     });
   });
 

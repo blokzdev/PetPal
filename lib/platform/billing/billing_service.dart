@@ -26,11 +26,14 @@ class BillingService {
   BillingService({
     required IapPlatform iap,
     required Future<void> Function(Entitlement) onOptimisticEntitlement,
+    Future<void> Function(int credits)? onPhotoCreditsGranted,
   })  : _iap = iap,
-        _onOptimisticEntitlement = onOptimisticEntitlement;
+        _onOptimisticEntitlement = onOptimisticEntitlement,
+        _onPhotoCreditsGranted = onPhotoCreditsGranted;
 
   final IapPlatform _iap;
   final Future<void> Function(Entitlement) _onOptimisticEntitlement;
+  final Future<void> Function(int credits)? _onPhotoCreditsGranted;
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   final StreamController<BillingEvent> _events =
@@ -108,9 +111,25 @@ class BillingService {
     return _buyNonConsumableById(productId);
   }
 
+  /// Phase 7 task C.2 — trigger a consumable photo-credit-pack
+  /// purchase ($2.99 = 50 credits per row 36, rolls over indefinitely).
+  /// On success, [_onPhotoCreditsGranted] is called with the
+  /// quantity (50); the provider wiring increments the cached
+  /// `photoCreditsBalance` on the active entitlement via
+  /// `EntitlementNotifier.setOptimistic`.
+  ///
+  /// Result arrives via [events]; caller listens.
+  Future<bool> buyPhotoCredits() =>
+      _buyConsumableById(ProductIds.photoCredits50);
+
   /// Restore previous non-consumable purchases (subs + care packs).
   /// Restored purchases stream through [events] as `purchased` /
-  /// `restored` outcomes.
+  /// `restored` outcomes. **Consumable purchases (photo credits) are
+  /// NOT restorable by Play** — credits granted but never consumed
+  /// stay on the account, but Play's `restorePurchases` doesn't
+  /// surface them (consumables are "owned" only briefly between
+  /// grant and consume). The backend tracks credit balance
+  /// canonically per row 82.
   Future<void> restorePurchases({String? userId}) =>
       _iap.restorePurchases(applicationUserName: userId);
 
@@ -125,6 +144,26 @@ class BillingService {
       return false;
     }
     return _iap.buyNonConsumable(
+      purchaseParam: PurchaseParam(productDetails: product),
+    );
+  }
+
+  Future<bool> _buyConsumableById(String productId) async {
+    if (!_available) {
+      _events.add(const BillingEvent.unavailable());
+      return false;
+    }
+    final product = _products[productId];
+    if (product == null) {
+      _events.add(BillingEvent.error('product not loaded: $productId'));
+      return false;
+    }
+    // autoConsume: true is the plugin default — Play marks the
+    // consumable as consumed after a successful purchase so the
+    // user can buy another one. We additionally call completePurchase
+    // in _onPurchaseSuccess (the plugin's auto-consume + our
+    // completePurchase are both required for a clean Play handoff).
+    return _iap.buyConsumable(
       purchaseParam: PurchaseParam(productDetails: product),
     );
   }
@@ -157,15 +196,29 @@ class BillingService {
   }
 
   Future<void> _onPurchaseSuccess(PurchaseDetails purchase) async {
-    // Optimistic entitlement update. Server reconciliation (when the
-    // play-billing-verify Edge Function ships) will overwrite this
-    // with the canonical state from Supabase.
+    // Optimistic entitlement / credits update. Server reconciliation
+    // (when the play-billing-verify Edge Function ships) will
+    // overwrite this with the canonical state from Supabase.
     final entitlement = _entitlementFor(purchase.productID);
     if (entitlement != null) {
       try {
         await _onOptimisticEntitlement(entitlement);
       } catch (e) {
         debugPrint('BillingService: optimistic entitlement update failed: $e');
+      }
+    } else {
+      // Phase 7 task C.2 — consumable photo credit pack. Quantity
+      // lookup from ProductIds.creditPackQuantities; the provider
+      // wiring increments the cached photoCreditsBalance on the
+      // active entitlement.
+      final credits = ProductIds.creditPackQuantities[purchase.productID];
+      final granted = _onPhotoCreditsGranted;
+      if (credits != null && granted != null) {
+        try {
+          await granted(credits);
+        } catch (e) {
+          debugPrint('BillingService: optimistic credits grant failed: $e');
+        }
       }
     }
 

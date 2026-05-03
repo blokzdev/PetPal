@@ -64,4 +64,12 @@ abstract final class ProductIds {
     carePackReactiveDog,
     expertPackSeniorDog,
   };
+
+  /// Phase 7 task C.2 — quantity granted per consumable purchase.
+  /// Adding a new credit pack (e.g. `photo_credits_200` in v1.x) is
+  /// a one-line change here + Play Console product registration; the
+  /// dispatch path in `BillingService` reads from this map.
+  static const creditPackQuantities = <String, int>{
+    photoCredits50: 50,
+  };
 }

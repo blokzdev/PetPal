@@ -161,6 +161,21 @@ final billingServiceProvider = FutureProvider<BillingService>((ref) async {
       // with the canonical state from Supabase.
       await ref.read(entitlementProvider.notifier).setOptimistic(ent);
     },
+    onPhotoCreditsGranted: (credits) async {
+      // Phase 7 task C.2 — credit pack purchase optimistically
+      // increments the cached photoCreditsBalance. Read current,
+      // copyWith with new balance, set. Backend reconciliation
+      // overwrites with the canonical balance once the
+      // play-billing-verify Edge Function ships.
+      final notifier = ref.read(entitlementProvider.notifier);
+      final current = ref.read(entitlementProvider).value ??
+          Entitlement.freeAnonymous();
+      await notifier.setOptimistic(
+        current.copyWith(
+          photoCreditsBalance: current.photoCreditsBalance + credits,
+        ),
+      );
+    },
   );
   ref.onDispose(service.dispose);
   await service.initialize();
