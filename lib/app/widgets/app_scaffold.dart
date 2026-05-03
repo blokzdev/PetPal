@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -243,12 +244,25 @@ class _AsyncAppScaffold<T> extends StatelessWidget {
 ///
 /// Use `appSnackBar(context, 'Saved a memory about Loki')` instead of
 /// `ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: ...))`.
+///
+/// Phase 7 task H.2.b — every snackbar dispatched through this helper
+/// also fires a `SemanticsService.announce` so TalkBack reads the
+/// message aloud. Sighted users see the floating slab; screen-reader
+/// users get the same message via the live region channel. Keeps the
+/// 12+ existing call sites (chat, hub, settings, paywall, sync setup,
+/// account-delete, …) accessible without per-site changes. Set
+/// [announce] to false for snackbars whose message is purely visual
+/// chrome already conveyed elsewhere in the tree.
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason> appSnackBar(
   BuildContext context,
   String message, {
   SnackBarAction? action,
   Duration duration = const Duration(seconds: 4),
+  bool announce = true,
 }) {
+  if (announce) {
+    SemanticsService.announce(message, Directionality.of(context));
+  }
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(message),

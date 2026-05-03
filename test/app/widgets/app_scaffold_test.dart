@@ -354,5 +354,33 @@ void main() {
       await tester.pump();
       expect(find.text('View'), findsOneWidget);
     });
+
+    // Phase 7 task H.2.b — `announce: false` opt-out exists for
+    // snackbars whose message duplicates state already in the tree.
+    // Default behaviour is `announce: true` (TalkBack reads the
+    // message via `SemanticsService.announce`).
+    testWidgets('accepts announce: false without throwing',
+        (tester) async {
+      late BuildContext ctx;
+      await tester.pumpWidget(wrap(
+        AppScaffold(
+          title: 'X',
+          body: Builder(
+            builder: (context) {
+              ctx = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ));
+      // The opt-out path is the only behavioural difference we can
+      // assert reliably in unit tests — `SemanticsService.announce`
+      // dispatches through a platform channel that's not trivially
+      // observable via `find.*`. The visual SnackBar still renders.
+      appSnackBar(ctx, 'Background sync done', announce: false);
+      await tester.pump();
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Background sync done'), findsOneWidget);
+    });
   });
 }
