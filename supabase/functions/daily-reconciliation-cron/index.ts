@@ -265,6 +265,16 @@ async function listAllObjects(
   // Supabase Storage list is shallow per `prefix` — recurse into
   // each pet-id subfolder. Object keys are
   // `<user_id>/<pet_id>/<relative>.enc` (DECISIONS row 83).
+  //
+  // **Keyspace lock — single-level recursion is correct because
+  // DECISIONS row 83 caps the wiki keyspace at exactly 3 levels
+  // (`<user_id>/<pet_id>/<rel>.enc`).** Any future deeper nesting
+  // (e.g. a `<user_id>/<pet_id>/photos/<photo_id>.enc/...` layout
+  // for batched photo storage) MUST extend this recursion or the
+  // cron will silently leave nested files behind on hard-purge.
+  // Update DECISIONS row 83 + the test fake's `storageObjects`
+  // shape in `_tests/daily_reconciliation_cron_test.ts` together
+  // when revisiting.
   const out: string[] = [];
 
   const { data: top, error: topErr } = await bucket.list(userId, {
