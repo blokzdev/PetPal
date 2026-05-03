@@ -1,0 +1,71 @@
+# Supabase CLI config for the PetPal backend (Phase 7 Group A.2).
+# DECISIONS row 82 locks the operational spec; this file translates
+# the lock into Supabase CLI knobs for local dev (`supabase start`).
+#
+# `project_id` is overwritten by `supabase link --project-ref <id>`
+# at deployment time. The placeholder here is fine for local dev.
+
+project_id = "petpal-dev-placeholder"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+secure_password_change = false
+max_frequency = "1s"
+otp_length = 6
+otp_expiry = 3600
+
+# Magic-link via signInWithOtp. Email content lives in the
+# `auth.email.template.<type>` blocks below; v1 keeps them minimal.
+[auth.email.template.magic_link]
+subject = "Your PetPal sign-in link"
+content_path = "./templates/magic_link.html"
+
+[auth.sms]
+enable_signup = false
+
+[edge_runtime]
+enabled = true
+policy = "oneshot"
+inspector_port = 8083
+
+# llm-proxy Edge Function — the Phase 7 funded path. cache_control
+# passthrough is mandatory; CORS allows the Flutter app's origin.
+[functions.llm-proxy]
+verify_jwt = false  # The function resolves identity itself: JWT for signed-in,
+                    # x-petpal-device-token header for anonymous free users.
+                    # Verifying JWT at the gateway would reject the anonymous
+                    # path, which is the funded 200-msg/mo allowance.
+
+[functions.play-billing-webhook]
+verify_jwt = false  # Play Console RTDN can't supply a Supabase JWT;
+                    # the function validates the receipt with Play directly.
+
+[functions.daily-reconciliation-cron]
+verify_jwt = true   # Internal cron only; service role JWT required.
