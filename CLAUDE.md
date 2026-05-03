@@ -11,8 +11,9 @@ At the start of every session, in this order:
 1. Read `CLAUDE.md` (this file).
 2. Read `ROADMAP.md` — find the **current phase** and the **next unchecked task**.
 3. Read `DECISIONS.md` — recent entries first, so you don't re-litigate settled choices.
-4. If the user said "Continue from where we left off," begin the next unchecked task in the current phase. Confirm before acting if the task is ambiguous.
-5. **Stop at the end of each phase.** Do not auto-advance.
+4. **Branch check (DECISIONS row 37 + 86 enforcement).** Run `git branch --show-current`. The trunk is `claude/petpal-planning-S9DXN`. If the harness brief named a different branch and you're on it, **surface the mismatch to the user before any commits land** and propose a fast-forward of S9DXN to recover the row-37 invariant. Do **not** auto-resolve — the user picks (a) FF S9DXN to the harness branch then continue on S9DXN, (b) continue on the harness branch then FF S9DXN at session end, or (c) reconcile differently. The failure mode is silent drift across sessions; the protection is making the decision explicit on every session start.
+5. If the user said "Continue from where we left off," begin the next unchecked task in the current phase. Confirm before acting if the task is ambiguous.
+6. **Stop at the end of each phase.** Do not auto-advance.
 
 ---
 
