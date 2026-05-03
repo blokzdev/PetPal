@@ -114,6 +114,7 @@ class _WelcomePage extends StatelessWidget {
               width: 144,
               height: 144,
               color: scheme.onSurface,
+              semanticLabel: 'PetPal',
             ),
           ),
           Gaps.l,

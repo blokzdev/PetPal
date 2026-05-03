@@ -113,18 +113,30 @@ class PetSwitcherTitle extends ConsumerWidget {
       return Text(title);
     }
 
-    return InkWell(
-      onTap: () => _openSheet(context, ref, pet.id),
-      borderRadius: Corners.s,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
-            const SizedBox(width: Spacing.xs),
-            const Icon(PhosphorIconsRegular.caretDown, size: 16),
-          ],
+    // Phase 7 task H.2.b — the InkWell wraps a Text title with a
+    // decorative chevron icon. TalkBack would otherwise read this as
+    // "title text, button" with no hint that the action switches pets.
+    // `MergeSemantics` collapses the row's two children into a single
+    // semantics node; the wrapping `Semantics(button: true, ...)` makes
+    // it announce as a button with a clear "Switch pet" hint.
+    return Semantics(
+      button: true,
+      label: title,
+      hint: 'Switch pet',
+      excludeSemantics: true,
+      child: InkWell(
+        onTap: () => _openSheet(context, ref, pet.id),
+        borderRadius: Corners.s,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+              const SizedBox(width: Spacing.xs),
+              const Icon(PhosphorIconsRegular.caretDown, size: 16),
+            ],
+          ),
         ),
       ),
     );

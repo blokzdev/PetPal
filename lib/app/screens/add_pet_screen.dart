@@ -508,18 +508,17 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                   ),
                 ),
                 if (_petQuotaBlocked != null) ...[
-                  const SizedBox(height: 4),
+                  // Phase 7 task H.2.b — restored default tap padding +
+                  // dropped `Size.zero` so the Compare-plans link meets
+                  // the 48dp touch-target floor. The inline pet-quota
+                  // error already sits inside a Padding(.l), so the
+                  // button's pill padding fits without crowding.
                   Align(
                     alignment: Alignment.centerLeft,
                     child: TextButton(
                       onPressed: () => dispatchPaywall(
                         context,
                         _petQuotaBlocked!,
-                      ),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size.zero,
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                       child: const Text('Compare plans'),
                     ),

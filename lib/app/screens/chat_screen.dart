@@ -679,6 +679,7 @@ class _Composer extends StatelessWidget {
                       ),
                       const SizedBox(width: Spacing.s),
                       IconButton.filled(
+                        tooltip: sending ? 'Sending…' : 'Send',
                         onPressed: sending ? null : onSend,
                         icon: sending
                             ? const SizedBox(
