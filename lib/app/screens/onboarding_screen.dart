@@ -189,7 +189,9 @@ class _PrivacyPage extends StatelessWidget {
             Text("Your pet's journal.", style: sectionLabelStyle),
             Gaps.s,
             Text(
-              "Stays on this phone. PetPal doesn't copy it to a server.",
+              "Stays on this phone by default. With Pro and a sign-in, "
+              "you can sync an encrypted copy across devices — PetPal "
+              "can't read it without your passphrase.",
               style: bodyStyle,
             ),
             Gaps.l,

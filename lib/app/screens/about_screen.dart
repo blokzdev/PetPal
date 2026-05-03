@@ -69,8 +69,11 @@ class AboutScreen extends StatelessWidget {
                   ),
                   title: const Text('Privacy policy'),
                   subtitle: const Text(
-                    'Memory is private by default. No data leaves your '
-                    'device except for chat.',
+                    'Your journal stays on this device. Chat sends your '
+                    "message and the relevant memories to Anthropic's "
+                    "Claude — nothing else leaves the phone. Pro sync "
+                    "uploads end-to-end encrypted copies that PetPal "
+                    "can't read.",
                   ),
                   // v1.1 promotes this to a dedicated Privacy & Data
                   // screen per V1X_BACKLOG. v1 lands the policy text
