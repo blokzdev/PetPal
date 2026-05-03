@@ -19,6 +19,9 @@ import '../data/wiki_io_fs.dart';
 import '../harness/agent/agent_loop.dart';
 import '../harness/agent/direct_transport.dart';
 import '../harness/agent/llm_client.dart';
+import '../harness/agent/proxy_transport.dart';
+import 'auth/auth_session_notifier.dart';
+import 'sync/supabase_runtime_config.dart';
 import '../platform/billing/billing_service.dart';
 import '../platform/billing/iap_platform.dart';
 import 'entitlement/entitlement.dart';
@@ -271,19 +274,10 @@ final photoExtractorProvider = Provider<PhotoExtractor>((ref) {
 /// observation layer. DECISIONS row 41 (f) split: Sonnet for the
 /// extractor (accuracy on structured fields); Haiku for the affective
 /// add-on (cost-sensitive — fires at most 1-per-5-saves, doesn't
-/// need Sonnet's nuance). Same Anthropic transport, different model.
+/// need Sonnet's nuance). Same selection rules as [llmClientProvider]
+/// (BYOK → DirectTransport, signed-in → ProxyTransport).
 final haikuLlmClientProvider = Provider<LlmClient>((ref) {
-  final keyAsync = ref.watch(apiKeyProvider);
-  final key = keyAsync.maybeWhen(data: (k) => k, orElse: () => null);
-  if (key == null || key.isEmpty) {
-    throw StateError(
-      'No API key — onboarding incomplete. Cannot construct '
-      'haikuLlmClientProvider.',
-    );
-  }
-  final client = DirectTransport(apiKey: key, model: 'claude-haiku-4-5');
-  ref.onDispose(client.close);
-  return client;
+  return _selectLlmTransport(ref, model: 'claude-haiku-4-5');
 });
 
 /// Phase 6 task 6.8 — affective observation runner. Optional warm-
@@ -516,22 +510,75 @@ final activePetProvider = Provider<Pet?>((ref) {
 
 // ─── LLM client + agent loop ───────────────────────────────────────────────
 
-/// Production [LlmClient] backed by [DirectTransport]. Reads the API key
-/// from [apiKeyProvider]; when the key changes (rotation in Settings, or
-/// onboarding), the provider rebuilds and emits a fresh client. Tests
-/// override with a scripted fake.
+/// Production [LlmClient]. Selects between [DirectTransport] (BYOK)
+/// and [ProxyTransport] (signed-in via Supabase Edge Function) per
+/// the rules in [_selectLlmTransport]. Tests override with a
+/// scripted fake.
 final llmClientProvider = Provider<LlmClient>((ref) {
+  return _selectLlmTransport(ref);
+});
+
+/// Phase 7 task H.1.c.2 — LlmTransport selection (DECISIONS rows 36
+/// + 74 + 82).
+///
+/// Decision matrix:
+///   1. **BYOK** — `apiKeyProvider` non-empty → [DirectTransport]
+///      with the user's key. Calls go straight to api.anthropic.com;
+///      PetPal's proxy is bypassed (row 74).
+///   2. **Signed-in proxy** — no key, but `authSessionProvider` has
+///      a session AND `supabaseRuntimeConfigProvider` is populated
+///      → [ProxyTransport] with the session's JWT. Calls route
+///      through the Edge Function which atomically increments the
+///      monthly text counter (row 75) and forwards to Anthropic.
+///   3. **Otherwise** — throw `StateError`. Callers MUST guard via
+///      `_chatTransportReady(ref)` (chat_screen) or analogous gates
+///      so the throw is never reached in practice. Vision callers
+///      gate via [VisionGate].
+///
+/// Anonymous (signed-out) proxy via device-token routes forward to
+/// a later commit — H.1.c.2 ships the signed-in path only. The
+/// Edge Function itself supports both paths today (per row 82).
+LlmClient _selectLlmTransport(
+  Ref ref, {
+  String model = 'claude-sonnet-4-6',
+  int maxTokens = 4096,
+}) {
+  // BYOK precedence — same rule as the entitlement notifier
+  // (Entitlement.byok wins) so the transport choice agrees with the
+  // tier the user sees in Settings.
   final keyAsync = ref.watch(apiKeyProvider);
   final key = keyAsync.maybeWhen(data: (k) => k, orElse: () => null);
-  if (key == null || key.isEmpty) {
-    throw StateError(
-      'No API key — onboarding incomplete. Cannot construct LlmClient.',
+  if (key != null && key.isNotEmpty) {
+    final client = DirectTransport(
+      apiKey: key,
+      model: model,
+      maxTokens: maxTokens,
     );
+    ref.onDispose(client.close);
+    return client;
   }
-  final client = DirectTransport(apiKey: key);
-  ref.onDispose(client.close);
-  return client;
-});
+
+  // Proxy path — signed-in + Supabase configured.
+  final session = ref.watch(authSessionProvider).value;
+  final config = ref.watch(supabaseRuntimeConfigProvider);
+  if (session != null && config != null) {
+    final client = ProxyTransport(
+      supabaseUrl: config.url,
+      supabaseAnonKey: config.anonKey,
+      userJwt: session.accessToken,
+      model: model,
+      maxTokens: maxTokens,
+    );
+    ref.onDispose(client.close);
+    return client;
+  }
+
+  throw StateError(
+    'No transport available: BYOK key absent + not signed in. '
+    'Caller must guard with _chatTransportReady (or analogous '
+    'auth + entitlement check) before reading llmClientProvider.',
+  );
+}
 
 /// Production [AlarmScheduler] / [WorkScheduler] / [ReminderScheduler] —
 /// each constructs its plugin bindings lazily so the providers are

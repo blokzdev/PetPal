@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../auth/auth_session_notifier.dart';
 import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
 import '../chat/chat_state.dart';
@@ -13,6 +14,7 @@ import '../design/design.dart';
 import '../entitlement/entitlement.dart';
 import '../entitlement/quota_exception.dart';
 import '../providers.dart';
+import '../sync/supabase_runtime_config.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/journal_bloom.dart';
 import '../widgets/paywall_dispatcher.dart';
@@ -26,24 +28,30 @@ class ChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
-/// Phase 7 task F.1 — chat transport gate.
+/// Phase 7 task F.1 / H.1.c.2 — chat transport gate.
 ///
-/// In F.1 the only working transport is [DirectTransport] (BYOK
-/// path). Free-tier users without BYOK have no working chat path
-/// until Group H wires the proxy + magic-link sign-in. The chat
-/// surface stays reachable so the user can still read scrollback
-/// + see what's missing, but the composer flips to a
-/// [_ChatUnavailableBanner] CTA pointing at Settings → BYOK
-/// toggle. The gate is "do we have a stored Anthropic key" — the
-/// canonical signal for any working transport in F.1 — rather
-/// than an entitlement-state check, since the BYOK auto-migration
-/// path leaves users in the byok state with their existing key.
+/// Two paths satisfy the gate (matches `_selectLlmTransport` in
+/// providers.dart):
+///   1. **BYOK** — `apiKeyProvider` non-empty → DirectTransport
+///      reachable.
+///   2. **Signed-in proxy** — auth session + Supabase config
+///      populated → ProxyTransport reachable. Per DECISIONS row 75
+///      the server-side counter handles quota; the client just
+///      needs to know the path is live.
+///
+/// Anonymous proxy via device-token routes forward to a later
+/// commit. Until then, signed-out non-BYOK users see the banner.
 bool _chatTransportReady(WidgetRef ref) {
   final keyAsync = ref.watch(apiKeyProvider);
-  return keyAsync.maybeWhen(
+  final hasKey = keyAsync.maybeWhen(
     data: (k) => k != null && k.isNotEmpty,
     orElse: () => false,
   );
+  if (hasKey) return true;
+
+  final session = ref.watch(authSessionProvider).value;
+  final config = ref.watch(supabaseRuntimeConfigProvider);
+  return session != null && config != null;
 }
 
 class _ChatScreenState extends ConsumerState<ChatScreen> {
@@ -873,21 +881,25 @@ class _ChatAppBarTitle extends StatelessWidget {
   }
 }
 
-/// Phase 7 task F.1 — chat-unavailable banner.
+/// Phase 7 task F.1 / H.1.c.2 — chat-unavailable banner.
 ///
-/// Renders in place of [_Composer] when the active transport
-/// can't send (no key, proxy not yet wired). Single-CTA: route
-/// the user to Settings → Plan → BYOK toggle. Sage register only;
-/// uses the surfaceContainer slab + outlineVariant divider treatment
-/// the composer already establishes so the surface chrome doesn't
-/// jump when the user enables BYOK and the composer slides back in.
-class _ChatUnavailableBanner extends StatelessWidget {
+/// Renders in place of [_Composer] when no transport is reachable
+/// (per `_chatTransportReady`). Two CTAs map onto the two real
+/// paths: sign-in routes to /sign-in and unlocks the proxy lane;
+/// "Use your own key" routes to Settings to flip the BYOK toggle.
+/// Sage register only; uses the surfaceContainer slab +
+/// outlineVariant divider so the chrome doesn't jump when chat
+/// becomes reachable and the composer slides back in.
+class _ChatUnavailableBanner extends ConsumerWidget {
   const _ChatUnavailableBanner();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final hasSupabase =
+        ref.watch(supabaseRuntimeConfigProvider) != null;
+
     return Material(
       color: scheme.surfaceContainer,
       child: Column(
@@ -922,10 +934,13 @@ class _ChatUnavailableBanner extends StatelessWidget {
                       const SizedBox(width: Spacing.s),
                       Expanded(
                         child: Text(
-                          "Chat needs a connection to Claude. Add your "
-                          "Anthropic key in Settings to start chatting "
-                          "now — the free monthly allowance is rolling "
-                          "out in the next update.",
+                          hasSupabase
+                              ? "Chat needs a connection to Claude. Sign "
+                                  "in for the free monthly allowance, or "
+                                  "use your own Anthropic key in Settings."
+                              : "Chat needs a connection to Claude. Add "
+                                  "your Anthropic key in Settings to start "
+                                  "chatting.",
                           style: textTheme.bodyMedium?.copyWith(
                             color: scheme.onSurface.withValues(alpha: 0.85),
                             height: 1.4,
@@ -935,15 +950,42 @@ class _ChatUnavailableBanner extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: Spacing.s),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: FilledButton.icon(
-                      onPressed: () =>
-                          GoRouter.of(context).push('/settings'),
-                      icon: const Icon(PhosphorIconsRegular.gear, size: 16),
-                      label: const Text('Open Settings'),
+                  if (hasSupabase) ...[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton.icon(
+                          onPressed: () =>
+                              GoRouter.of(context).push('/settings'),
+                          icon: const Icon(
+                            PhosphorIconsRegular.key,
+                            size: 16,
+                          ),
+                          label: const Text('Use your own key'),
+                        ),
+                        const SizedBox(width: Spacing.xs),
+                        FilledButton.icon(
+                          onPressed: () =>
+                              GoRouter.of(context).push('/sign-in'),
+                          icon: const Icon(
+                            PhosphorIconsRegular.signIn,
+                            size: 16,
+                          ),
+                          label: const Text('Sign in'),
+                        ),
+                      ],
                     ),
-                  ),
+                  ] else
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: FilledButton.icon(
+                        onPressed: () =>
+                            GoRouter.of(context).push('/settings'),
+                        icon:
+                            const Icon(PhosphorIconsRegular.gear, size: 16),
+                        label: const Text('Open Settings'),
+                      ),
+                    ),
                 ],
               ),
             ),
