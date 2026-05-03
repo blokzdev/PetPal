@@ -35,6 +35,23 @@ abstract class AccountDeletionClient {
   /// server-error. The UI maps this onto VOICE.md-compatible
   /// error copy.
   Future<DateTime> requestDeletion();
+
+  /// Phase 7 task H.1.d.undo — cancel a pending deletion.
+  ///
+  /// Fires when the user signs in during the 30-day retention window.
+  /// Returns `true` if a pending deletion existed and was cancelled,
+  /// `false` if no pending deletion existed (the user signed in
+  /// without ever requesting a deletion — common case).
+  ///
+  /// Idempotent: re-invoking when no pending deletion exists is a
+  /// no-op that returns `false`.
+  ///
+  /// Already-purged audit rows (`hard_purged_at` non-null) are NOT
+  /// touched — they're the GDPR/CCPA compliance trail.
+  ///
+  /// Throws [AccountDeletionException] on auth / network /
+  /// server-error.
+  Future<bool> cancelDeletion();
 }
 
 class AccountDeletionException implements Exception {
@@ -111,23 +128,66 @@ class SupabaseAccountDeletionClient implements AccountDeletionClient {
       );
     }
   }
+
+  @override
+  Future<bool> cancelDeletion() async {
+    final jwt = _jwtSource();
+    if (jwt.isEmpty) {
+      throw const AccountDeletionException(
+        'cancelDeletion requires a signed-in user — JWT not available.',
+      );
+    }
+
+    final uri = Uri.parse('$_url/functions/v1/cancel-account-delete');
+    final res = await _http.post(
+      uri,
+      headers: {
+        'apikey': _anonKey,
+        'Authorization': 'Bearer $jwt',
+        'Content-Type': 'application/json',
+      },
+      body: '{}',
+    );
+
+    if (res.statusCode != 200) {
+      throw AccountDeletionException(
+        'cancel-account-delete failed (${res.statusCode}): ${res.body}',
+      );
+    }
+
+    try {
+      final body = jsonDecode(res.body) as Map<String, Object?>;
+      return body['was_pending'] == true;
+    } on FormatException catch (e) {
+      throw AccountDeletionException(
+        'cancel-account-delete response malformed: $e',
+      );
+    }
+  }
 }
 
 /// Test fake. Scripted retention-window timestamp or scripted
-/// error; counts requestDeletion calls.
+/// error; counts requestDeletion + cancelDeletion calls.
 class FakeAccountDeletionClient implements AccountDeletionClient {
-  FakeAccountDeletionClient({DateTime? retentionEnd})
+  FakeAccountDeletionClient({DateTime? retentionEnd, bool wasPending = false})
       : _retentionEnd = retentionEnd ??
-            DateTime.now().add(const Duration(days: 30));
+            DateTime.now().add(const Duration(days: 30)),
+        _cancelWasPending = wasPending;
 
   DateTime _retentionEnd;
   Object? _scriptedError;
+  Object? _scriptedCancelError;
+  bool _cancelWasPending;
   int _callCount = 0;
+  int _cancelCallCount = 0;
 
   void scriptRetentionEnd(DateTime t) => _retentionEnd = t;
   void scriptError(Object error) => _scriptedError = error;
+  void scriptCancelWasPending(bool v) => _cancelWasPending = v;
+  void scriptCancelError(Object error) => _scriptedCancelError = error;
 
   int get callCount => _callCount;
+  int get cancelCallCount => _cancelCallCount;
 
   @override
   Future<DateTime> requestDeletion() async {
@@ -138,6 +198,17 @@ class FakeAccountDeletionClient implements AccountDeletionClient {
       throw err;
     }
     return _retentionEnd;
+  }
+
+  @override
+  Future<bool> cancelDeletion() async {
+    _cancelCallCount++;
+    final err = _scriptedCancelError;
+    if (err != null) {
+      _scriptedCancelError = null;
+      throw err;
+    }
+    return _cancelWasPending;
   }
 }
 

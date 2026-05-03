@@ -69,3 +69,13 @@ verify_jwt = false  # Play Console RTDN can't supply a Supabase JWT;
 
 [functions.daily-reconciliation-cron]
 verify_jwt = true   # Internal cron only; service role JWT required.
+
+[functions.account-delete]
+verify_jwt = false  # The function resolves user_id via admin.auth.getUser
+                    # so the gateway-side check is redundant + the
+                    # function returns its own VOICE.md error copy on
+                    # invalid JWT.
+
+[functions.cancel-account-delete]
+verify_jwt = false  # Same auth pattern as account-delete — function
+                    # validates JWT itself + returns granular errors.

@@ -181,6 +181,90 @@ void main() {
       expect(await fake.requestDeletion(), isA<DateTime>());
       expect(fake.callCount, 2);
     });
+
+    test('cancelDeletion default — no pending', () async {
+      final fake = FakeAccountDeletionClient();
+      expect(await fake.cancelDeletion(), isFalse);
+      expect(fake.cancelCallCount, 1);
+    });
+
+    test('cancelDeletion — scripted pending state', () async {
+      final fake = FakeAccountDeletionClient(wasPending: true);
+      expect(await fake.cancelDeletion(), isTrue);
+      fake.scriptCancelWasPending(false);
+      expect(await fake.cancelDeletion(), isFalse);
+    });
+
+    test('cancelDeletion — scripted error then clears', () async {
+      final fake = FakeAccountDeletionClient();
+      const err = AccountDeletionException('cancel-forced');
+      fake.scriptCancelError(err);
+      expect(() => fake.cancelDeletion(), throwsA(same(err)));
+      expect(await fake.cancelDeletion(), isFalse);
+      expect(fake.cancelCallCount, 2);
+    });
+  });
+
+  // Phase 7 task H.1.d.undo — proactive client-driven cancel.
+  group('cancelDeletion — Supabase wire', () {
+    test('POSTs to /functions/v1/cancel-account-delete and parses '
+        'was_pending=true', () async {
+      http.Request? captured;
+      final client = _client(
+        mock: MockClient((req) async {
+          captured = req as http.Request;
+          return http.Response(
+            jsonEncode({'was_pending': true}),
+            200,
+          );
+        }),
+      );
+
+      final wasPending = await client.cancelDeletion();
+      expect(wasPending, isTrue);
+
+      expect(captured!.method, 'POST');
+      expect(
+        captured!.url.toString(),
+        '$url/functions/v1/cancel-account-delete',
+      );
+      expect(captured!.headers['apikey'], anon);
+      expect(captured!.headers['Authorization'], 'Bearer jwt-stub');
+    });
+
+    test('parses was_pending=false (idempotent no-op)', () async {
+      final client = _client(
+        mock: MockClient(
+          (_) async => http.Response('{"was_pending":false}', 200),
+        ),
+      );
+      expect(await client.cancelDeletion(), isFalse);
+    });
+
+    test('throws on 401', () async {
+      final client = _client(
+        mock: MockClient(
+          (_) async => http.Response('{"error":"invalid_jwt"}', 401),
+        ),
+      );
+      await expectLater(
+        client.cancelDeletion(),
+        throwsA(isA<AccountDeletionException>()),
+      );
+    });
+
+    test('throws when JWT empty — no network call', () async {
+      final client = _client(
+        jwtSource: () => '',
+        mock: MockClient(
+          (_) async => fail('cancelDeletion should short-circuit on empty JWT'),
+        ),
+      );
+      await expectLater(
+        client.cancelDeletion(),
+        throwsA(isA<AccountDeletionException>()),
+      );
+    });
   });
 }
 
