@@ -8,6 +8,8 @@ import '../entitlement/entitlement.dart';
 import '../entitlement/entitlement_notifier.dart';
 import '../entitlement/quota_exception.dart';
 import '../providers.dart';
+import '../sync/passphrase_setup_screen.dart';
+import '../sync/sync_providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/paywall_dispatcher.dart';
 import '../widgets/pet_card.dart';
@@ -138,6 +140,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           // for the counter copy; §7 for the additive register.
           const PetSectionHeader(title: 'Plan'),
           const _PlanCard(),
+          const SizedBox(height: Spacing.l),
+          // Phase 7 task G.2 — sync section. Pro-gated; surfaces
+          // the passphrase setup CTA pre-setup, the unlock CTA on
+          // a fresh device, and a "sync now" button + last-sync
+          // timestamp once unlocked. Live-status string keeps the
+          // user grounded ("synced 3 minutes ago" / "passphrase
+          // needed" / "Pro lifts sync").
+          const PetSectionHeader(title: 'Sync'),
+          const _SyncCard(),
           const SizedBox(height: Spacing.l),
           const PetSectionHeader(title: 'Weekly summary'),
           PetCard(
@@ -621,6 +632,128 @@ class _ByokToggleTileState extends ConsumerState<_ByokToggleTile> {
         ),
       ),
       isThreeLine: true,
+    );
+  }
+}
+
+/// Phase 7 task G.2 — sync surface in Settings.
+///
+/// State machine driven by `syncUiStateProvider` +
+/// `syncChallengeExistsProvider`. Five visible states match the
+/// `SyncUiState` enum:
+///
+///   - `proLocked` — show the Pro-required nudge with a Compare
+///     plans link routing through `dispatchPaywall`.
+///   - `signedOut` — Pro user but no auth session yet (Group
+///     H.1 ships sign-in). Shows a helpful "sign-in coming in a
+///     later update" line so the user knows it's not their fault.
+///   - `setupNeeded` — first device. CTA opens
+///     `PassphraseSetupScreen`.
+///   - `locked` — second device, challenge exists. CTA opens the
+///     unlock sheet.
+///   - `unlocked` — ready. Shows "Sync now" button + last-sync
+///     timestamp (once a sync has run).
+class _SyncCard extends ConsumerWidget {
+  const _SyncCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(syncUiStateProvider);
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: switch (state) {
+        SyncUiState.proLocked => ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.cloudArrowUp,
+              color: scheme.onSurface.withValues(alpha: 0.6),
+            ),
+            title: const Text('Sync across devices'),
+            subtitle: Text(
+              'Pro mirrors your journal end-to-end encrypted across '
+              "every device you sign in on.",
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+            trailing: TextButton(
+              onPressed: () => dispatchPaywall(
+                context,
+                SyncQuotaExceeded(
+                  ref.read(entitlementProvider).valueOrNull ??
+                      Entitlement.freeAnonymous(),
+                ),
+              ),
+              child: const Text('Compare plans'),
+            ),
+          ),
+        SyncUiState.signedOut => ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.signIn,
+              color: scheme.onSurface.withValues(alpha: 0.6),
+            ),
+            title: const Text('Sign in to enable sync'),
+            subtitle: Text(
+              "Magic-link sign-in ships in a later update. Sync "
+              "needs an account so your devices can find each other.",
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+          ),
+        SyncUiState.setupNeeded => ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.lock,
+              color: scheme.primary,
+            ),
+            title: const Text('Set up sync'),
+            subtitle: Text(
+              "Pick a passphrase to encrypt your journal across "
+              "devices. Only you can read it — PetPal can't.",
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+            trailing: const Icon(PhosphorIconsRegular.caretRight),
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const PassphraseSetupScreen(),
+                fullscreenDialog: true,
+              ),
+            ),
+          ),
+        SyncUiState.locked => ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.lockKey,
+              color: scheme.primary,
+            ),
+            title: const Text('Unlock sync'),
+            subtitle: Text(
+              "Enter the passphrase you set up on your other device.",
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+            trailing: const Icon(PhosphorIconsRegular.caretRight),
+            onTap: () => showPassphraseUnlockSheet(context),
+          ),
+        SyncUiState.unlocked => ListTile(
+            leading: Icon(
+              PhosphorIconsRegular.cloudCheck,
+              color: scheme.primary,
+            ),
+            title: const Text('Sync is on'),
+            subtitle: Text(
+              "Your journal mirrors across your devices, end-to-end "
+              "encrypted. PetPal can't read it.",
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurface.withValues(alpha: 0.65),
+              ),
+            ),
+          ),
+      },
     );
   }
 }

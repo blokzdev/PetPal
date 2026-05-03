@@ -120,6 +120,22 @@ dependencies:
   fl_chart: ^1.1.1
   in_app_purchase: ^3.2.3
   collection: ^1.19.1
+  # Phase 7 task G.2 — E2EE wiki sync (DECISIONS rows 71 + 83).
+  # `cryptography` provides Argon2id (passphrase → key derivation
+  # with the m=64MB, t=3, p=4 starting params from row 71) and
+  # AES-GCM-256 (the body cipher per row 83's object shape).
+  # Pure-Dart, no native plugin manifest changes — verified
+  # against the plugin-bump checklist (row 33 N/A; pure Dart).
+  # 160/160 pub points, dint package, well-maintained.
+  cryptography: ^2.7.0
+  # Phase 7 task G.2 → Group H — Supabase client adoption deferred
+  # to Group H.1 (magic-link sign-in). G.2 keeps the production
+  # `SupabaseSyncBackend` implementation deferred so the package
+  # arrives in the same commit that wires the auth session it
+  # depends on. The `SyncBackend` abstraction lets G.2 ship the
+  # E2EE crypto + adapter wiring + passphrase UX testably without
+  # the package; H.1 adds `supabase` and the concrete
+  # SupabaseSyncBackend.
 
 dev_dependencies:
   flutter_test:
