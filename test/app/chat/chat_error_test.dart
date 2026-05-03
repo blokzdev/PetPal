@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/chat/chat_error.dart';
-import 'package:petpal/harness/agent/anthropic_client.dart';
+import 'package:petpal/harness/agent/direct_transport.dart';
 
 void main() {
   test('401 maps to auth, 429 maps to rate limit, 5xx maps to server',

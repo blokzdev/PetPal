@@ -16,7 +16,7 @@ import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import '../data/wiki_io_fs.dart';
 import '../harness/agent/agent_loop.dart';
-import '../harness/agent/anthropic_client.dart';
+import '../harness/agent/direct_transport.dart';
 import '../harness/agent/llm_client.dart';
 import '../harness/agent/tool_dispatcher.dart';
 import '../harness/guardrails/red_flag_screener.dart';
@@ -185,7 +185,7 @@ final haikuLlmClientProvider = Provider<LlmClient>((ref) {
       'haikuLlmClientProvider.',
     );
   }
-  final client = AnthropicClient(apiKey: key, model: 'claude-haiku-4-5');
+  final client = DirectTransport(apiKey: key, model: 'claude-haiku-4-5');
   ref.onDispose(client.close);
   return client;
 });
@@ -355,7 +355,7 @@ final activePetIdProvider = Provider<int Function()>((ref) {
 
 // ─── LLM client + agent loop ───────────────────────────────────────────────
 
-/// Production [LlmClient] backed by [AnthropicClient]. Reads the API key
+/// Production [LlmClient] backed by [DirectTransport]. Reads the API key
 /// from [apiKeyProvider]; when the key changes (rotation in Settings, or
 /// onboarding), the provider rebuilds and emits a fresh client. Tests
 /// override with a scripted fake.
@@ -367,7 +367,7 @@ final llmClientProvider = Provider<LlmClient>((ref) {
       'No API key — onboarding incomplete. Cannot construct LlmClient.',
     );
   }
-  final client = AnthropicClient(apiKey: key);
+  final client = DirectTransport(apiKey: key);
   ref.onDispose(client.close);
   return client;
 });

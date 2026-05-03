@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:petpal/harness/agent/anthropic_client.dart';
+import 'package:petpal/harness/agent/direct_transport.dart';
 import 'package:petpal/harness/agent/llm_transport.dart';
 import 'package:petpal/harness/agent/messages.dart';
 import 'package:petpal/harness/agent/proxy_transport.dart';
@@ -55,8 +55,9 @@ void main() {
       t.close();
     });
 
-    test('AnthropicClient also extends LlmTransport (A.3.1 abstraction)', () {
-      final t = AnthropicClient(apiKey: 'sk-ant-x');
+    test('DirectTransport also extends LlmTransport (sibling under '
+        'the abstraction)', () {
+      final t = DirectTransport(apiKey: 'sk-ant-x');
       expect(t, isA<LlmTransport>());
       t.close();
     });
@@ -172,7 +173,7 @@ void main() {
           reason: 'cache_control block must reach the Edge Function intact');
     });
 
-    test('body shape matches AnthropicClient (model, max_tokens, messages)',
+    test('body shape matches DirectTransport (model, max_tokens, messages)',
         () async {
       late Map<String, Object?> body;
       final mock = MockClient((req) async {

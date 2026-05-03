@@ -81,14 +81,10 @@ class AnthropicApiException implements Exception {
 /// chat UI in Phase 2 needs token-level rendering.
 /// Direct-call transport — POSTs to `api.anthropic.com/v1/messages`
 /// with the user's own `sk-ant-…` API key. Used by the BYOK path
-/// (DECISIONS row 36 BYOK lane + row 74 validation).
-///
-/// Phase 7 task A.3.2 renames this class to `DirectTransport` and
-/// the file to `direct_transport.dart`. Kept as `AnthropicClient`
-/// for A.3.1 to minimise diff in the abstraction-introduction
-/// commit.
-class AnthropicClient extends LlmTransport {
-  AnthropicClient({
+/// (DECISIONS row 36 BYOK lane + row 74 validation). Sibling to
+/// [ProxyTransport] (the funded path); both extend [LlmTransport].
+class DirectTransport extends LlmTransport {
+  DirectTransport({
     required String apiKey,
     this.model = _defaultModel,
     this.maxTokens = _defaultMaxTokens,

@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:petpal/harness/agent/anthropic_client.dart';
+import 'package:petpal/harness/agent/direct_transport.dart';
 import 'package:petpal/harness/agent/messages.dart';
 
 http.Response _ok(Map<String, Object?> body) => http.Response(
@@ -41,14 +41,14 @@ Map<String, Object?> _stubAssistantText(
     };
 
 void main() {
-  group('AnthropicClient.turn — request shape', () {
+  group('DirectTransport.turn — request shape', () {
     test('hits POST /v1/messages with the right headers', () async {
       late http.Request seen;
       final mock = MockClient((req) async {
         seen = req;
         return _ok(_stubAssistantText('hi'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(
         systemPrompt: 's',
@@ -69,7 +69,7 @@ void main() {
         body = jsonDecode(req.body) as Map<String, Object?>;
         return _ok(_stubAssistantText('ok'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(
         systemPrompt: 'You are PetPal.',
@@ -91,7 +91,7 @@ void main() {
         body = jsonDecode(req.body) as Map<String, Object?>;
         return _ok(_stubAssistantText('ok'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(systemPrompt: 's', history: [Message.userText('hi')]);
 
@@ -105,7 +105,7 @@ void main() {
         body = jsonDecode(req.body) as Map<String, Object?>;
         return _ok(_stubAssistantText('ok'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(
         systemPrompt: 's',
@@ -169,7 +169,7 @@ void main() {
         body = jsonDecode(req.body) as Map<String, Object?>;
         return _ok(_stubAssistantText('ok'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(
         systemPrompt: 's',
@@ -203,14 +203,14 @@ void main() {
         body = jsonDecode(req.body) as Map<String, Object?>;
         return _ok(_stubAssistantText('ok'));
       });
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(systemPrompt: 's', history: [Message.userText('hi')]);
       expect(body.containsKey('tools'), isFalse);
     });
   });
 
-  group('AnthropicClient.turn — response parsing', () {
+  group('DirectTransport.turn — response parsing', () {
     test('decodes a text-only assistant response', () async {
       final mock = MockClient((req) async => _ok({
             'role': 'assistant',
@@ -224,7 +224,7 @@ void main() {
               'cache_read_input_tokens': 0,
             },
           }));
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       final msg = await client.turn(
         systemPrompt: 's',
@@ -255,7 +255,7 @@ void main() {
               'cache_read_input_tokens': 0,
             },
           }));
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       final msg = await client.turn(
         systemPrompt: 's',
@@ -284,7 +284,7 @@ void main() {
               'cache_read_input_tokens': 0,
             },
           }));
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
       final msg = await client.turn(
         systemPrompt: 's',
         history: [Message.userText('hi')],
@@ -305,7 +305,7 @@ void main() {
               'cache_read_input_tokens': 1234,
             },
           }));
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await client.turn(systemPrompt: 's', history: [Message.userText('hi')]);
       expect(client.lastUsage, isNotNull);
@@ -314,12 +314,12 @@ void main() {
     });
   });
 
-  group('AnthropicClient.turn — errors', () {
+  group('DirectTransport.turn — errors', () {
     test('throws AnthropicApiException with errorType on 401', () async {
       final mock = MockClient(
         (req) async => _error(401, 'authentication_error', 'invalid x-api-key'),
       );
-      final client = AnthropicClient(apiKey: 'sk-bad', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-bad', httpClient: mock);
 
       try {
         await client.turn(
@@ -338,7 +338,7 @@ void main() {
       final mock = MockClient(
         (req) async => _error(429, 'rate_limit_error', 'too many requests'),
       );
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await expectLater(
         client.turn(systemPrompt: 's', history: [Message.userText('hi')]),
@@ -352,7 +352,7 @@ void main() {
       final mock = MockClient(
         (req) async => http.Response('Bad Gateway', 502),
       );
-      final client = AnthropicClient(apiKey: 'sk-test', httpClient: mock);
+      final client = DirectTransport(apiKey: 'sk-test', httpClient: mock);
 
       await expectLater(
         client.turn(systemPrompt: 's', history: [Message.userText('hi')]),

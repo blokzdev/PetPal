@@ -22,7 +22,7 @@ class ComposedTurn {
 
   /// Identity + SOUL.md + active skill fragments + output contract +
   /// (when flagged) a one-shot escalation directive. Stable across
-  /// turns for the same pet+skills+screener-state, so [AnthropicClient]'s
+  /// turns for the same pet+skills+screener-state, so [DirectTransport]'s
   /// `cache_control: ephemeral` marker on this block accrues hits.
   /// Note: a flagged turn breaks the cache for that turn only — the
   /// next unflagged turn returns to the canonical prefix.

@@ -6,12 +6,11 @@ import 'llm_client.dart';
 /// active entitlement state (per DECISIONS row 75 hybrid quota model
 /// + row 76 proxy build-now decision):
 ///
-///   - [AnthropicClient] (BYOK path) — sends requests directly to
+///   - [DirectTransport] (BYOK path) — sends requests directly to
 ///     `api.anthropic.com` with the user's own `sk-ant-…` key. Used
 ///     when the user has flipped the "Bring your own Anthropic key"
 ///     toggle in Settings (VOICE.md §6 example 12). Quotas don't
-///     apply; calls are between user + Anthropic. **Renames to
-///     `DirectTransport` in A.3.2.**
+///     apply; calls are between user + Anthropic.
 ///
 ///   - [ProxyTransport] (funded path) — sends requests to PetPal's
 ///     Supabase Edge Function (`/functions/v1/llm-proxy`), which

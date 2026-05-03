@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../../harness/agent/anthropic_client.dart';
+import '../../harness/agent/direct_transport.dart';
 
 /// Coarse categorisation of failures the chat surface needs to render
 /// differently. Each maps to a one-liner of copy + the same retry

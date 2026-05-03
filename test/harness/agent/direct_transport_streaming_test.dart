@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:petpal/harness/agent/anthropic_client.dart';
+import 'package:petpal/harness/agent/direct_transport.dart';
 import 'package:petpal/harness/agent/llm_stream_event.dart';
 import 'package:petpal/harness/agent/messages.dart';
 
@@ -69,7 +69,7 @@ void main() {
         headers: {'content-type': 'text/event-stream'},
       );
     });
-    final client = AnthropicClient(apiKey: 'test', httpClient: mock);
+    final client = DirectTransport(apiKey: 'test', httpClient: mock);
 
     final events = <LlmStreamEvent>[];
     await for (final e in client.streamTurn(
@@ -106,7 +106,7 @@ void main() {
         401,
       );
     });
-    final client = AnthropicClient(apiKey: 'bad', httpClient: mock);
+    final client = DirectTransport(apiKey: 'bad', httpClient: mock);
 
     await expectLater(
       () async {
@@ -137,7 +137,7 @@ void main() {
         200,
       );
     });
-    final client = AnthropicClient(apiKey: 'test', httpClient: mock);
+    final client = DirectTransport(apiKey: 'test', httpClient: mock);
 
     final deltas = <String>[];
     await for (final e in client.streamTurn(

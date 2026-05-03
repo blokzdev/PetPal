@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:petpal/harness/agent/anthropic_client.dart';
+import 'package:petpal/harness/agent/direct_transport.dart';
 import 'package:petpal/harness/agent/messages.dart';
 
 /// Phase 6 task 6.4 — wire-shape fixtures for the new ImageBlock
@@ -59,7 +59,7 @@ Future<Map<String, Object?>> captureRequest(List<Message> history) async {
       headers: {'content-type': 'text/event-stream'},
     );
   });
-  final client = AnthropicClient(apiKey: 'test', httpClient: mock);
+  final client = DirectTransport(apiKey: 'test', httpClient: mock);
   await for (final _ in client.streamTurn(
     systemPrompt: 'You are PetPal.',
     history: history,

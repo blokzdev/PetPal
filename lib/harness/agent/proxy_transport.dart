@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'anthropic_client.dart';
+import 'direct_transport.dart';
 import 'llm_stream_event.dart';
 import 'llm_transport.dart';
 import 'messages.dart';
@@ -29,9 +29,9 @@ import 'messages.dart';
 /// quota gate (Group D.1) catches these and surfaces the paywall
 /// per VOICE.md §6 example 14.
 ///
-/// Body shape is identical to [AnthropicClient]'s — same JSON
+/// Body shape is identical to [DirectTransport]'s — same JSON
 /// envelope, same `cache_control` blocks. The proxy is a passthrough.
-/// Encoding helpers are duplicated here from [AnthropicClient] for
+/// Encoding helpers are duplicated here from [DirectTransport] for
 /// A.3.1 (kept self-contained); A.3.2's rename commit may DRY them
 /// into a shared protocol module.
 class ProxyTransport extends LlmTransport {
