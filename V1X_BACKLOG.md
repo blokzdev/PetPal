@@ -624,6 +624,53 @@ Each entry uses the same shape:
   one obvious action; if Note + Medical also need fast access,
   they stay on Home Quick Capture or chat composer.
 
+### BYOC (bring-your-own-cloud) sync
+
+- **Source:** Phase 7 Group G.1 spec.
+- **DECISIONS:** 83 (Supabase Storage as v1's sync object store +
+  the `CloudSyncAdapter` seam that makes swapping a one-file
+  change).
+- **Scope:** Medium (~2-3 tasks: S3-compatible adapter
+  implementation + UX flow for users to plug in their own
+  bucket credentials + integration test against MinIO or
+  Backblaze).
+- **Dependencies:** Phase 7 Group G.2 (the production Supabase
+  adapter ships first; v1.x adds a sibling `S3CompatibleSyncAdapter`
+  against the same `CloudSyncAdapter` interface).
+- **Notes:** Lets the privacy-maximalist segment (the same users
+  drawn to BYOK in Settings) point sync at their own S3 / R2 /
+  Backblaze without trusting PetPal-hosted infra. Server-side
+  E2EE is layer (1); the bucket provider is layer (2). Both
+  remain meaningful when the bucket isn't ours. Trigger: real
+  v1 / v1.1 user signal that BYOK + custom-bucket is a
+  retention-blocking gap (cofounder's instinct: small but
+  vocal segment, not v1-load-bearing).
+
+### Photo sync
+
+- **Source:** Phase 7 Group G.1 spec.
+- **DECISIONS:** 83 (photos explicitly excluded from sync v1 —
+  per-pet wiki text only).
+- **Scope:** Medium (~3 tasks: chunked upload for large
+  binaries; selective sync UX so users can opt out of photos
+  on metered connections; bandwidth + storage cost modeling
+  given Pro's bandwidth quota).
+- **Dependencies:** Phase 7 Group G.2 production adapter; Phase
+  6 photo capture pipeline (already shipped); plausible Pro
+  bandwidth-tier surfacing if real usage suggests it (today
+  Pro is ~$60/yr unlimited; photo sync at scale changes that
+  math).
+- **Notes:** v1 scope is text-only sync to keep bandwidth
+  modeling tractable + ship faster. A Pro user with 500 photos
+  averaging 1.5 MB each = 750 MB on first cross-device pull —
+  within Supabase Pro's 250 GB/mo bandwidth, but at scale
+  (10k Pro users, all photo-syncing) the math breaks. Trigger:
+  real Pro-user signal that "I switched phones and lost my
+  photo memories" is a retention failure mode. v1 mitigation:
+  the photo files persist locally + are exported via the
+  Settings export-as-zip path, so a user going device-to-device
+  can restore manually.
+
 ### Engagement metrics
 
 - **Source:** Phase 6.6 scoping (cofounder review).
