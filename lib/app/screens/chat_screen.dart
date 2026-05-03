@@ -10,9 +10,12 @@ import '../chat/chat_error.dart';
 import '../chat/chat_notifier.dart';
 import '../chat/chat_state.dart';
 import '../design/design.dart';
+import '../entitlement/entitlement.dart';
+import '../entitlement/quota_exception.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/journal_bloom.dart';
+import '../widgets/paywall_dispatcher.dart';
 import '../widgets/pet_empty_state.dart';
 import 'photo_capture_screen.dart';
 
@@ -765,7 +768,21 @@ class _ErrorBanner extends StatelessWidget {
               style: TextStyle(color: scheme.onErrorContainer),
             ),
           ),
-          if (canRetry &&
+          // Phase 7 task E.1 — quota-exceeded gets the "See Pro
+          // options" CTA instead of Retry. Routes via
+          // dispatchPaywall so future quota subtypes get routed
+          // consistently. The chat error bar is the single
+          // chokepoint where the chat surface meets the paywall.
+          if (error.category == ChatErrorCategory.quotaExceeded) ...[
+            const SizedBox(width: 8),
+            TextButton(
+              onPressed: () => dispatchPaywall(
+                context,
+                TextQuotaExceeded(Entitlement.freeAnonymous()),
+              ),
+              child: const Text('See Pro options'),
+            ),
+          ] else if (canRetry &&
               error.category != ChatErrorCategory.auth) ...[
             const SizedBox(width: 8),
             TextButton(onPressed: onRetry, child: const Text('Retry')),

@@ -11,7 +11,9 @@ import 'screens/dev_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/hub_screen.dart';
 import 'screens/onboarding_screen.dart';
+import 'screens/paywall_screen.dart';
 import 'screens/photo_capture_screen.dart';
+import 'screens/photo_credit_pack_screen.dart';
 import 'screens/photo_timeline_screen.dart';
 import 'screens/profile_view_screen.dart';
 import 'screens/reminders_screen.dart';
@@ -68,6 +70,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pets/add',
         builder: (context, state) => const AddPetScreen(),
+      ),
+      // Phase 7 task E.1 — paywall surfaces. Live OUTSIDE the
+      // StatefulShellRoute (full-screen takeover; no bottom nav
+      // while purchasing). Reached via `dispatchPaywall(...)` from
+      // quota-hit dispatchers + Settings "Upgrade to Pro" link.
+      GoRoute(
+        path: '/paywall',
+        builder: (context, state) => const PaywallScreen(),
+        routes: [
+          GoRoute(
+            path: 'credits',
+            builder: (context, state) => const PhotoCreditPackScreen(),
+          ),
+        ],
       ),
       // Phase 1 verification screen — exercises the full harness. Linked
       // from Home only in debug builds (see HomeScreen).

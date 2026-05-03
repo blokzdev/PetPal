@@ -8,7 +8,9 @@ import '../../data/relationship.dart';
 import '../../data/species_catalog.dart';
 import '../design/design.dart';
 import '../entitlement/entitlement.dart';
+import '../entitlement/quota_exception.dart';
 import '../providers.dart';
+import '../widgets/paywall_dispatcher.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
@@ -93,6 +95,9 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
 
   bool _saving = false;
   String? _saveError;
+  // Phase 7 task E.1 — non-null when the saveError is a pet-quota
+  // block. Renders the "Compare plans" link below the error.
+  PetQuotaExceeded? _petQuotaBlocked;
 
   @override
   void dispose() {
@@ -225,6 +230,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     setState(() {
       _saving = true;
       _saveError = null;
+      _petQuotaBlocked = null;
     });
     try {
       final repo = await ref.read(petRepoProvider.future);
@@ -243,8 +249,12 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
           if (!mounted) return;
           setState(() {
             _saving = false;
+            // Phase 7 task E.1 — pet-cap UX is inline + Compare
+            // plans link (Stage 1 product decision; user confirmed
+            // hard wall + escape valve register).
             _saveError = 'You already have a pet on the free plan. '
                 'Adding a second pet is part of Pro.';
+            _petQuotaBlocked = PetQuotaExceeded(entitlement);
           });
           return;
         }
@@ -488,6 +498,24 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
                     color: Theme.of(context).colorScheme.error,
                   ),
                 ),
+                if (_petQuotaBlocked != null) ...[
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: TextButton(
+                      onPressed: () => dispatchPaywall(
+                        context,
+                        _petQuotaBlocked!,
+                      ),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text('Compare plans'),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 12),
               ],
               FilledButton(
