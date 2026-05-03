@@ -6,26 +6,34 @@
 //
 //   1. Authenticates the request via the user's Supabase JWT.
 //   2. Hashes the auth UUID with SHA-256 — the audit log holds the
-//      hash, NOT the user_id, so the GDPR/CCPA "we deleted everything
+//      hash so the steady-state GDPR/CCPA "we deleted everything
 //      including identity" claim holds even if the audit log itself
 //      is preserved.
-//   3. Inserts a row in `deleted_accounts_log` with
+//   3. Also writes `user_id` (operational column, migration 0003) so
+//      the daily-reconciliation cron can resolve the user during the
+//      30-day retention window. The cron NULLs this column after
+//      hard-purge so the steady-state audit row is hash-only.
+//   4. Inserts a row in `deleted_accounts_log` with
 //      retention_window_ends_at = now() + 30 days.
-//   4. Signs the user out of the current session — the client also
+//   5. Signs the user out of the current session — the client also
 //      clears its local session, so post-call the device is signed
 //      out.
 //
-// What this Edge Function does NOT do (deferred to a follow-up
-// commit alongside the daily cron):
+// What this Edge Function does NOT do (handled by sibling functions
+// per DECISIONS row 90):
 //
 //   - Hard-purge of wiki blobs, entitlement row, counter rows,
 //     proxy_request_log entries, and the auth.users row. Per row 77
-//     these run on the cron AT THE END of the 30-day window so the
-//     user can sign in to undo within that window.
-//   - Undo path. v1 ships a hard 30-day window; if the user signs in
-//     during the window, the cron sees their fresh `last_sign_in_at`
-//     and removes the deleted_accounts_log row before hard-purge
-//     fires. (Implementation lands with the cron commit.)
+//     these run on `daily-reconciliation-cron` AT THE END of the
+//     30-day window so the user can sign in to undo within that
+//     window.
+//   - Undo path. Two-pronged:
+//     (a) `cancel-account-delete` Edge Function — fires when the user
+//         signs in during the window; deletes the audit row
+//         immediately so the cron sees nothing to purge.
+//     (b) Cron defensive check — even without (a), the cron compares
+//         `auth.users.last_sign_in_at > delete_requested_at` before
+//         purging.
 //
 // Identity model (DECISIONS row 70 + 82): magic-link Supabase Auth.
 // JWT in the Authorization header is the single auth signal.
@@ -85,10 +93,15 @@ export async function handleDeleteRequest(
   // Insert the audit row. RLS is bypassed via the service-role
   // client; the table itself has no RLS policy that would let a
   // signed-in user write to it directly.
+  //
+  // `user_id` is the operational column (migration 0003). The cron
+  // NULLs it out after hard-purge — at which point the steady-state
+  // audit row is hash + timestamps only.
   const { error: insertErr } = await deps.admin
     .from('deleted_accounts_log')
     .insert({
       user_id_hash: userIdHash,
+      user_id: userId,
       delete_requested_at: now.toISOString(),
       retention_window_ends_at: retentionEnd.toISOString(),
     });
