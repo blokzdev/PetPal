@@ -195,7 +195,7 @@ now:
 | Server-side IAP receipt verification | `play-billing-verify` Edge Function (later C-group commit) | Play Console RTDN webhook URL |
 | Cloud sync provider | Group G.1 architectural decision (Supabase Storage vs other) | Likely same `supabase secrets` + a new bucket |
 | E2EE passphrase derivation | Group G.2 implementation | In-app onboarding flow (no dashboard config) |
-| Auth (Supabase magic-link email) | Group F.1 BYOK rewrite + auth wiring | Supabase Dashboard → Authentication → Email templates (already partly seeded by `supabase/templates/magic_link.html`) |
+| Auth (Supabase magic-link email) | Group H.1.a (this commit) | Supabase Dashboard → Authentication → Email templates (already partly seeded by `supabase/templates/magic_link.html`) **AND** Authentication → URL Configuration → "Additional Redirect URLs" must include `petpal://login-callback` exactly — without this, magic-link tap returns 400 invalid_request |
 | Multi-pet UI | Group E.2 | No dashboard config; pure Flutter |
 | Account deletion + data export | Group H.1 | Settings screen + Supabase function (will need an `account-delete` Edge Function) |
 

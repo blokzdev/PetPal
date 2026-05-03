@@ -128,14 +128,19 @@ dependencies:
   # against the plugin-bump checklist (row 33 N/A; pure Dart).
   # 160/160 pub points, dint package, well-maintained.
   cryptography: ^2.7.0
-  # Phase 7 task G.2 → Group H — Supabase client adoption deferred
-  # to Group H.1 (magic-link sign-in). G.2 keeps the production
-  # `SupabaseSyncBackend` implementation deferred so the package
-  # arrives in the same commit that wires the auth session it
-  # depends on. The `SyncBackend` abstraction lets G.2 ship the
-  # E2EE crypto + adapter wiring + passphrase UX testably without
-  # the package; H.1 adds `supabase` and the concrete
-  # SupabaseSyncBackend.
+  # Phase 7 task H.1.a — Supabase client adoption (DECISIONS rows 69 +
+  # 70 + 82). Brings magic-link auth (`signInWithOtp`), the production
+  # SupabaseSyncBackend wiring (H.1.b), and the SDK auth-state stream
+  # that the AuthSessionNotifier subscribes to. `supabase_flutter`
+  # bundles `app_links` for the magic-link return deep-link
+  # (`petpal://login-callback`); the matching intent filter lives in
+  # `android/app/src/main/AndroidManifest.xml` and is asserted by
+  # `test/platform/android_manifest_test.dart` per the row-33
+  # plugin-bump checklist. Initialization happens in `main()` only
+  # when `--dart-define`'d `SUPABASE_URL` + `SUPABASE_ANON_KEY` are
+  # present; absent those, the app stays on the BYOK / sign-in-coming
+  # path documented in `docs/SETUP.md`.
+  supabase_flutter: ^2.12.4
 
 dev_dependencies:
   flutter_test:

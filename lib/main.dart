@@ -1,7 +1,11 @@
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
+import 'app/auth/auth_gateway.dart';
+import 'app/auth/auth_session_notifier.dart';
+import 'app/auth/supabase_auth_gateway.dart';
 import 'app/providers.dart';
 import 'app/routing.dart';
 import 'app/theme.dart';
@@ -13,6 +17,15 @@ import 'platform/scheduler_bootstrap_registry.dart';
 import 'platform/scheduler_log.dart';
 import 'platform/settings_storage.dart';
 import 'platform/work_scheduler.dart';
+
+/// Phase 7 task H.1.a — Supabase project URL.
+///
+/// Supplied at build time via `--dart-define=SUPABASE_URL=...`
+/// (see `docs/SETUP.md`). Empty string when unset → main() skips
+/// Supabase.initialize() entirely and the app stays on the
+/// BYOK / sign-in-coming path.
+const _supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+const _supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +68,25 @@ Future<void> main() async {
   setSchedulerBootstrap(bootstrapAndFire);
   schedulerLog('app_init', fields: {});
 
+  // Phase 7 task H.1.a — Supabase initialization.
+  //
+  // Both URL + anon key must be supplied via --dart-define for
+  // initialization to run. Missing either → silent skip; the
+  // authGatewayProvider stays on its InMemoryAuthGateway default
+  // and the chat / sync surfaces render the "sign-in coming"
+  // register from F.1 + G.2. This keeps `flutter run` against a
+  // dev image without dart-defines viable for non-auth screens.
+  SupabaseAuthGateway? supabaseGateway;
+  if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
+    await supabase.Supabase.initialize(
+      url: _supabaseUrl,
+      anonKey: _supabaseAnonKey,
+    );
+    supabaseGateway =
+        SupabaseAuthGateway(supabase.Supabase.instance.client.auth)
+          ..initialize();
+  }
+
   runApp(
     ProviderScope(
       overrides: [
@@ -63,6 +95,8 @@ Future<void> main() async {
         settingsStorageProvider.overrideWithValue(settings),
         welcomeCompletedProvider
             .overrideWith(() => _SeededWelcomeNotifier(welcomeCompleted)),
+        if (supabaseGateway != null)
+          authGatewayProvider.overrideWithValue(supabaseGateway),
       ],
       child: const PetPalApp(),
     ),

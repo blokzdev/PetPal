@@ -117,4 +117,54 @@ void main() {
       expect(manifest, contains('android.intent.action.BOOT_COMPLETED'));
     });
   });
+
+  group('supabase_flutter plugin-bump (Phase 7 task H.1.a, DECISIONS row 33)',
+      () {
+    test('Supabase magic-link return — petpal:// URL scheme registered', () {
+      // The custom URL scheme is the load-bearing piece of the deep-link
+      // intent filter. supabase_flutter's bundled app_links integration
+      // listens for VIEW intents matching this scheme/host pair and
+      // surfaces them as `signedIn` events on the auth-state stream.
+      // Without this declaration, the magic-link tap from email opens
+      // the system browser instead of returning to PetPal — sign-in
+      // appears to silently fail to the user.
+      expect(manifest, contains('android:scheme="petpal"'));
+      expect(manifest, contains('android:host="login-callback"'));
+    });
+
+    test('Deep-link intent filter has VIEW + BROWSABLE + DEFAULT categories',
+        () {
+      // The intent filter MUST carry all three signals so Android
+      // routes the URI to MainActivity:
+      //   - VIEW so the system asks "who handles this URI?"
+      //   - BROWSABLE so links from email apps / browsers count as
+      //     valid sources (without it, only in-app intents work)
+      //   - DEFAULT so PetPal is offered as a candidate without an
+      //     explicit component selection
+      // Removing any one of these silently breaks the magic-link
+      // return path — surfaced only on real-device tap of the
+      // emailed link.
+      expect(manifest, contains('android.intent.action.VIEW'));
+      expect(manifest, contains('android.intent.category.BROWSABLE'));
+      expect(manifest, contains('android.intent.category.DEFAULT'));
+    });
+
+    test(
+        'No new permissions — supabase_flutter rides INTERNET '
+        '(already declared)', () {
+      // The plugin-bump checklist for supabase_flutter 2.12.4 found
+      // zero new permission requirements beyond INTERNET (already
+      // declared for the Anthropic API + future cloud sync). The
+      // package's example AndroidManifest declares only the deep-link
+      // intent filter and INTERNET. No services, no receivers, no
+      // providers, no foreground-service permissions.
+      //
+      // This test exists to record that the H.1.a plugin-bump
+      // checklist (DECISIONS row 33) was performed. If a future
+      // supabase_flutter upgrade adds new components, the next bump's
+      // audit will see this assertion unchanged → run the full
+      // checklist again.
+      expect(manifest, contains('android.permission.INTERNET'));
+    });
+  });
 }

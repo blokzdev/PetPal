@@ -40,6 +40,26 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Phase 7 task H.1.a — Supabase magic-link return deep
+                 link (DECISIONS rows 70 + 82). The custom URL scheme
+                 `petpal://login-callback` is registered as Supabase's
+                 `emailRedirectTo` for `signInWithOtp` calls. When the
+                 user taps the magic link from email, Android resolves
+                 the URI to MainActivity, supabase_flutter's bundled
+                 app_links listener catches it, and the auth client
+                 fires a `signedIn` event that flows through
+                 AuthSessionNotifier without per-activity glue. This
+                 scheme MUST also be registered in the Supabase Auth
+                 → Settings → "Additional redirect URLs" dashboard;
+                 documented in docs/SETUP.md. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="petpal"
+                    android:host="login-callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
