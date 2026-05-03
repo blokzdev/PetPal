@@ -8,6 +8,7 @@ import 'app/auth/auth_session_notifier.dart';
 import 'app/auth/supabase_auth_gateway.dart';
 import 'app/providers.dart';
 import 'app/routing.dart';
+import 'app/sync/supabase_runtime_config.dart';
 import 'app/theme.dart';
 import 'app/welcome/welcome_completed_notifier.dart';
 import 'platform/api_key_storage.dart';
@@ -68,15 +69,18 @@ Future<void> main() async {
   setSchedulerBootstrap(bootstrapAndFire);
   schedulerLog('app_init', fields: {});
 
-  // Phase 7 task H.1.a — Supabase initialization.
+  // Phase 7 task H.1.a/b — Supabase initialization.
   //
   // Both URL + anon key must be supplied via --dart-define for
   // initialization to run. Missing either → silent skip; the
-  // authGatewayProvider stays on its InMemoryAuthGateway default
-  // and the chat / sync surfaces render the "sign-in coming"
-  // register from F.1 + G.2. This keeps `flutter run` against a
-  // dev image without dart-defines viable for non-auth screens.
+  // authGatewayProvider stays on its InMemoryAuthGateway default,
+  // supabaseRuntimeConfigProvider stays null, and the syncBackend
+  // / cloudSyncAdapter providers stay on their NoopCloudSyncAdapter
+  // / unauthenticated-InMemorySyncBackend fallbacks. This keeps
+  // `flutter run` against a dev image without dart-defines viable
+  // for non-auth screens.
   SupabaseAuthGateway? supabaseGateway;
+  SupabaseRuntimeConfig? supabaseConfig;
   if (_supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty) {
     await supabase.Supabase.initialize(
       url: _supabaseUrl,
@@ -85,6 +89,10 @@ Future<void> main() async {
     supabaseGateway =
         SupabaseAuthGateway(supabase.Supabase.instance.client.auth)
           ..initialize();
+    supabaseConfig = const SupabaseRuntimeConfig(
+      url: _supabaseUrl,
+      anonKey: _supabaseAnonKey,
+    );
   }
 
   runApp(
@@ -97,6 +105,8 @@ Future<void> main() async {
             .overrideWith(() => _SeededWelcomeNotifier(welcomeCompleted)),
         if (supabaseGateway != null)
           authGatewayProvider.overrideWithValue(supabaseGateway),
+        if (supabaseConfig != null)
+          supabaseRuntimeConfigProvider.overrideWithValue(supabaseConfig),
       ],
       child: const PetPalApp(),
     ),

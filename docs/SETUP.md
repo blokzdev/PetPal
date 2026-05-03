@@ -54,10 +54,22 @@ Then locally:
 
 ```bash
 supabase link --project-ref abcdefgh        # the slug from Project URL
-supabase db push                             # applies 0001_phase7_init.sql
+supabase db push                             # applies 0001_phase7_init.sql + 0002_sync_objects.sql
 supabase secrets set ANTHROPIC_API_KEY=sk-ant-...
 supabase functions deploy llm-proxy
 ```
+
+Then in the Supabase Dashboard → **Storage** → **New bucket**:
+
+- Name: `wiki` (must match exactly — the H.1.b RLS policies + the
+  `SupabaseSyncBackend` are hard-coded to this name)
+- Public: **off** (wiki blobs are E2EE ciphertext but the bucket is
+  still per-user access-controlled via the policies in
+  `0002_sync_objects.sql`)
+- File size limit: leave default (50MB is plenty for ~2KB markdown
+  ciphertext blobs)
+- Allowed MIME types: leave unrestricted (blobs upload as
+  `application/octet-stream`)
 
 In the Supabase SQL Editor (Dashboard → SQL Editor), enable `pg_cron`
 and run:

@@ -1,19 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/sync/cloud_sync_adapter.dart';
+import '../../data/sync/e2ee_sync_adapter.dart';
+import '../../data/sync/supabase_sync_backend.dart';
 import '../../data/sync/sync_backend.dart';
 import '../../data/sync/sync_session.dart';
+import '../auth/auth_session_notifier.dart';
 import '../entitlement/entitlement.dart';
 import '../providers.dart';
+import 'supabase_runtime_config.dart';
 
-/// Phase 7 task G.2 — sync provider graph.
+/// Phase 7 task G.2 / H.1.b — sync provider graph.
 ///
 /// **Layered**: `syncSession` (in-memory key cache) → `syncBackend`
 /// (network) → `cloudSyncAdapter` (push/pull logic) →
-/// `entitlementGatedSyncAdapter` (Pro gate). Production wiring for
-/// the backend (Supabase Storage + Postgres clients) lands in
-/// Group H.1 alongside magic-link sign-in; G.2 ships the in-memory
-/// fake so tests + the passphrase setup UX work end-to-end.
+/// `entitlementGatedSyncAdapter` (Pro gate). H.1.b lights up the
+/// production wiring: when [supabaseRuntimeConfigProvider] is
+/// populated AND [authSessionProvider] has a session, [syncBackend]
+/// returns a [SupabaseSyncBackend] keyed to that user's UUID;
+/// otherwise it stays on the unauthenticated [InMemorySyncBackend]
+/// fallback so the Settings sync card renders the `signedOut` state
+/// correctly.
 
 /// One [SyncSession] per app launch — holds the derived key after
 /// passphrase setup / unlock; locked on app close (memory reclaim).
@@ -21,13 +28,32 @@ final syncSessionProvider = Provider<SyncSession>((ref) {
   return SyncSession();
 });
 
-/// G.2 stub. Returns an [InMemorySyncBackend] that's NOT
-/// authenticated — sync attempts surface the "sign in to enable
-/// sync" path. H.1 overrides this provider with the real
-/// `SupabaseSyncBackend` once auth lands. Tests inject a fully-
-/// wired `InMemorySyncBackend(isAuthenticated: true)` directly.
+/// Production-aware sync backend.
+///
+/// Returns:
+///   - [SupabaseSyncBackend] when signed-in + Supabase config set
+///     (H.1.b production path).
+///   - [InMemorySyncBackend] (unauthenticated) otherwise — chat /
+///     sync surfaces stay on the "sign-in coming" / "sign in to
+///     enable sync" register.
+///
+/// JWT freshness: the backend re-reads `accessToken` from
+/// [authSessionProvider] on every request via the closure, so token
+/// refresh inside `supabase_flutter` is picked up without
+/// re-instantiating the backend.
 final syncBackendProvider = Provider<SyncBackend>((ref) {
-  return InMemorySyncBackend(isAuthenticated: false);
+  final config = ref.watch(supabaseRuntimeConfigProvider);
+  final session = ref.watch(authSessionProvider).value;
+  if (config == null || session == null) {
+    return InMemorySyncBackend(isAuthenticated: false);
+  }
+  return SupabaseSyncBackend(
+    supabaseUrl: config.url,
+    anonKey: config.anonKey,
+    userId: session.userId,
+    jwtSource: () =>
+        ref.read(authSessionProvider).value?.accessToken ?? '',
+  );
 });
 
 /// Phase 7 task G.2 — actions surfaced to the passphrase setup
@@ -82,8 +108,7 @@ class _SyncAuthRequired implements Exception {
   const _SyncAuthRequired();
   @override
   String toString() =>
-      'Sign in to your PetPal account before setting up sync. '
-      '(Magic-link sign-in ships in a later update.)';
+      'Sign in to your PetPal account before setting up sync.';
 }
 
 class _SyncSetupRequired implements Exception {
@@ -133,13 +158,41 @@ final syncChallengeExistsProvider = FutureProvider<bool>((ref) async {
   return challenge != null;
 });
 
-/// G.2 placeholder — production [CloudSyncAdapter] composes
-/// `E2eeSyncAdapter` + `EntitlementGatedSyncAdapter` once H.1 wires
-/// auth + the production backend. Tests construct adapters
-/// directly with their own session + backend overrides. The
-/// existing `NoopCloudSyncAdapter` from Phase 2 stays as the
-/// pre-wiring default so callers that read this provider don't
-/// crash.
-final cloudSyncAdapterProvider = Provider<CloudSyncAdapter>((ref) {
-  return NoopCloudSyncAdapter();
+/// Phase 7 task H.1.b — production [CloudSyncAdapter] wiring.
+///
+/// Composes [E2eeSyncAdapter] (encrypts wiki blobs) +
+/// [EntitlementGatedSyncAdapter] (Pro-only gate per row 36) against
+/// the active sync backend + signed-in user.
+///
+/// Returns [NoopCloudSyncAdapter] when:
+///   - No auth session (signed out)
+///   - Backend isn't authenticated (Supabase config missing or
+///     session expired)
+///
+/// FutureProvider because [E2eeSyncAdapter] needs the resolved
+/// [WikiIo] from `wikiIoProvider` (which is itself async — the
+/// platform path-provider lookup happens lazily). Consumers wrap
+/// reads in `.when(data: ..., loading: ..., error: ...)`.
+final cloudSyncAdapterProvider =
+    FutureProvider<CloudSyncAdapter>((ref) async {
+  final session = ref.watch(authSessionProvider).value;
+  final backend = ref.watch(syncBackendProvider);
+
+  if (session == null || !backend.isAuthenticated) {
+    return NoopCloudSyncAdapter();
+  }
+
+  final wiki = await ref.watch(wikiIoProvider.future);
+  final inner = E2eeSyncAdapter(
+    backend: backend,
+    session: ref.watch(syncSessionProvider),
+    wiki: wiki,
+    userId: session.userId,
+  );
+
+  return EntitlementGatedSyncAdapter(
+    inner: inner,
+    entitlementSource: () =>
+        ref.read(entitlementProvider).value ?? Entitlement.freeAnonymous(),
+  );
 });
