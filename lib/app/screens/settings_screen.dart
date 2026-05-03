@@ -291,6 +291,12 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
+    final petsAsync = ref.watch(petsProvider);
+    final petCount = petsAsync.maybeWhen(
+      data: (p) => p.length,
+      orElse: () => 0,
+    );
+
     return PetCard(
       padding: EdgeInsets.zero,
       child: Column(
@@ -322,6 +328,26 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
                     child: const Text('Upgrade'),
                   ),
           ),
+          // ── Pets row (Phase 7 task E.2) ──────────────────────────
+          // Free / BYOK: "1 of 1 pet" register matches §7 principle
+          // #1 (additive framing) without claiming the cap is
+          // mean-spirited. Pro: just the count, no cap framing.
+          if (petCount > 0) ...[
+            const Divider(height: 1, thickness: 1, indent: 16),
+            ListTile(
+              leading: Icon(
+                PhosphorIconsRegular.pawPrint,
+                color: scheme.onSurface.withValues(alpha: 0.6),
+              ),
+              title: Text(_petsRowTitle(entitlement, petCount)),
+              subtitle: Text(
+                _petsRowSubtitle(entitlement),
+                style: textTheme.bodySmall?.copyWith(
+                  color: scheme.onSurface.withValues(alpha: 0.65),
+                ),
+              ),
+            ),
+          ],
           // ── Ambient text counter (free + BYOK; Pro is unmetered) ─
           // VOICE.md §6 example 11 + §7 principle #2: ambient
           // information, NOT a meter ticking down.
@@ -422,6 +448,30 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
     return "You've used all $cap of this month's free chats. "
         'Pro lifts the limit, or switch to BYOK in Settings to '
         'keep chatting now.';
+  }
+
+  /// Phase 7 task E.2 — pet-count row title.
+  ///
+  /// Free / BYOK ("$count of $cap pet[s]"): cap framing matches
+  /// VOICE.md §6 example 11's ambient register — stating the cap
+  /// without surveilling the user. Pro has no cap, so just count.
+  String _petsRowTitle(Entitlement e, int count) {
+    final cap = e.petCap;
+    if (cap == null) {
+      return count == 1 ? '1 pet' : '$count pets';
+    }
+    final petWord = cap == 1 ? 'pet' : 'pets';
+    return '$count of $cap $petWord';
+  }
+
+  /// Phase 7 task E.2 — pet-count row subtitle. Pro keeps it
+  /// ambient ("Add as many as you like"); free/BYOK names the
+  /// limit + the additive Pro lift, never extractive (§7 #1).
+  String _petsRowSubtitle(Entitlement e) {
+    if (e.petCap == null) {
+      return 'Add as many as you like.';
+    }
+    return 'Pro adds room for the rest of the household.';
   }
 
   String _formatDate(DateTime d) {

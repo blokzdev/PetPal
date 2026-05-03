@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../data/db/database.dart';
 import '../../data/onboarding_templates.dart';
 import '../../data/pet_name.dart';
 import '../../data/repos/reminder_repo.dart';
@@ -16,10 +17,17 @@ import '../widgets/battery_exemption_prompt.dart';
 import '../widgets/paywall_dispatcher.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
+import '../widgets/pet_section_header.dart';
 import '../widgets/pet_skeleton.dart';
+import '../widgets/pet_switcher.dart';
 
-/// Reminders CRUD screen — per-pet destination, so the app bar
-/// interpolates the active pet's name (VOICE.md §5).
+/// Reminders CRUD screen.
+///
+/// Phase 7 task E.2 — family-wide surface. Single combined list
+/// sectioned by pet (in pet-creation order). The screen no longer
+/// reads the global "active pet" — it shows everything. The "Add
+/// reminder" FAB asks which pet via the pet switcher when the user
+/// has 2+ pets; single-pet households auto-target the only pet.
 ///
 /// The screen surfaces three calm banners when the relevant Android
 /// permission is denied — battery optimisation, exact alarms, and
@@ -32,27 +40,13 @@ class RemindersScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final petsAsync = ref.watch(petsProvider);
-    // Bug-2 defense: empty/whitespace name → treat as null so the
-    // title falls back to "Reminders" rather than "'s reminders".
-    final petName = petsAsync.maybeWhen(
-      data: (pets) {
-        if (pets.isEmpty) return null;
-        final name = pets.last.name.trim();
-        return name.isEmpty ? null : name;
-      },
-      orElse: () => null,
-    );
-    final title = petName == null ? 'Reminders' : "$petName's reminders";
 
     return AppScaffold(
-      title: title,
+      title: 'Reminders',
       body: petsAsync.when(
         data: (pets) => pets.isEmpty
             ? const _NoPet()
-            : _Body(
-                pet: pets.last,
-                onAdd: () => _openAdd(context, ref, pets.last.id),
-              ),
+            : _Body(pets: pets, onAdd: () => _openAdd(context, ref, pets)),
         loading: () => const _RemindersSkeleton(),
         error: (e, _) =>
             const Center(child: Text("Couldn't load reminders.")),
@@ -61,7 +55,7 @@ class RemindersScreen extends ConsumerWidget {
         data: (pets) => pets.isEmpty
             ? null
             : FloatingActionButton.extended(
-                onPressed: () => _openAdd(context, ref, pets.last.id),
+                onPressed: () => _openAdd(context, ref, pets),
                 icon: const Icon(PhosphorIconsRegular.bellRinging),
                 label: const Text('Add reminder'),
               ),
@@ -70,10 +64,32 @@ class RemindersScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openAdd(BuildContext context, WidgetRef ref, int petId) async {
+  Future<void> _openAdd(
+    BuildContext context,
+    WidgetRef ref,
+    List<Pet> pets,
+  ) async {
+    int? petId;
+    if (pets.length == 1) {
+      petId = pets.single.id;
+    } else {
+      // Multi-pet household: ask which pet via the switcher sheet.
+      // First pet in the list is our suggested current selection so
+      // the modal opens on a sensible default.
+      final choice = await showPetSwitcherSheet(
+        context,
+        currentSelection: PickedPet(pets.first.id),
+      );
+      if (choice is PickedPet) {
+        petId = choice.petId;
+      } else {
+        return;
+      }
+    }
+    if (!context.mounted) return;
     final created = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-        builder: (_) => _AddReminderScreen(petId: petId),
+        builder: (_) => _AddReminderScreen(petId: petId!),
       ),
     );
     if (created != true) return;
@@ -86,8 +102,9 @@ class RemindersScreen extends ConsumerWidget {
       settings: ref.read(settingsStorageProvider),
       health: ref.read(scheduleHealthServiceProvider),
     );
-    // Reset the list — the new row should appear.
+    // Refresh the list — invalidating the family clears all keys.
     ref.invalidate(remindersForPetProvider);
+    ref.invalidate(allRemindersProvider);
   }
 }
 
@@ -118,13 +135,13 @@ final _scheduleHealthProvider = FutureProvider.autoDispose((ref) async {
 });
 
 class _Body extends ConsumerWidget {
-  const _Body({required this.pet, required this.onAdd});
-  final dynamic pet;
+  const _Body({required this.pets, required this.onAdd});
+  final List<Pet> pets;
   final VoidCallback onAdd;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final reminders = ref.watch(remindersForPetProvider(pet.id as int));
+    final all = ref.watch(allRemindersProvider);
     final health = ref.watch(_scheduleHealthProvider);
 
     return Column(
@@ -135,23 +152,90 @@ class _Body extends ConsumerWidget {
           error: (_, _) => const SizedBox.shrink(),
         ),
         Expanded(
-          child: reminders.when(
-            data: (rows) => rows.isEmpty
-                ? RemindersEmptyForTesting(
-                    // Bug-2 defense: empty/whitespace name → "Your
-                    // pet" via displayPetName so the empty heading
-                    // doesn't render "No reminders for  yet." with
-                    // a double-space.
-                    petName: displayPetName(pet.name as String?),
+          child: all.when(
+            data: (sections) {
+              final populated =
+                  sections.where((s) => s.reminders.isNotEmpty).toList();
+              if (populated.isEmpty) {
+                // Phase 7 task E.2 — single-pet household keeps its
+                // original on-empty narrative (the rich teaching
+                // copy). Multi-pet household gets a neutral cross-
+                // pet empty state.
+                if (pets.length == 1) {
+                  return RemindersEmptyForTesting(
+                    petName: displayPetName(pets.single.name),
                     onAdd: onAdd,
-                  )
-                : _List(rows: rows, petId: pet.id as int),
+                  );
+                }
+                return _AllPetsEmptyForTesting(onAdd: onAdd);
+              }
+              return _SectionedList(sections: populated);
+            },
             loading: () => const _RemindersSkeleton(),
             error: (e, _) =>
                 const Center(child: Text("Couldn't load reminders.")),
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SectionedList extends StatelessWidget {
+  const _SectionedList({required this.sections});
+
+  final List<({Pet pet, List<ReminderRow> reminders})> sections;
+
+  @override
+  Widget build(BuildContext context) {
+    // Each section: small-caps header with pet name + count, then
+    // the existing reminder rows. Sections separated by Spacing.s
+    // to read as distinct groups within a single scrollable surface.
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: Spacing.s),
+      itemCount: sections.length,
+      itemBuilder: (context, i) {
+        final section = sections[i];
+        final headerLabel = sections.length == 1
+            ? null
+            : "${displayPetName(section.pet.name)}'s reminders "
+                '· ${section.reminders.length}';
+        return Padding(
+          padding: const EdgeInsets.only(bottom: Spacing.m),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (headerLabel != null)
+                PetSectionHeader(title: headerLabel),
+              _List(rows: section.reminders, petId: section.pet.id),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Phase 7 task E.2 — multi-pet household empty state. Triggered
+/// when no pet has any reminders. Drops the per-pet teaching copy
+/// in favor of a household-neutral framing that still teaches the
+/// reminder categories.
+class _AllPetsEmptyForTesting extends StatelessWidget {
+  const _AllPetsEmptyForTesting({required this.onAdd});
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) {
+    return PetEmptyState(
+      icon: PhosphorIconsRegular.bell,
+      heading: 'No reminders set yet.',
+      body: 'When something comes due — heartworm, flea treatment, '
+          'vaccines — set a reminder and PetPal will nudge you.',
+      action: PetButton(
+        label: 'Add reminder',
+        onPressed: onAdd,
+        icon: PhosphorIconsRegular.bellRinging,
+      ),
     );
   }
 }
@@ -247,6 +331,7 @@ class _List extends ConsumerWidget {
             final service = await ref.read(reminderServiceProvider.future);
             await service.cancel(r.id);
             ref.invalidate(remindersForPetProvider);
+            ref.invalidate(allRemindersProvider);
             // Task 5.8 — light haptic on completing/cancelling a
             // reminder. Fires after the cancel succeeds, before the
             // animation plays out, so the buzz syncs with the row's

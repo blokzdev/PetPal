@@ -327,14 +327,23 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
   @override
   Widget build(BuildContext context) {
     final petsAsync = ref.watch(petsProvider);
+    // Phase 7 task E.2 — Pro-aware early-exit. Pro users have
+    // `entitlement.petCap == null` and skip the gate; free / BYOK
+    // users see _FreeTierLimit when they've hit the 1-pet cap.
+    // The deeper gate inside `_save` (D.1, line 246) stays as the
+    // canonical defense — this early-exit just keeps the form
+    // unrendered when the user clearly can't save.
+    final entitlement = ref.watch(entitlementProvider).valueOrNull ??
+        Entitlement.freeAnonymous();
+    final cap = entitlement.petCap;
     final atLimit = petsAsync.maybeWhen(
-      data: (pets) => pets.isNotEmpty,
+      data: (pets) => cap != null && pets.length >= cap,
       orElse: () => false,
     );
     if (atLimit) {
-      return const AppScaffold(
+      return AppScaffold(
         title: 'Add a pet',
-        body: _FreeTierLimit(),
+        body: _FreeTierLimit(blocked: PetQuotaExceeded(entitlement)),
       );
     }
     return AppScaffold(
@@ -1132,7 +1141,13 @@ class _InYourWordsCard extends StatelessWidget {
 }
 
 class _FreeTierLimit extends StatelessWidget {
-  const _FreeTierLimit();
+  const _FreeTierLimit({required this.blocked});
+
+  /// Phase 7 task E.2 — the synthesized [PetQuotaExceeded] is
+  /// passed to [dispatchPaywall] when the user taps "Compare
+  /// plans," matching the inline-error CTA that fires from inside
+  /// `_save`. VOICE.md §6 example 9 governs the body copy.
+  final PetQuotaExceeded blocked;
 
   @override
   Widget build(BuildContext context) {
@@ -1152,13 +1167,17 @@ class _FreeTierLimit extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Adding a second pet is part of Pro, coming in a future '
-            'update.',
+            'Adding a second pet is part of Pro.',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 32),
           FilledButton(
+            onPressed: () => dispatchPaywall(context, blocked),
+            child: const Text('Compare plans'),
+          ),
+          const SizedBox(height: 8),
+          TextButton(
             onPressed: () => Navigator.of(context).pop(),
             child: const Text('Back'),
           ),

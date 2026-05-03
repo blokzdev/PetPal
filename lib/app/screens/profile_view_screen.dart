@@ -16,6 +16,7 @@ import '../widgets/charts/weight_chart.dart';
 import '../widgets/editorial_card.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
+import '../widgets/pet_switcher.dart';
 
 /// Phase 6.6 task 6.6.C.4 — Pet profile layered restructure
 /// (read-only sectioned view; edit pencil routes to the existing
@@ -52,20 +53,28 @@ class _ProfileViewScreenState extends ConsumerState<ProfileViewScreen> {
   String _body = '';
   bool _loaded = false;
   String? _loadError;
+  // Phase 7 task E.2 — track which pet's SOUL is currently
+  // hydrated. When the user picks a new pet via the switcher, the
+  // build watcher notices the mismatch and triggers a reload.
+  int? _hydratedPetId;
 
   @override
   void initState() {
     super.initState();
-    _load();
+    // Defer the first load so we can read the resolved active pet
+    // ID after the providers have rendered at least once.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final pet = ref.read(activePetProvider);
+      if (pet != null) _load(pet.id);
+    });
   }
 
-  Future<void> _load() async {
+  Future<void> _load(int petId) async {
     try {
       final wiki = await ref.read(wikiIoProvider.future);
-      final activePetId = ref.read(activePetIdProvider);
       String raw;
       try {
-        raw = await wiki.read(wiki.soulPath(activePetId()));
+        raw = await wiki.read(wiki.soulPath(petId));
       } catch (_) {
         raw = '';
       }
@@ -75,35 +84,61 @@ class _ProfileViewScreenState extends ConsumerState<ProfileViewScreen> {
         _frontmatter = parsed.frontmatter;
         _body = parsed.body.trim();
         _loaded = true;
+        _hydratedPetId = petId;
       });
     } catch (e) {
       if (!mounted) return;
       setState(() {
         _loaded = true;
         _loadError = "Couldn't load this pet's profile: $e";
+        _hydratedPetId = petId;
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final petsAsync = ref.watch(petsProvider);
-    final petName = petsAsync.maybeWhen(
-      data: (pets) {
-        if (pets.isEmpty) return null;
-        final n = pets.last.name.trim();
-        return n.isEmpty ? null : n;
-      },
-      orElse: () => null,
-    );
+    // Phase 7 task E.2 — the active pet drives the screen. When the
+    // user picks a different pet via the switcher this rebuild
+    // sees the mismatch and re-hydrates.
+    final pet = ref.watch(activePetProvider);
+    final activePetId = pet?.id;
+    final petName = () {
+      if (pet == null) return null;
+      final n = pet.name.trim();
+      return n.isEmpty ? null : n;
+    }();
     final title = petName == null ? 'Profile' : "$petName's profile";
-    final activePetId = petsAsync.maybeWhen(
-      data: (pets) => pets.isEmpty ? null : pets.last.id,
-      orElse: () => null,
-    );
+
+    if (activePetId != null && activePetId != _hydratedPetId) {
+      // Schedule a reload — can't call setState during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _load(activePetId);
+      });
+    } else if (activePetId == null && !_loaded) {
+      // Phase 7 task E.2 — no-pet path. Pre-E.2 the screen would
+      // call _load() in initState, hit StateError, and surface a
+      // "Couldn't load this pet's profile" error message. With
+      // activePetProvider returning null on the no-pet path we
+      // never call _load, so flip _loaded synchronously to render
+      // the section scaffolding (the SOUL is empty, the
+      // AboutCard / DetailsCard handle empty frontmatter).
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        setState(() => _loaded = true);
+      });
+    }
 
     return AppScaffold(
       title: title,
+      titleWidget: PetSwitcherTitle(
+        titleBuilder: (p) {
+          final n = p.name.trim();
+          return n.isEmpty ? 'Profile' : "$n's profile";
+        },
+        fallbackTitle: 'Profile',
+      ),
       actions: [
         IconButton(
           tooltip: 'Edit profile',

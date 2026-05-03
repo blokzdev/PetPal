@@ -15,6 +15,8 @@ import '../widgets/app_scaffold.dart';
 import '../widgets/editorial_card.dart';
 import '../widgets/pet_card.dart';
 import '../widgets/pet_section_header.dart';
+import '../widgets/pet_switcher.dart';
+import '../active_pet/active_pet_notifier.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -22,6 +24,12 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final pets = ref.watch(petsProvider);
+    // Phase 7 task E.2 — the active pet (persisted switcher
+    // selection, falling back to most-recent) drives the greeting
+    // hero + chat CTA. Free users never see the switcher chevron
+    // (single pet, nothing to switch to); Pro users with multiple
+    // pets get the chevron via PetSwitcherTitle inside AppScaffold.
+    final activePet = ref.watch(activePetProvider);
 
     // Resolve the per-state body + optional hero. Always feed a single
     // AppScaffold.hero so the AnimatedSwitcher in the body keeps the
@@ -33,10 +41,11 @@ class HomeScreen extends ConsumerWidget {
     Widget body = const SizedBox.shrink();
     pets.when(
       data: (list) {
-        final keyValue = list.isEmpty ? 'empty' : 'pet-${list.last.id}';
-        final child = list.isEmpty
+        final keyValue =
+            (activePet == null) ? 'empty' : 'pet-${activePet.id}';
+        final child = activePet == null
             ? const _EmptyState()
-            : _GreetingBody(pet: list.last);
+            : _GreetingBody(pet: activePet);
         body = Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -51,14 +60,14 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
         );
-        if (list.isNotEmpty) {
+        if (activePet != null) {
           hero = _PetGreetingHero(
-            key: ValueKey('hero-${list.last.id}'),
-            petId: list.last.id,
+            key: ValueKey('hero-${activePet.id}'),
+            petId: activePet.id,
             // Bug-2 defense: route the raw name through
             // displayPetName so an empty/whitespace name renders
             // as "Your pet" rather than a blank gradient.
-            petName: displayPetName(list.last.name),
+            petName: displayPetName(activePet.name),
           );
         }
       },
@@ -68,16 +77,61 @@ class HomeScreen extends ConsumerWidget {
           body = Center(child: Text('Could not read pets: $e')),
     );
 
+    // Phase 7 task E.2 — multi-pet households surface the pet
+    // switcher as an AppBar action icon on Home. The Home AppBar
+    // title stays "PetPal" (brand register, not pet identity); the
+    // pet identity lives in the greeting hero. The action icon is
+    // hidden when the user only has one pet — nowhere to switch to.
+    final showSwitcherAction = pets.maybeWhen(
+      data: (list) => list.length > 1,
+      orElse: () => false,
+    );
+    final actions = showSwitcherAction
+        ? <Widget>[
+            _HomePetSwitcherAction(activePetId: activePet?.id),
+          ]
+        : null;
+
     if (hero == null) {
       return AppScaffold(
         title: 'PetPal',
+        actions: actions,
         body: body,
       );
     }
     return AppScaffold.hero(
       title: 'PetPal',
+      actions: actions,
       heroBuilder: (_) => hero!,
       body: body,
+    );
+  }
+}
+
+class _HomePetSwitcherAction extends ConsumerWidget {
+  const _HomePetSwitcherAction({required this.activePetId});
+
+  final int? activePetId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return IconButton(
+      tooltip: 'Switch pet',
+      icon: const Icon(PhosphorIconsRegular.usersThree),
+      onPressed: () async {
+        final current = activePetId == null
+            ? const PickedAllPets() // sentinel; Home never selects "all"
+            : PickedPet(activePetId!);
+        final choice = await showPetSwitcherSheet(
+          context,
+          currentSelection: current,
+        );
+        if (choice is PickedPet && choice.petId != activePetId) {
+          await ref
+              .read(activePetSelectionProvider.notifier)
+              .select(choice.petId);
+        }
+      },
     );
   }
 }

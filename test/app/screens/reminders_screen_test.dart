@@ -128,8 +128,11 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // App-bar interpolates the active pet's name (VOICE.md §5).
-    expect(find.text("Milo's reminders"), findsOneWidget);
+    // Phase 7 task E.2 — reminders is now a household-wide
+    // surface. App-bar drops the per-pet interpolation in favour
+    // of a static "Reminders" title; the cross-pet section
+    // headers carry the pet name when more than one exists.
+    expect(find.text('Reminders'), findsOneWidget);
     // Empty state — Phase 6.6 task 6.6.C.5 Stitch register
     // (reference shape): "$petName's schedule is clear. Enjoy
     // the quiet moments together." Heading interpolates name

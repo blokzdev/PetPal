@@ -51,6 +51,7 @@ import '../platform/api_key_storage.dart';
 import '../platform/schedule_health.dart';
 import '../platform/settings_storage.dart';
 import '../platform/work_scheduler.dart';
+import 'active_pet/active_pet_notifier.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
 
@@ -350,15 +351,49 @@ class _RecentAffectiveObservationNotifier
 /// Active pet's wiki entries, newest first. Invalidated by
 /// `ref.invalidate(wikiEntriesProvider)` after chat-tool writes (or any
 /// other mutation) so the wiki browser refetches on next build.
+///
+/// Phase 7 task E.2 — follows [activePetProvider] (the persisted pet
+/// switcher selection, with a `pets.last` fallback). Home + Profile
+/// stay scoped to the active pet via this provider; the Journal
+/// screen consumes [journalEntriesProvider] so it can also surface
+/// the cross-pet "All pets" mode.
 final wikiEntriesProvider = FutureProvider<List<Entry>>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  final pet = ref.watch(activePetProvider);
+  if (pet == null) return const [];
+  return (db.select(db.entries)
+        ..where((e) => e.petId.equals(pet.id))
+        ..orderBy([(e) => OrderingTerm.desc(e.ts)]))
+      .get();
+});
+
+/// Phase 7 task E.2 — Journal-tab entries provider. `null` selection
+/// = the cross-pet "All pets" timeline (interleaved by `ts desc`);
+/// a non-null selection = entries for that single pet. Distinct
+/// from [wikiEntriesProvider] so Home/Profile (active-pet-scoped)
+/// don't have to share invalidation semantics with the Journal's
+/// per-screen view selection.
+///
+/// Watches [wikiEntriesProvider] for its dependency signal — chat
+/// / tool / form writes that invalidate the active-pet provider
+/// should also refresh the Journal regardless of which selection
+/// is active. The watched value isn't consumed; only the dep-graph
+/// edge matters.
+final journalEntriesProvider =
+    FutureProvider.family<List<Entry>, int?>((ref, petId) async {
+  ref.watch(wikiEntriesProvider);
   final db = await ref.watch(appDatabaseProvider.future);
   final pets = await ref.watch(petsProvider.future);
   if (pets.isEmpty) return const [];
-  final petId = pets.last.id;
-  return (db.select(db.entries)
-        ..where((e) => e.petId.equals(petId))
-        ..orderBy([(e) => OrderingTerm.desc(e.ts)]))
-      .get();
+  final query = db.select(db.entries)
+    ..orderBy([(e) => OrderingTerm.desc(e.ts)]);
+  if (petId == null) {
+    final ids = pets.map((p) => p.id).toList();
+    query.where((e) => e.petId.isIn(ids));
+  } else {
+    query.where((e) => e.petId.equals(petId));
+  }
+  return query.get();
 });
 
 // ─── Embeddings + retrieval ────────────────────────────────────────────────
@@ -422,22 +457,53 @@ final hybridRetrieverProvider = FutureProvider<HybridRetriever>((ref) async {
 });
 
 /// Returns a callback resolving to the active pet's id at call time.
-/// Free-tier rule (DECISIONS row 8): the most recently-created pet is
-/// active; multi-pet UI lands in 2.9.
+///
+/// Phase 7 task E.2 — resolves the persisted pet-switcher selection
+/// (via [activePetSelectionProvider]) when set and the pet still
+/// exists; otherwise falls back to `pets.last.id`. Throws
+/// [StateError] when no pets exist (callers must route to
+/// `/pets/add` first). The callable shape is preserved for existing
+/// `ref.read(activePetIdProvider)()` call sites in chat / soul
+/// editor / hub.
 final activePetIdProvider = Provider<int Function()>((ref) {
   return () {
-    final petsAsync = ref.read(petsProvider);
-    final pets = petsAsync.maybeWhen(
-      data: (p) => p,
-      orElse: () => const <Pet>[],
-    );
+    final pets = ref.read(petsProvider).maybeWhen(
+          data: (p) => p,
+          orElse: () => const <Pet>[],
+        );
     if (pets.isEmpty) {
       throw StateError(
         'No active pet — UI should have routed to /pets/add before chat.',
       );
     }
+    final selected = ref.read(activePetSelectionProvider).valueOrNull;
+    if (selected != null) {
+      for (final p in pets) {
+        if (p.id == selected) return p.id;
+      }
+    }
     return pets.last.id;
   };
+});
+
+/// Phase 7 task E.2 — resolved active [Pet] (or `null` when no pets
+/// exist). Watches both [petsProvider] and
+/// [activePetSelectionProvider] so the active surfaces (home greeting,
+/// profile, journal title) repaint when the user picks a pet from
+/// the switcher or the persisted selection loads on app start.
+final activePetProvider = Provider<Pet?>((ref) {
+  final pets = ref.watch(petsProvider).maybeWhen(
+        data: (p) => p,
+        orElse: () => const <Pet>[],
+      );
+  if (pets.isEmpty) return null;
+  final selected = ref.watch(activePetSelectionProvider).valueOrNull;
+  if (selected != null) {
+    for (final p in pets) {
+      if (p.id == selected) return p;
+    }
+  }
+  return pets.last;
 });
 
 // ─── LLM client + agent loop ───────────────────────────────────────────────
@@ -507,6 +573,24 @@ final remindersForPetProvider =
     FutureProvider.family<List<ReminderRow>, int>((ref, petId) async {
   final service = await ref.watch(reminderServiceProvider.future);
   return service.listForPet(petId);
+});
+
+/// Phase 7 task E.2 — family-wide reminders, sectioned by pet, in
+/// pet-creation order. Each entry pairs a pet with its (possibly
+/// empty) reminder list. The Reminders screen renders sections in
+/// this order; sections with no reminders are dropped at the screen
+/// layer (this provider returns the full set so callers can
+/// distinguish "no pets" from "every pet has zero reminders").
+final allRemindersProvider =
+    FutureProvider<List<({Pet pet, List<ReminderRow> reminders})>>(
+        (ref) async {
+  final pets = await ref.watch(petsProvider.future);
+  final out = <({Pet pet, List<ReminderRow> reminders})>[];
+  for (final pet in pets) {
+    final reminders = await ref.watch(remindersForPetProvider(pet.id).future);
+    out.add((pet: pet, reminders: reminders));
+  }
+  return out;
 });
 
 /// Top-level facade over reminder create/cancel/list. Wraps repo +

@@ -4,47 +4,101 @@ import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../../data/db/database.dart';
+import '../active_pet/active_pet_notifier.dart';
 import '../design/design.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
 import '../widgets/editorial_card.dart';
 import '../widgets/pet_button.dart';
 import '../widgets/pet_empty_state.dart';
+import '../widgets/pet_switcher.dart';
 
 /// Phase 6.6 task 6.6.A.3 — Export AppBar action removed (DECISIONS
 /// row 60: Export relocated to Hub for IA-single-rooting). The
 /// journal browser keeps the vet-visit creator action + the refresh
 /// action; the refresh action's responsibility is local to the
 /// browser, so it stays.
-class WikiBrowserScreen extends ConsumerWidget {
+///
+/// Phase 7 task E.2 — Stateful so the screen can hold a journal-
+/// local view selection (`null` = cross-pet "All pets" timeline; a
+/// pet ID = single-pet view). The switcher in the AppBar opens
+/// the cross-pet sheet variant; selecting a real pet ALSO updates
+/// the global active pet selection (so Home / Profile track the
+/// user's intent across tabs). Selecting "All pets" stays
+/// journal-local.
+class WikiBrowserScreen extends ConsumerStatefulWidget {
   const WikiBrowserScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final entriesAsync = ref.watch(wikiEntriesProvider);
-    // Per-pet destination → interpolate the active pet's name into the
-    // app bar title (VOICE.md §5).
+  ConsumerState<WikiBrowserScreen> createState() => _WikiBrowserScreenState();
+}
+
+class _WikiBrowserScreenState extends ConsumerState<WikiBrowserScreen> {
+  /// `null` = "All pets" cross-pet timeline; otherwise the pet ID
+  /// being browsed. Initialized lazily from [activePetProvider] on
+  /// the first build so navigating into Journal honours the user's
+  /// global active pet, but staying inside Journal preserves their
+  /// view choice (including "All pets").
+  int? _selectedPetId;
+  bool _initialized = false;
+
+  Future<void> _openSwitcher(BuildContext context) async {
+    final current = _selectedPetId == null
+        ? const PickedAllPets()
+        : PickedPet(_selectedPetId!);
+    final choice = await showPetSwitcherSheet(
+      context,
+      currentSelection: current,
+      includeAllPets: true,
+    );
+    if (choice == null) return;
+    if (choice is PickedAllPets) {
+      setState(() => _selectedPetId = null);
+    } else if (choice is PickedPet) {
+      setState(() => _selectedPetId = choice.petId);
+      // Sync the global active pet so Home / Profile follow.
+      await ref
+          .read(activePetSelectionProvider.notifier)
+          .select(choice.petId);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final activePet = ref.watch(activePetProvider);
+    if (!_initialized && activePet != null) {
+      _selectedPetId = activePet.id;
+      _initialized = true;
+    }
     final petsAsync = ref.watch(petsProvider);
-    // Bug-2 defense: treat null AND empty/whitespace as the
-    // "no-named-pet" case so we don't render "'s journal" with an
-    // orphan apostrophe. The downstream `_Tree`, `_DigestCard`, and
-    // empty-state widgets already check for null but were
-    // partially missing the empty case.
-    final petName = petsAsync.maybeWhen(
+
+    final entriesAsync = ref.watch(journalEntriesProvider(_selectedPetId));
+    final selectedPetName = petsAsync.maybeWhen(
       data: (pets) {
-        if (pets.isEmpty) return null;
-        final name = pets.last.name.trim();
-        return name.isEmpty ? null : name;
+        if (_selectedPetId == null) return null;
+        for (final p in pets) {
+          if (p.id == _selectedPetId) {
+            final n = p.name.trim();
+            return n.isEmpty ? null : n;
+          }
+        }
+        return null;
       },
       orElse: () => null,
     );
-    final title = petName == null ? 'Journal' : "$petName's journal";
+    final title = _selectedPetId == null
+        ? 'All pets · journal'
+        : (selectedPetName == null
+            ? 'Journal'
+            : "$selectedPetName's journal");
+
     return AppScaffold.async<List<Entry>>(
       title: title,
+      titleWidget: _JournalSwitcherTitle(
+        title: title,
+        onTap: () => _openSwitcher(context),
+      ),
       actions: [
-        // Phase 6 task 6.10 — log a structured vet-visit entry. The
-        // form lives at /vet/new; saves a structured-frontmatter
-        // markdown file under wiki/<petId>/vet/.
         IconButton(
           tooltip: 'Log a vet visit',
           onPressed: () => GoRouter.of(context).push('/vet/new'),
@@ -52,15 +106,68 @@ class WikiBrowserScreen extends ConsumerWidget {
         ),
         IconButton(
           tooltip: 'Refresh',
-          onPressed: () => ref.invalidate(wikiEntriesProvider),
+          onPressed: () =>
+              ref.invalidate(journalEntriesProvider(_selectedPetId)),
           icon: const Icon(PhosphorIconsRegular.arrowClockwise),
         ),
       ],
       value: entriesAsync,
-      onRetry: () => ref.invalidate(wikiEntriesProvider),
+      onRetry: () =>
+          ref.invalidate(journalEntriesProvider(_selectedPetId)),
       data: (context, entries) => entries.isEmpty
-          ? JournalEmptyForTesting(petName: petName)
-          : _Tree(entries: entries, petName: petName),
+          ? JournalEmptyForTesting(petName: selectedPetName)
+          : _Tree(
+              entries: entries,
+              petName: selectedPetName,
+              isAllPets: _selectedPetId == null,
+              petsById: petsAsync.maybeWhen(
+                data: (list) => {for (final p in list) p.id: p},
+                orElse: () => const <int, Pet>{},
+              ),
+            ),
+    );
+  }
+}
+
+/// Phase 7 task E.2 — Journal AppBar title.
+///
+/// Hidden chevron + tappable title. Always shows the chevron because
+/// the Journal is the one surface where "All pets" mode is reachable
+/// — even single-pet households need a way to flip back from the
+/// cross-pet view, which means the affordance must be visible.
+class _JournalSwitcherTitle extends ConsumerWidget {
+  const _JournalSwitcherTitle({required this.title, required this.onTap});
+
+  final String title;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final petsAsync = ref.watch(petsProvider);
+    final petCount = petsAsync.maybeWhen(
+      data: (pets) => pets.length,
+      orElse: () => 0,
+    );
+    if (petCount <= 1) {
+      // Solo-pet user — no other pet to switch to and "All pets"
+      // would just mirror the single pet's view. Hide the
+      // affordance to keep the AppBar clean.
+      return Text(title);
+    }
+    return InkWell(
+      onTap: onTap,
+      borderRadius: Corners.s,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: Spacing.xs),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(child: Text(title, overflow: TextOverflow.ellipsis)),
+            const SizedBox(width: Spacing.xs),
+            const Icon(PhosphorIconsRegular.caretDown, size: 16),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -104,12 +211,41 @@ class JournalEmptyForTesting extends StatelessWidget {
 }
 
 class _Tree extends StatelessWidget {
-  const _Tree({required this.entries, required this.petName});
+  const _Tree({
+    required this.entries,
+    required this.petName,
+    this.isAllPets = false,
+    this.petsById = const <int, Pet>{},
+  });
   final List<Entry> entries;
   final String? petName;
+  // Phase 7 task E.2 — when true, the tree renders flat (no
+  // by-type grouping) and prefixes each card's kicker with the
+  // pet's name. The "All pets" timeline is interleaved by `ts`
+  // desc so the user reads a household-wide chronological feed.
+  final bool isAllPets;
+  final Map<int, Pet> petsById;
 
   @override
   Widget build(BuildContext context) {
+    if (isAllPets) {
+      return ListView(
+        children: [
+          for (final entry in entries)
+            if (entry.type == 'digest')
+              _DigestCard(
+                entry: entry,
+                petName: petsById[entry.petId]?.name,
+                petPrefix: petsById[entry.petId]?.name,
+              )
+            else
+              _EntryTile(
+                entry: entry,
+                petPrefix: petsById[entry.petId]?.name,
+              ),
+        ],
+      );
+    }
     final byType = <String, List<Entry>>{};
     for (final e in entries) {
       byType.putIfAbsent(e.type, () => []).add(e);
@@ -196,8 +332,12 @@ class _TypeHeader extends StatelessWidget {
 }
 
 class _EntryTile extends StatelessWidget {
-  const _EntryTile({required this.entry});
+  const _EntryTile({required this.entry, this.petPrefix});
   final Entry entry;
+  /// Phase 7 task E.2 — non-null in "All pets" mode; prepended to
+  /// the kicker so the cross-pet timeline stays scannable
+  /// ("LOKI · VET · APR 22" instead of just "VET · APR 22").
+  final String? petPrefix;
 
   static const _monthAbbrev = [
     'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
@@ -207,6 +347,10 @@ class _EntryTile extends StatelessWidget {
   String _kickerFor(Entry e) {
     final type = _humanTypeLabel(e.type).toUpperCase();
     final month = _monthAbbrev[e.ts.month - 1];
+    final prefix = petPrefix?.trim();
+    if (prefix != null && prefix.isNotEmpty) {
+      return '${prefix.toUpperCase()} · $type · $month ${e.ts.day}';
+    }
     return '$type · $month ${e.ts.day}';
   }
 
@@ -265,9 +409,18 @@ class _EntryTile extends StatelessWidget {
 /// tapping the card opens the entry viewer where the full markdown
 /// renders.
 class _DigestCard extends StatelessWidget {
-  const _DigestCard({required this.entry, required this.petName});
+  const _DigestCard({
+    required this.entry,
+    required this.petName,
+    this.petPrefix,
+  });
   final Entry entry;
   final String? petName;
+  /// Phase 7 task E.2 — non-null in "All pets" mode; prepended to
+  /// the digest kicker so a cross-pet weekly summary card carries
+  /// its pet's name even though the title body still reads
+  /// "{pet}'s week".
+  final String? petPrefix;
 
   static const _monthAbbrev = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -290,8 +443,12 @@ class _DigestCard extends StatelessWidget {
     final subject = (petName == null || petName!.isEmpty)
         ? 'This'
         : "$petName's";
+    final kickerPrefix = petPrefix?.trim();
+    final kicker = (kickerPrefix != null && kickerPrefix.isNotEmpty)
+        ? '${kickerPrefix.toUpperCase()} · WEEKLY SUMMARY'
+        : 'WEEKLY SUMMARY';
     return EditorialCard(
-      kicker: 'WEEKLY SUMMARY',
+      kicker: kicker,
       title: '$subject week',
       titleStyle: JournalText.weeklySummaryTitle(color: scheme.onSurface),
       body: _formatRange(entry.ts),
