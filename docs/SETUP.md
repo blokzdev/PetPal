@@ -1,10 +1,11 @@
-# PetPal — Phase 7 setup guide
+# PetPal — Setup guide
 
 Everything you (the human) need to do on the dashboards / CLI / file
-system, in order. Phase 7 is code-complete (DECISIONS rows 89 + 90
-mark the last sub-piece closes); the only remaining gate is the
-two-device on-device verification — this guide is the prerequisite
-for that pass.
+system to provision the backend + the dev environment + Play Console.
+This is the standing operational baseline — completing it is a
+prerequisite for any on-device test session, and the same checklist
+covers the two-device on-device verification before Phase 7 formally
+closes.
 
 For the deeper Supabase A.2 deploy details, see
 [`docs/phase7/A2-deployment.md`](./phase7/A2-deployment.md). This
@@ -34,7 +35,7 @@ Accounts you'll need:
 
 ---
 
-## 2. Supabase — dev project (Group A.2 + G + H)
+## 2. Supabase — dev project
 
 ```bash
 cd /path/to/PetPal
@@ -251,9 +252,9 @@ can switch between monthly/annual without orphan grants.
 ### Webhook URL
 
 **Skip for now.** The `play-billing-verify` Edge Function (server-side
-receipt verification) lands in a later Phase 7 commit. Once it ships,
-you'll come back to Play Console → Monetize setup → **Real-time
-developer notifications** and paste in:
+receipt verification) is a Phase 8 prerequisite — see §6. Once it
+ships, you'll come back to Play Console → Monetize setup →
+**Real-time developer notifications** and paste in:
 
 ```
 https://abcdefgh.supabase.co/functions/v1/play-billing-webhook
@@ -296,30 +297,23 @@ launch — no re-entry needed. Same migration runs for the
 
 ---
 
-## 6. What shipped since this doc was first written
+## 6. Still deferred
 
-Phase 7 was incomplete when this guide was first authored at commit
-`8a2e70e`. The original §6 listed six "Stage 2 catch-up" rows
-deferred to later commits. Five have shipped:
-
-| Feature | Shipped in | Reference |
-|---|---|---|
-| Cloud sync provider (Supabase Storage) | Group G.1 + G.2 | DECISIONS rows 83 + 84 |
-| E2EE passphrase derivation (Argon2id) | Group G.2 | DECISIONS row 71 |
-| Magic-link auth (Supabase) | Group H.1.a–c | DECISIONS row 70 (redirect URL config moved to §2c above) |
-| Multi-pet UI | Group E.2 | DECISIONS row 36 |
-| Account deletion + 30-day undo + hard-purge cron | Group H.1.d + H.1.d-follow-ups | DECISIONS rows 77, 87, 90 (`account-delete`, `cancel-account-delete`, `daily-reconciliation-cron` Edge Functions in §2a above) |
-
-**Still deferred:**
+One setup item is intentionally not yet ready:
 
 | Feature | Blocked by | Where you'll set it up |
 |---|---|---|
 | Server-side IAP receipt verification | `play-billing-verify` Edge Function (Phase 8 prerequisite) | Play Console RTDN webhook URL — see §4 "Webhook URL" |
 
-DECISIONS rows 89 + 90 close H.2.b (accessibility audit) +
-H.1.d-follow-ups respectively. The only Phase-7 gate that remains
-is the two-device on-device verification — which this guide is the
-prerequisite for.
+Until `play-billing-verify` ships, IAP works in optimistic-emit mode
+(client trusts the Play sandbox response and updates entitlement
+immediately; backend reconciliation is a no-op). Acceptable for v1
+internal-track + closed testing; not acceptable for open production
+launch — the verify function gates Phase 8 task 8.6 (release-track
+AAB build).
+
+Canonical version history for the rest of the codebase lives in
+`DECISIONS.md`. Don't duplicate it here.
 
 ---
 
@@ -354,7 +348,7 @@ switch the default model.)
 
 ---
 
-## 8. Quick sanity checklist before two-device verification
+## 8. Quick sanity checklist before any on-device test session
 
 **Supabase project (per §2):**
 
@@ -412,6 +406,7 @@ purged).
 
 ---
 
-That's everything actionable for two-device on-device verification.
-§5 (BYOK dev testing) + §7 (cost alerts) are deferrable. §1 + §2 +
-§3 + §4 are the load-bearing prerequisites.
+§1 + §2 + §3 + §4 are the load-bearing prerequisites for any
+on-device test session, including the two-device verification that
+gates Phase 7's formal close. §5 (BYOK dev testing) + §7 (cost
+alerts) are deferrable.
