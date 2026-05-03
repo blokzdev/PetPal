@@ -12,12 +12,15 @@ import '../data/repos/reminder_repo.dart';
 import '../data/repos/skill_repo.dart';
 import '../data/repos/trends_repo.dart';
 import '../data/repos/wiki_repo.dart';
+import '../data/repos/entitlement_repo.dart';
 import '../data/soul_file.dart';
 import '../data/wiki_io.dart';
 import '../data/wiki_io_fs.dart';
 import '../harness/agent/agent_loop.dart';
 import '../harness/agent/direct_transport.dart';
 import '../harness/agent/llm_client.dart';
+import 'entitlement/entitlement.dart';
+import 'entitlement/entitlement_notifier.dart';
 import '../harness/agent/tool_dispatcher.dart';
 import '../harness/guardrails/red_flag_screener.dart';
 import '../harness/retrieval/embedding_provider.dart';
@@ -128,6 +131,24 @@ final petRepoProvider = FutureProvider<PetRepo>((ref) async {
   final wiki = await ref.watch(wikiIoProvider.future);
   return PetRepo(db: db, wiki: wiki);
 });
+
+/// Phase 7 task B.1 — entitlement cache repo.
+final entitlementRepoProvider = FutureProvider<EntitlementRepo>((ref) async {
+  final db = await ref.watch(appDatabaseProvider.future);
+  return EntitlementRepo(db: db);
+});
+
+/// Phase 7 task B.1 — active-user entitlement.
+///
+/// Read by the agent loop's quota gate (DECISIONS row 75), Settings
+/// (Pro badge, message counter, photo-credit balance), and the
+/// paywall dispatcher. Backed by [EntitlementNotifier]; B.1 emits
+/// [Entitlement.freeAnonymous] by default. Reconciliation against
+/// Supabase wires in once auth lands (Group F.1).
+final entitlementProvider =
+    AsyncNotifierProvider<EntitlementNotifier, Entitlement>(
+  EntitlementNotifier.new,
+);
 
 /// Snapshot list of all pets. Callers that mutate pets (add-pet flow,
 /// pet switcher) must `ref.invalidate(petsProvider)` after the write so

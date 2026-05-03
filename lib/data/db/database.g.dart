@@ -2204,6 +2204,616 @@ class SkillsInstalledCompanion extends UpdateCompanion<SkillsInstalledData> {
   }
 }
 
+class $EntitlementsTable extends Entitlements
+    with TableInfo<$EntitlementsTable, EntitlementRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $EntitlementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stateMeta = const VerificationMeta('state');
+  @override
+  late final GeneratedColumn<String> state = GeneratedColumn<String>(
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('free'),
+  );
+  static const VerificationMeta _renewalDateMeta = const VerificationMeta(
+    'renewalDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> renewalDate = GeneratedColumn<DateTime>(
+    'renewal_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _graceUntilMeta = const VerificationMeta(
+    'graceUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> graceUntil = GeneratedColumn<DateTime>(
+    'grace_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _photoCreditsBalanceMeta =
+      const VerificationMeta('photoCreditsBalance');
+  @override
+  late final GeneratedColumn<int> photoCreditsBalance = GeneratedColumn<int>(
+    'photo_credits_balance',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _monthlyTextCountMeta = const VerificationMeta(
+    'monthlyTextCount',
+  );
+  @override
+  late final GeneratedColumn<int> monthlyTextCount = GeneratedColumn<int>(
+    'monthly_text_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _monthlyVisionCountMeta =
+      const VerificationMeta('monthlyVisionCount');
+  @override
+  late final GeneratedColumn<int> monthlyVisionCount = GeneratedColumn<int>(
+    'monthly_vision_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _counterPeriodStartMeta =
+      const VerificationMeta('counterPeriodStart');
+  @override
+  late final GeneratedColumn<DateTime> counterPeriodStart =
+      GeneratedColumn<DateTime>(
+        'counter_period_start',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _fetchedAtMeta = const VerificationMeta(
+    'fetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fetchedAt = GeneratedColumn<DateTime>(
+    'fetched_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    userId,
+    state,
+    renewalDate,
+    graceUntil,
+    photoCreditsBalance,
+    monthlyTextCount,
+    monthlyVisionCount,
+    counterPeriodStart,
+    fetchedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'entitlements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<EntitlementRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('state')) {
+      context.handle(
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
+    }
+    if (data.containsKey('renewal_date')) {
+      context.handle(
+        _renewalDateMeta,
+        renewalDate.isAcceptableOrUnknown(
+          data['renewal_date']!,
+          _renewalDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('grace_until')) {
+      context.handle(
+        _graceUntilMeta,
+        graceUntil.isAcceptableOrUnknown(data['grace_until']!, _graceUntilMeta),
+      );
+    }
+    if (data.containsKey('photo_credits_balance')) {
+      context.handle(
+        _photoCreditsBalanceMeta,
+        photoCreditsBalance.isAcceptableOrUnknown(
+          data['photo_credits_balance']!,
+          _photoCreditsBalanceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monthly_text_count')) {
+      context.handle(
+        _monthlyTextCountMeta,
+        monthlyTextCount.isAcceptableOrUnknown(
+          data['monthly_text_count']!,
+          _monthlyTextCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('monthly_vision_count')) {
+      context.handle(
+        _monthlyVisionCountMeta,
+        monthlyVisionCount.isAcceptableOrUnknown(
+          data['monthly_vision_count']!,
+          _monthlyVisionCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('counter_period_start')) {
+      context.handle(
+        _counterPeriodStartMeta,
+        counterPeriodStart.isAcceptableOrUnknown(
+          data['counter_period_start']!,
+          _counterPeriodStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_counterPeriodStartMeta);
+    }
+    if (data.containsKey('fetched_at')) {
+      context.handle(
+        _fetchedAtMeta,
+        fetchedAt.isAcceptableOrUnknown(data['fetched_at']!, _fetchedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {userId};
+  @override
+  EntitlementRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return EntitlementRow(
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}state'],
+      )!,
+      renewalDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}renewal_date'],
+      ),
+      graceUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}grace_until'],
+      ),
+      photoCreditsBalance: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}photo_credits_balance'],
+      )!,
+      monthlyTextCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}monthly_text_count'],
+      )!,
+      monthlyVisionCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}monthly_vision_count'],
+      )!,
+      counterPeriodStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}counter_period_start'],
+      )!,
+      fetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $EntitlementsTable createAlias(String alias) {
+    return $EntitlementsTable(attachedDatabase, alias);
+  }
+}
+
+class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
+  /// Supabase auth.users.id (UUID v4 as a text string).
+  final String userId;
+
+  /// One of {'free', 'pro_monthly', 'pro_annual', 'byok'} per
+  /// DECISIONS row 36. Stored as text to match the Supabase enum-style
+  /// `text + check constraint` column without a Drift codegen step.
+  final String state;
+
+  /// Subscription anniversary; null for free + byok rows.
+  final DateTime? renewalDate;
+
+  /// Grace window after a billing failure (Play sometimes retries before
+  /// the entitlement actually expires). Null when no grace is active.
+  final DateTime? graceUntil;
+
+  /// Vision credit pack balance; rolls over indefinitely per row 36.
+  final int photoCreditsBalance;
+
+  /// Server-side counters mirrored locally for the UI (Settings shows
+  /// "127 / 200 used this month" per VOICE.md §6 example 11). The
+  /// quota gate uses the SERVER counter, not these — these are purely
+  /// for display.
+  final int monthlyTextCount;
+  final int monthlyVisionCount;
+  final DateTime counterPeriodStart;
+
+  /// When this cache row was last refreshed from Supabase. Used to
+  /// surface stale-cache warnings and to drive the reconciliation
+  /// schedule (refresh if older than 24 h on next app foreground).
+  final DateTime fetchedAt;
+  const EntitlementRow({
+    required this.userId,
+    required this.state,
+    this.renewalDate,
+    this.graceUntil,
+    required this.photoCreditsBalance,
+    required this.monthlyTextCount,
+    required this.monthlyVisionCount,
+    required this.counterPeriodStart,
+    required this.fetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['user_id'] = Variable<String>(userId);
+    map['state'] = Variable<String>(state);
+    if (!nullToAbsent || renewalDate != null) {
+      map['renewal_date'] = Variable<DateTime>(renewalDate);
+    }
+    if (!nullToAbsent || graceUntil != null) {
+      map['grace_until'] = Variable<DateTime>(graceUntil);
+    }
+    map['photo_credits_balance'] = Variable<int>(photoCreditsBalance);
+    map['monthly_text_count'] = Variable<int>(monthlyTextCount);
+    map['monthly_vision_count'] = Variable<int>(monthlyVisionCount);
+    map['counter_period_start'] = Variable<DateTime>(counterPeriodStart);
+    map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    return map;
+  }
+
+  EntitlementsCompanion toCompanion(bool nullToAbsent) {
+    return EntitlementsCompanion(
+      userId: Value(userId),
+      state: Value(state),
+      renewalDate: renewalDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(renewalDate),
+      graceUntil: graceUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(graceUntil),
+      photoCreditsBalance: Value(photoCreditsBalance),
+      monthlyTextCount: Value(monthlyTextCount),
+      monthlyVisionCount: Value(monthlyVisionCount),
+      counterPeriodStart: Value(counterPeriodStart),
+      fetchedAt: Value(fetchedAt),
+    );
+  }
+
+  factory EntitlementRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return EntitlementRow(
+      userId: serializer.fromJson<String>(json['userId']),
+      state: serializer.fromJson<String>(json['state']),
+      renewalDate: serializer.fromJson<DateTime?>(json['renewalDate']),
+      graceUntil: serializer.fromJson<DateTime?>(json['graceUntil']),
+      photoCreditsBalance: serializer.fromJson<int>(
+        json['photoCreditsBalance'],
+      ),
+      monthlyTextCount: serializer.fromJson<int>(json['monthlyTextCount']),
+      monthlyVisionCount: serializer.fromJson<int>(json['monthlyVisionCount']),
+      counterPeriodStart: serializer.fromJson<DateTime>(
+        json['counterPeriodStart'],
+      ),
+      fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'userId': serializer.toJson<String>(userId),
+      'state': serializer.toJson<String>(state),
+      'renewalDate': serializer.toJson<DateTime?>(renewalDate),
+      'graceUntil': serializer.toJson<DateTime?>(graceUntil),
+      'photoCreditsBalance': serializer.toJson<int>(photoCreditsBalance),
+      'monthlyTextCount': serializer.toJson<int>(monthlyTextCount),
+      'monthlyVisionCount': serializer.toJson<int>(monthlyVisionCount),
+      'counterPeriodStart': serializer.toJson<DateTime>(counterPeriodStart),
+      'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+    };
+  }
+
+  EntitlementRow copyWith({
+    String? userId,
+    String? state,
+    Value<DateTime?> renewalDate = const Value.absent(),
+    Value<DateTime?> graceUntil = const Value.absent(),
+    int? photoCreditsBalance,
+    int? monthlyTextCount,
+    int? monthlyVisionCount,
+    DateTime? counterPeriodStart,
+    DateTime? fetchedAt,
+  }) => EntitlementRow(
+    userId: userId ?? this.userId,
+    state: state ?? this.state,
+    renewalDate: renewalDate.present ? renewalDate.value : this.renewalDate,
+    graceUntil: graceUntil.present ? graceUntil.value : this.graceUntil,
+    photoCreditsBalance: photoCreditsBalance ?? this.photoCreditsBalance,
+    monthlyTextCount: monthlyTextCount ?? this.monthlyTextCount,
+    monthlyVisionCount: monthlyVisionCount ?? this.monthlyVisionCount,
+    counterPeriodStart: counterPeriodStart ?? this.counterPeriodStart,
+    fetchedAt: fetchedAt ?? this.fetchedAt,
+  );
+  EntitlementRow copyWithCompanion(EntitlementsCompanion data) {
+    return EntitlementRow(
+      userId: data.userId.present ? data.userId.value : this.userId,
+      state: data.state.present ? data.state.value : this.state,
+      renewalDate: data.renewalDate.present
+          ? data.renewalDate.value
+          : this.renewalDate,
+      graceUntil: data.graceUntil.present
+          ? data.graceUntil.value
+          : this.graceUntil,
+      photoCreditsBalance: data.photoCreditsBalance.present
+          ? data.photoCreditsBalance.value
+          : this.photoCreditsBalance,
+      monthlyTextCount: data.monthlyTextCount.present
+          ? data.monthlyTextCount.value
+          : this.monthlyTextCount,
+      monthlyVisionCount: data.monthlyVisionCount.present
+          ? data.monthlyVisionCount.value
+          : this.monthlyVisionCount,
+      counterPeriodStart: data.counterPeriodStart.present
+          ? data.counterPeriodStart.value
+          : this.counterPeriodStart,
+      fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EntitlementRow(')
+          ..write('userId: $userId, ')
+          ..write('state: $state, ')
+          ..write('renewalDate: $renewalDate, ')
+          ..write('graceUntil: $graceUntil, ')
+          ..write('photoCreditsBalance: $photoCreditsBalance, ')
+          ..write('monthlyTextCount: $monthlyTextCount, ')
+          ..write('monthlyVisionCount: $monthlyVisionCount, ')
+          ..write('counterPeriodStart: $counterPeriodStart, ')
+          ..write('fetchedAt: $fetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    userId,
+    state,
+    renewalDate,
+    graceUntil,
+    photoCreditsBalance,
+    monthlyTextCount,
+    monthlyVisionCount,
+    counterPeriodStart,
+    fetchedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is EntitlementRow &&
+          other.userId == this.userId &&
+          other.state == this.state &&
+          other.renewalDate == this.renewalDate &&
+          other.graceUntil == this.graceUntil &&
+          other.photoCreditsBalance == this.photoCreditsBalance &&
+          other.monthlyTextCount == this.monthlyTextCount &&
+          other.monthlyVisionCount == this.monthlyVisionCount &&
+          other.counterPeriodStart == this.counterPeriodStart &&
+          other.fetchedAt == this.fetchedAt);
+}
+
+class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
+  final Value<String> userId;
+  final Value<String> state;
+  final Value<DateTime?> renewalDate;
+  final Value<DateTime?> graceUntil;
+  final Value<int> photoCreditsBalance;
+  final Value<int> monthlyTextCount;
+  final Value<int> monthlyVisionCount;
+  final Value<DateTime> counterPeriodStart;
+  final Value<DateTime> fetchedAt;
+  final Value<int> rowid;
+  const EntitlementsCompanion({
+    this.userId = const Value.absent(),
+    this.state = const Value.absent(),
+    this.renewalDate = const Value.absent(),
+    this.graceUntil = const Value.absent(),
+    this.photoCreditsBalance = const Value.absent(),
+    this.monthlyTextCount = const Value.absent(),
+    this.monthlyVisionCount = const Value.absent(),
+    this.counterPeriodStart = const Value.absent(),
+    this.fetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  EntitlementsCompanion.insert({
+    required String userId,
+    this.state = const Value.absent(),
+    this.renewalDate = const Value.absent(),
+    this.graceUntil = const Value.absent(),
+    this.photoCreditsBalance = const Value.absent(),
+    this.monthlyTextCount = const Value.absent(),
+    this.monthlyVisionCount = const Value.absent(),
+    required DateTime counterPeriodStart,
+    required DateTime fetchedAt,
+    this.rowid = const Value.absent(),
+  }) : userId = Value(userId),
+       counterPeriodStart = Value(counterPeriodStart),
+       fetchedAt = Value(fetchedAt);
+  static Insertable<EntitlementRow> custom({
+    Expression<String>? userId,
+    Expression<String>? state,
+    Expression<DateTime>? renewalDate,
+    Expression<DateTime>? graceUntil,
+    Expression<int>? photoCreditsBalance,
+    Expression<int>? monthlyTextCount,
+    Expression<int>? monthlyVisionCount,
+    Expression<DateTime>? counterPeriodStart,
+    Expression<DateTime>? fetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (userId != null) 'user_id': userId,
+      if (state != null) 'state': state,
+      if (renewalDate != null) 'renewal_date': renewalDate,
+      if (graceUntil != null) 'grace_until': graceUntil,
+      if (photoCreditsBalance != null)
+        'photo_credits_balance': photoCreditsBalance,
+      if (monthlyTextCount != null) 'monthly_text_count': monthlyTextCount,
+      if (monthlyVisionCount != null)
+        'monthly_vision_count': monthlyVisionCount,
+      if (counterPeriodStart != null)
+        'counter_period_start': counterPeriodStart,
+      if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  EntitlementsCompanion copyWith({
+    Value<String>? userId,
+    Value<String>? state,
+    Value<DateTime?>? renewalDate,
+    Value<DateTime?>? graceUntil,
+    Value<int>? photoCreditsBalance,
+    Value<int>? monthlyTextCount,
+    Value<int>? monthlyVisionCount,
+    Value<DateTime>? counterPeriodStart,
+    Value<DateTime>? fetchedAt,
+    Value<int>? rowid,
+  }) {
+    return EntitlementsCompanion(
+      userId: userId ?? this.userId,
+      state: state ?? this.state,
+      renewalDate: renewalDate ?? this.renewalDate,
+      graceUntil: graceUntil ?? this.graceUntil,
+      photoCreditsBalance: photoCreditsBalance ?? this.photoCreditsBalance,
+      monthlyTextCount: monthlyTextCount ?? this.monthlyTextCount,
+      monthlyVisionCount: monthlyVisionCount ?? this.monthlyVisionCount,
+      counterPeriodStart: counterPeriodStart ?? this.counterPeriodStart,
+      fetchedAt: fetchedAt ?? this.fetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (state.present) {
+      map['state'] = Variable<String>(state.value);
+    }
+    if (renewalDate.present) {
+      map['renewal_date'] = Variable<DateTime>(renewalDate.value);
+    }
+    if (graceUntil.present) {
+      map['grace_until'] = Variable<DateTime>(graceUntil.value);
+    }
+    if (photoCreditsBalance.present) {
+      map['photo_credits_balance'] = Variable<int>(photoCreditsBalance.value);
+    }
+    if (monthlyTextCount.present) {
+      map['monthly_text_count'] = Variable<int>(monthlyTextCount.value);
+    }
+    if (monthlyVisionCount.present) {
+      map['monthly_vision_count'] = Variable<int>(monthlyVisionCount.value);
+    }
+    if (counterPeriodStart.present) {
+      map['counter_period_start'] = Variable<DateTime>(
+        counterPeriodStart.value,
+      );
+    }
+    if (fetchedAt.present) {
+      map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('EntitlementsCompanion(')
+          ..write('userId: $userId, ')
+          ..write('state: $state, ')
+          ..write('renewalDate: $renewalDate, ')
+          ..write('graceUntil: $graceUntil, ')
+          ..write('photoCreditsBalance: $photoCreditsBalance, ')
+          ..write('monthlyTextCount: $monthlyTextCount, ')
+          ..write('monthlyVisionCount: $monthlyVisionCount, ')
+          ..write('counterPeriodStart: $counterPeriodStart, ')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2216,6 +2826,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SkillsInstalledTable skillsInstalled = $SkillsInstalledTable(
     this,
   );
+  late final $EntitlementsTable entitlements = $EntitlementsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2228,6 +2839,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     messages,
     reminders,
     skillsInstalled,
+    entitlements,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4571,6 +5183,294 @@ typedef $$SkillsInstalledTableProcessedTableManager =
       SkillsInstalledData,
       PrefetchHooks Function()
     >;
+typedef $$EntitlementsTableCreateCompanionBuilder =
+    EntitlementsCompanion Function({
+      required String userId,
+      Value<String> state,
+      Value<DateTime?> renewalDate,
+      Value<DateTime?> graceUntil,
+      Value<int> photoCreditsBalance,
+      Value<int> monthlyTextCount,
+      Value<int> monthlyVisionCount,
+      required DateTime counterPeriodStart,
+      required DateTime fetchedAt,
+      Value<int> rowid,
+    });
+typedef $$EntitlementsTableUpdateCompanionBuilder =
+    EntitlementsCompanion Function({
+      Value<String> userId,
+      Value<String> state,
+      Value<DateTime?> renewalDate,
+      Value<DateTime?> graceUntil,
+      Value<int> photoCreditsBalance,
+      Value<int> monthlyTextCount,
+      Value<int> monthlyVisionCount,
+      Value<DateTime> counterPeriodStart,
+      Value<DateTime> fetchedAt,
+      Value<int> rowid,
+    });
+
+class $$EntitlementsTableFilterComposer
+    extends Composer<_$AppDatabase, $EntitlementsTable> {
+  $$EntitlementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get renewalDate => $composableBuilder(
+    column: $table.renewalDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get graceUntil => $composableBuilder(
+    column: $table.graceUntil,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get photoCreditsBalance => $composableBuilder(
+    column: $table.photoCreditsBalance,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get monthlyTextCount => $composableBuilder(
+    column: $table.monthlyTextCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get monthlyVisionCount => $composableBuilder(
+    column: $table.monthlyVisionCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get counterPeriodStart => $composableBuilder(
+    column: $table.counterPeriodStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$EntitlementsTableOrderingComposer
+    extends Composer<_$AppDatabase, $EntitlementsTable> {
+  $$EntitlementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get state => $composableBuilder(
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get renewalDate => $composableBuilder(
+    column: $table.renewalDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get graceUntil => $composableBuilder(
+    column: $table.graceUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get photoCreditsBalance => $composableBuilder(
+    column: $table.photoCreditsBalance,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get monthlyTextCount => $composableBuilder(
+    column: $table.monthlyTextCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get monthlyVisionCount => $composableBuilder(
+    column: $table.monthlyVisionCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get counterPeriodStart => $composableBuilder(
+    column: $table.counterPeriodStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fetchedAt => $composableBuilder(
+    column: $table.fetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$EntitlementsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $EntitlementsTable> {
+  $$EntitlementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get state =>
+      $composableBuilder(column: $table.state, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get renewalDate => $composableBuilder(
+    column: $table.renewalDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get graceUntil => $composableBuilder(
+    column: $table.graceUntil,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get photoCreditsBalance => $composableBuilder(
+    column: $table.photoCreditsBalance,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get monthlyTextCount => $composableBuilder(
+    column: $table.monthlyTextCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get monthlyVisionCount => $composableBuilder(
+    column: $table.monthlyVisionCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get counterPeriodStart => $composableBuilder(
+    column: $table.counterPeriodStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fetchedAt =>
+      $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+}
+
+class $$EntitlementsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $EntitlementsTable,
+          EntitlementRow,
+          $$EntitlementsTableFilterComposer,
+          $$EntitlementsTableOrderingComposer,
+          $$EntitlementsTableAnnotationComposer,
+          $$EntitlementsTableCreateCompanionBuilder,
+          $$EntitlementsTableUpdateCompanionBuilder,
+          (
+            EntitlementRow,
+            BaseReferences<_$AppDatabase, $EntitlementsTable, EntitlementRow>,
+          ),
+          EntitlementRow,
+          PrefetchHooks Function()
+        > {
+  $$EntitlementsTableTableManager(_$AppDatabase db, $EntitlementsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$EntitlementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$EntitlementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$EntitlementsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> userId = const Value.absent(),
+                Value<String> state = const Value.absent(),
+                Value<DateTime?> renewalDate = const Value.absent(),
+                Value<DateTime?> graceUntil = const Value.absent(),
+                Value<int> photoCreditsBalance = const Value.absent(),
+                Value<int> monthlyTextCount = const Value.absent(),
+                Value<int> monthlyVisionCount = const Value.absent(),
+                Value<DateTime> counterPeriodStart = const Value.absent(),
+                Value<DateTime> fetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => EntitlementsCompanion(
+                userId: userId,
+                state: state,
+                renewalDate: renewalDate,
+                graceUntil: graceUntil,
+                photoCreditsBalance: photoCreditsBalance,
+                monthlyTextCount: monthlyTextCount,
+                monthlyVisionCount: monthlyVisionCount,
+                counterPeriodStart: counterPeriodStart,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String userId,
+                Value<String> state = const Value.absent(),
+                Value<DateTime?> renewalDate = const Value.absent(),
+                Value<DateTime?> graceUntil = const Value.absent(),
+                Value<int> photoCreditsBalance = const Value.absent(),
+                Value<int> monthlyTextCount = const Value.absent(),
+                Value<int> monthlyVisionCount = const Value.absent(),
+                required DateTime counterPeriodStart,
+                required DateTime fetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => EntitlementsCompanion.insert(
+                userId: userId,
+                state: state,
+                renewalDate: renewalDate,
+                graceUntil: graceUntil,
+                photoCreditsBalance: photoCreditsBalance,
+                monthlyTextCount: monthlyTextCount,
+                monthlyVisionCount: monthlyVisionCount,
+                counterPeriodStart: counterPeriodStart,
+                fetchedAt: fetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$EntitlementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $EntitlementsTable,
+      EntitlementRow,
+      $$EntitlementsTableFilterComposer,
+      $$EntitlementsTableOrderingComposer,
+      $$EntitlementsTableAnnotationComposer,
+      $$EntitlementsTableCreateCompanionBuilder,
+      $$EntitlementsTableUpdateCompanionBuilder,
+      (
+        EntitlementRow,
+        BaseReferences<_$AppDatabase, $EntitlementsTable, EntitlementRow>,
+      ),
+      EntitlementRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -4588,4 +5488,6 @@ class $AppDatabaseManager {
       $$RemindersTableTableManager(_db, _db.reminders);
   $$SkillsInstalledTableTableManager get skillsInstalled =>
       $$SkillsInstalledTableTableManager(_db, _db.skillsInstalled);
+  $$EntitlementsTableTableManager get entitlements =>
+      $$EntitlementsTableTableManager(_db, _db.entitlements);
 }

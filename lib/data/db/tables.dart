@@ -79,3 +79,62 @@ class SkillsInstalled extends Table {
   @override
   Set<Column<Object>> get primaryKey => {skillId};
 }
+
+/// Phase 7 task B.1 — local cache of the active user's entitlement.
+///
+/// **The Supabase `entitlements` table is the canonical source of truth**
+/// (DECISIONS row 78 + 82); this table mirrors a subset of those columns
+/// for offline reads and as the data source for the Riverpod
+/// `entitlementProvider`. Reconciliation flow:
+///
+///   - On app foreground / chat-screen mount / post-IAP-purchase: fetch
+///     the latest entitlement from Supabase and `upsert` here.
+///   - The agent loop's quota gate reads this table — never the network
+///     — so a chat turn never blocks on a network round-trip.
+///
+/// `userId` matches the Supabase auth user ID. When the user is signed
+/// out (anonymous free path), this table has no row for them; the
+/// provider returns a synthetic [Entitlement.freeAnonymous] default.
+///
+/// `@DataClassName('EntitlementRow')` keeps Drift's generated row
+/// class out of the way of the domain `Entitlement` class in
+/// `lib/app/entitlement/entitlement.dart`.
+@DataClassName('EntitlementRow')
+class Entitlements extends Table {
+  /// Supabase auth.users.id (UUID v4 as a text string).
+  TextColumn get userId => text()();
+
+  /// One of {'free', 'pro_monthly', 'pro_annual', 'byok'} per
+  /// DECISIONS row 36. Stored as text to match the Supabase enum-style
+  /// `text + check constraint` column without a Drift codegen step.
+  TextColumn get state => text().withDefault(const Constant('free'))();
+
+  /// Subscription anniversary; null for free + byok rows.
+  DateTimeColumn get renewalDate => dateTime().nullable()();
+
+  /// Grace window after a billing failure (Play sometimes retries before
+  /// the entitlement actually expires). Null when no grace is active.
+  DateTimeColumn get graceUntil => dateTime().nullable()();
+
+  /// Vision credit pack balance; rolls over indefinitely per row 36.
+  IntColumn get photoCreditsBalance =>
+      integer().withDefault(const Constant(0))();
+
+  /// Server-side counters mirrored locally for the UI (Settings shows
+  /// "127 / 200 used this month" per VOICE.md §6 example 11). The
+  /// quota gate uses the SERVER counter, not these — these are purely
+  /// for display.
+  IntColumn get monthlyTextCount =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get monthlyVisionCount =>
+      integer().withDefault(const Constant(0))();
+  DateTimeColumn get counterPeriodStart => dateTime()();
+
+  /// When this cache row was last refreshed from Supabase. Used to
+  /// surface stale-cache warnings and to drive the reconciliation
+  /// schedule (refresh if older than 24 h on next app foreground).
+  DateTimeColumn get fetchedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {userId};
+}
