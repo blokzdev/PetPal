@@ -81,17 +81,26 @@ supabase secrets list
 You should see `ANTHROPIC_API_KEY`. Supabase's `SUPABASE_URL` and
 `SUPABASE_SERVICE_ROLE_KEY` are auto-injected — no manual set needed.
 
-## Step 5 — Deploy the llm-proxy Edge Function
+## Step 5 — Deploy the Edge Functions
 
 ```bash
 supabase functions deploy llm-proxy
+supabase functions deploy account-delete
+supabase functions deploy cancel-account-delete
+supabase functions deploy daily-reconciliation-cron
 ```
 
-The deployed function URL is:
-`https://<project-ref>.supabase.co/functions/v1/llm-proxy`
+(`play-billing-webhook` is declared but not yet implemented; deploy
+it when Group C.1 ships its index.ts.)
 
-Verify with a curl ping (this should return 401 since we haven't
-supplied auth):
+The deployed function URLs are:
+- `https://<project-ref>.supabase.co/functions/v1/llm-proxy`
+- `https://<project-ref>.supabase.co/functions/v1/account-delete`
+- `https://<project-ref>.supabase.co/functions/v1/cancel-account-delete`
+- `https://<project-ref>.supabase.co/functions/v1/daily-reconciliation-cron`
+
+Verify the proxy with a curl ping (this should return 401 since we
+haven't supplied auth):
 
 ```bash
 curl -X POST "https://<project-ref>.supabase.co/functions/v1/llm-proxy" \
@@ -101,11 +110,15 @@ curl -X POST "https://<project-ref>.supabase.co/functions/v1/llm-proxy" \
 
 Expected: `{"error":{"code":"unauthorized",...}}`
 
-## Step 6 — Configure cron jobs (counter reset + storage hygiene)
+The same shape works against `account-delete` + `cancel-account-delete`.
 
-In the Supabase Dashboard → Database → Extensions, enable `pg_cron`.
+## Step 6 — Configure cron jobs (counter reset + storage hygiene + account purge)
 
-Then in the SQL editor, schedule these jobs:
+In the Supabase Dashboard → Database → Extensions, enable `pg_cron`
+**and** `pg_net` (the latter is required for the
+`daily-reconciliation-cron` HTTP invocation in step 6c).
+
+### 6a — Internal SQL crons
 
 ```sql
 select cron.schedule(
@@ -128,6 +141,76 @@ select cron.schedule(
 ```
 
 These are idempotent — re-running won't reset already-reset counters.
+
+### 6b — Daily-reconciliation-cron secret
+
+Set a `cron_secret` setting that authenticates the daily-purge
+HTTP call. The secret rides as the `Authorization` header so the
+Edge Function (`verify_jwt = true`) treats it as a service-role
+invocation.
+
+```sql
+-- Generate a strong random secret (run once; capture the output).
+select encode(gen_random_bytes(32), 'hex');
+-- Example output: e3a9f5b2c1...   (64 hex chars)
+
+-- Persist as a Postgres setting (replace <SERVICE_ROLE_JWT> with the
+-- service_role key from Settings → API; the Edge Function expects a
+-- Supabase JWT with role=service_role per supabase/config.toml's
+-- verify_jwt=true on this function).
+alter database postgres set "app.daily_cron_jwt" = '<SERVICE_ROLE_JWT>';
+```
+
+### 6c — Daily account-deletion purge cron
+
+Per DECISIONS row 90 — runs the `daily-reconciliation-cron` Edge
+Function once daily. The function scans `deleted_accounts_log` for
+entries past their 30-day retention window, undoes deletions for
+users who signed in during the window, hard-purges everything else.
+
+```sql
+select cron.schedule(
+  'daily-account-purge',
+  '0 5 * * *',   -- nightly at 05:00 UTC (after the SQL crons above)
+  $$
+    select net.http_post(
+      url := 'https://<project-ref>.supabase.co/functions/v1/daily-reconciliation-cron',
+      headers := jsonb_build_object(
+        'Authorization', 'Bearer ' || current_setting('app.daily_cron_jwt'),
+        'Content-Type', 'application/json'
+      ),
+      body := '{}'::jsonb
+    );
+  $$
+);
+```
+
+Replace `<project-ref>` with the project slug from step 1.
+
+### 6d — Verify cron registration
+
+```sql
+select * from cron.job;
+```
+
+Expected: 4 rows for `reset-monthly-counters`,
+`purge-stale-anonymous-counters`, `purge-stale-proxy-logs`,
+`daily-account-purge`.
+
+### 6e — Smoke-test the daily-reconciliation-cron manually
+
+Before letting the cron run unattended, fire it once with a
+service-role JWT:
+
+```bash
+curl -X POST "https://<project-ref>.supabase.co/functions/v1/daily-reconciliation-cron" \
+     -H "Authorization: Bearer <SERVICE_ROLE_JWT>" \
+     -H "Content-Type: application/json" \
+     -d '{}' | jq
+```
+
+Expected: `{"scanned": 0, "undone": 0, "purged": 0, "errors": []}`
+(non-zero counts on prod once real deletions land).
 
 ## Step 7 — Set up cost-run-up alerts
 
@@ -185,7 +268,9 @@ psql "$(supabase db remote-url)" \
 deno test --allow-net --allow-env supabase/functions/_tests/
 ```
 
-Expected: all 11 tests pass.
+Expected: 4 test files (`llm_proxy_test.ts`, `account_delete_test.ts`,
+`cancel_account_delete_test.ts`, `daily_reconciliation_cron_test.ts`)
+covering ~40 invariants total. All must pass.
 
 ## Step 10 — Hand-off
 
@@ -227,5 +312,7 @@ schema bump until B.1).
 
 - Sync bucket setup (Group G.1)
 - Play Billing webhook URL registration in Play Console (Group C.1)
-- Daily reconciliation cron job (Group C — runs against Play API,
-  needs Play credentials we haven't provisioned yet)
+- Play-API daily reconciliation cron (Group C — runs against Play
+  API, needs Play credentials we haven't provisioned yet). Distinct
+  from the `daily-reconciliation-cron` Edge Function in step 6c,
+  which scans `deleted_accounts_log` for account-deletion purges.
