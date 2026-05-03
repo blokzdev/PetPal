@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/providers.dart';
 import 'app/routing.dart';
 import 'app/theme.dart';
+import 'app/welcome/welcome_completed_notifier.dart';
 import 'platform/api_key_storage.dart';
 import 'platform/notifications_service.dart';
 import 'platform/scheduler_bootstrap.dart';
@@ -27,6 +28,19 @@ Future<void> main() async {
   // synchronously after the first build.
   final settings = await SharedPrefsSettingsStorage.open();
 
+  // Phase 7 task F.1 — pre-read the welcome flag so the router's
+  // redirect has a synchronous answer on first frame. Mirrors the
+  // pre-read of the API key above. Pre-Phase-7 users with a stored
+  // key are auto-promoted by [WelcomeCompletedNotifier.build] —
+  // this pre-read applies the same migration synchronously so the
+  // router doesn't briefly bounce them through onboarding.
+  final welcomeStored = await settings.getBool('welcome_completed');
+  final welcomeCompleted = welcomeStored ??
+      (initialKey != null && initialKey.isNotEmpty);
+  if (welcomeCompleted && welcomeStored != true) {
+    await settings.setBool('welcome_completed', true);
+  }
+
   // Phase 4 scheduling stack init. Order matters:
   //   1. Notifications channel (so the alarm callback's `show()` works
   //      even if the user opens an alarm-fired flow before re-opening
@@ -47,6 +61,8 @@ Future<void> main() async {
         apiKeyStorageProvider.overrideWithValue(storage),
         apiKeyProvider.overrideWith(() => _SeededApiKeyNotifier(initialKey)),
         settingsStorageProvider.overrideWithValue(settings),
+        welcomeCompletedProvider
+            .overrideWith(() => _SeededWelcomeNotifier(welcomeCompleted)),
       ],
       child: const PetPalApp(),
     ),
@@ -77,4 +93,15 @@ class _SeededApiKeyNotifier extends ApiKeyNotifier {
 
   @override
   Future<String?> build() async => _initial;
+}
+
+/// Phase 7 task F.1 — [WelcomeCompletedNotifier] variant that
+/// returns the pre-read welcome flag synchronously. The migration
+/// path was already applied in `main()` above.
+class _SeededWelcomeNotifier extends WelcomeCompletedNotifier {
+  _SeededWelcomeNotifier(this._initial);
+  final bool _initial;
+
+  @override
+  Future<bool> build() async => _initial;
 }

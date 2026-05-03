@@ -134,6 +134,21 @@ class Entitlement {
     );
   }
 
+  /// Phase 7 task F.1 — synthetic default for the BYOK lane.
+  ///
+  /// BYOK is a free-tier modifier (DECISIONS row 36): the user
+  /// supplies their own Anthropic key, calls go direct via
+  /// [DirectTransport], and the cost-driven caps lift (text +
+  /// vision + synthesis). Sync, multi-pet, and the 5-reminder cap
+  /// remain Pro-only — those aren't cost-driven gates.
+  factory Entitlement.byok({DateTime? now}) {
+    final t = now ?? DateTime.now();
+    return Entitlement(
+      state: EntitlementState.byok,
+      counterPeriodStart: DateTime(t.year, t.month),
+    );
+  }
+
   final EntitlementState state;
 
   /// Supabase auth user ID (UUID). Null for [EntitlementState.freeAnonymous].

@@ -26,6 +26,26 @@ class ChatScreen extends ConsumerStatefulWidget {
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
 }
 
+/// Phase 7 task F.1 — chat transport gate.
+///
+/// In F.1 the only working transport is [DirectTransport] (BYOK
+/// path). Free-tier users without BYOK have no working chat path
+/// until Group H wires the proxy + magic-link sign-in. The chat
+/// surface stays reachable so the user can still read scrollback
+/// + see what's missing, but the composer flips to a
+/// [_ChatUnavailableBanner] CTA pointing at Settings → BYOK
+/// toggle. The gate is "do we have a stored Anthropic key" — the
+/// canonical signal for any working transport in F.1 — rather
+/// than an entitlement-state check, since the BYOK auto-migration
+/// path leaves users in the byok state with their existing key.
+bool _chatTransportReady(WidgetRef ref) {
+  final keyAsync = ref.watch(apiKeyProvider);
+  return keyAsync.maybeWhen(
+    data: (k) => k != null && k.isNotEmpty,
+    orElse: () => false,
+  );
+}
+
 class _ChatScreenState extends ConsumerState<ChatScreen> {
   final _input = TextEditingController();
   final _scrollController = ScrollController();
@@ -237,15 +257,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               canRetry: !state.sending && state.lastFailedInput != null,
               onRetry: () => ref.read(chatProvider.notifier).retry(),
             ),
-          _Composer(
-            controller: _input,
-            sending: state.sending,
-            onSend: _send,
-            onAttachPhoto: state.sending ? null : _pickChatPhoto,
-            pendingAttachedImage: state.pendingAttachedImage,
-            onClearPendingImage: () =>
-                ref.read(chatProvider.notifier).clearAttachedImage(),
-          ),
+          // Phase 7 task F.1 — chat is gated on having a working
+          // transport. Until Group H wires the proxy + sign-in,
+          // chat needs an Anthropic key (= BYOK or auto-migrated
+          // pre-Phase-7 key). When neither is present we render a
+          // disabled-composer banner pointing at Settings → BYOK
+          // toggle so the user has a clear next step.
+          if (_chatTransportReady(ref))
+            _Composer(
+              controller: _input,
+              sending: state.sending,
+              onSend: _send,
+              onAttachPhoto: state.sending ? null : _pickChatPhoto,
+              pendingAttachedImage: state.pendingAttachedImage,
+              onClearPendingImage: () =>
+                  ref.read(chatProvider.notifier).clearAttachedImage(),
+            )
+          else
+            const _ChatUnavailableBanner(),
         ],
       ),
     );
@@ -840,6 +869,87 @@ class _ChatAppBarTitle extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// Phase 7 task F.1 — chat-unavailable banner.
+///
+/// Renders in place of [_Composer] when the active transport
+/// can't send (no key, proxy not yet wired). Single-CTA: route
+/// the user to Settings → Plan → BYOK toggle. Sage register only;
+/// uses the surfaceContainer slab + outlineVariant divider treatment
+/// the composer already establishes so the surface chrome doesn't
+/// jump when the user enables BYOK and the composer slides back in.
+class _ChatUnavailableBanner extends StatelessWidget {
+  const _ChatUnavailableBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return Material(
+      color: scheme.surfaceContainer,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Divider(
+            height: 1,
+            thickness: 1,
+            color: scheme.outlineVariant,
+          ),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                Spacing.m,
+                Spacing.m,
+                Spacing.m,
+                Spacing.m,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        PhosphorIconsRegular.key,
+                        size: 18,
+                        color: scheme.primary,
+                      ),
+                      const SizedBox(width: Spacing.s),
+                      Expanded(
+                        child: Text(
+                          "Chat needs a connection to Claude. Add your "
+                          "Anthropic key in Settings — sign-in for the "
+                          "free monthly allowance ships in a later "
+                          'update.',
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurface.withValues(alpha: 0.85),
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: Spacing.s),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: FilledButton.icon(
+                      onPressed: () =>
+                          GoRouter.of(context).push('/settings'),
+                      icon: const Icon(PhosphorIconsRegular.gear, size: 16),
+                      label: const Text('Open Settings'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

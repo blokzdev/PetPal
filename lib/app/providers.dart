@@ -52,6 +52,7 @@ import '../platform/schedule_health.dart';
 import '../platform/settings_storage.dart';
 import '../platform/work_scheduler.dart';
 import 'active_pet/active_pet_notifier.dart';
+import 'welcome/welcome_completed_notifier.dart';
 
 // ─── API key ────────────────────────────────────────────────────────────────
 
@@ -88,12 +89,19 @@ class ApiKeyNotifier extends AsyncNotifier<String?> {
   }
 }
 
-/// True once the user has saved a non-empty API key. The router uses this
-/// to gate the onboarding redirect.
+/// True once the user has finished the welcome flow.
+///
+/// Phase 7 task F.1 — decoupled from `apiKeyProvider`. The proxy-
+/// default model (DECISIONS row 36) lets a free-tier user be past
+/// onboarding without ever entering a key; the canonical "have they
+/// seen the welcome + privacy disclosure" signal is now
+/// [welcomeCompletedProvider]. Existing pre-Phase-7 users with a
+/// stored key are auto-promoted to completed by the notifier's
+/// build() (one-time silent migration).
 final isOnboardedProvider = Provider<bool>((ref) {
-  final keyAsync = ref.watch(apiKeyProvider);
-  return keyAsync.maybeWhen(
-    data: (k) => k != null && k.isNotEmpty,
+  final completedAsync = ref.watch(welcomeCompletedProvider);
+  return completedAsync.maybeWhen(
+    data: (done) => done,
     orElse: () => false,
   );
 });

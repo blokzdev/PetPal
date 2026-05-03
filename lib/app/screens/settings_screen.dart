@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../byok/byok_key_entry_sheet.dart';
 import '../design/design.dart';
 import '../entitlement/entitlement.dart';
+import '../entitlement/entitlement_notifier.dart';
 import '../entitlement/quota_exception.dart';
 import '../providers.dart';
 import '../widgets/app_scaffold.dart';
@@ -348,6 +350,14 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
               ),
             ),
           ],
+          // ── BYOK toggle (Phase 7 task F.1) ───────────────────────
+          // VOICE.md §6 example 12 + DECISIONS row 74. Hidden for
+          // Pro (Pro is already unmetered + adds sync; BYOK as a
+          // cost-driven escape valve has no add-value for Pro).
+          if (!entitlement.isPro) ...[
+            const Divider(height: 1, thickness: 1, indent: 16),
+            _ByokToggleTile(active: entitlement.state == EntitlementState.byok),
+          ],
           // ── Ambient text counter (free + BYOK; Pro is unmetered) ─
           // VOICE.md §6 example 11 + §7 principle #2: ambient
           // information, NOT a meter ticking down.
@@ -490,5 +500,127 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
       'Dec',
     ];
     return '${months[d.month - 1]} ${d.day}, ${d.year}';
+  }
+}
+
+/// Phase 7 task F.1 — Bring-your-own-key toggle row.
+///
+/// Lives inside the Plan card for free / BYOK users (Pro hides
+/// it — Pro is unmetered without a key). Toggle ON opens
+/// [showByokKeyEntrySheet] (format check + live ping per
+/// DECISIONS row 74); toggle OFF prompts a confirmation dialog
+/// before clearing the stored key + reverting entitlement state
+/// to anonymous-free.
+///
+/// The switch's visible state mirrors `entitlement.state ==
+/// byok` rather than the local Switch widget's own value — that
+/// way an external state change (re-pump after migration,
+/// settings sync) keeps the UI in sync.
+class _ByokToggleTile extends ConsumerStatefulWidget {
+  const _ByokToggleTile({required this.active});
+
+  final bool active;
+
+  @override
+  ConsumerState<_ByokToggleTile> createState() => _ByokToggleTileState();
+}
+
+class _ByokToggleTileState extends ConsumerState<_ByokToggleTile> {
+  bool _busy = false;
+
+  Future<void> _handleChange(bool target) async {
+    if (_busy) return;
+    if (target) {
+      setState(() => _busy = true);
+      final ok = await showByokKeyEntrySheet(context);
+      if (mounted) setState(() => _busy = false);
+      // No state mutation here — the sheet calls
+      // `setByokActive(active: true)` itself on success.
+      // VOICE-rule: don't snackbar on cancel; users tap the
+      // switch by mistake all the time.
+      if (ok != true) return;
+    } else {
+      final confirm = await _confirmDisable(context);
+      if (confirm != true) return;
+      setState(() => _busy = true);
+      try {
+        await ref
+            .read(entitlementProvider.notifier)
+            .setByokActive(active: false);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "BYOK off. Chat goes back to PetPal's monthly "
+              'allowance.',
+            ),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Couldn't turn BYOK off: $e")),
+        );
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
+    }
+  }
+
+  Future<bool?> _confirmDisable(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Turn BYOK off?'),
+        content: const Text(
+          'Your stored API key will be removed from this phone. Chat '
+          "will route through PetPal's monthly allowance again.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Keep BYOK on'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('Turn off'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    return SwitchListTile(
+      value: widget.active,
+      onChanged: _busy ? null : _handleChange,
+      secondary: Icon(
+        widget.active
+            ? Icons.key
+            : Icons.key_off_outlined,
+        color: scheme.onSurface.withValues(alpha: 0.6),
+      ),
+      title: const Text('Bring your own Anthropic key'),
+      subtitle: Text(
+        // VOICE.md §6 example 12 lock — additive register, honest
+        // about what changes.
+        widget.active
+            ? "Your key handles chat — PetPal's monthly cap doesn't "
+                'apply.'
+            : "By default, PetPal handles the connection to Claude "
+                "and includes a monthly chat allowance. Switch this "
+                "on if you'd rather use your own Anthropic API key "
+                "— your messages then go directly to Anthropic "
+                "without passing through PetPal's servers, and the "
+                "monthly limits don't apply.",
+        style: textTheme.bodySmall?.copyWith(
+          color: scheme.onSurface.withValues(alpha: 0.65),
+        ),
+      ),
+      isThreeLine: true,
+    );
   }
 }
