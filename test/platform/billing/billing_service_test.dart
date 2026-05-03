@@ -19,6 +19,7 @@ void main() {
   late _FakeIap iap;
   late List<Entitlement> optimisticUpdates;
   late List<int> creditGrants;
+  late List<String> carePackGrants;
   late BillingService service;
   late StreamSubscription<BillingEvent> sub;
   late List<BillingEvent> events;
@@ -33,6 +34,7 @@ void main() {
         _stubProduct(ProductIds.proMonthly, '\$7.99'),
         _stubProduct(ProductIds.proAnnual, '\$59.00'),
         _stubProduct(ProductIds.photoCredits50, '\$2.99'),
+        _stubProduct(ProductIds.carePackReactiveDog, '\$2.99'),
       ],
       notFoundIDs: const [],
     );
@@ -44,6 +46,7 @@ void main() {
     iap = _FakeIap();
     optimisticUpdates = [];
     creditGrants = [];
+    carePackGrants = [];
     service = BillingService(
       iap: iap,
       onOptimisticEntitlement: (ent) async {
@@ -51,6 +54,9 @@ void main() {
       },
       onPhotoCreditsGranted: (credits) async {
         creditGrants.add(credits);
+      },
+      onCarePackOwned: (skillId) async {
+        carePackGrants.add(skillId);
       },
     );
     events = [];
@@ -440,6 +446,110 @@ void main() {
     });
   });
 
+  group('Phase 7 task C.3 — buyCarePack', () {
+    test('triggers buyNonConsumable with the care pack product ID',
+        () async {
+      await initReady();
+
+      final ok = await service.buyCarePack(ProductIds.carePackReactiveDog);
+      expect(ok, isTrue);
+      expect(iap.lastNonConsumableProductId, ProductIds.carePackReactiveDog);
+    });
+
+    test('rejects unknown product IDs (not in carePackToSkillId map) — '
+        'returns false + emits BillingError without dispatching to IAP',
+        () async {
+      await initReady();
+
+      final ok = await service.buyCarePack('not_a_care_pack');
+      await pumpEventQueue();
+
+      expect(ok, isFalse);
+      expect(events.last, isA<BillingError>());
+      expect((events.last as BillingError).message,
+          contains('not_a_care_pack'));
+      expect(iap.lastNonConsumableProductId, isNull,
+          reason: 'unknown care pack must NOT trigger a Play Billing '
+              'purchase request');
+    });
+
+    test('PURCHASED on care pack → resolves skill ID via map and fires '
+        'onCarePackOwned callback', () async {
+      await initReady();
+
+      iap.streamController.add([
+        _purchaseDetails(
+          ProductIds.carePackReactiveDog,
+          PurchaseStatus.purchased,
+          pendingComplete: true,
+        ),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      // Skill ID resolved from ProductIds.carePackToSkillId.
+      expect(carePackGrants, hasLength(1));
+      expect(carePackGrants.first, 'reactive-dog');
+      // BillingPurchased event fired.
+      expect(events.whereType<BillingPurchased>(), hasLength(1));
+      // completePurchase called.
+      expect(iap.completedPurchases, hasLength(1));
+      // No Pro state change — care pack ownership is orthogonal to
+      // Pro tier.
+      expect(optimisticUpdates, isEmpty);
+    });
+
+    test('RESTORED on care pack → same dispatch path (cross-device '
+        'restore re-grants ownership)', () async {
+      await initReady();
+
+      iap.streamController.add([
+        _purchaseDetails(
+          ProductIds.carePackReactiveDog,
+          PurchaseStatus.restored,
+          pendingComplete: true,
+        ),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(carePackGrants, hasLength(1));
+      expect(events.whereType<BillingRestored>(), hasLength(1));
+    });
+
+    test('callback omitted on construction → care pack grant is silently '
+        'skipped (no exception)', () async {
+      final localIap = _FakeIap();
+      final localService = BillingService(
+        iap: localIap,
+        onOptimisticEntitlement: (_) async {},
+        // intentionally omit onCarePackOwned
+      );
+      final localEvents = <BillingEvent>[];
+      final localSub = localService.events.listen(localEvents.add);
+      localIap.available = true;
+      localIap.productResponse = ProductDetailsResponse(
+        productDetails: [
+          _stubProduct(ProductIds.carePackReactiveDog, '\$2.99')
+        ],
+        notFoundIDs: const [],
+      );
+      await localService.initialize();
+      await pumpEventQueue();
+
+      localIap.streamController.add([
+        _purchaseDetails(
+          ProductIds.carePackReactiveDog,
+          PurchaseStatus.purchased,
+          pendingComplete: true,
+        ),
+      ]);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(localEvents.whereType<BillingPurchased>(), hasLength(1));
+      expect(localIap.completedPurchases, hasLength(1));
+      await localSub.cancel();
+      await localService.dispose();
+    });
+  });
 }
 
 ProductDetails _stubProduct(String id, String priceText) => ProductDetails(

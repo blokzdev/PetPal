@@ -95,15 +95,29 @@ void main() {
       expect(manifest.triggers, contains('fighting'));
     });
 
-    test('all three new 5.14 packs ship as free-tier (no requires_pro)', () {
-      for (final id in const ['reactive-dog', 'senior-cat', 'multi-cat']) {
+    test('cat-track 5.14 packs (senior-cat, multi-cat) stay free-tier', () {
+      // Phase 7 task C.3 flipped reactive-dog to requires_pro: true
+      // (the v1 starter care pack — care_pack_reactive_dog at $2.99,
+      // unlocks the reactive-dog skill ID). senior-cat + multi-cat
+      // stay free pending the cat-track care pack registration in
+      // v1.x.
+      for (final id in const ['senior-cat', 'multi-cat']) {
         final raw =
             File('assets/skills/$id/manifest.md').readAsStringSync();
         final manifest = parseSkillManifest(raw);
         expect(manifest.requiresPro, isFalse,
-            reason: '$id: 5.14 packs are free-tier (Pro IAPs land '
-                'in Phase 7)');
+            reason: '$id stays free pending v1.x cat-track care pack');
       }
+    });
+
+    test('reactive-dog ships as Pro-gated (Phase 7 task C.3 — '
+        'unlocked by care_pack_reactive_dog IAP or any Pro tier)', () {
+      final raw =
+          File('assets/skills/reactive-dog/manifest.md').readAsStringSync();
+      final manifest = parseSkillManifest(raw);
+      expect(manifest.requiresPro, isTrue,
+          reason: 'reactive-dog is the v1 starter care pack '
+              '(ProductIds.carePackReactiveDog → reactive-dog skill ID)');
     });
   });
 }

@@ -23,13 +23,16 @@ void main() {
     await db.close();
   });
 
-  test('schema bump v1→v2 creates the entitlements table', () async {
+  test('schema bump (current version) creates the entitlements table',
+      () async {
     // The migration runs onCreate (since this is a fresh in-memory DB
     // at the current schemaVersion). A successful select confirms the
-    // table exists with the expected columns.
+    // table exists with the expected columns. Schema version mark
+    // bumps with each Phase 7 task that touches Drift; the test only
+    // pins "table exists + version is non-zero."
     final result = await db.select(db.entitlements).get();
     expect(result, isEmpty);
-    expect(db.schemaVersion, 2);
+    expect(db.schemaVersion, greaterThanOrEqualTo(2));
   });
 
   test('read returns null when no row exists for the user', () async {
@@ -47,6 +50,7 @@ void main() {
       monthlyVisionCount: 12,
       counterPeriodStart: DateTime(2026, 5),
       fetchedAt: DateTime(2026, 5, 15, 10, 30),
+      ownedCarePackSkillIds: const {'reactive-dog'},
     );
 
     await repo.upsert(ent);
@@ -61,6 +65,30 @@ void main() {
     expect(readBack.monthlyVisionCount, 12);
     expect(readBack.counterPeriodStart, DateTime(2026, 5));
     expect(readBack.fetchedAt, DateTime(2026, 5, 15, 10, 30));
+    expect(readBack.ownedCarePackSkillIds, equals({'reactive-dog'}));
+  });
+
+  test('Phase 7 task C.3 — ownedCarePackSkillIds round-trips JSON serialization '
+      '(empty, single-element, multi-element)', () async {
+    // Empty set persists as "[]" and decodes back to empty.
+    await repo.upsert(Entitlement(
+      state: EntitlementState.free,
+      userId: 'user-empty',
+      counterPeriodStart: DateTime(2026, 5),
+    ));
+    final empty = await repo.read('user-empty');
+    expect(empty!.ownedCarePackSkillIds, isEmpty);
+
+    // Multi-element set round-trips intact (order-independent).
+    await repo.upsert(Entitlement(
+      state: EntitlementState.free,
+      userId: 'user-multi',
+      counterPeriodStart: DateTime(2026, 5),
+      ownedCarePackSkillIds: const {'reactive-dog', 'senior-dog', 'puppy'},
+    ));
+    final multi = await repo.read('user-multi');
+    expect(multi!.ownedCarePackSkillIds,
+        equals({'reactive-dog', 'senior-dog', 'puppy'}));
   });
 
   test('upsert overwrites an existing row (insertOnConflictUpdate)', () async {

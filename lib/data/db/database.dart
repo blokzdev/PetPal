@@ -20,7 +20,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -41,6 +41,16 @@ class AppDatabase extends _$AppDatabase {
           // table starts empty and fills on first sign-in / reconciliation.
           if (from < 2) {
             await m.createTable(entitlements);
+          }
+          // Phase 7 task C.3 — schema bump v2 → v3 adds
+          // `entitlements.ownedCarePackSkillIdsJson` for care pack
+          // ownership tracking. Defaults to '[]' so existing rows
+          // get the empty-set behaviour without a backfill.
+          if (from < 3) {
+            await m.addColumn(
+              entitlements,
+              entitlements.ownedCarePackSkillIdsJson,
+            );
           }
         },
         beforeOpen: (details) async {

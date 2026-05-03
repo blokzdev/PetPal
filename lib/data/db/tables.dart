@@ -135,6 +135,18 @@ class Entitlements extends Table {
   /// schedule (refresh if older than 24 h on next app foreground).
   DateTimeColumn get fetchedAt => dateTime()();
 
+  /// Phase 7 task C.3 — JSON-serialized `Set<String>` of skill IDs
+  /// the user has unlocked via care pack purchases. Persisted as
+  /// JSON in this column so adding new owned packs is a no-schema-
+  /// change update. Empty array on default (free / Pro users have
+  /// nothing here unless they bought a care pack standalone).
+  ///
+  /// Authoritative ownership lives on the Supabase side once the
+  /// play-billing-verify Edge Function ships; this column is the
+  /// optimistic local mirror.
+  TextColumn get ownedCarePackSkillIdsJson =>
+      text().withDefault(const Constant('[]'))();
+
   @override
   Set<Column<Object>> get primaryKey => {userId};
 }

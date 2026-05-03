@@ -72,4 +72,20 @@ abstract final class ProductIds {
   static const creditPackQuantities = <String, int>{
     photoCredits50: 50,
   };
+
+  /// Phase 7 task C.3 — care pack product ID → skill ID it unlocks.
+  /// Adding a new care pack in v1.x is a one-line change here + Play
+  /// Console product registration + a corresponding skill manifest
+  /// with `requires_pro: true`. The skill loader reads this map's
+  /// values transitively via the `Entitlement.ownedCarePackSkillIds`
+  /// set populated by the BillingService dispatch.
+  ///
+  /// Expert packs ([expertPackSeniorDog]) follow the same pattern;
+  /// each is a non-consumable IAP unlocking one (or, for bundles,
+  /// multiple) skill IDs. v1 ships only the Reactive Dog care pack;
+  /// expert pack registrations land if/when shipped.
+  static const carePackToSkillId = <String, String>{
+    carePackReactiveDog: 'reactive-dog',
+    expertPackSeniorDog: 'senior-dog',
+  };
 }

@@ -214,6 +214,30 @@ void main() {
     });
   });
 
+  group('Phase 7 task C.3 — ownedCarePackSkillIds field', () {
+    test('default is empty set', () {
+      final e = Entitlement.freeAnonymous();
+      expect(e.ownedCarePackSkillIds, isEmpty);
+    });
+
+    test('copyWith updates the set; equality compares set contents', () {
+      final base = Entitlement.freeAnonymous();
+      final updated = base.copyWith(
+        ownedCarePackSkillIds: const {'reactive-dog', 'senior-dog'},
+      );
+      expect(updated.ownedCarePackSkillIds,
+          equals({'reactive-dog', 'senior-dog'}));
+      expect(updated, isNot(equals(base)));
+
+      // Equal-content sets compare equal regardless of insertion order.
+      final reordered = base.copyWith(
+        ownedCarePackSkillIds: const {'senior-dog', 'reactive-dog'},
+      );
+      expect(reordered, equals(updated));
+      expect(reordered.hashCode, updated.hashCode);
+    });
+  });
+
   group('Entitlement equality + copyWith', () {
     test('equality compares all fields', () {
       final a = Entitlement.freeAnonymous(now: DateTime(2026, 5));

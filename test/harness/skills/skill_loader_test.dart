@@ -33,6 +33,7 @@ SkillManifest _manifest({
   List<String> category = const [],
   List<String> triggers = const [],
   List<String> loads = const [],
+  bool requiresPro = false,
 }) {
   return SkillManifest(
     id: id,
@@ -41,7 +42,7 @@ SkillManifest _manifest({
     category: category,
     triggers: triggers,
     loads: loads,
-    requiresPro: false,
+    requiresPro: requiresPro,
   );
 }
 
@@ -237,6 +238,90 @@ void main() {
     await loader.match(petCategory: 'dog', userInput: 'my puppy');
     expect(dogReads, 1);
     expect(catReads, 0, reason: 'cat skill filtered out before read');
+  });
+
+  // ── Phase 7 task C.3 — entitlement gate on requires_pro skills ──────
+
+  group('Phase 7 task C.3 — entitlement gate on requires_pro skills', () {
+    final paid = _manifest(
+      id: 'reactive-dog',
+      category: ['dog'],
+      triggers: ['reactive'],
+      loads: ['overview.md'],
+      requiresPro: true,
+    );
+    final free = _manifest(
+      id: 'puppy',
+      category: ['dog'],
+      triggers: ['puppy'],
+      loads: ['overview.md'],
+    );
+    final source = _FakeSkillSource([
+      (manifest: paid, fragments: const {'overview.md': 'paid content'}),
+      (manifest: free, fragments: const {'overview.md': 'free content'}),
+    ]);
+
+    test('non-Pro + no care-pack ownership → requires_pro skill is dropped',
+        () async {
+      final loader = SkillLoader(source: source);
+      final result = await loader.match(
+        petCategory: 'dog',
+        userInput: 'my reactive dog',
+      );
+      expect(result, hasLength(0),
+          reason: 'requires_pro skill must be gated; trigger "reactive" '
+              'matches but the skill is locked');
+    });
+
+    test('non-Pro + matching care-pack ownership → skill loads', () async {
+      final loader = SkillLoader(
+        source: source,
+        ownedCarePackSkillIds: const {'reactive-dog'},
+      );
+      final result = await loader.match(
+        petCategory: 'dog',
+        userInput: 'my reactive dog',
+      );
+      expect(result, hasLength(1));
+      expect(result.first.skillId, 'reactive-dog');
+      expect(result.first.text, 'paid content');
+    });
+
+    test('Pro user → all requires_pro skills load regardless of '
+        'ownership set', () async {
+      final loader = SkillLoader(source: source, isPro: true);
+      final result = await loader.match(
+        petCategory: 'dog',
+        userInput: 'my reactive dog',
+      );
+      expect(result, hasLength(1));
+      expect(result.first.skillId, 'reactive-dog');
+    });
+
+    test('free skill (requires_pro: false) loads regardless of '
+        'entitlement state', () async {
+      final loader = SkillLoader(source: source);
+      final result = await loader.match(
+        petCategory: 'dog',
+        userInput: 'puppy training',
+      );
+      expect(result, hasLength(1));
+      expect(result.first.skillId, 'puppy');
+    });
+
+    test('mismatched care-pack ownership ID does NOT unlock other paid '
+        'skills (only the matching skill ID counts)', () async {
+      final loader = SkillLoader(
+        source: source,
+        ownedCarePackSkillIds: const {'senior-dog'}, // wrong skill
+      );
+      final result = await loader.match(
+        petCategory: 'dog',
+        userInput: 'my reactive dog',
+      );
+      expect(result, hasLength(0),
+          reason: 'owning senior-dog must NOT unlock reactive-dog');
+    });
   });
 }
 

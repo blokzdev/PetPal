@@ -2307,6 +2307,18 @@ class $EntitlementsTable extends Entitlements
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _ownedCarePackSkillIdsJsonMeta =
+      const VerificationMeta('ownedCarePackSkillIdsJson');
+  @override
+  late final GeneratedColumn<String> ownedCarePackSkillIdsJson =
+      GeneratedColumn<String>(
+        'owned_care_pack_skill_ids_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
   @override
   List<GeneratedColumn> get $columns => [
     userId,
@@ -2318,6 +2330,7 @@ class $EntitlementsTable extends Entitlements
     monthlyVisionCount,
     counterPeriodStart,
     fetchedAt,
+    ownedCarePackSkillIdsJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2406,6 +2419,15 @@ class $EntitlementsTable extends Entitlements
     } else if (isInserting) {
       context.missing(_fetchedAtMeta);
     }
+    if (data.containsKey('owned_care_pack_skill_ids_json')) {
+      context.handle(
+        _ownedCarePackSkillIdsJsonMeta,
+        ownedCarePackSkillIdsJson.isAcceptableOrUnknown(
+          data['owned_care_pack_skill_ids_json']!,
+          _ownedCarePackSkillIdsJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -2451,6 +2473,10 @@ class $EntitlementsTable extends Entitlements
         DriftSqlType.dateTime,
         data['${effectivePrefix}fetched_at'],
       )!,
+      ownedCarePackSkillIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owned_care_pack_skill_ids_json'],
+      )!,
     );
   }
 
@@ -2491,6 +2517,17 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
   /// surface stale-cache warnings and to drive the reconciliation
   /// schedule (refresh if older than 24 h on next app foreground).
   final DateTime fetchedAt;
+
+  /// Phase 7 task C.3 — JSON-serialized `Set<String>` of skill IDs
+  /// the user has unlocked via care pack purchases. Persisted as
+  /// JSON in this column so adding new owned packs is a no-schema-
+  /// change update. Empty array on default (free / Pro users have
+  /// nothing here unless they bought a care pack standalone).
+  ///
+  /// Authoritative ownership lives on the Supabase side once the
+  /// play-billing-verify Edge Function ships; this column is the
+  /// optimistic local mirror.
+  final String ownedCarePackSkillIdsJson;
   const EntitlementRow({
     required this.userId,
     required this.state,
@@ -2501,6 +2538,7 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
     required this.monthlyVisionCount,
     required this.counterPeriodStart,
     required this.fetchedAt,
+    required this.ownedCarePackSkillIdsJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2518,6 +2556,9 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
     map['monthly_vision_count'] = Variable<int>(monthlyVisionCount);
     map['counter_period_start'] = Variable<DateTime>(counterPeriodStart);
     map['fetched_at'] = Variable<DateTime>(fetchedAt);
+    map['owned_care_pack_skill_ids_json'] = Variable<String>(
+      ownedCarePackSkillIdsJson,
+    );
     return map;
   }
 
@@ -2536,6 +2577,7 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
       monthlyVisionCount: Value(monthlyVisionCount),
       counterPeriodStart: Value(counterPeriodStart),
       fetchedAt: Value(fetchedAt),
+      ownedCarePackSkillIdsJson: Value(ownedCarePackSkillIdsJson),
     );
   }
 
@@ -2558,6 +2600,9 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
         json['counterPeriodStart'],
       ),
       fetchedAt: serializer.fromJson<DateTime>(json['fetchedAt']),
+      ownedCarePackSkillIdsJson: serializer.fromJson<String>(
+        json['ownedCarePackSkillIdsJson'],
+      ),
     );
   }
   @override
@@ -2573,6 +2618,9 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
       'monthlyVisionCount': serializer.toJson<int>(monthlyVisionCount),
       'counterPeriodStart': serializer.toJson<DateTime>(counterPeriodStart),
       'fetchedAt': serializer.toJson<DateTime>(fetchedAt),
+      'ownedCarePackSkillIdsJson': serializer.toJson<String>(
+        ownedCarePackSkillIdsJson,
+      ),
     };
   }
 
@@ -2586,6 +2634,7 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
     int? monthlyVisionCount,
     DateTime? counterPeriodStart,
     DateTime? fetchedAt,
+    String? ownedCarePackSkillIdsJson,
   }) => EntitlementRow(
     userId: userId ?? this.userId,
     state: state ?? this.state,
@@ -2596,6 +2645,8 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
     monthlyVisionCount: monthlyVisionCount ?? this.monthlyVisionCount,
     counterPeriodStart: counterPeriodStart ?? this.counterPeriodStart,
     fetchedAt: fetchedAt ?? this.fetchedAt,
+    ownedCarePackSkillIdsJson:
+        ownedCarePackSkillIdsJson ?? this.ownedCarePackSkillIdsJson,
   );
   EntitlementRow copyWithCompanion(EntitlementsCompanion data) {
     return EntitlementRow(
@@ -2620,6 +2671,9 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
           ? data.counterPeriodStart.value
           : this.counterPeriodStart,
       fetchedAt: data.fetchedAt.present ? data.fetchedAt.value : this.fetchedAt,
+      ownedCarePackSkillIdsJson: data.ownedCarePackSkillIdsJson.present
+          ? data.ownedCarePackSkillIdsJson.value
+          : this.ownedCarePackSkillIdsJson,
     );
   }
 
@@ -2634,7 +2688,8 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
           ..write('monthlyTextCount: $monthlyTextCount, ')
           ..write('monthlyVisionCount: $monthlyVisionCount, ')
           ..write('counterPeriodStart: $counterPeriodStart, ')
-          ..write('fetchedAt: $fetchedAt')
+          ..write('fetchedAt: $fetchedAt, ')
+          ..write('ownedCarePackSkillIdsJson: $ownedCarePackSkillIdsJson')
           ..write(')'))
         .toString();
   }
@@ -2650,6 +2705,7 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
     monthlyVisionCount,
     counterPeriodStart,
     fetchedAt,
+    ownedCarePackSkillIdsJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -2663,7 +2719,8 @@ class EntitlementRow extends DataClass implements Insertable<EntitlementRow> {
           other.monthlyTextCount == this.monthlyTextCount &&
           other.monthlyVisionCount == this.monthlyVisionCount &&
           other.counterPeriodStart == this.counterPeriodStart &&
-          other.fetchedAt == this.fetchedAt);
+          other.fetchedAt == this.fetchedAt &&
+          other.ownedCarePackSkillIdsJson == this.ownedCarePackSkillIdsJson);
 }
 
 class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
@@ -2676,6 +2733,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
   final Value<int> monthlyVisionCount;
   final Value<DateTime> counterPeriodStart;
   final Value<DateTime> fetchedAt;
+  final Value<String> ownedCarePackSkillIdsJson;
   final Value<int> rowid;
   const EntitlementsCompanion({
     this.userId = const Value.absent(),
@@ -2687,6 +2745,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
     this.monthlyVisionCount = const Value.absent(),
     this.counterPeriodStart = const Value.absent(),
     this.fetchedAt = const Value.absent(),
+    this.ownedCarePackSkillIdsJson = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   EntitlementsCompanion.insert({
@@ -2699,6 +2758,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
     this.monthlyVisionCount = const Value.absent(),
     required DateTime counterPeriodStart,
     required DateTime fetchedAt,
+    this.ownedCarePackSkillIdsJson = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : userId = Value(userId),
        counterPeriodStart = Value(counterPeriodStart),
@@ -2713,6 +2773,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
     Expression<int>? monthlyVisionCount,
     Expression<DateTime>? counterPeriodStart,
     Expression<DateTime>? fetchedAt,
+    Expression<String>? ownedCarePackSkillIdsJson,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2728,6 +2789,8 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
       if (counterPeriodStart != null)
         'counter_period_start': counterPeriodStart,
       if (fetchedAt != null) 'fetched_at': fetchedAt,
+      if (ownedCarePackSkillIdsJson != null)
+        'owned_care_pack_skill_ids_json': ownedCarePackSkillIdsJson,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2742,6 +2805,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
     Value<int>? monthlyVisionCount,
     Value<DateTime>? counterPeriodStart,
     Value<DateTime>? fetchedAt,
+    Value<String>? ownedCarePackSkillIdsJson,
     Value<int>? rowid,
   }) {
     return EntitlementsCompanion(
@@ -2754,6 +2818,8 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
       monthlyVisionCount: monthlyVisionCount ?? this.monthlyVisionCount,
       counterPeriodStart: counterPeriodStart ?? this.counterPeriodStart,
       fetchedAt: fetchedAt ?? this.fetchedAt,
+      ownedCarePackSkillIdsJson:
+          ownedCarePackSkillIdsJson ?? this.ownedCarePackSkillIdsJson,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2790,6 +2856,11 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
     if (fetchedAt.present) {
       map['fetched_at'] = Variable<DateTime>(fetchedAt.value);
     }
+    if (ownedCarePackSkillIdsJson.present) {
+      map['owned_care_pack_skill_ids_json'] = Variable<String>(
+        ownedCarePackSkillIdsJson.value,
+      );
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2808,6 +2879,7 @@ class EntitlementsCompanion extends UpdateCompanion<EntitlementRow> {
           ..write('monthlyVisionCount: $monthlyVisionCount, ')
           ..write('counterPeriodStart: $counterPeriodStart, ')
           ..write('fetchedAt: $fetchedAt, ')
+          ..write('ownedCarePackSkillIdsJson: $ownedCarePackSkillIdsJson, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -5194,6 +5266,7 @@ typedef $$EntitlementsTableCreateCompanionBuilder =
       Value<int> monthlyVisionCount,
       required DateTime counterPeriodStart,
       required DateTime fetchedAt,
+      Value<String> ownedCarePackSkillIdsJson,
       Value<int> rowid,
     });
 typedef $$EntitlementsTableUpdateCompanionBuilder =
@@ -5207,6 +5280,7 @@ typedef $$EntitlementsTableUpdateCompanionBuilder =
       Value<int> monthlyVisionCount,
       Value<DateTime> counterPeriodStart,
       Value<DateTime> fetchedAt,
+      Value<String> ownedCarePackSkillIdsJson,
       Value<int> rowid,
     });
 
@@ -5261,6 +5335,11 @@ class $$EntitlementsTableFilterComposer
 
   ColumnFilters<DateTime> get fetchedAt => $composableBuilder(
     column: $table.fetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownedCarePackSkillIdsJson => $composableBuilder(
+    column: $table.ownedCarePackSkillIdsJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5318,6 +5397,11 @@ class $$EntitlementsTableOrderingComposer
     column: $table.fetchedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get ownedCarePackSkillIdsJson => $composableBuilder(
+    column: $table.ownedCarePackSkillIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EntitlementsTableAnnotationComposer
@@ -5367,6 +5451,11 @@ class $$EntitlementsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get fetchedAt =>
       $composableBuilder(column: $table.fetchedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get ownedCarePackSkillIdsJson => $composableBuilder(
+    column: $table.ownedCarePackSkillIdsJson,
+    builder: (column) => column,
+  );
 }
 
 class $$EntitlementsTableTableManager
@@ -5409,6 +5498,7 @@ class $$EntitlementsTableTableManager
                 Value<int> monthlyVisionCount = const Value.absent(),
                 Value<DateTime> counterPeriodStart = const Value.absent(),
                 Value<DateTime> fetchedAt = const Value.absent(),
+                Value<String> ownedCarePackSkillIdsJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EntitlementsCompanion(
                 userId: userId,
@@ -5420,6 +5510,7 @@ class $$EntitlementsTableTableManager
                 monthlyVisionCount: monthlyVisionCount,
                 counterPeriodStart: counterPeriodStart,
                 fetchedAt: fetchedAt,
+                ownedCarePackSkillIdsJson: ownedCarePackSkillIdsJson,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -5433,6 +5524,7 @@ class $$EntitlementsTableTableManager
                 Value<int> monthlyVisionCount = const Value.absent(),
                 required DateTime counterPeriodStart,
                 required DateTime fetchedAt,
+                Value<String> ownedCarePackSkillIdsJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => EntitlementsCompanion.insert(
                 userId: userId,
@@ -5444,6 +5536,7 @@ class $$EntitlementsTableTableManager
                 monthlyVisionCount: monthlyVisionCount,
                 counterPeriodStart: counterPeriodStart,
                 fetchedAt: fetchedAt,
+                ownedCarePackSkillIdsJson: ownedCarePackSkillIdsJson,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

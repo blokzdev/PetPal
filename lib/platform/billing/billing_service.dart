@@ -27,13 +27,16 @@ class BillingService {
     required IapPlatform iap,
     required Future<void> Function(Entitlement) onOptimisticEntitlement,
     Future<void> Function(int credits)? onPhotoCreditsGranted,
+    Future<void> Function(String skillId)? onCarePackOwned,
   })  : _iap = iap,
         _onOptimisticEntitlement = onOptimisticEntitlement,
-        _onPhotoCreditsGranted = onPhotoCreditsGranted;
+        _onPhotoCreditsGranted = onPhotoCreditsGranted,
+        _onCarePackOwned = onCarePackOwned;
 
   final IapPlatform _iap;
   final Future<void> Function(Entitlement) _onOptimisticEntitlement;
   final Future<void> Function(int credits)? _onPhotoCreditsGranted;
+  final Future<void> Function(String skillId)? _onCarePackOwned;
 
   StreamSubscription<List<PurchaseDetails>>? _purchaseSub;
   final StreamController<BillingEvent> _events =
@@ -121,6 +124,23 @@ class BillingService {
   /// Result arrives via [events]; caller listens.
   Future<bool> buyPhotoCredits() =>
       _buyConsumableById(ProductIds.photoCredits50);
+
+  /// Phase 7 task C.3 — trigger a non-consumable care pack purchase.
+  /// Caller passes the Play product ID (e.g.
+  /// [ProductIds.carePackReactiveDog]); the dispatch path resolves
+  /// the corresponding skill ID via [ProductIds.carePackToSkillId]
+  /// and fires [_onCarePackOwned] on PURCHASED.
+  ///
+  /// Returns false + emits [BillingError] when [productId] isn't a
+  /// known care pack — caller mistakes shouldn't silently buy a
+  /// random product.
+  Future<bool> buyCarePack(String productId) async {
+    if (!ProductIds.carePackToSkillId.containsKey(productId)) {
+      _events.add(BillingEvent.error('not a care pack: $productId'));
+      return false;
+    }
+    return _buyNonConsumableById(productId);
+  }
 
   /// Restore previous non-consumable purchases (subs + care packs).
   /// Restored purchases stream through [events] as `purchased` /
@@ -212,12 +232,26 @@ class BillingService {
       // wiring increments the cached photoCreditsBalance on the
       // active entitlement.
       final credits = ProductIds.creditPackQuantities[purchase.productID];
-      final granted = _onPhotoCreditsGranted;
-      if (credits != null && granted != null) {
+      final grantedCredits = _onPhotoCreditsGranted;
+      if (credits != null && grantedCredits != null) {
         try {
-          await granted(credits);
+          await grantedCredits(credits);
         } catch (e) {
           debugPrint('BillingService: optimistic credits grant failed: $e');
+        }
+      }
+
+      // Phase 7 task C.3 — non-consumable care pack. Resolves the
+      // skill ID and fires the ownership callback; provider wiring
+      // adds the skill ID to the cached `ownedCarePackSkillIds`
+      // set on the active entitlement.
+      final skillId = ProductIds.carePackToSkillId[purchase.productID];
+      final grantedCarePack = _onCarePackOwned;
+      if (skillId != null && grantedCarePack != null) {
+        try {
+          await grantedCarePack(skillId);
+        } catch (e) {
+          debugPrint('BillingService: optimistic care pack grant failed: $e');
         }
       }
     }

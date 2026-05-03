@@ -176,6 +176,23 @@ final billingServiceProvider = FutureProvider<BillingService>((ref) async {
         ),
       );
     },
+    onCarePackOwned: (skillId) async {
+      // Phase 7 task C.3 — care pack purchase optimistically adds
+      // the skill ID to the cached ownedCarePackSkillIds set.
+      // Backend reconciliation overwrites once the
+      // play-billing-verify Edge Function ships.
+      final notifier = ref.read(entitlementProvider.notifier);
+      final current = ref.read(entitlementProvider).value ??
+          Entitlement.freeAnonymous();
+      await notifier.setOptimistic(
+        current.copyWith(
+          ownedCarePackSkillIds: {
+            ...current.ownedCarePackSkillIds,
+            skillId,
+          },
+        ),
+      );
+    },
   );
   ref.onDispose(service.dispose);
   await service.initialize();
@@ -568,7 +585,22 @@ final filteredSkillSourceProvider =
 
 final skillLoaderProvider = FutureProvider<SkillLoader>((ref) async {
   final source = await ref.watch(filteredSkillSourceProvider.future);
-  return SkillLoader(source: source);
+  // Phase 7 task C.3 — entitlement-gated `requires_pro` skills.
+  // Snapshot the entitlement at construction time via `ref.read`
+  // (NOT watch) so the loader stays stable across the session.
+  // Entitlement changes (Pro upgrade, care pack purchase) take
+  // effect on the next session — chat sessions don't span billing
+  // events in practice, and a mid-session loader rebuild would
+  // invalidate active skill matching.
+  final entitlement = ref.read(entitlementProvider).maybeWhen(
+        data: (e) => e,
+        orElse: Entitlement.freeAnonymous,
+      );
+  return SkillLoader(
+    source: source,
+    isPro: entitlement.isPro,
+    ownedCarePackSkillIds: entitlement.ownedCarePackSkillIds,
+  );
 });
 
 /// Catalog entry for the skill browser: manifest + whether it's

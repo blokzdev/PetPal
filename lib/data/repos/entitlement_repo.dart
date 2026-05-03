@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 import '../../app/entitlement/entitlement.dart';
@@ -47,6 +49,9 @@ class EntitlementRepo {
             monthlyVisionCount: Value(ent.monthlyVisionCount),
             counterPeriodStart: Value(ent.counterPeriodStart),
             fetchedAt: Value(ent.fetchedAt ?? DateTime.now()),
+            ownedCarePackSkillIdsJson: Value(
+              jsonEncode(ent.ownedCarePackSkillIds.toList()),
+            ),
           ),
         );
   }
@@ -69,5 +74,19 @@ class EntitlementRepo {
         monthlyVisionCount: row.monthlyVisionCount,
         counterPeriodStart: row.counterPeriodStart,
         fetchedAt: row.fetchedAt,
+        ownedCarePackSkillIds: _decodeSkillIds(row.ownedCarePackSkillIdsJson),
       );
+
+  Set<String> _decodeSkillIds(String json) {
+    try {
+      final decoded = jsonDecode(json);
+      if (decoded is List) {
+        return decoded.whereType<String>().toSet();
+      }
+    } catch (_) {
+      // Malformed JSON — defensive fallback to empty set; the
+      // reconciliation pass overwrites with the canonical value.
+    }
+    return const <String>{};
+  }
 }

@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show SetEquality;
 import 'package:flutter/foundation.dart' show immutable;
 
 /// Phase 7 Group B.1 — entitlement state machine.
@@ -117,6 +118,7 @@ class Entitlement {
     this.monthlyVisionCount = 0,
     required this.counterPeriodStart,
     this.fetchedAt,
+    this.ownedCarePackSkillIds = const <String>{},
   });
 
   /// Synthetic default for signed-out users. Reconciliation against
@@ -161,6 +163,16 @@ class Entitlement {
   /// the synthetic [freeAnonymous] default.
   final DateTime? fetchedAt;
 
+  /// Phase 7 task C.3 — skill IDs the user has unlocked via care
+  /// pack purchases. Pro users implicitly have access to every
+  /// `requiresPro` skill regardless of this set; non-Pro users
+  /// access a `requiresPro` skill only if its ID is in this set.
+  ///
+  /// Authoritative value lives on Supabase (per the
+  /// play-billing-verify Edge Function); this field is the
+  /// optimistic local mirror.
+  final Set<String> ownedCarePackSkillIds;
+
   bool get isPro => state.isPro;
   bool get isFree => state.isFree;
   bool get isTextMetered => state.isTextMetered;
@@ -197,6 +209,7 @@ class Entitlement {
     int? monthlyVisionCount,
     DateTime? counterPeriodStart,
     DateTime? fetchedAt,
+    Set<String>? ownedCarePackSkillIds,
   }) =>
       Entitlement(
         state: state ?? this.state,
@@ -208,6 +221,8 @@ class Entitlement {
         monthlyVisionCount: monthlyVisionCount ?? this.monthlyVisionCount,
         counterPeriodStart: counterPeriodStart ?? this.counterPeriodStart,
         fetchedAt: fetchedAt ?? this.fetchedAt,
+        ownedCarePackSkillIds:
+            ownedCarePackSkillIds ?? this.ownedCarePackSkillIds,
       );
 
   @override
@@ -221,7 +236,11 @@ class Entitlement {
       other.monthlyTextCount == monthlyTextCount &&
       other.monthlyVisionCount == monthlyVisionCount &&
       other.counterPeriodStart == counterPeriodStart &&
-      other.fetchedAt == fetchedAt;
+      other.fetchedAt == fetchedAt &&
+      const SetEquality<String>().equals(
+        other.ownedCarePackSkillIds,
+        ownedCarePackSkillIds,
+      );
 
   @override
   int get hashCode => Object.hash(
@@ -234,6 +253,7 @@ class Entitlement {
         monthlyVisionCount,
         counterPeriodStart,
         fetchedAt,
+        const SetEquality<String>().hash(ownedCarePackSkillIds),
       );
 
   @override

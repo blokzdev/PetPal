@@ -5,7 +5,7 @@ version: 1
 category: [dog]
 triggers: ["reactive", "reactivity", "leash reactivity", "barks at", "lunging", "lunges at", "fearful", "fear aggression", "aggressive on leash", "scared of", "barking at other dogs"]
 loads: ["overview.md", "thresholds.md", "logging.md"]
-requires_pro: false
+requires_pro: true
 ---
 
 # Reactive Dog Support
