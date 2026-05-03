@@ -12,6 +12,7 @@ import 'app/sync/supabase_runtime_config.dart';
 import 'app/theme.dart';
 import 'app/welcome/welcome_completed_notifier.dart';
 import 'platform/api_key_storage.dart';
+import 'platform/analytics/crash_analytics.dart';
 import 'platform/notifications_service.dart';
 import 'platform/scheduler_bootstrap.dart';
 import 'platform/scheduler_bootstrap_registry.dart';
@@ -69,6 +70,15 @@ Future<void> main() async {
   setSchedulerBootstrap(bootstrapAndFire);
   schedulerLog('app_init', fields: {});
 
+  // Phase 7 task H.2 — crash analytics opt-in.
+  // Hydrate the toggle from persistent storage so the gate is
+  // correct from the first error that might fire. v1 uses
+  // [NoopCrashAnalytics] regardless of toggle state — the
+  // abstraction is in place, the redaction layer is in place,
+  // the toggle persists. A concrete provider lands in Phase 8+.
+  final crashAnalytics = NoopCrashAnalytics(storage: settings);
+  await crashAnalytics.hydrate();
+
   // Phase 7 task H.1.a/b — Supabase initialization.
   //
   // Both URL + anon key must be supplied via --dart-define for
@@ -107,6 +117,7 @@ Future<void> main() async {
           authGatewayProvider.overrideWithValue(supabaseGateway),
         if (supabaseConfig != null)
           supabaseRuntimeConfigProvider.overrideWithValue(supabaseConfig),
+        crashAnalyticsProvider.overrideWithValue(crashAnalytics),
       ],
       child: const PetPalApp(),
     ),

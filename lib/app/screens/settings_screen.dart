@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../../platform/analytics/crash_analytics.dart';
 import '../auth/auth_session_notifier.dart';
 import '../byok/byok_key_entry_sheet.dart';
 import '../design/design.dart';
@@ -262,7 +263,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               ),
             ),
           ),
+          const SizedBox(height: Spacing.l),
+          // Phase 7 task H.2 — opt-in crash analytics. Off by default
+          // per ROADMAP H.2 lock. Even when ON, v1 ships
+          // NoopCrashAnalytics → nothing actually leaves the device
+          // until a provider is wired in Phase 8+. The toggle persists
+          // the user's choice so the eventual provider wiring honours
+          // the existing opt-in.
+          const PetSectionHeader(title: 'Diagnostics'),
+          const _CrashAnalyticsCard(),
         ],
+      ),
+    );
+  }
+}
+
+/// Phase 7 task H.2 — crash analytics toggle.
+///
+/// Off by default. Subtitle copy is honest about the v1 state:
+/// nothing actually transmits until a provider is wired (Phase 8+).
+/// The redaction layer (sk_ant_redaction.dart) is already in place
+/// so when a provider lands, no BYOK key can leak through telemetry.
+class _CrashAnalyticsCard extends ConsumerStatefulWidget {
+  const _CrashAnalyticsCard();
+
+  @override
+  ConsumerState<_CrashAnalyticsCard> createState() =>
+      _CrashAnalyticsCardState();
+}
+
+class _CrashAnalyticsCardState extends ConsumerState<_CrashAnalyticsCard> {
+  bool _saving = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final analytics = ref.watch(crashAnalyticsProvider);
+    return PetCard(
+      padding: EdgeInsets.zero,
+      child: SwitchListTile(
+        title: const Text('Anonymous crash reports'),
+        subtitle: const Text(
+          'Off by default. When you opt in, PetPal sends crash '
+          'details — never your chat content or pet data — to help '
+          "us fix bugs. Your Anthropic API key is scrubbed before "
+          'anything is sent.',
+        ),
+        value: analytics.enabled,
+        onChanged: _saving
+            ? null
+            : (value) async {
+                setState(() => _saving = true);
+                try {
+                  await analytics.setEnabled(value);
+                } finally {
+                  if (mounted) setState(() => _saving = false);
+                }
+              },
       ),
     );
   }
