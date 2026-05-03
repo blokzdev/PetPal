@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import '../wiki_io.dart';
 import 'cloud_sync_adapter.dart';
+import 'conflict_resolver.dart';
 import 'sync_backend.dart';
 import 'sync_session.dart';
 import 'wiki_crypto.dart';
@@ -39,17 +40,20 @@ class E2eeSyncAdapter implements CloudSyncAdapter {
     required WikiIo wiki,
     required String userId,
     DateTime Function() clock = DateTime.now,
+    ConflictResolver? resolver,
   })  : _backend = backend,
         _session = session,
         _wiki = wiki,
         _userId = userId,
-        _clock = clock;
+        _clock = clock,
+        _resolver = resolver ?? const ConflictResolver();
 
   final SyncBackend _backend;
   final SyncSession _session;
   final WikiIo _wiki;
   final String _userId;
   final DateTime Function() _clock;
+  final ConflictResolver _resolver;
 
   /// Track the last write timestamp we observed for each
   /// `<petId>/<relativePath>` so we can compare against the
@@ -148,19 +152,17 @@ class E2eeSyncAdapter implements CloudSyncAdapter {
       final remote = await _backend.listSince(petId: petId, since: since);
       final changed = <String>[];
       for (final meta in remote) {
+        final fullPath =
+            _fullPath(petId: meta.petId, relPath: meta.relativePath);
         final tsKey = _tsKey(meta.petId, meta.relativePath);
-        final localTs = _lastWriteTs[tsKey];
-        if (localTs != null && !meta.writeTs.isAfter(localTs)) {
-          continue;
-        }
+
         if (meta.deleted) {
-          await _wiki.deleteIfExists(
-            _fullPath(petId: meta.petId, relPath: meta.relativePath),
-          );
+          await _wiki.deleteIfExists(fullPath);
           _lastWriteTs[tsKey] = meta.writeTs;
           changed.add(meta.relativePath);
           continue;
         }
+
         final objectKey =
             _objectKey(petId: meta.petId, relPath: meta.relativePath);
         final blob = await _backend.downloadObject(objectKey);
@@ -169,17 +171,66 @@ class E2eeSyncAdapter implements CloudSyncAdapter {
           relativePath: meta.relativePath,
           writeTs: meta.writeTs,
         );
-        final plaintext = await _session.crypto.decrypt(
+        final remoteBytes = await _session.crypto.decrypt(
           blob: blob,
           keyBytes: _session.derivedKey,
           aad: aad,
         );
-        await _wiki.writeAtomic(
-          _fullPath(petId: meta.petId, relPath: meta.relativePath),
-          utf8.decode(plaintext),
+
+        // Local participant — null if the file doesn't exist locally
+        // (first-pull on this device). _lastWriteTs may also be null
+        // post-restart even when the file exists — the resolver
+        // routes that path to a defensive .conflict.md so user edits
+        // aren't silently overwritten.
+        final localBytes = await _readLocalBytes(fullPath);
+        final localParticipant = localBytes == null
+            ? null
+            : ConflictParticipant(
+                bytes: localBytes,
+                writeTs: _lastWriteTs[tsKey],
+              );
+        final remoteParticipant = ConflictParticipant(
+          bytes: remoteBytes,
+          writeTs: meta.writeTs,
         );
-        _lastWriteTs[tsKey] = meta.writeTs;
-        changed.add(meta.relativePath);
+
+        final resolution = _resolver.resolve(
+          local: localParticipant,
+          remote: remoteParticipant,
+        );
+
+        switch (resolution) {
+          case KeepLocal():
+            // No-op. Update the tracker so future LWW comparisons
+            // against this remote ts know we've already seen it.
+            _lastWriteTs[tsKey] = meta.writeTs;
+
+          case KeepRemote(:final bytes, :final writeTs):
+            await _wiki.writeAtomic(fullPath, utf8.decode(bytes));
+            _lastWriteTs[tsKey] = writeTs;
+            changed.add(meta.relativePath);
+
+          case WriteWithConflict(
+              :final survivorBytes,
+              :final survivorTs,
+              :final loserBytes,
+            ):
+            await _wiki.writeAtomic(
+              fullPath,
+              utf8.decode(survivorBytes),
+            );
+            final conflictPath = _fullPath(
+              petId: meta.petId,
+              relPath: conflictPathFor(meta.relativePath),
+            );
+            await _wiki.writeAtomic(
+              conflictPath,
+              utf8.decode(loserBytes),
+            );
+            _lastWriteTs[tsKey] = survivorTs;
+            changed.add(meta.relativePath);
+            changed.add(conflictPathFor(meta.relativePath));
+        }
       }
       final now = _clock();
       status = SyncStatus(state: SyncState.idle, lastSyncAt: now);
@@ -191,6 +242,18 @@ class E2eeSyncAdapter implements CloudSyncAdapter {
         errorMessage: '$e',
       );
       rethrow;
+    }
+  }
+
+  /// Read local bytes if the file exists. Returns null on miss
+  /// (the WikiIo.read contract throws when missing — the catch
+  /// translates that to null for the resolver).
+  Future<Uint8List?> _readLocalBytes(String fullPath) async {
+    try {
+      final body = await _wiki.read(fullPath);
+      return Uint8List.fromList(utf8.encode(body));
+    } catch (_) {
+      return null;
     }
   }
 
