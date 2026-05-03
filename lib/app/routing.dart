@@ -18,6 +18,7 @@ import 'screens/photo_timeline_screen.dart';
 import 'screens/profile_view_screen.dart';
 import 'screens/reminders_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/sign_in_screen.dart';
 import 'screens/skill_browser_screen.dart';
 import 'screens/soul_editor_screen.dart';
 import 'screens/vet_visit_form_screen.dart';
@@ -70,6 +71,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/pets/add',
         builder: (context, state) => const AddPetScreen(),
+      ),
+      // Phase 7 task H.1.c — magic-link sign-in. Lives outside the
+      // StatefulShellRoute so the user gets a focused full-screen
+      // flow (no bottom nav distraction during a security-flavoured
+      // moment). Auto-pops on signedIn event from the deep-link
+      // return — see SignInScreen for the listener.
+      GoRoute(
+        path: '/sign-in',
+        builder: (context, state) => const SignInScreen(),
       ),
       // Phase 7 task E.1 — paywall surfaces. Live OUTSIDE the
       // StatefulShellRoute (full-screen takeover; no bottom nav

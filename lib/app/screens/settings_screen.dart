@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import '../auth/auth_session_notifier.dart';
 import '../byok/byok_key_entry_sheet.dart';
 import '../design/design.dart';
 import '../entitlement/entitlement.dart';
@@ -341,6 +343,14 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
                     child: const Text('Upgrade'),
                   ),
           ),
+          // ── Account row (Phase 7 task H.1.c) ─────────────────────
+          // VOICE.md §6 examples 16 + 17. Sits right under the plan
+          // badge so the additive framing reads as a peer of the
+          // plan tier, not a gated upgrade. Free chat without
+          // sign-in is a brand promise — the signed-out copy must
+          // land that thesis instantly.
+          const Divider(height: 1, thickness: 1, indent: 16),
+          const _AccountTile(),
           // ── Pets row (Phase 7 task E.2) ──────────────────────────
           // Free / BYOK: "1 of 1 pet" register matches §7 principle
           // #1 (additive framing) without claiming the cap is
@@ -527,6 +537,122 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
 /// byok` rather than the local Switch widget's own value — that
 /// way an external state change (re-pump after migration,
 /// settings sync) keeps the UI in sync.
+/// Phase 7 task H.1.c — Settings Account tile.
+///
+/// Two visual states keyed off [authSessionProvider]:
+///   - **Signed out** — "PetPal account" with additive framing
+///     (VOICE.md §6 example 16). Tap routes to /sign-in. The brand
+///     promise — free chat without sign-in — is named explicitly so
+///     the user doesn't read this tile as a gated requirement.
+///   - **Signed in** — "Signed in as <email>" with a "Sign out"
+///     trailing button. Tap-to-sign-out runs through the
+///     confirmation dialog (VOICE.md §6 example 17) which reassures
+///     local data stays + sync pauses, not loss.
+///
+/// Sign-out path:
+///   1. User taps "Sign out".
+///   2. Confirmation dialog opens.
+///   3. On confirm: AuthSessionNotifier.signOut() → Supabase Auth
+///      clears the session → onAuthStateChange fires → notifier
+///      rebuilds → tile flips back to signed-out copy.
+///
+/// The entitlement refresh on sign-in (signed-in users get their
+/// userId-keyed entitlement row from Supabase per row 78) is wired
+/// in H.1.c.2 — for H.1.c.1 the entitlement notifier stays on its
+/// local-cached behaviour. This tile renders correctly regardless.
+class _AccountTile extends ConsumerWidget {
+  const _AccountTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final session = ref.watch(authSessionProvider).value;
+
+    if (session == null) {
+      return ListTile(
+        leading: Icon(
+          PhosphorIconsRegular.signIn,
+          color: scheme.onSurface.withValues(alpha: 0.6),
+        ),
+        title: const Text('PetPal account'),
+        subtitle: Text(
+          "Sign in to sync your journal across devices and pick up "
+          "where you left off on a new phone. Free chat works "
+          "without an account.",
+          style: textTheme.bodySmall?.copyWith(
+            color: scheme.onSurface.withValues(alpha: 0.65),
+          ),
+        ),
+        trailing: const Icon(PhosphorIconsRegular.caretRight),
+        onTap: () => GoRouter.of(context).push('/sign-in'),
+      );
+    }
+
+    return ListTile(
+      leading: Icon(
+        PhosphorIconsRegular.userCircle,
+        color: scheme.primary,
+      ),
+      title: Text('Signed in as ${session.email ?? "your PetPal account"}'),
+      subtitle: Text(
+        "Sync mirrors your journal end-to-end encrypted across every "
+        "device you sign in on.",
+        style: textTheme.bodySmall?.copyWith(
+          color: scheme.onSurface.withValues(alpha: 0.65),
+        ),
+      ),
+      trailing: TextButton(
+        onPressed: () => _confirmSignOut(context, ref),
+        child: const Text('Sign out'),
+      ),
+    );
+  }
+
+  Future<void> _confirmSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Sign out of PetPal?'),
+        content: const Text(
+          "Your journal stays on this device — sign-out only pauses "
+          "sync. The next time you sign in, sync picks back up where "
+          "it left off.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Sign out'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+    if (!context.mounted) return;
+    try {
+      await ref.read(authSessionProvider.notifier).signOut();
+    } catch (_) {
+      // Even on remote sign-out failure, the local session is
+      // cleared — surface a quiet snackbar so the user knows it
+      // worked locally. Stays on the AppScaffold messenger; no
+      // alarmist tone (VOICE.md §1).
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            "You're signed out on this device. The remote sign-out "
+            "may finish later — no data lost.",
+          ),
+        ),
+      );
+    }
+  }
+}
+
 class _ByokToggleTile extends ConsumerStatefulWidget {
   const _ByokToggleTile({required this.active});
 
@@ -692,16 +818,18 @@ class _SyncCard extends ConsumerWidget {
         SyncUiState.signedOut => ListTile(
             leading: Icon(
               PhosphorIconsRegular.signIn,
-              color: scheme.onSurface.withValues(alpha: 0.6),
+              color: scheme.primary,
             ),
             title: const Text('Sign in to enable sync'),
             subtitle: Text(
-              "Magic-link sign-in ships in a later update. Sync "
-              "needs an account so your devices can find each other.",
+              "Sync needs a PetPal account so your devices can find "
+              "each other. We'll email you a sign-in link.",
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),
               ),
             ),
+            trailing: const Icon(PhosphorIconsRegular.caretRight),
+            onTap: () => GoRouter.of(context).push('/sign-in'),
           ),
         SyncUiState.setupNeeded => ListTile(
             leading: Icon(

@@ -348,6 +348,128 @@ as-is. Relationship is one layer deeper than chrome.
                                           onboarding; surfaces BYOK as
                                           a Settings choice, not a
                                           required setup step)
+
+16. Settings — Account tile (signed out)
+    Bad:  "Sign in to PetPal" / "Required for sync."
+    After: "PetPal account"
+           "Sign in to sync your journal across devices and pick up
+            where you left off on a new phone. Free chat works
+            without an account."
+                                          (sign-in is additive, not
+                                          required. Free use without
+                                          sign-in is the brand
+                                          promise — the copy must
+                                          land that thesis instantly
+                                          so users don't read the
+                                          tile as a gated
+                                          requirement.)
+
+17. Settings — Account tile (signed in) + sign-out confirmation
+    After (tile):
+            Title:    "Signed in as alice@example.com"
+            Subtitle: "Sync mirrors your journal end-to-end encrypted
+                       across every device you sign in on."
+            CTA:      "Sign out"
+
+    After (confirmation dialog):
+            Title:    "Sign out of PetPal?"
+            Body:     "Your journal stays on this device — sign-out
+                       only pauses sync. The next time you sign in,
+                       sync picks back up where it left off."
+            Buttons:  "Cancel" / "Sign out"
+                                          (reassurance is the
+                                          load-bearing fact: local
+                                          data stays intact, sync
+                                          pauses, no data loss. Users
+                                          who hesitate at "Sign out"
+                                          are usually worried about
+                                          losing the journal — name
+                                          the worry, dispel it.)
+
+18. Sign-in screen (the magic-link flow)
+    Title:    "Sign in to PetPal"
+    Body:     "We'll email you a link. Tap it on this device to sign
+               in — no password needed."
+    Field:    "Email"
+    Button:   "Send sign-in link"
+
+    Privacy disclosure (small card below the button):
+              "Your account links your devices for sync and the free
+               monthly chat allowance. Your journal stays end-to-end
+               encrypted — PetPal can't read it."
+
+    After (confirmation state, post-send):
+    Headline: "Check your inbox"
+    Body:     "We sent a sign-in link to alice@example.com. Tap it on
+               this device — PetPal will open signed in."
+    Hint:     "The link expires in an hour. Didn't get it? Try a
+               different email below."
+    CTA:      "Try a different email"
+                                          (passwordless framing;
+                                          single-device flow named
+                                          honestly — "tap it on this
+                                          device" prevents the cross-
+                                          device-tap edge case from
+                                          becoming a support ticket.
+                                          Privacy disclosure inline
+                                          on the entry screen, not
+                                          buried elsewhere.)
+
+19. Sync card — "setup needed" gate register
+    Bad:  "Pick a passphrase to encrypt your journal across devices.
+           Only you can read it — PetPal can't."
+    After:"Set up sync passphrase"
+          "This passphrase encrypts your journal so PetPal can't read
+           it. **PetPal cannot recover it if you forget.** Pick
+           something you'll remember and write it down."
+                                          (gate register, not warm
+                                          continuation. The
+                                          passphrase is the most
+                                          consequential moment in the
+                                          app — irrecoverable if
+                                          lost. Copy primes the user
+                                          to approach the three-stage
+                                          modal with appropriate
+                                          gravity. The bold sentence
+                                          is load-bearing; it surfaces
+                                          irrecoverability before the
+                                          modal does.)
+
+20. Account deletion — single-screen disclosure + typed gate
+    Title: "Delete your PetPal account"
+    Body:  "This permanently removes your account from PetPal. Here's
+            what happens:
+
+            • Your journal on this device is deleted
+            • Your synced copy on PetPal's servers is deleted within
+              30 days — sign in within that window to undo
+            • Active subscriptions stay on your Google Play account;
+              cancel them in Play Store before deleting if you want
+              a refund
+            • Your sync passphrase is removed and cannot be recovered
+            • PetPal's records of your AI chat usage are deleted
+
+            Want to keep a copy of your journal first? [Export to ZIP]
+
+            Type DELETE below to confirm."
+    Field: "DELETE"
+    Button: "Delete account"  (disabled until field matches exactly)
+                                          (single-screen disclosure
+                                          per DECISIONS row 77's
+                                          Option e. Friction-as-
+                                          discipline lives in the
+                                          typed-confirmation gate at
+                                          the end, not in stretching
+                                          the cascade across five
+                                          screens. Export inline as a
+                                          choice — never a forced
+                                          step. The five points are
+                                          listed in the order a user
+                                          would worry about them:
+                                          local data first, server
+                                          data second, money third,
+                                          irrecoverable secret fourth,
+                                          server-side records last.)
 ```
 
 ## 7. Monetization voice principles

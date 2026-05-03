@@ -923,9 +923,9 @@ class _ChatUnavailableBanner extends StatelessWidget {
                       Expanded(
                         child: Text(
                           "Chat needs a connection to Claude. Add your "
-                          "Anthropic key in Settings — sign-in for the "
-                          "free monthly allowance ships in a later "
-                          'update.',
+                          "Anthropic key in Settings to start chatting "
+                          "now — the free monthly allowance is rolling "
+                          "out in the next update.",
                           style: textTheme.bodyMedium?.copyWith(
                             color: scheme.onSurface.withValues(alpha: 0.85),
                             height: 1.4,
