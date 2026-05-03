@@ -118,6 +118,7 @@ dependencies:
   # downloads, 130+ pub points) and the stylistic flexibility maps
   # cleanly onto the warm-modern palette without theme overrides.
   fl_chart: ^1.1.1
+  in_app_purchase: ^3.2.3
 
 dev_dependencies:
   flutter_test:

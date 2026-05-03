@@ -19,6 +19,8 @@ import '../data/wiki_io_fs.dart';
 import '../harness/agent/agent_loop.dart';
 import '../harness/agent/direct_transport.dart';
 import '../harness/agent/llm_client.dart';
+import '../platform/billing/billing_service.dart';
+import '../platform/billing/iap_platform.dart';
 import 'entitlement/entitlement.dart';
 import 'entitlement/entitlement_notifier.dart';
 import '../harness/agent/tool_dispatcher.dart';
@@ -136,6 +138,33 @@ final petRepoProvider = FutureProvider<PetRepo>((ref) async {
 final entitlementRepoProvider = FutureProvider<EntitlementRepo>((ref) async {
   final db = await ref.watch(appDatabaseProvider.future);
   return EntitlementRepo(db: db);
+});
+
+/// Phase 7 task C.1 — Play Billing platform façade. Production wraps
+/// `InAppPurchase.instance`. Tests override with a fake.
+final iapPlatformProvider = Provider<IapPlatform>((ref) => IapPlatformImpl());
+
+/// Phase 7 task C.1 — Play Billing service. Initialized eagerly so
+/// the purchaseStream subscription is open before any pending-on-
+/// relaunch purchases get redelivered. Caller awaits the future
+/// once at app start; the broadcast `events` stream surfaces all
+/// purchase outcomes.
+final billingServiceProvider = FutureProvider<BillingService>((ref) async {
+  final iap = ref.watch(iapPlatformProvider);
+  final service = BillingService(
+    iap: iap,
+    onOptimisticEntitlement: (ent) async {
+      // Push the optimistic state through the entitlement notifier
+      // so the agent loop's quota gate + the Settings UI both see
+      // Pro immediately. Server reconciliation (when
+      // play-billing-verify Edge Function ships) overwrites this
+      // with the canonical state from Supabase.
+      await ref.read(entitlementProvider.notifier).setOptimistic(ent);
+    },
+  );
+  ref.onDispose(service.dispose);
+  await service.initialize();
+  return service;
 });
 
 /// Phase 7 task B.1 — active-user entitlement.

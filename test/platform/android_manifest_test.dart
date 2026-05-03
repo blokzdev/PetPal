@@ -53,6 +53,32 @@ void main() {
     });
   });
 
+  group('in_app_purchase plugin-bump (Phase 7 task C.1, DECISIONS row 33)', () {
+    test('NO new manifest components required — Play Billing handles '
+        'permissions internally', () {
+      // The in_app_purchase_android plugin's auto-merged manifest is
+      // empty (just `<manifest>`); the example app declares no
+      // billing-specific permissions or components beyond the standard
+      // Flutter activity. Play Billing Library handles BILLING
+      // internally as of Billing v3+ (the legacy
+      // `com.android.vending.BILLING` permission is auto-granted and
+      // doesn't need to be requested in our manifest).
+      //
+      // This test exists only to record that the bump's plugin-
+      // checklist (DECISIONS row 33) was performed and yielded
+      // zero manifest changes. If a future plugin upgrade adds new
+      // components, the next bump's audit will see this test
+      // unchanged → run the full checklist again.
+      expect(
+        manifest.contains('com.android.vending.BILLING'),
+        isFalse,
+        reason: 'BILLING permission should NOT appear — Play Billing '
+            'Library handles it internally, and explicitly declaring '
+            'it would re-trigger the legacy auto-grant warning.',
+      );
+    });
+  });
+
   group('android_alarm_manager_plus components (DECISIONS row 33 hotfix)', () {
     test('AlarmService — JobIntentService that runs the Dart callback', () {
       expect(
