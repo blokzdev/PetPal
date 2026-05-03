@@ -3,111 +3,89 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import 'anthropic_client.dart';
 import 'llm_stream_event.dart';
 import 'llm_transport.dart';
 import 'messages.dart';
 
-/// Default model. CLAUDE.md positions PetPal as a chat agent; Sonnet is the
-/// best speed/intelligence balance for conversational pet-care guidance.
-const _defaultModel = 'claude-sonnet-4-6';
-
-/// Conservative output ceiling. Keeps responses under SDK HTTP timeout for
-/// non-streaming requests (per Anthropic SDK guidance, ~16K is the upper
-/// bound before streaming becomes mandatory).
-const _defaultMaxTokens = 4096;
-
-const _apiVersion = '2023-06-01';
-
-/// Token-usage stats from the most recent turn. Surfaced separately from
-/// [Message] so cache-hit-rate can be inspected without cluttering the
-/// [LlmClient] contract that [AgentLoop] consumes.
-class AnthropicUsage {
-  AnthropicUsage({
-    required this.inputTokens,
-    required this.outputTokens,
-    required this.cacheCreationInputTokens,
-    required this.cacheReadInputTokens,
-  });
-
-  factory AnthropicUsage.fromJson(Map<String, Object?> json) => AnthropicUsage(
-        inputTokens: (json['input_tokens'] as num?)?.toInt() ?? 0,
-        outputTokens: (json['output_tokens'] as num?)?.toInt() ?? 0,
-        cacheCreationInputTokens:
-            (json['cache_creation_input_tokens'] as num?)?.toInt() ?? 0,
-        cacheReadInputTokens:
-            (json['cache_read_input_tokens'] as num?)?.toInt() ?? 0,
-      );
-
-  final int inputTokens;
-  final int outputTokens;
-  final int cacheCreationInputTokens;
-  final int cacheReadInputTokens;
-}
-
-/// Thrown when the Anthropic API returns a non-2xx response or an unparseable
-/// body. [statusCode] is the HTTP status; [errorType] is the API's
-/// `error.type` (e.g. `invalid_request_error`, `authentication_error`,
-/// `rate_limit_error`).
-class AnthropicApiException implements Exception {
-  AnthropicApiException({
-    required this.statusCode,
-    required this.message,
-    this.errorType,
-  });
-
-  final int statusCode;
-  final String message;
-  final String? errorType;
-
-  @override
-  String toString() =>
-      'AnthropicApiException($statusCode${errorType != null ? ' $errorType' : ''}): $message';
-}
-
-/// Thin, non-streaming Anthropic Messages API client. Implements [LlmClient]
-/// so [AgentLoop] can drive it without knowing it talks to Anthropic.
+/// Phase 7 Group A.3 — funded-path transport.
 ///
-/// Prompt caching: every call wraps [systemPrompt] in a single text block
-/// with `cache_control: {type: "ephemeral"}`. The render order is
-/// `tools` → `system` → `messages`, so a `cache_control` marker on the last
-/// (only) system block caches *both* tools and system together. Keep
-/// `systemPrompt` byte-stable across turns and the cache will accrue —
-/// SessionBuilder in 1.11 takes responsibility for that, putting volatile
-/// content (retrieved snippets) in the messages array instead of the system
-/// prompt.
+/// POSTs to PetPal's Supabase Edge Function
+/// (`<supabaseUrl>/functions/v1/llm-proxy`) instead of Anthropic
+/// directly. The Edge Function (DECISIONS row 82, see
+/// `supabase/functions/llm-proxy/index.ts`) handles auth, rate-limit
+/// floor, atomic counter increment, and forwards to Anthropic with
+/// PetPal's master key — preserving `cache_control` blocks
+/// byte-for-byte (CLAUDE.md §6 prompt-cache lock).
 ///
-/// Streaming is intentionally out of scope for Phase 1.10 — Phase 1.13's dev
-/// screen tolerates blocking turns. A streaming `turn` lands later when the
-/// chat UI in Phase 2 needs token-level rendering.
-/// Direct-call transport — POSTs to `api.anthropic.com/v1/messages`
-/// with the user's own `sk-ant-…` API key. Used by the BYOK path
-/// (DECISIONS row 36 BYOK lane + row 74 validation).
+/// Authentication shape (DECISIONS rows 70 + 82):
+///   - Signed-in users supply a Supabase JWT via [userJwt].
+///   - Anonymous (signed-out free) users supply a UUID v4 via
+///     [deviceToken]. The Edge Function rejects both-null with 401.
 ///
-/// Phase 7 task A.3.2 renames this class to `DirectTransport` and
-/// the file to `direct_transport.dart`. Kept as `AnthropicClient`
-/// for A.3.1 to minimise diff in the abstraction-introduction
-/// commit.
-class AnthropicClient extends LlmTransport {
-  AnthropicClient({
-    required String apiKey,
-    this.model = _defaultModel,
-    this.maxTokens = _defaultMaxTokens,
-    this.baseUrl = 'https://api.anthropic.com',
+/// Quota gating happens server-side; this transport surfaces it as
+/// an [AnthropicApiException] with `statusCode: 402` for monthly cap
+/// exceeded, `429` for rate-limited, `403` for banned. The Flutter
+/// quota gate (Group D.1) catches these and surfaces the paywall
+/// per VOICE.md §6 example 14.
+///
+/// Body shape is identical to [AnthropicClient]'s — same JSON
+/// envelope, same `cache_control` blocks. The proxy is a passthrough.
+/// Encoding helpers are duplicated here from [AnthropicClient] for
+/// A.3.1 (kept self-contained); A.3.2's rename commit may DRY them
+/// into a shared protocol module.
+class ProxyTransport extends LlmTransport {
+  ProxyTransport({
+    required String supabaseUrl,
+    required String supabaseAnonKey,
+    String? userJwt,
+    String? deviceToken,
+    this.model = 'claude-sonnet-4-6',
+    this.maxTokens = 4096,
     http.Client? httpClient,
-  })  : _apiKey = apiKey,
-        _http = httpClient ?? http.Client();
+  })  : _supabaseUrl = supabaseUrl,
+        _supabaseAnonKey = supabaseAnonKey,
+        _userJwt = userJwt,
+        _deviceToken = deviceToken,
+        _http = httpClient ?? http.Client() {
+    if (userJwt == null && deviceToken == null) {
+      throw ArgumentError(
+        'ProxyTransport requires either userJwt (signed-in) or '
+        'deviceToken (anonymous). The Edge Function rejects '
+        'both-null with 401.',
+      );
+    }
+  }
 
-  final String _apiKey;
+  static const _apiVersion = '2023-06-01';
+
+  final String _supabaseUrl;
+  final String _supabaseAnonKey;
+  final String? _userJwt;
+  final String? _deviceToken;
   final http.Client _http;
   final String model;
   final int maxTokens;
-  final String baseUrl;
 
   AnthropicUsage? _lastUsage;
-
-  /// Token usage from the most recent successful turn. Null until the first
-  /// turn lands. Useful for cache-hit-rate dashboards.
   AnthropicUsage? get lastUsage => _lastUsage;
+
+  Uri get _endpoint => Uri.parse('$_supabaseUrl/functions/v1/llm-proxy');
+
+  Map<String, String> _headers({bool streaming = false}) {
+    final jwt = _userJwt;
+    final token = _deviceToken;
+    return <String, String>{
+      'Content-Type': 'application/json',
+      'apikey': _supabaseAnonKey,
+      // ignore: use_null_aware_elements
+      if (jwt != null) 'Authorization': 'Bearer $jwt',
+      // ignore: use_null_aware_elements
+      if (token != null) 'x-petpal-device-token': token,
+      'anthropic-version': _apiVersion,
+      if (streaming) 'accept': 'text/event-stream',
+    };
+  }
 
   @override
   Future<Message> turn({
@@ -115,40 +93,21 @@ class AnthropicClient extends LlmTransport {
     required List<Message> history,
     List<ToolDefinition> tools = const [],
   }) async {
-    final body = <String, Object?>{
-      'model': model,
-      'max_tokens': maxTokens,
-      'system': [
-        {
-          'type': 'text',
-          'text': systemPrompt,
-          'cache_control': {'type': 'ephemeral'},
-        },
-      ],
-      'messages': [for (final m in history) _encodeMessage(m)],
-      if (tools.isNotEmpty)
-        'tools': [
-          for (final t in tools)
-            {
-              'name': t.name,
-              'description': t.description,
-              'input_schema': t.inputSchema,
-            },
-        ],
-    };
+    final body = _buildBody(
+      systemPrompt: systemPrompt,
+      history: history,
+      tools: tools,
+      streaming: false,
+    );
 
     final response = await _http.post(
-      Uri.parse('$baseUrl/v1/messages'),
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': _apiKey,
-        'anthropic-version': _apiVersion,
-      },
+      _endpoint,
+      headers: _headers(),
       body: jsonEncode(body),
     );
 
     if (response.statusCode != 200) {
-      throw _errorFromResponse(response);
+      throw _errorFromBody(response.statusCode, response.body);
     }
 
     final decoded = jsonDecode(response.body) as Map<String, Object?>;
@@ -165,34 +124,15 @@ class AnthropicClient extends LlmTransport {
     required List<Message> history,
     List<ToolDefinition> tools = const [],
   }) async* {
-    final body = <String, Object?>{
-      'model': model,
-      'max_tokens': maxTokens,
-      'stream': true,
-      'system': [
-        {
-          'type': 'text',
-          'text': systemPrompt,
-          'cache_control': {'type': 'ephemeral'},
-        },
-      ],
-      'messages': [for (final m in history) _encodeMessage(m)],
-      if (tools.isNotEmpty)
-        'tools': [
-          for (final t in tools)
-            {
-              'name': t.name,
-              'description': t.description,
-              'input_schema': t.inputSchema,
-            },
-        ],
-    };
+    final body = _buildBody(
+      systemPrompt: systemPrompt,
+      history: history,
+      tools: tools,
+      streaming: true,
+    );
 
-    final request = http.Request('POST', Uri.parse('$baseUrl/v1/messages'))
-      ..headers['Content-Type'] = 'application/json'
-      ..headers['x-api-key'] = _apiKey
-      ..headers['anthropic-version'] = _apiVersion
-      ..headers['accept'] = 'text/event-stream'
+    final request = http.Request('POST', _endpoint)
+      ..headers.addAll(_headers(streaming: true))
       ..body = jsonEncode(body);
 
     final streamed = await _http.send(request);
@@ -207,10 +147,6 @@ class AnthropicClient extends LlmTransport {
     await for (final raw in streamed.stream
         .transform(utf8.decoder)
         .transform(const LineSplitter())) {
-      // SSE frames are `data: {json}` lines, separated by blank lines.
-      // Anthropic also prefixes lines with `event: <name>` for routing,
-      // but the JSON payload always carries `type` so the event header is
-      // redundant — we key off `type` instead.
       if (!raw.startsWith('data:')) continue;
       final payload = raw.substring(5).trim();
       if (payload.isEmpty || payload == '[DONE]') continue;
@@ -226,9 +162,6 @@ class AnthropicClient extends LlmTransport {
 
       switch (evt['type']) {
         case 'message_start':
-          // The opening message envelope carries input usage; surface in
-          // [_lastUsage] so cache-hit-rate dashboards still work for
-          // streaming turns.
           final msg = evt['message'];
           if (msg is Map<String, Object?>) {
             final usage = msg['usage'];
@@ -241,8 +174,7 @@ class AnthropicClient extends LlmTransport {
         case 'content_block_start':
           final index = (evt['index'] as num?)?.toInt() ?? 0;
           final block = evt['content_block'];
-          if (block is Map<String, Object?> &&
-              block['type'] == 'tool_use') {
+          if (block is Map<String, Object?> && block['type'] == 'tool_use') {
             yield StreamToolUseStart(
               index: index,
               id: block['id'] as String? ?? '',
@@ -308,7 +240,36 @@ class AnthropicClient extends LlmTransport {
 
   void close() => _http.close();
 
-  // ---- encoding -----------------------------------------------------------
+  // ─── shared body / encoding / decoding ────────────────────────────
+
+  Map<String, Object?> _buildBody({
+    required String systemPrompt,
+    required List<Message> history,
+    required List<ToolDefinition> tools,
+    required bool streaming,
+  }) =>
+      <String, Object?>{
+        'model': model,
+        'max_tokens': maxTokens,
+        if (streaming) 'stream': true,
+        'system': [
+          {
+            'type': 'text',
+            'text': systemPrompt,
+            'cache_control': {'type': 'ephemeral'},
+          },
+        ],
+        'messages': [for (final m in history) _encodeMessage(m)],
+        if (tools.isNotEmpty)
+          'tools': [
+            for (final t in tools)
+              {
+                'name': t.name,
+                'description': t.description,
+                'input_schema': t.inputSchema,
+              },
+          ],
+      };
 
   Map<String, Object?> _encodeMessage(Message m) => {
         'role': m.role,
@@ -319,13 +280,6 @@ class AnthropicClient extends LlmTransport {
     switch (block) {
       case TextBlock(:final text):
         return {'type': 'text', 'text': text};
-      // Phase 6 task 6.4 — image block. Anthropic's vision shape is
-      // `{type: 'image', source: {type: 'base64', media_type, data}}`
-      // with optional `cache_control: {type: 'ephemeral'}` for
-      // prompt-cache eligibility on follow-up turns that reference
-      // the same image. Base64-encode the bytes inline; the byte
-      // size cap is enforced upstream (6.6 pre-write resize, 5 MB
-      // per-image API ceiling).
       case ImageBlock(
           :final bytes,
           :final mediaType,
@@ -357,8 +311,6 @@ class AnthropicClient extends LlmTransport {
     }
   }
 
-  // ---- decoding -----------------------------------------------------------
-
   Message _decodeMessage(Map<String, Object?> json) {
     final role = json['role'] as String? ?? Message.assistantRole;
     final rawContent = json['content'];
@@ -388,14 +340,9 @@ class AnthropicClient extends LlmTransport {
               : const {},
         );
       default:
-        // Thinking blocks and unknown variants are ignored by the harness
-        // for now — Phase 1 doesn't surface them.
         return null;
     }
   }
-
-  AnthropicApiException _errorFromResponse(http.Response response) =>
-      _errorFromBody(response.statusCode, response.body);
 
   AnthropicApiException _errorFromBody(int statusCode, String rawBody) {
     String message = rawBody;
@@ -403,14 +350,17 @@ class AnthropicClient extends LlmTransport {
     try {
       final decoded = jsonDecode(rawBody);
       if (decoded is Map<String, Object?>) {
+        // Edge Function error shape: {"error": {"code": "...", "detail": "..."}}.
+        // Map to AnthropicApiException so callers handle it uniformly.
         final error = decoded['error'];
         if (error is Map<String, Object?>) {
-          errorType = error['type'] as String?;
-          message = (error['message'] as String?) ?? message;
+          errorType = error['type'] as String? ?? error['code'] as String?;
+          message =
+              (error['message'] as String?) ?? (error['detail'] as String?) ?? message;
         }
       }
     } catch (_) {
-      // Body wasn't JSON — keep the raw body as the message.
+      // Body wasn't JSON — keep raw as message.
     }
     return AnthropicApiException(
       statusCode: statusCode,
