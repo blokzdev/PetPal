@@ -33,7 +33,12 @@ void main() {
       build({String userId = 'user-uuid', bool authenticated = true}) async {
     final backend = InMemorySyncBackend(isAuthenticated: authenticated);
     final session = SyncSession(crypto: fastCrypto());
-    await session.setup(passphrase: 'correct horse staple');
+    // Store the setup challenge so a second device unlocking with the
+    // same passphrase derives the SAME key — without this, pull tests
+    // that rebuild a target session re-run setup() and derive a fresh
+    // key, decrypting the source's blobs to a MAC mismatch.
+    final challenge = await session.setup(passphrase: 'correct horse staple');
+    await backend.storeChallenge(challenge);
     final wiki = _CapturingWikiIo();
     final adapter = E2eeSyncAdapter(
       backend: backend,

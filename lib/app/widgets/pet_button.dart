@@ -143,7 +143,9 @@ class _PetButtonContent extends StatelessWidget {
           Icon(icon, size: 18),
           const SizedBox(width: Spacing.s),
         ],
-        Text(label),
+        // Flexible so a long label wraps within the button's width
+        // rather than overflowing at large accessibility text scales.
+        Flexible(child: Text(label, textAlign: TextAlign.center)),
       ],
     );
     return Stack(

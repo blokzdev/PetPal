@@ -121,12 +121,6 @@ class SupabaseEntitlementsClient implements EntitlementsClient {
       counterPeriodStart: _parseTs(row['counter_period_start']) ??
           DateTime.now().toUtc(),
       fetchedAt: DateTime.now().toUtc(),
-      // Care pack ownership is a local-only field today (Drift schema
-      // v3 column `owned_care_pack_skill_ids_json`). The play-billing-
-      // verify Edge Function will mirror it server-side in a later
-      // commit; until then, server fetch leaves it empty and the
-      // notifier merges the cached value back in.
-      ownedCarePackSkillIds: const <String>{},
     );
   }
 

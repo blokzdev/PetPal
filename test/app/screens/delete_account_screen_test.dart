@@ -1,11 +1,16 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/app/account/account_deletion_client.dart';
+import 'package:petpal/app/account/local_data_wipe.dart';
 import 'package:petpal/app/auth/app_auth_session.dart';
 import 'package:petpal/app/auth/auth_gateway.dart';
 import 'package:petpal/app/auth/auth_session_notifier.dart';
+import 'package:petpal/app/providers.dart';
 import 'package:petpal/app/screens/delete_account_screen.dart';
+import 'package:petpal/data/wiki_io.dart';
 
 /// Phase 7 task H.1.d — DeleteAccountScreen widget tests.
 ///
@@ -13,7 +18,7 @@ import 'package:petpal/app/screens/delete_account_screen.dart';
 /// transitions using the FakeAccountDeletionClient + InMemoryAuthGateway
 /// test fakes, so no network plumbing is needed.
 void main() {
-  Widget _harness({
+  Widget harness({
     required FakeAccountDeletionClient client,
     InMemoryAuthGateway? gateway,
   }) {
@@ -30,6 +35,13 @@ void main() {
       overrides: [
         accountDeletionClientProvider.overrideWithValue(client),
         authGatewayProvider.overrideWithValue(g),
+        // The success path wipes local data + reads wikiIo; fake both
+        // so it doesn't reach platform channels (path_provider) that
+        // hang in the test harness.
+        wikiIoProvider.overrideWith((ref) async => _NoopWiki()),
+        localDataWipeProvider.overrideWithValue(
+          LocalDataWipe(deleteDriftFile: () async {}),
+        ),
       ],
       child: const MaterialApp(home: DeleteAccountScreen()),
     );
@@ -39,7 +51,7 @@ void main() {
     testWidgets('renders all five Option (e) disclosure items',
         (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       // Match keywords from each disclosure item (DECISIONS row 77 +
@@ -56,7 +68,7 @@ void main() {
     testWidgets('exposes the inline export-first affordance',
         (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       expect(find.text('Export to ZIP'), findsOneWidget,
@@ -68,7 +80,7 @@ void main() {
     testWidgets('Delete button disabled until DELETE is typed',
         (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       final button = tester.widget<FilledButton>(
@@ -80,7 +92,7 @@ void main() {
 
     testWidgets('Typing DELETE enables the button', (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'DELETE');
@@ -95,7 +107,7 @@ void main() {
     testWidgets('lowercase input is uppercased by the formatter',
         (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'delete');
@@ -111,7 +123,7 @@ void main() {
 
     testWidgets('partial input keeps the button disabled', (tester) async {
       final client = FakeAccountDeletionClient();
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'DEL');
@@ -129,17 +141,20 @@ void main() {
         (tester) async {
       final retention = DateTime.utc(2026, 6, 2);
       final client = FakeAccountDeletionClient(retentionEnd: retention);
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'DELETE');
       await tester.pump();
 
-      await tester.tap(
+      await tester.ensureVisible(
         find.widgetWithText(FilledButton, 'Delete account'),
       );
       await tester.pump();
-      await tester.pump();
+      await tester.tap(
+        find.widgetWithText(FilledButton, 'Delete account'),
+      );
+      await tester.pumpAndSettle();
 
       expect(client.callCount, 1);
       expect(
@@ -159,10 +174,14 @@ void main() {
         ..scriptError(
           const AccountDeletionException('temporary outage'),
         );
-      await tester.pumpWidget(_harness(client: client));
+      await tester.pumpWidget(harness(client: client));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'DELETE');
+      await tester.pump();
+      await tester.ensureVisible(
+        find.widgetWithText(FilledButton, 'Delete account'),
+      );
       await tester.pump();
       await tester.tap(
         find.widgetWithText(FilledButton, 'Delete account'),
@@ -224,6 +243,8 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Delete your PetPal account'), findsOneWidget);
 
+      await tester.ensureVisible(find.text('Cancel'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 
@@ -257,6 +278,10 @@ void main() {
 
       await tester.enterText(find.byType(TextField), 'DELETE');
       await tester.pump();
+      await tester.ensureVisible(
+        find.widgetWithText(FilledButton, 'Delete account'),
+      );
+      await tester.pump();
       await tester.tap(
         find.widgetWithText(FilledButton, 'Delete account'),
       );
@@ -270,4 +295,27 @@ void main() {
       );
     });
   });
+}
+
+class _NoopWiki implements WikiIo {
+  @override
+  Future<void> writeAtomic(String relPath, String body) async {}
+  @override
+  Future<String> read(String relPath) async => '';
+  @override
+  Future<List<String>> listForPet(int petId) async => const [];
+  @override
+  String petDir(int petId) => 'wiki/$petId';
+  @override
+  String soulPath(int petId) => 'wiki/$petId/SOUL.md';
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) async {}
+  @override
+  Future<Uint8List> readBytes(String relPath) async => Uint8List(0);
+  @override
+  Future<void> deleteIfExists(String relPath) async {}
+  @override
+  Future<int> bytesForPet(int petId) async => 0;
+  @override
+  Future<void> deleteAll() async {}
 }

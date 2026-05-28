@@ -94,7 +94,12 @@ class E2eeSyncAdapter implements CloudSyncAdapter {
         final plaintext = Uint8List.fromList(utf8.encode(body));
         final hash = WikiCrypto.bodyHash(plaintext);
         final tsKey = _tsKey(petId, relPath);
-        final writeTs = _lastWriteTs[tsKey] ?? _clock();
+        // A file only reaches the upload below when it's new or its
+        // content changed (the hash-match check skips unchanged
+        // files). Stamp it with the current clock — reusing a stale
+        // tracked ts would publish a fresh edit under an old
+        // timestamp and break LWW ordering on the pulling device.
+        final writeTs = _clock();
         // Skip uploads when local hash matches the server's
         // recorded hash — saves bandwidth for the common case
         // (most files don't change session-to-session).

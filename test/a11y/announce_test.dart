@@ -3,9 +3,10 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Phase 7 task H.2.b — Pass E. Source-presence assertion that the
-/// `appSnackBar` helper still wires `SemanticsService.announce` so
-/// every snackbar dispatched through the central helper is also
-/// announced to TalkBack.
+/// `appSnackBar` helper still wires `SemanticsService.sendAnnouncement`
+/// so every snackbar dispatched through the central helper is also
+/// announced to TalkBack. (`announce` was deprecated after Flutter
+/// v3.35; `sendAnnouncement` is the multi-window-safe replacement.)
 ///
 /// The behavioural test for `announce: false` opt-out lives in
 /// `test/app/widgets/app_scaffold_test.dart` alongside the existing
@@ -13,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 /// future "while I'm here" cleanup that drops the announce can't
 /// land silently.
 void main() {
-  group('Pass E — appSnackBar wires SemanticsService.announce', () {
+  group('Pass E — appSnackBar wires SemanticsService.sendAnnouncement', () {
     test('app_scaffold.dart imports flutter/semantics.dart', () {
       final src = File('lib/app/widgets/app_scaffold.dart').readAsStringSync();
       expect(
@@ -25,7 +26,7 @@ void main() {
       );
     });
 
-    test('appSnackBar calls SemanticsService.announce by default', () {
+    test('appSnackBar calls SemanticsService.sendAnnouncement by default', () {
       final src = File('lib/app/widgets/app_scaffold.dart').readAsStringSync();
       // The wire — must announce the message in the active reading
       // direction so TalkBack reads it aloud as it appears on screen.
@@ -34,12 +35,12 @@ void main() {
       // TextDirection.ltr` form; the substring assertion below
       // matches both shapes by anchoring on the announce call only.
       expect(
-        src.contains('SemanticsService.announce('),
+        src.contains('SemanticsService.sendAnnouncement('),
         isTrue,
         reason:
-            'appSnackBar dropped its SemanticsService.announce wire — '
-            'Phase 7 H.2.b regression. TalkBack would not read the '
-            'snackbar text without this.',
+            'appSnackBar dropped its SemanticsService.sendAnnouncement '
+            'wire — Phase 7 H.2.b regression. TalkBack would not read '
+            'the snackbar text without this.',
       );
       // And the Directionality lookup must be the defensive maybeOf
       // form per the audit fix — strict `Directionality.of(context)`

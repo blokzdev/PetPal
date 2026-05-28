@@ -24,6 +24,12 @@ void main() {
 
   testWidgets('weekly summary toggle starts off, persists when flipped on',
       (tester) async {
+    // Tall viewport so the lazy ListView builds the Weekly-summary
+    // section — Phase 7's Plan + Sync sections now sit above it.
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final settings = InMemorySettingsStorage();
     final stack = await buildChatTestStack(
       llm: ScriptedLlmClient(scripts: const []),
@@ -97,6 +103,12 @@ void main() {
   });
 
   testWidgets('preloaded "on" state shows the toggle as on', (tester) async {
+    // Tall viewport so the lazy ListView builds the Weekly-summary
+    // section — Phase 7's Plan + Sync sections now sit above it.
+    tester.view.physicalSize = const Size(800, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
     final settings =
         InMemorySettingsStorage({'weekly_digest_enabled': true});
     final stack = await buildChatTestStack(

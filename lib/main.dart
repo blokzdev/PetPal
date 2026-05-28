@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
-import 'app/auth/auth_gateway.dart';
 import 'app/auth/auth_session_notifier.dart';
 import 'app/auth/supabase_auth_gateway.dart';
 import 'app/providers.dart';

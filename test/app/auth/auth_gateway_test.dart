@@ -226,5 +226,8 @@ AppAuthSession _session(String userId, {String? email}) => AppAuthSession(
       userId: userId,
       email: email,
       accessToken: 'tok-$userId',
-      expiresAt: DateTime.now().add(const Duration(hours: 1)),
+      // Fixed far-future expiry so two _session() calls with matching
+      // args compare equal (value semantics) — DateTime.now() would
+      // differ by microseconds between calls — and stay non-expired.
+      expiresAt: DateTime.utc(2099),
     );

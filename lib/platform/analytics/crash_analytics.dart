@@ -90,7 +90,7 @@ class NoopCrashAnalytics implements CrashAnalytics {
     // wiring of a provider that forgets the redact call would ship
     // unredacted payloads.
     final _ = redactSkAnt(error.toString());
-    final __ = stack != null ? redactSkAnt(stack.toString()) : null;
+    final _ = stack != null ? redactSkAnt(stack.toString()) : null;
     _droppedReportCount++;
   }
 }

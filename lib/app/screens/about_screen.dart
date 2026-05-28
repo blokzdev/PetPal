@@ -71,8 +71,8 @@ class AboutScreen extends StatelessWidget {
                   subtitle: const Text(
                     'Your journal stays on this device. Chat sends your '
                     "message and the relevant memories to Anthropic's "
-                    "Claude — nothing else leaves the phone. Pro sync "
-                    "uploads end-to-end encrypted copies that PetPal "
+                    'Claude — nothing else leaves the phone. Pro sync '
+                    'uploads end-to-end encrypted copies that PetPal '
                     "can't read.",
                   ),
                   // v1.1 promotes this to a dedicated Privacy & Data

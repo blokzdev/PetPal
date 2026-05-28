@@ -190,8 +190,8 @@ class _PrivacyPage extends StatelessWidget {
             Text("Your pet's journal.", style: sectionLabelStyle),
             Gaps.s,
             Text(
-              "Stays on this phone by default. With Pro and a sign-in, "
-              "you can sync an encrypted copy across devices — PetPal "
+              'Stays on this phone by default. With Pro and a sign-in, '
+              'you can sync an encrypted copy across devices — PetPal '
               "can't read it without your passphrase.",
               style: bodyStyle,
             ),
@@ -206,11 +206,11 @@ class _PrivacyPage extends StatelessWidget {
               'When you ask PetPal something, your message and the '
               "relevant memories about your pet go to Anthropic's "
               'Claude. By default, PetPal routes that through our '
-              "servers — this is how the free 200-message-a-month "
+              'servers — this is how the free 200-message-a-month '
               "allowance works, and it's the only thing that "
               'leaves the phone. You can switch to your own '
               'Anthropic API key any time in Settings; with that '
-              "on, calls go direct to Anthropic and our servers "
+              'on, calls go direct to Anthropic and our servers '
               "don't see them.",
               style: bodyStyle,
             ),

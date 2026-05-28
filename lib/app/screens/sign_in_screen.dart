@@ -150,13 +150,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         Text(
           'Sign in to PetPal',
           style: textTheme.headlineSmall?.copyWith(
-            fontVariations: [FontVariation('wght', 600)],
+            fontVariations: [const FontVariation('wght', 600)],
           ),
         ),
         const SizedBox(height: Spacing.s),
         Text(
           "We'll email you a link. Tap it on this device to sign in — "
-          "no password needed.",
+          'no password needed.',
           style: textTheme.bodyMedium?.copyWith(
             color: scheme.onSurface.withValues(alpha: 0.75),
             height: 1.45,
@@ -170,7 +170,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           enabled: !_sending,
           keyboardType: TextInputType.emailAddress,
           autocorrect: false,
-          textCapitalization: TextCapitalization.none,
           textInputAction: TextInputAction.send,
           onSubmitted: (_) => _emailIsValid ? _send() : null,
           decoration: const InputDecoration(
@@ -219,7 +218,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           'Check your inbox',
           textAlign: TextAlign.center,
           style: textTheme.headlineSmall?.copyWith(
-            fontVariations: [FontVariation('wght', 600)],
+            fontVariations: [const FontVariation('wght', 600)],
           ),
         ),
         const SizedBox(height: Spacing.s),
@@ -234,7 +233,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
         ),
         const SizedBox(height: Spacing.l),
         PetCard(
-          padding: const EdgeInsets.all(Spacing.m),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -247,7 +245,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               Expanded(
                 child: Text(
                   "The link expires in an hour. Didn't get it? Try a "
-                  "different email below.",
+                  'different email below.',
                   style: textTheme.bodySmall?.copyWith(
                     color: scheme.onSurface.withValues(alpha: 0.7),
                     height: 1.45,
@@ -274,7 +272,6 @@ class _PrivacyDisclosure extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return PetCard(
-      padding: const EdgeInsets.all(Spacing.m),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -286,8 +283,8 @@ class _PrivacyDisclosure extends StatelessWidget {
           const SizedBox(width: Spacing.s),
           Expanded(
             child: Text(
-              "Your account links your devices for sync and the free "
-              "monthly chat allowance. Your journal stays end-to-end "
+              'Your account links your devices for sync and the free '
+              'monthly chat allowance. Your journal stays end-to-end '
               "encrypted — PetPal can't read it.",
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.7),

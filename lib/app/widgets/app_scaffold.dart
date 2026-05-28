@@ -267,7 +267,8 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> appSnackBar(
     // pumping outside MaterialApp). Every current call site sits
     // inside MaterialApp so the maybeOf path returns the inherited
     // direction; the fallback is purely defensive.
-    SemanticsService.announce(
+    SemanticsService.sendAnnouncement(
+      View.of(context),
       message,
       Directionality.maybeOf(context) ?? TextDirection.ltr,
     );

@@ -174,10 +174,11 @@ class _PetSwitcherSheet extends ConsumerWidget {
 
     return SafeArea(
       child: petsAsync.when(
-        data: (pets) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+        data: (pets) => SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 Spacing.l,
@@ -218,7 +219,8 @@ class _PetSwitcherSheet extends ConsumerWidget {
               },
             ),
             const SizedBox(height: Spacing.s),
-          ],
+            ],
+          ),
         ),
         loading: () => const Padding(
           padding: EdgeInsets.all(Spacing.xl),

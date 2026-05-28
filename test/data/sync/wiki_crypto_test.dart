@@ -59,7 +59,7 @@ void main() {
       final aad = BlobAad(
         petId: 1,
         relativePath: 'vet/checkup.md',
-        writeTs: DateTime.utc(2026, 5, 1),
+        writeTs: DateTime.utc(2026, 5),
       );
       const plaintext = 'absolutely-unique-marker-string-that-must-not-leak';
       final blob = await crypto.encrypt(
@@ -84,7 +84,7 @@ void main() {
       final aad = BlobAad(
         petId: 1,
         relativePath: 'a',
-        writeTs: DateTime.utc(2026, 1),
+        writeTs: DateTime.utc(2026),
       );
       final plaintext = Uint8List.fromList(utf8.encode('same plaintext'));
       final a = await crypto.encrypt(plaintext: plaintext, keyBytes: key, aad: aad);
@@ -204,7 +204,7 @@ void main() {
       final aad = BlobAad(
         petId: 1,
         relativePath: 'a',
-        writeTs: DateTime.utc(2026, 1),
+        writeTs: DateTime.utc(2026),
       );
       expect(
         () => crypto.decrypt(
@@ -223,7 +223,7 @@ void main() {
       final aad = BlobAad(
         petId: 1,
         relativePath: 'a',
-        writeTs: DateTime.utc(2026, 1),
+        writeTs: DateTime.utc(2026),
       );
       final blob = await crypto.encrypt(
         plaintext: Uint8List.fromList([1, 2, 3]),

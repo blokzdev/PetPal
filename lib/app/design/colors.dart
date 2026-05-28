@@ -80,6 +80,10 @@ ColorScheme buildLightColorScheme() {
     surfaceContainerHighest: PetPalColors.lightSurfaceContainerHighest,
     onSurface: PetPalColors.graphite,
     surfaceTint: PetPalColors.sage,
+    // Warm-gray control border tuned to clear WCAG 3.0 non-text
+    // contrast on the warm off-white surface (the FlexColorScheme
+    // default landed at 2.9:1). See test/a11y/contrast_test.dart.
+    outline: const Color(0xFF8A8278),
   );
 }
 

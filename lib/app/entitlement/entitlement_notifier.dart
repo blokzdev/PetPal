@@ -76,6 +76,17 @@ class EntitlementNotifier extends AsyncNotifier<Entitlement> {
     // refresh inside `supabase_flutter` doesn't trigger a notifier
     // rebuild. Sign-in / sign-out / different-user transitions DO
     // trigger rebuild — those are the load-bearing events.
+    // Settle the auth session before deciding the tier so the first
+    // build reflects the real signed-in/out state rather than the
+    // transient AsyncLoading null. An auth error degrades to "signed
+    // out" (the select below reads null off the error state). The
+    // userId `select` keeps rebuilds scoped to sign-in/out — token
+    // refresh leaves userId unchanged and never re-fetches.
+    try {
+      await ref.read(authSessionProvider.future);
+    } catch (_) {
+      // Auth in an error state — fall through to the anonymous default.
+    }
     final userId =
         ref.watch(authSessionProvider.select((s) => s.value?.userId));
     final config = ref.watch(supabaseRuntimeConfigProvider);
@@ -93,7 +104,7 @@ class EntitlementNotifier extends AsyncNotifier<Entitlement> {
     Entitlement? cached;
     try {
       repo = await ref.read(entitlementRepoProvider.future);
-      cached = await repo.read(userId);
+      cached = await repo?.read(userId);
     } catch (_) {
       // Test path with no DB override / unavailable repo — fall
       // through with no cache. Server fetch may still succeed.
@@ -115,6 +126,10 @@ class EntitlementNotifier extends AsyncNotifier<Entitlement> {
         // row 78). Without this merge, sign-in would silently
         // drop the user's purchased care packs.
         final merged = fetched.copyWith(
+          // Attribute to the signed-in user. The server row's user_id
+          // should already match the query, but normalising keeps the
+          // emitted + cached entitlement keyed to the active session.
+          userId: userId,
           ownedCarePackSkillIds:
               cached?.ownedCarePackSkillIds ?? const <String>{},
         );
@@ -208,8 +223,10 @@ class EntitlementNotifier extends AsyncNotifier<Entitlement> {
       // through the auth-aware path. A signed-in user dropping BYOK
       // refetches their server entitlement; a signed-out user lands
       // on freeAnonymous. Without this, build() stayed on the BYOK
-      // result cached in `state` and the user appeared stuck.
+      // result cached in `state` and the user appeared stuck. Await
+      // the rebuild so callers see the settled state on return.
       ref.invalidateSelf();
+      await future;
     }
   }
 }

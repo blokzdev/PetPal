@@ -55,7 +55,7 @@ void main() {
     await container
         .read(activePetSelectionProvider.notifier)
         .select(7);
-    expect(container.read(activePetSelectionProvider).valueOrNull, 7);
+    expect(container.read(activePetSelectionProvider).value, 7);
     expect(await settings.getInt('active_pet_id'), 7);
   });
 

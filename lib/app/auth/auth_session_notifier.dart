@@ -53,7 +53,7 @@ class AuthSessionNotifier extends AsyncNotifier<AppAuthSession?> {
   @override
   Future<AppAuthSession?> build() async {
     final gateway = ref.read(authGatewayProvider);
-    _sub?.cancel();
+    await _sub?.cancel();
     _sub = gateway.onSessionChange.listen((session) {
       state = AsyncValue.data(session);
     });

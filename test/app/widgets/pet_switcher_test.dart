@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:petpal/app/active_pet/active_pet_notifier.dart';
 import 'package:petpal/app/providers.dart';
 import 'package:petpal/app/widgets/pet_switcher.dart';
 import 'package:petpal/data/db/database.dart';

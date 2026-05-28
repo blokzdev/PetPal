@@ -936,12 +936,12 @@ class _ChatUnavailableBanner extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           hasSupabase
-                              ? "Chat needs a connection to Claude. Sign "
-                                  "in for the free monthly allowance, or "
-                                  "use your own Anthropic key in Settings."
-                              : "Chat needs a connection to Claude. Add "
-                                  "your Anthropic key in Settings to start "
-                                  "chatting.",
+                              ? 'Chat needs a connection to Claude. Sign '
+                                  'in for the free monthly allowance, or '
+                                  'use your own Anthropic key in Settings.'
+                              : 'Chat needs a connection to Claude. Add '
+                                  'your Anthropic key in Settings to start '
+                                  'chatting.',
                           style: textTheme.bodyMedium?.copyWith(
                             color: scheme.onSurface.withValues(alpha: 0.85),
                             height: 1.4,
