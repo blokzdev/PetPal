@@ -26,7 +26,7 @@ void main() {
   group('LWW outside the 5s skew window', () {
     test('remote ts > local + 5s → KeepRemote', () {
       final r = const ConflictResolver().resolve(
-        local: local('local body', ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        local: local('local body', ts: DateTime.utc(2026, 5, 1, 10)),
         remote: remote('remote body', ts: DateTime.utc(2026, 5, 1, 10, 0, 6)),
       );
       expect(r, isA<KeepRemote>());
@@ -36,7 +36,7 @@ void main() {
     test('local ts > remote + 5s → KeepLocal', () {
       final r = const ConflictResolver().resolve(
         local: local('local body', ts: DateTime.utc(2026, 5, 1, 10, 0, 6)),
-        remote: remote('remote body', ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        remote: remote('remote body', ts: DateTime.utc(2026, 5, 1, 10)),
       );
       expect(r, isA<KeepLocal>());
     });
@@ -46,10 +46,10 @@ void main() {
       () {
     test('different frontmatter keys → WriteWithConflict (later '
         'survives, earlier becomes .conflict.md)', () {
-      final localBody = '---\nweight_kg: 14.2\n---\n\nbody';
-      final remoteBody = '---\nweight_kg: 14.2\nallergies: [chicken]\n---\n\nbody';
+      const localBody = '---\nweight_kg: 14.2\n---\n\nbody';
+      const remoteBody = '---\nweight_kg: 14.2\nallergies: [chicken]\n---\n\nbody';
       final r = const ConflictResolver().resolve(
-        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10)),
         remote: remote(remoteBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 2)),
       );
       expect(r, isA<WriteWithConflict>());
@@ -63,11 +63,11 @@ void main() {
 
     test('local frontmatter has key remote lacks → WriteWithConflict',
         () {
-      final localBody = '---\nweight_kg: 14.2\nmeds: [carafate]\n---\n\nbody';
-      final remoteBody = '---\nweight_kg: 14.2\n---\n\nbody';
+      const localBody = '---\nweight_kg: 14.2\nmeds: [carafate]\n---\n\nbody';
+      const remoteBody = '---\nweight_kg: 14.2\n---\n\nbody';
       final r = const ConflictResolver().resolve(
         local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 2)),
-        remote: remote(remoteBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        remote: remote(remoteBody, ts: DateTime.utc(2026, 5, 1, 10)),
       );
       expect(r, isA<WriteWithConflict>());
       final c = r as WriteWithConflict;
@@ -81,8 +81,8 @@ void main() {
       // Setup: A wrote at t=10, B wrote at t=12 (both within 5s).
       // Both have structurally-divergent frontmatter (different
       // key sets).
-      final aBody = '---\nfoo: 1\nshared: a\n---\n\na content';
-      final bBody = '---\nbar: 2\nshared: a\n---\n\nb content';
+      const aBody = '---\nfoo: 1\nshared: a\n---\n\na content';
+      const bBody = '---\nbar: 2\nshared: a\n---\n\nb content';
       final aTs = DateTime.utc(2026, 5, 1, 10, 0, 10);
       final bTs = DateTime.utc(2026, 5, 1, 10, 0, 12);
 
@@ -113,10 +113,10 @@ void main() {
   group('within 5s skew window — body-only edits use simple LWW', () {
     test('same frontmatter keys, different body, later remote ts → '
         'KeepRemote (no .conflict.md)', () {
-      final localBody = '---\nfoo: 1\n---\n\nlocal body text';
-      final remoteBody = '---\nfoo: 1\n---\n\nremote body text';
+      const localBody = '---\nfoo: 1\n---\n\nlocal body text';
+      const remoteBody = '---\nfoo: 1\n---\n\nremote body text';
       final r = const ConflictResolver().resolve(
-        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10)),
         remote: remote(remoteBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 2)),
       );
       expect(r, isA<KeepRemote>());
@@ -124,9 +124,9 @@ void main() {
 
     test('exact-tie ts: deterministic tiebreak by hash, BOTH devices '
         'pick the same survivor', () {
-      final localBody = '---\nfoo: 1\n---\n\nbody A';
-      final remoteBody = '---\nfoo: 1\n---\n\nbody B';
-      final ts = DateTime.utc(2026, 5, 1);
+      const localBody = '---\nfoo: 1\n---\n\nbody A';
+      const remoteBody = '---\nfoo: 1\n---\n\nbody B';
+      final ts = DateTime.utc(2026, 5);
 
       final aResolution = const ConflictResolver().resolve(
         local: local(localBody, ts: ts),
@@ -160,9 +160,9 @@ void main() {
   group('identical-body short-circuit', () {
     test('local.bytes == remote.bytes → KeepLocal regardless of ts',
         () {
-      final body = '---\nfoo: 1\n---\n\nbody';
+      const body = '---\nfoo: 1\n---\n\nbody';
       final r = const ConflictResolver().resolve(
-        local: local(body, ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        local: local(body, ts: DateTime.utc(2026, 5, 1, 10)),
         remote: remote(body, ts: DateTime.utc(2026, 5, 1, 10, 0, 100)),
       );
       expect(r, isA<KeepLocal>(),
@@ -174,7 +174,7 @@ void main() {
     test('local == null → KeepRemote', () {
       final r = const ConflictResolver().resolve(
         local: null,
-        remote: remote('body', ts: DateTime.utc(2026, 5, 1)),
+        remote: remote('body', ts: DateTime.utc(2026, 5)),
       );
       expect(r, isA<KeepRemote>());
     });
@@ -183,10 +183,10 @@ void main() {
   group('post-restart local ts unknown', () {
     test('local body == remote body → KeepLocal (no-op even '
         'without a ts)', () {
-      final body = 'identical body';
+      const body = 'identical body';
       final r = const ConflictResolver().resolve(
         local: local(body), // no ts
-        remote: remote(body, ts: DateTime.utc(2026, 5, 1)),
+        remote: remote(body, ts: DateTime.utc(2026, 5)),
       );
       expect(r, isA<KeepLocal>());
     });
@@ -195,7 +195,7 @@ void main() {
         'WriteWithConflict (preserves the user edit)', () {
       final r = const ConflictResolver().resolve(
         local: local('local pre-restart edit'), // no ts
-        remote: remote('older remote', ts: DateTime.utc(2026, 5, 1)),
+        remote: remote('older remote', ts: DateTime.utc(2026, 5)),
       );
       expect(r, isA<WriteWithConflict>());
       final c = r as WriteWithConflict;
@@ -226,12 +226,12 @@ void main() {
       // With default 5s tolerance, a 4s gap is concurrent →
       // structural diverge would fire. With 1s tolerance, 4s
       // is outside the window → pure LWW.
-      final localBody = '---\nfoo: 1\n---\n\nbody';
-      final remoteBody = '---\nfoo: 1\nbar: 2\n---\n\nbody';
+      const localBody = '---\nfoo: 1\n---\n\nbody';
+      const remoteBody = '---\nfoo: 1\nbar: 2\n---\n\nbody';
       final tight = const ConflictResolver(
         skewTolerance: Duration(seconds: 1),
       ).resolve(
-        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 0)),
+        local: local(localBody, ts: DateTime.utc(2026, 5, 1, 10)),
         remote: remote(remoteBody, ts: DateTime.utc(2026, 5, 1, 10, 0, 4)),
       );
       expect(tight, isA<KeepRemote>(),

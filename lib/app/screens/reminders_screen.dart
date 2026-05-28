@@ -309,6 +309,12 @@ class _List extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return ListView.separated(
+      // Nested inside _SectionedList's outer ListView, so shrink to
+      // content and defer scrolling to the parent — an independently
+      // scrollable inner list gets unbounded height inside the
+      // section Column and fails layout.
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: rows.length,
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (context, i) {

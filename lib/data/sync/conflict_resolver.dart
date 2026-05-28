@@ -42,8 +42,12 @@ class ConflictResolver {
     required ConflictParticipant? local,
     required ConflictParticipant remote,
   }) {
+    // remote always carries a sidecar-recorded ts (ConflictParticipant
+    // contract); only the local side may be ts-less.
+    final remoteTs = remote.writeTs!;
+
     if (local == null) {
-      return KeepRemote(bytes: remote.bytes, writeTs: remote.writeTs);
+      return KeepRemote(bytes: remote.bytes, writeTs: remoteTs);
     }
 
     if (_bytesEqual(local.bytes, remote.bytes)) {
@@ -60,7 +64,7 @@ class ConflictResolver {
       // overwriting work.
       return WriteWithConflict(
         survivorBytes: remote.bytes,
-        survivorTs: remote.writeTs,
+        survivorTs: remoteTs,
         survivorOrigin: ConflictOrigin.remote,
         loserBytes: local.bytes,
         loserTs: null,
@@ -68,9 +72,9 @@ class ConflictResolver {
       );
     }
 
-    final delta = remote.writeTs.difference(localTs);
+    final delta = remoteTs.difference(localTs);
     if (delta > skewTolerance) {
-      return KeepRemote(bytes: remote.bytes, writeTs: remote.writeTs);
+      return KeepRemote(bytes: remote.bytes, writeTs: remoteTs);
     }
     if (-delta > skewTolerance) {
       return const KeepLocal();
@@ -98,11 +102,11 @@ class ConflictResolver {
       final localHash = WikiCrypto.bodyHash(local.bytes);
       final remoteHash = WikiCrypto.bodyHash(remote.bytes);
       return remoteHash.compareTo(localHash) > 0
-          ? KeepRemote(bytes: remote.bytes, writeTs: remote.writeTs)
+          ? KeepRemote(bytes: remote.bytes, writeTs: remoteTs)
           : const KeepLocal();
     }
     if (delta.isNegative) return const KeepLocal();
-    return KeepRemote(bytes: remote.bytes, writeTs: remote.writeTs);
+    return KeepRemote(bytes: remote.bytes, writeTs: remoteTs);
   }
 
   WriteWithConflict _conflict({
@@ -113,7 +117,7 @@ class ConflictResolver {
     if (remoteWins) {
       return WriteWithConflict(
         survivorBytes: remote.bytes,
-        survivorTs: remote.writeTs,
+        survivorTs: remote.writeTs!,
         survivorOrigin: ConflictOrigin.remote,
         loserBytes: local.bytes,
         loserTs: local.writeTs,

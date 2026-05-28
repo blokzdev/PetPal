@@ -20,7 +20,7 @@ void main() {
 
   ProviderContainer makeContainer({
     required InMemoryAuthGateway gateway,
-    required FakeAccountDeletionClient client,
+    required AccountDeletionClient client,
   }) {
     final container = ProviderContainer(
       overrides: [

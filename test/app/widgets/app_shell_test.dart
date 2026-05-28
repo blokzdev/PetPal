@@ -77,10 +77,10 @@ void main() {
             'register for post-sign-in cancellation',
       );
       expect(
-        src.contains("cancelled — your data is safe"),
+        src.contains('cancelled — your data is safe'),
         isTrue,
         reason: 'AppShell snackbar must close with the "your data is '
-            "safe\" reassurance phrase",
+            'safe" reassurance phrase',
       );
     });
 

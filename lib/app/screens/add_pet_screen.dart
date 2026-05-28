@@ -333,7 +333,7 @@ class _AddPetScreenState extends ConsumerState<AddPetScreen> {
     // The deeper gate inside `_save` (D.1, line 246) stays as the
     // canonical defense — this early-exit just keeps the form
     // unrendered when the user clearly can't save.
-    final entitlement = ref.watch(entitlementProvider).valueOrNull ??
+    final entitlement = ref.watch(entitlementProvider).value ??
         Entitlement.freeAnonymous();
     final cap = entitlement.petCap;
     final atLimit = petsAsync.maybeWhen(

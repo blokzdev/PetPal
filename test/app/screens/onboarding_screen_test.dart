@@ -97,6 +97,10 @@ void main() {
       findsOneWidget,
     );
     expect(find.textContaining(privacyFooterStart), findsOneWidget);
+    // The privacy page scrolls; its CTA sits below the fold in the
+    // test viewport, so bring it on-screen before tapping.
+    await tester.ensureVisible(find.text('Get started').last);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Get started').last);
     await tester.pumpAndSettle();
 

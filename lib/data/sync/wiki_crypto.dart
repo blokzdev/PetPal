@@ -142,8 +142,8 @@ class WikiCrypto {
         'unknown blob version $version (expected $blobVersion)',
       );
     }
-    final ivStart = 1;
-    final ivEnd = ivStart + ivLengthBytes;
+    const ivStart = 1;
+    const ivEnd = ivStart + ivLengthBytes;
     final macStart = blob.length - macLengthBytes;
     if (macStart <= ivEnd) {
       throw const WikiCryptoException('blob is truncated');

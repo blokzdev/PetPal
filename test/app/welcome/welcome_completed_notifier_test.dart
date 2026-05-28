@@ -73,7 +73,7 @@ void main() {
     await container.read(welcomeCompletedProvider.future);
     await notifier.markCompleted();
     expect(
-      container.read(welcomeCompletedProvider).valueOrNull,
+      container.read(welcomeCompletedProvider).value,
       isTrue,
     );
     expect(await settings.getBool('welcome_completed'), isTrue);

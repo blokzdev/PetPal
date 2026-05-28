@@ -8,7 +8,6 @@ import '../auth/auth_session_notifier.dart';
 import '../byok/byok_key_entry_sheet.dart';
 import '../design/design.dart';
 import '../entitlement/entitlement.dart';
-import '../entitlement/entitlement_notifier.dart';
 import '../entitlement/quota_exception.dart';
 import '../providers.dart';
 import '../sync/passphrase_setup_screen.dart';
@@ -305,7 +304,7 @@ class _CrashAnalyticsCardState extends ConsumerState<_CrashAnalyticsCard> {
         subtitle: const Text(
           'Off by default. When you opt in, PetPal sends crash '
           'details — never your chat content or pet data — to help '
-          "us fix bugs. Your Anthropic API key is scrubbed before "
+          'us fix bugs. Your Anthropic API key is scrubbed before '
           'anything is sent.',
         ),
         value: analytics.enabled,
@@ -631,7 +630,7 @@ class _PlanCardState extends ConsumerState<_PlanCard> {
 ///     (VOICE.md §6 example 16). Tap routes to /sign-in. The brand
 ///     promise — free chat without sign-in — is named explicitly so
 ///     the user doesn't read this tile as a gated requirement.
-///   - **Signed in** — "Signed in as <email>" with a "Sign out"
+///   - **Signed in** — "Signed in as `<email>`" with a "Sign out"
 ///     trailing button. Tap-to-sign-out runs through the
 ///     confirmation dialog (VOICE.md §6 example 17) which reassures
 ///     local data stays + sync pauses, not loss.
@@ -664,9 +663,9 @@ class _AccountTile extends ConsumerWidget {
         ),
         title: const Text('PetPal account'),
         subtitle: Text(
-          "Sign in to sync your journal across devices and pick up "
-          "where you left off on a new phone. Free chat works "
-          "without an account.",
+          'Sign in to sync your journal across devices and pick up '
+          'where you left off on a new phone. Free chat works '
+          'without an account.',
           style: textTheme.bodySmall?.copyWith(
             color: scheme.onSurface.withValues(alpha: 0.65),
           ),
@@ -683,8 +682,8 @@ class _AccountTile extends ConsumerWidget {
       ),
       title: Text('Signed in as ${session.email ?? "your PetPal account"}'),
       subtitle: Text(
-        "Sync mirrors your journal end-to-end encrypted across every "
-        "device you sign in on.",
+        'Sync mirrors your journal end-to-end encrypted across every '
+        'device you sign in on.',
         style: textTheme.bodySmall?.copyWith(
           color: scheme.onSurface.withValues(alpha: 0.65),
         ),
@@ -702,9 +701,9 @@ class _AccountTile extends ConsumerWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('Sign out of PetPal?'),
         content: const Text(
-          "Your journal stays on this device — sign-out only pauses "
-          "sync. The next time you sign in, sync picks back up where "
-          "it left off.",
+          'Your journal stays on this device — sign-out only pauses '
+          'sync. The next time you sign in, sync picks back up where '
+          'it left off.',
         ),
         actions: [
           TextButton(
@@ -732,7 +731,7 @@ class _AccountTile extends ConsumerWidget {
         const SnackBar(
           content: Text(
             "You're signed out on this device. The remote sign-out "
-            "may finish later — no data lost.",
+            'may finish later — no data lost.',
           ),
         ),
       );
@@ -834,10 +833,10 @@ class _ByokToggleTileState extends ConsumerState<_ByokToggleTile> {
         widget.active
             ? "Your key handles chat — PetPal's monthly cap doesn't "
                 'apply.'
-            : "By default, PetPal handles the connection to Claude "
-                "and includes a monthly chat allowance. Switch this "
+            : 'By default, PetPal handles the connection to Claude '
+                'and includes a monthly chat allowance. Switch this '
                 "on if you'd rather use your own Anthropic API key "
-                "— your messages then go directly to Anthropic "
+                '— your messages then go directly to Anthropic '
                 "without passing through PetPal's servers, and the "
                 "monthly limits don't apply.",
         style: textTheme.bodySmall?.copyWith(
@@ -886,7 +885,7 @@ class _SyncCard extends ConsumerWidget {
             title: const Text('Sync across devices'),
             subtitle: Text(
               'Pro mirrors your journal end-to-end encrypted across '
-              "every device you sign in on.",
+              'every device you sign in on.',
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),
               ),
@@ -895,7 +894,7 @@ class _SyncCard extends ConsumerWidget {
               onPressed: () => dispatchPaywall(
                 context,
                 SyncQuotaExceeded(
-                  ref.read(entitlementProvider).valueOrNull ??
+                  ref.read(entitlementProvider).value ??
                       Entitlement.freeAnonymous(),
                 ),
               ),
@@ -909,7 +908,7 @@ class _SyncCard extends ConsumerWidget {
             ),
             title: const Text('Sign in to enable sync'),
             subtitle: Text(
-              "Sync needs a PetPal account so your devices can find "
+              'Sync needs a PetPal account so your devices can find '
               "each other. We'll email you a sign-in link.",
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),
@@ -925,7 +924,7 @@ class _SyncCard extends ConsumerWidget {
             ),
             title: const Text('Set up sync'),
             subtitle: Text(
-              "Pick a passphrase to encrypt your journal across "
+              'Pick a passphrase to encrypt your journal across '
               "devices. Only you can read it — PetPal can't.",
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),
@@ -933,7 +932,7 @@ class _SyncCard extends ConsumerWidget {
             ),
             trailing: const Icon(PhosphorIconsRegular.caretRight),
             onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
+              MaterialPageRoute<void>(
                 builder: (_) => const PassphraseSetupScreen(),
                 fullscreenDialog: true,
               ),
@@ -946,7 +945,7 @@ class _SyncCard extends ConsumerWidget {
             ),
             title: const Text('Unlock sync'),
             subtitle: Text(
-              "Enter the passphrase you set up on your other device.",
+              'Enter the passphrase you set up on your other device.',
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),
               ),
@@ -961,7 +960,7 @@ class _SyncCard extends ConsumerWidget {
             ),
             title: const Text('Sync is on'),
             subtitle: Text(
-              "Your journal mirrors across your devices, end-to-end "
+              'Your journal mirrors across your devices, end-to-end '
               "encrypted. PetPal can't read it.",
               style: textTheme.bodySmall?.copyWith(
                 color: scheme.onSurface.withValues(alpha: 0.65),

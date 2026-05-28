@@ -197,7 +197,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         Text(
           'Delete your PetPal account',
           style: textTheme.headlineSmall?.copyWith(
-            fontVariations: [FontVariation('wght', 600)],
+            fontVariations: [const FontVariation('wght', 600)],
           ),
         ),
         const SizedBox(height: Spacing.s),
@@ -214,7 +214,6 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
         const SizedBox(height: Spacing.m),
         // Inline export affordance — never a forced step.
         PetCard(
-          padding: const EdgeInsets.all(Spacing.m),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -229,7 +228,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
                   const SizedBox(width: Spacing.s),
                   Expanded(
                     child: Text(
-                      "Want to keep a copy of your journal first?",
+                      'Want to keep a copy of your journal first?',
                       style: textTheme.bodyMedium?.copyWith(
                         color: scheme.onSurface.withValues(alpha: 0.85),
                         height: 1.4,
@@ -264,7 +263,7 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
           'Type DELETE below to confirm.',
           style: textTheme.bodyMedium?.copyWith(
             color: scheme.onSurface.withValues(alpha: 0.85),
-            fontVariations: [FontVariation('wght', 500)],
+            fontVariations: [const FontVariation('wght', 500)],
           ),
         ),
         const SizedBox(height: Spacing.s),
@@ -339,13 +338,13 @@ class _DeleteAccountScreenState extends ConsumerState<DeleteAccountScreen> {
           'Your account is scheduled for deletion',
           textAlign: TextAlign.center,
           style: textTheme.headlineSmall?.copyWith(
-            fontVariations: [FontVariation('wght', 600)],
+            fontVariations: [const FontVariation('wght', 600)],
           ),
         ),
         const SizedBox(height: Spacing.s),
         Text(
           "PetPal's servers will fully erase your data on $dateFmt. "
-          "Until then, signing back in restores your account.",
+          'Until then, signing back in restores your account.',
           textAlign: TextAlign.center,
           style: textTheme.bodyMedium?.copyWith(
             color: scheme.onSurface.withValues(alpha: 0.75),
@@ -399,7 +398,6 @@ class _Disclosure extends StatelessWidget {
     ];
 
     return PetCard(
-      padding: const EdgeInsets.all(Spacing.m),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

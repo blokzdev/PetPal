@@ -12,7 +12,7 @@ import 'package:petpal/app/screens/sign_in_screen.dart';
 /// error, deep-link return — using the InMemoryAuthGateway from H.1.a's
 /// auth scaffold so no real Supabase is needed.
 void main() {
-  Widget _harness({required InMemoryAuthGateway gateway}) {
+  Widget harness({required InMemoryAuthGateway gateway}) {
     return ProviderScope(
       overrides: [
         authGatewayProvider.overrideWithValue(gateway),
@@ -25,7 +25,7 @@ void main() {
     testWidgets('renders email field + disabled Send button initially',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       expect(find.text('Sign in to PetPal'), findsOneWidget);
@@ -45,7 +45,7 @@ void main() {
 
     testWidgets('Send button enables for valid email', (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'alice@example.com');
@@ -60,7 +60,7 @@ void main() {
     testWidgets('Send button stays disabled for malformed email',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'not-an-email');
@@ -76,7 +76,7 @@ void main() {
     testWidgets('renders privacy disclosure on the entry screen',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       expect(
@@ -92,7 +92,7 @@ void main() {
     testWidgets('Sending forwards to gateway with locked redirect URL',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'alice@example.com');
@@ -110,7 +110,7 @@ void main() {
     testWidgets('Successful send transitions to confirmation state',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'alice@example.com');
@@ -137,7 +137,7 @@ void main() {
     testWidgets('Try a different email returns to entry state',
         (tester) async {
       final gateway = InMemoryAuthGateway();
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'alice@example.com');
@@ -167,7 +167,7 @@ void main() {
       gateway.scriptSendError(
         const AuthGatewayException('email rate limit exceeded'),
       );
-      await tester.pumpWidget(_harness(gateway: gateway));
+      await tester.pumpWidget(harness(gateway: gateway));
       await tester.pump();
 
       await tester.enterText(find.byType(TextField), 'alice@example.com');

@@ -10,6 +10,7 @@ import 'package:petpal/app/providers.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/main.dart';
+import 'package:petpal/platform/settings_storage.dart';
 
 import '_helpers/fake_api_key_storage.dart';
 
@@ -111,6 +112,11 @@ void main() {
       ProviderScope(
         overrides: [
           apiKeyStorageProvider.overrideWithValue(FakeApiKeyStorage()),
+          // Real in-memory settings so welcome_completed resolves to
+          // false (no flag set) — without this the production storage
+          // throws in tests and the notifier defaults to "completed",
+          // skipping the welcome screen this test asserts on.
+          settingsStorageProvider.overrideWithValue(InMemorySettingsStorage()),
           ..._dataOverrides(),
         ],
         child: const PetPalApp(),

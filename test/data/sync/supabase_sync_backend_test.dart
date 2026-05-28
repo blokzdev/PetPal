@@ -191,7 +191,7 @@ void main() {
         return http.Response('[]', 200);
       });
       final backend = _backend(client: mock);
-      final since = DateTime.utc(2026, 5, 1, 12, 0, 0);
+      final since = DateTime.utc(2026, 5, 1, 12);
 
       await backend.listSince(petId: 42, since: since);
 

@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:petpal/data/sync/conflict_resolver.dart';
 import 'package:petpal/data/sync/e2ee_sync_adapter.dart';
 import 'package:petpal/data/sync/sync_backend.dart';
 import 'package:petpal/data/sync/sync_session.dart';
@@ -69,8 +68,8 @@ void main() {
     // Each device tracks its own wall clock. Use offsets so the
     // timestamps are deterministic + far apart enough to escape
     // the 5s skew tolerance.
-    var clockA = DateTime.utc(2026, 5, 1, 10, 0, 0);
-    var clockB = DateTime.utc(2026, 5, 1, 10, 0, 0);
+    var clockA = DateTime.utc(2026, 5, 1, 10);
+    var clockB = DateTime.utc(2026, 5, 1, 10);
     final deviceA = await buildDevice(
       backend: backend,
       challenge: challenge,

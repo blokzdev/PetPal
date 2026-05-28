@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../design/design.dart';
@@ -193,9 +192,9 @@ class _WrittenDownStage extends StatelessWidget {
         ),
         Gaps.l,
         Text(
-          "A password manager is best. A paper note in a drawer is "
-          "fine. Phone notes that sync to another account that you "
-          "control also works.",
+          'A password manager is best. A paper note in a drawer is '
+          'fine. Phone notes that sync to another account that you '
+          'control also works.',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: scheme.onSurfaceVariant,
             height: 1.4,
@@ -204,10 +203,10 @@ class _WrittenDownStage extends StatelessWidget {
         Gaps.m,
         Text(
           "What doesn't work: only remembering it. Only storing it "
-          "inside this app (the whole point of E2EE is that the "
+          'inside this app (the whole point of E2EE is that the '
           "app doesn't see it). Only on this phone (if the phone "
-          "breaks before the second device installs, your synced "
-          "wiki goes with it).",
+          'breaks before the second device installs, your synced '
+          'wiki goes with it).',
           style: theme.textTheme.bodyLarge?.copyWith(
             color: scheme.onSurfaceVariant,
             height: 1.4,
@@ -219,8 +218,8 @@ class _WrittenDownStage extends StatelessWidget {
           onChanged: onChanged,
           controlAffinity: ListTileControlAffinity.leading,
           title: const Text(
-            "I have written this down somewhere safe — a password "
-            "manager, paper, or another device I control.",
+            'I have written this down somewhere safe — a password '
+            'manager, paper, or another device I control.',
           ),
         ),
         Gaps.m,
@@ -264,8 +263,8 @@ class _WarningStage extends StatelessWidget {
         ),
         Gaps.l,
         Text(
-          "Sync wraps your journal in end-to-end encryption before "
-          "it leaves the phone — only your devices can read it. "
+          'Sync wraps your journal in end-to-end encryption before '
+          'it leaves the phone — only your devices can read it. '
           "PetPal can't.",
           style: theme.textTheme.bodyLarge?.copyWith(
             color: scheme.onSurfaceVariant,
@@ -274,7 +273,7 @@ class _WarningStage extends StatelessWidget {
         ),
         Gaps.m,
         Text(
-          "If you forget your passphrase, your synced journal is "
+          'If you forget your passphrase, your synced journal is '
           "unrecoverable. We don't have a copy. We can't reset it. "
           "We can't email it. There is no support path.",
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -289,8 +288,8 @@ class _WarningStage extends StatelessWidget {
           onChanged: onChanged,
           controlAffinity: ListTileControlAffinity.leading,
           title: const Text(
-            "I understand that PetPal cannot recover this "
-            "passphrase if I lose it.",
+            'I understand that PetPal cannot recover this '
+            'passphrase if I lose it.',
           ),
         ),
         Gaps.m,
@@ -326,7 +325,7 @@ class _EntryStage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "Choose your sync passphrase.",
+          'Choose your sync passphrase.',
           style: theme.textTheme.headlineSmall,
         ),
         Gaps.s,
@@ -476,7 +475,7 @@ class _UnlockSheetState extends ConsumerState<_UnlockSheet> {
           ),
           Gaps.s,
           Text(
-            "Enter the passphrase you set up on your other device.",
+            'Enter the passphrase you set up on your other device.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

@@ -19,7 +19,7 @@ void main() {
 
     test('redacts a 40-char real-shape Anthropic key', () {
       const key = 'sk-ant-abcdefghijklmnopqrstuvwxyz0123456789';
-      final input = 'Authorization: $key';
+      const input = 'Authorization: $key';
       final got = redactSkAnt(input);
       expect(got, isNot(contains('abcdef')));
       expect(got, contains('[REDACTED-API-KEY]'));
@@ -27,7 +27,7 @@ void main() {
 
     test('redacts a partial 20-char prefix (defense-in-depth)', () {
       const partial = 'sk-ant-abcdefghijklmnopqrst';
-      final input = 'Truncated log: $partial...';
+      const input = 'Truncated log: $partial...';
       final got = redactSkAnt(input);
       expect(got, isNot(contains('abcdef')));
       expect(got, contains('[REDACTED-API-KEY]'));
@@ -54,7 +54,7 @@ void main() {
 
     test('handles base64url-style chars (_, -) in the trail', () {
       const key = 'sk-ant-abc-def_ghijklmnopqrstuv_-XYZ789';
-      final input = 'Bearer $key';
+      const input = 'Bearer $key';
       final got = redactSkAnt(input);
       expect(got, isNot(contains('abc-def')));
       expect(got, contains('[REDACTED-API-KEY]'));

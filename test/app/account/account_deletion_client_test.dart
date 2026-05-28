@@ -17,7 +17,7 @@ void main() {
       final retention = DateTime.utc(2026, 6, 2, 10);
       final client = _client(
         mock: MockClient((req) async {
-          captured = req as http.Request;
+          captured = req;
           return http.Response(
             jsonEncode({
               'retention_window_ends_at': retention.toIso8601String(),
@@ -159,14 +159,14 @@ void main() {
   group('FakeAccountDeletionClient', () {
     test('returns scripted retention end + counts calls', () async {
       final fake = FakeAccountDeletionClient(
-        retentionEnd: DateTime.utc(2026, 6, 1),
+        retentionEnd: DateTime.utc(2026, 6),
       );
 
-      expect(await fake.requestDeletion(), DateTime.utc(2026, 6, 1));
+      expect(await fake.requestDeletion(), DateTime.utc(2026, 6));
       expect(fake.callCount, 1);
 
-      fake.scriptRetentionEnd(DateTime.utc(2026, 7, 1));
-      expect(await fake.requestDeletion(), DateTime.utc(2026, 7, 1));
+      fake.scriptRetentionEnd(DateTime.utc(2026, 7));
+      expect(await fake.requestDeletion(), DateTime.utc(2026, 7));
       expect(fake.callCount, 2);
     });
 
@@ -212,7 +212,7 @@ void main() {
       http.Request? captured;
       final client = _client(
         mock: MockClient((req) async {
-          captured = req as http.Request;
+          captured = req;
           return http.Response(
             jsonEncode({'was_pending': true}),
             200,

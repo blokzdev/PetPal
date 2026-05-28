@@ -478,7 +478,7 @@ final activePetIdProvider = Provider<int Function()>((ref) {
         'No active pet — UI should have routed to /pets/add before chat.',
       );
     }
-    final selected = ref.read(activePetSelectionProvider).valueOrNull;
+    final selected = ref.read(activePetSelectionProvider).value;
     if (selected != null) {
       for (final p in pets) {
         if (p.id == selected) return p.id;
@@ -499,7 +499,7 @@ final activePetProvider = Provider<Pet?>((ref) {
         orElse: () => const <Pet>[],
       );
   if (pets.isEmpty) return null;
-  final selected = ref.watch(activePetSelectionProvider).valueOrNull;
+  final selected = ref.watch(activePetSelectionProvider).value;
   if (selected != null) {
     for (final p in pets) {
       if (p.id == selected) return p;

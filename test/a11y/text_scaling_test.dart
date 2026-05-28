@@ -186,7 +186,7 @@ void main() {
           Scaffold(
             body: PetEmptyState(
               icon: Icons.notifications_off,
-              heading: "No reminders yet for Loki",
+              heading: 'No reminders yet for Loki',
               body: 'Add a reminder for the next flea treatment, vet '
                   'visit, or food refill — PetPal will surface it on '
                   'the day it matters.',

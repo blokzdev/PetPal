@@ -328,9 +328,6 @@ Entitlement _proRow({String userId = 'u-1'}) => Entitlement(
       state: EntitlementState.proMonthly,
       userId: userId,
       renewalDate: DateTime.utc(2026, 6, 15),
-      photoCreditsBalance: 0,
-      monthlyTextCount: 0,
-      monthlyVisionCount: 0,
       counterPeriodStart: DateTime.utc(2026, 5),
       fetchedAt: DateTime.utc(2026, 5, 3),
     );

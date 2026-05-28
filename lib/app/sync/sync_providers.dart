@@ -115,8 +115,8 @@ class _SyncSetupRequired implements Exception {
   const _SyncSetupRequired();
   @override
   String toString() =>
-      "No sync passphrase exists yet for this account. Set one up "
-      "on the device that has your journal first.";
+      'No sync passphrase exists yet for this account. Set one up '
+      'on the device that has your journal first.';
 }
 
 /// Phase 7 task G.2 — derived UI state for the Settings sync card.

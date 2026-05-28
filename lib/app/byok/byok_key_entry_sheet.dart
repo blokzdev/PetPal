@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../design/design.dart';
-import '../entitlement/entitlement_notifier.dart';
 import '../providers.dart';
 import 'byok_validator.dart';
 
@@ -71,7 +70,7 @@ class _ByokKeyEntrySheetState extends ConsumerState<_ByokKeyEntrySheet> {
     if (!mounted) return;
     switch (result) {
       case ByokAccepted():
-        await _commit(key, softWarning: null);
+        await _commit(key);
       case ByokRejectedFormat():
         setState(() {
           _saving = false;
