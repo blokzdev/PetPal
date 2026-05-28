@@ -10,7 +10,7 @@ import 'schedule_mode.dart';
 /// mode-agnostic.
 ///
 /// `synthesisNotify` is intentionally not implemented in Phase 4 —
-/// concrete consumer ships with Pro-tier billing in Phase 5
+/// concrete consumer is reserved for the Phase 7+ Pro tier
 /// (DECISIONS row 28). The branch is kept exhaustive so the switch
 /// is type-checked, and throwing a clear `UnimplementedError` at
 /// runtime is preferred over silently swallowing it.
@@ -76,7 +76,7 @@ class ReminderDispatcher {
 
       case ScheduleMode.synthesisNotify:
         throw UnimplementedError(
-          'synthesisNotify dispatcher branch — Phase 5 Pro-tier '
+          'synthesisNotify dispatcher branch — Phase 7+ Pro-tier '
           'weekly-summary notifications. See DECISIONS row 28.',
         );
     }

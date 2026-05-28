@@ -36,7 +36,7 @@ void registerSchedulingTools(
           '`mode` defaults to `notification` (zero-token system '
           'notification, the common case). Other valid modes: `script` '
           '(zero-token Dart task), `synthesis` (LLM-backed journal '
-          'entry). `synthesisNotify` is reserved for Phase 5+.',
+          'entry). `synthesisNotify` is reserved for Phase 7+.',
       inputSchema: {
         'type': 'object',
         'properties': {

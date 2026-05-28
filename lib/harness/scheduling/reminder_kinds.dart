@@ -1,8 +1,8 @@
 import '../../data/onboarding_templates.dart';
 
 /// The four canonical reminder kinds Phase 4 ships with templates +
-/// default cadences for. New kinds may land in Phase 5+ (custom user-
-/// authored reminders) — this enum is *not* exhaustive of every
+/// default cadences for. New kinds may land in a later release (custom
+/// user-authored reminders) — this enum is *not* exhaustive of every
 /// possible `reminders.kind` value the database holds; the agent's
 /// `schedule_reminder` tool can write any string. The enum just
 /// captures the four kinds the UI knows how to surface with rich
