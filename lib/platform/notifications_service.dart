@@ -8,8 +8,8 @@ import 'scheduler_log.dart';
 /// per-kind channels would let a user mute "weight checks" but keep
 /// "vaccine due" on, which sounds nice in theory but in practice gets
 /// confused with the four canonical kinds we ship in 4.8 and adds
-/// settings noise. Phase 5+ may split this if there's evidence we
-/// need it.
+/// settings noise. A later release may split this if there's evidence
+/// we need it.
 const _channelId = 'petpal.reminders';
 const _channelName = 'Reminders';
 const _channelDescription =

@@ -151,7 +151,7 @@ void main() {
   });
 
   test(
-      'mode=synthesisNotify is the Phase 5 stub branch — throws '
+      'mode=synthesisNotify is the Phase 7+ stub branch — throws '
       'UnimplementedError so the dispatcher switch is exhaustive '
       '(DECISIONS row 28)', () async {
     final id = await repo.create(
@@ -166,7 +166,7 @@ void main() {
         isA<UnimplementedError>().having(
           (e) => e.message,
           'message',
-          contains('Phase 5'),
+          contains('Phase 7+'),
         ),
       ),
     );

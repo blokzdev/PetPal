@@ -22,7 +22,7 @@ enum ScheduleMode {
   /// canonical instance.
   synthesis,
 
-  /// LLM call + notification post-fire. Reserved for Phase 5+ Pro
+  /// LLM call + notification post-fire. Reserved for Phase 7+ Pro
   /// features (e.g. "Loki's weekly summary is ready"). The Phase 4
   /// dispatcher stubs this branch with `UnimplementedError` so the
   /// switch-on-mode is exhaustive without dragging Pro-tier code in.

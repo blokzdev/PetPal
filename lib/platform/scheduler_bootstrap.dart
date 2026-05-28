@@ -14,7 +14,7 @@ import 'scheduler_log.dart';
 /// Phase 4 only wires `notification` mode through a real engine —
 /// `script` and `synthesis` reminders aren't created by the user-
 /// facing flows yet, so their callback paths route to no-op stubs
-/// that just log. Phase 5+ replaces those with the real script
+/// that just log. A later phase replaces those with the real script
 /// registry and an extracted synthesis engine.
 Future<void> bootstrapAndFire(int reminderId) async {
   schedulerLog('dispatch_bootstrap_begin', fields: {
