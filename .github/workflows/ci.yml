@@ -1,8 +1,13 @@
 name: ci
 
 on:
+  # Working-branch validation runs through `pull_request` (the
+  # always-open-a-PR workflow). Listing `claude/**` under push too
+  # would double-fire `analyze + test` — once for the branch push and
+  # once for the PR event. `push` is scoped to `main` so post-merge CI
+  # + the main-gated `release-apk` job still run.
   push:
-    branches: [main, "claude/**"]
+    branches: [main]
   pull_request:
     branches: [main]
   workflow_dispatch:

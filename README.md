@@ -77,4 +77,7 @@ flutter_secure_storage for the API key · share_plus for export.
 
 ## License
 
-_TODO: pick a license before public launch (MIT vs Apache-2.0)._
+PetPal is **proprietary software** — Copyright © 2026 blokzdev, all rights
+reserved. See [LICENSE](LICENSE). No permission is granted to use, copy,
+modify, or distribute this code without prior written consent. Third-party
+dependencies remain under their own (permissive) licenses.
