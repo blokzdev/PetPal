@@ -11,7 +11,7 @@ At the start of every session, in this order:
 1. Read `CLAUDE.md` (this file).
 2. Read `ROADMAP.md` — find the **current phase** and the **next unchecked task**.
 3. Read `DECISIONS.md` — recent entries first, so you don't re-litigate settled choices.
-4. **Branch check (DECISIONS row 37 + 86 enforcement).** Run `git branch --show-current`. The trunk is `claude/petpal-planning-S9DXN`. If the harness brief named a different branch and you're on it, **surface the mismatch to the user before any commits land** and propose a fast-forward of S9DXN to recover the row-37 invariant. Do **not** auto-resolve — the user picks (a) FF S9DXN to the harness branch then continue on S9DXN, (b) continue on the harness branch then FF S9DXN at session end, or (c) reconcile differently. The failure mode is silent drift across sessions; the protection is making the decision explicit on every session start.
+4. **Branch check (DECISIONS row 93 enforcement, supersedes rows 37 + 86).** Trunk is `main`; branch protection requires the `ci / analyze + test` check before merge. Each subphase = a **fresh branch off the current `main`** named `claude/<descriptive-slug>` → one PR → user merges + deletes → re-sync local `main` (`git fetch origin main && git checkout main && git reset --hard origin/main`) before cutting the next. Run `git branch --show-current`: if you're on `main`, cut a fresh subphase branch before touching anything. If you're on a stale `claude/<slug>` from a previous session (its PR already merged + closed), the branch is dead — sync `main` and cut fresh; never stack new work on a merged branch. If the harness brief named a different branch than this protocol implies, **surface the mismatch to the user before any commits land** and let them pick — the failure mode is silent drift across sessions, and the protection is making the decision explicit on every session start. Stop and ask if unsure.
 5. If the user said "Continue from where we left off," begin the next unchecked task in the current phase. Confirm before acting if the task is ambiguous.
 6. **Stop at the end of each phase.** Do not auto-advance.
 
@@ -337,9 +337,10 @@ The Phase 4 hotfix added the three `android_alarm_manager_plus` components after
 
 - Code compiles, `flutter analyze` clean.
 - Touched code has at least one unit test where unit-testable.
-- Commit on `claude/petpal-planning-S9DXN` with a clear message.
+- Commit on the current `claude/<subphase>` branch (cut fresh from `main`, per §1 step 4 / DECISIONS row 93) with a clear message.
 - `ROADMAP.md` updated.
 - If the choice was non-obvious: `DECISIONS.md` updated.
+- **Verify-before-PR (DECISIONS row 93).** Before opening or updating a PR, run `flutter analyze --fatal-infos; echo "exit=$?"` (must be `exit=0`) **and** `flutter test --reporter expanded; echo "exit=$?"` (must be `exit=0`) locally. CI runs `analyze + test` as one sequential job — if analyze fails, the test step never runs, and a red analyze can mask a broken test suite. The CI #167–187 pile-up (PR #1's recovery effort) was this failure mode in production. Don't skip this gate.
 
 ### Phase-end self-verification pass
 
