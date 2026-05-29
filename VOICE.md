@@ -288,11 +288,19 @@ as-is. Relationship is one layer deeper than chrome.
       Live (the turn that just finished): the preamble itself is the
         alert — no separate badge or banner is needed. The bubble is
         the alert.
-      Scrollback (historical): a small `Icons.warning_amber_rounded`
-        icon on the bubble + muted "PetPal flagged this as urgent"
-        subtitle. Persists forever — it is a historical record, not a
-        current-state indicator. Survives any future edit-message or
-        mark-resolved feature (Phase 5+).
+      Scrollback (historical): a small `PhosphorIconsRegular.warningOctagon`
+        icon on the bubble + "PetPal flagged this as urgent" subtitle,
+        rendered in the **coral primary** medical-attention register
+        (CLAUDE.md §10 / DECISIONS rows 50 + 64 + 96 — coral is the
+        systemic medical-warning primary; the original "muted gray"
+        treatment was abandoned in Phase 6.6 once card-level coral
+        context made an inner gray badge visually incoherent). The
+        badge is subdued in stature (small icon, no large alert
+        chrome) but primary in color. Persists forever — it is a
+        historical record, not a current-state indicator. Survives
+        any future edit-message or mark-resolved feature (post-launch
+        scope; Phase 5 was renumbered to design system per DECISIONS
+        row 34).
 
 11. Free-tier monthly chat row in Settings
     Bad:  "127/200 messages used. Upgrade to Pro for unlimited."

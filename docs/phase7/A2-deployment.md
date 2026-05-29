@@ -90,8 +90,13 @@ supabase functions deploy cancel-account-delete
 supabase functions deploy daily-reconciliation-cron
 ```
 
-(`play-billing-webhook` is declared but not yet implemented; deploy
-it when Group C.1 ships its index.ts.)
+(`play-billing-verify` is declared in code but its index.ts hasn't
+been built yet — tracked as ROADMAP task 8.0 / DECISIONS row 92,
+the pre-monetization launch gate. Deploy it as a fifth function
+when that task ships. **Naming reconciliation:** earlier DECISIONS
+rows 82 + 90 called this `play-billing-webhook`; row 92 made
+`play-billing-verify` canonical to match the 11 code/doc sites
+that already used the verify name.)
 
 The deployed function URLs are:
 - `https://<project-ref>.supabase.co/functions/v1/llm-proxy`

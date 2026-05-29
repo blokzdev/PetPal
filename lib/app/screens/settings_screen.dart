@@ -821,9 +821,10 @@ class _ByokToggleTileState extends ConsumerState<_ByokToggleTile> {
       value: widget.active,
       onChanged: _busy ? null : _handleChange,
       secondary: Icon(
-        widget.active
-            ? Icons.key
-            : Icons.key_off_outlined,
+        // Single Phosphor glyph; SwitchListTile's Switch carries the on/off
+        // state (M3 idiomatic). DECISIONS row 96 amends ROADMAP 5.6.B —
+        // `keySlash` isn't in phosphor_flutter 2.1.0 / upstream Phosphor.
+        PhosphorIconsRegular.key,
         color: scheme.onSurface.withValues(alpha: 0.6),
       ),
       title: const Text('Bring your own Anthropic key'),
