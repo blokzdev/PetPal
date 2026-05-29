@@ -642,6 +642,7 @@ Lays the seam every other group consumes. Decision-then-implementation.
 - [ ] 8.2 Privacy policy hosted; Data Safety form drafted (LLM calls leaving the device disclosed)
 - [ ] 8.3 Store listing copy + 1 phone + 1 7" tablet screenshot set
 - [ ] 8.4 Release keystore generated; Play App Signing enrolled (replaces the debug-signing fallback from DECISIONS row 22)
+- [ ] 8.4b **Target SDK + permissions audit — pre-AAB-build hygiene gate.** Verify `android/app/build.gradle.kts` `targetSdkVersion` meets the current Play Store annual minimum (Play enforces this on upload, not on build — 8.6 produces a valid AAB against an out-of-date target, then 8.7 fails at Play Console). Sweep `android/app/src/main/AndroidManifest.xml` for deprecated permissions (`WRITE_EXTERNAL_STORAGE` on modern Android scoped-storage, `READ_EXTERNAL_STORAGE` ditto, any `MANAGE_EXTERNAL_STORAGE` accidents). Re-run the **DECISIONS row 33 plugin-bump checklist** against every plugin added since the row landed (`in_app_purchase`, `supabase_flutter`, `crypto`, …) — diff each plugin's `example/android/app/src/main/AndroidManifest.xml` from `~/.pub-cache/hosted/pub.dev/<pkg>-<ver>/` against ours; patch any missing services/receivers/providers; update `test/platform/android_manifest_test.dart` invariants. Gates 8.7 (upload AAB).
 - [ ] 8.5 R8/ProGuard rules verified for Drift, Anthropic SDK, and the Phase 4 scheduling stack
 - [ ] 8.6 `flutter build appbundle --release`
 - [ ] 8.7 Upload AAB to internal testing track
