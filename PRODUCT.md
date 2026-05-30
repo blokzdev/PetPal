@@ -9,6 +9,18 @@ owns and can export. Over months and years the journal becomes a single
 source of truth for that pet's life, and PetPal answers questions grounded
 in it. The chat is the interface. The journal is the product.
 
+**Feeding is a first-class dimension.** Owners log meals via photo or
+quick capture — the highest-frequency interaction in the app. PetPal
+screens known toxins (chocolate, xylitol, grapes, alliums, the canonical
+list) against a deterministic hazard list and surfaces the same coral
+medical-attention register used for symptoms; it never generates
+treatment advice from a photo. Over weeks, descriptive feeding signals
+— frequency, variety, table-scrap rate, hazard occurrences — appear on
+the pet profile and (on Pro) inside weekly and monthly synthesis. The
+synthesis describes what's in the journal; it never forecasts
+diet-driven health outcomes. The walls — *detect, never treat*;
+*surface, never predict* — hold at every level of the feature.
+
 ## The bet
 
 Foundation models are commoditizing. Frontier models alone don't

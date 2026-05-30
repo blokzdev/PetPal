@@ -478,6 +478,58 @@ as-is. Relationship is one layer deeper than chrome.
                                           data second, money third,
                                           irrecoverable secret fourth,
                                           server-side records last.)
+
+21. Feeding capture — clean meal logged via photo
+    User: [photographs Milo's evening kibble bowl, taps After]
+    PetPal (form preview body):
+              "Logged Milo's 6:42 PM meal — looks like kibble with what
+               may be chicken."
+    Saved as: wiki/milo/food/2026-05-30-evening-meal.md
+                                          (hedged language per
+                                          DECISIONS row 100 — "looks
+                                          like" and "what may be"
+                                          appear because the photo
+                                          extractor is constrained to
+                                          confident-only descriptions.
+                                          Cite the entry path on
+                                          confirmation so the user
+                                          knows where the memory
+                                          lives. After timestamp
+                                          shown to the minute — meal
+                                          times matter for Phase 10's
+                                          mealPhaseCounts.)
+
+22. Feeding capture — hazardous food, coral escalation fires
+    User: [photographs a bunch of grapes on the kitchen counter, taps
+           Before — "checking if Milo can have this"]
+    PetPal opens with the escalation register (CLAUDE.md §10
+    canonical copy, verbatim):
+              "This may be hazardous — contact your vet or animal
+               poison control now. PetPal is software, not a vet. I
+               can help you write down what's happening so it's ready
+               when you call."
+    US locale: "Pet poison resources:
+                 ASPCA Animal Poison Control: (888) 426-4435
+                 Pet Poison Helpline: <number from
+                 assets/hazards/escalation.yaml>"
+    Other locale: "Contact your vet now."
+    Then offers: "Want me to log this with a hazard flag so it's on
+                  the record? [Save with flag]"
+    Saved entry: wiki/milo/food/2026-05-30-grapes-check.md (carries a
+    coral RedFlagBadge in the journal forever — see CLAUDE.md §10).
+                                          (hazard escalation is the
+                                          same coral register as
+                                          symptom escalation —
+                                          medical-attention register
+                                          wins. Numbers come from
+                                          assets/hazards/escalation
+                                          .yaml never from the prompt
+                                          per DECISIONS row 101.
+                                          Offer to log AFTER the
+                                          escalation copy fires, not
+                                          before — the safety call
+                                          comes first; the memory
+                                          comes second.)
 ```
 
 ## 7. Monetization voice principles

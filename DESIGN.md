@@ -433,3 +433,20 @@ the design system surface area.
   it previews — don't fudge widths.
 - `AppScaffold` wraps every screen; never reach for a vanilla
   `Scaffold`.
+
+### Lens reuse — no new tokens per husbandry dimension
+
+Phase 8 introduces the feeding lens (CLAUDE.md §3.5, DECISIONS row 98)
+on top of the existing intake surface. **No new design tokens.** The
+feeding flow reuses the Phase 5 capture form (`PetCard` + form
+primitives), the Phase 6.6 `EditorialCard` for meal previews,
+`RedFlagBadge` for hazard escalation (coral medical-attention register
+per DECISIONS row 64), and `PhosphorIconsRegular.warningOctagon` for
+the hazard icon (the same glyph the symptom escalation register uses).
+
+Future lenses (grooming, environment, activity, body-condition-over-
+time) inherit the same constraint: **lenses reuse existing tokens.**
+Any net-new visual element a lens needs requires a DECISIONS row + a
+DESIGN.md note in the introducing PR, justifying why the existing
+vocabulary doesn't cover it. The lens pattern is a content shape, not
+a license to extend the visual system.
