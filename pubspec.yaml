@@ -196,6 +196,11 @@ flutter:
     # inat_taxon_id, common_alternatives, wild_or_domestic}. Loaded
     # lazily by the searchable picker (5.5.3). DECISIONS rows 42 + 43.
     - assets/species/
+    # Phase 8 task 8.3 — food-toxin hazard list + US-first poison-
+    # control escalation resources. Owner-auditable YAML per
+    # DECISIONS row 100; numbers verified at implementation per
+    # DECISIONS row 101 (never in any LLM prompt).
+    - assets/hazards/
     # Bundled launch skill packs (Phase 3 task 3.5). AssetSkillSource
     # discovers each skill via AssetManifest; each skill is a
     # subdirectory under assets/skills/<id>/ containing manifest.md

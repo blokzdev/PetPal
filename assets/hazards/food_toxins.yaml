@@ -1,0 +1,179 @@
+# Phase 8.3 food-toxin list. Owner-auditable per DECISIONS row 100.
+#
+# Adding or editing entries here REQUIRES updating
+# test/harness/guardrails/food_hazards_fixture.dart in the same commit
+# (≥10 positive phrasings per category, mirroring DECISIONS row 29's
+# coverage rule for the symptom screener). The fixture-walk test in
+# food_hazards_fixture_test.dart enforces this floor on every CI run.
+#
+# Match semantics:
+#   - Phrases are matched case-insensitively, word-bounded.
+#   - The screener compiles each phrase to RegExp.escape + \b…\b,
+#     so authors write plain English; reviewers don't need to know
+#     regex (DECISIONS row 107).
+#
+# Category order matters — first-match-wins iteration. More-specific
+# / more-acute categories are listed first so cross-category
+# phrasings (e.g. "pot brownie" matches both chocolate's "brownie"
+# AND cannabis's "pot brownie") flag the more useful category.
+# Specific-before-general ordering: xylitol, cannabis, macadamia,
+# grapes_raisins are listed before chocolate / alliums / alcohol /
+# caffeine / yeast_dough.
+#
+# Inclusion bar: known acute toxicity to dogs and/or cats, anchored to
+# ASPCA / Pet Poison Helpline canonical lists. v1 excludes:
+#   - salt-excessive (subjective; extractor's plain-English Rule 5
+#     produces "salt", not "excessive salt")
+#   - avocado (less acute for dogs/cats than parrots / large animals)
+#   - nuts-general (too broad — specific tree nuts handled per-entry)
+# Expand only with matching fixtures.
+
+categories:
+  - id: xylitol
+    species: [dog, cat]
+    ai_summary: "Xylitol (sugar substitute — causes acute hypoglycemia in dogs)"
+    phrases:
+      - xylitol
+      - birch sugar
+      - sugar-free gum
+      - sugarfree gum
+      - sugar-free mint
+      - sugar-free mints
+      - sugar-free candy
+      - sugarfree candy
+      - sugarless gum
+      - sugar free candy
+
+  - id: cannabis
+    species: [dog, cat]
+    ai_summary: "Cannabis (THC toxicity)"
+    phrases:
+      - marijuana
+      - cannabis
+      - weed
+      - thc
+      - edible
+      - edibles
+      - pot brownie
+      - pot brownies
+      - cannabis gummy
+      - cannabis gummies
+      - thc gummy
+      - thc gummies
+      - cbd gummy
+
+  - id: macadamia
+    species: [dog]
+    ai_summary: "Macadamia nuts (weakness / tremors in dogs)"
+    phrases:
+      - macadamia
+      - macadamias
+      - macadamia nut
+      - macadamia nuts
+      - macadamia cookie
+      - macadamia cookies
+      - macadamia brittle
+      - white chocolate macadamia
+      - macadamia crunch
+      - macadamia brownie
+
+  - id: grapes_raisins
+    species: [dog]
+    ai_summary: "Grapes / raisins (nephrotoxic to dogs)"
+    phrases:
+      - grape
+      - grapes
+      - raisin
+      - raisins
+      - sultana
+      - sultanas
+      - currant
+      - currants
+      - grape juice
+      - raisin bread
+      - trail mix
+
+  - id: chocolate
+    species: [dog, cat]
+    ai_summary: "Chocolate (theobromine — toxic to dogs and cats)"
+    phrases:
+      - chocolate
+      - cocoa
+      - cacao
+      - cocoa powder
+      - dark chocolate
+      - milk chocolate
+      - white chocolate
+      - chocolate chip
+      - chocolate chips
+      - chocolate bar
+      - chocolate truffle
+      - brownie
+      - brownies
+
+  - id: alliums
+    species: [dog, cat]
+    ai_summary: "Allium (onion / garlic / chives — hemolytic anemia)"
+    phrases:
+      - onion
+      - onions
+      - garlic
+      - chives
+      - leek
+      - leeks
+      - shallot
+      - shallots
+      - scallion
+      - scallions
+      - spring onion
+      - green onion
+      - onion powder
+      - garlic powder
+
+  - id: alcohol
+    species: [dog, cat]
+    ai_summary: "Alcohol (ethanol toxicity)"
+    phrases:
+      - beer
+      - wine
+      - liquor
+      - whiskey
+      - vodka
+      - rum
+      - bourbon
+      - champagne
+      - cocktail
+      - alcohol
+      - ethanol
+      - gin
+
+  - id: caffeine
+    species: [dog, cat]
+    ai_summary: "Caffeine (stimulant toxicity)"
+    phrases:
+      - coffee
+      - espresso
+      - coffee grounds
+      - tea bag
+      - tea bags
+      - energy drink
+      - energy drinks
+      - caffeine pill
+      - caffeine pills
+      - cold brew
+
+  - id: yeast_dough
+    species: [dog, cat]
+    ai_summary: "Raw yeast dough (gastric expansion + ethanol production)"
+    phrases:
+      - raw dough
+      - bread dough
+      - unbaked dough
+      - pizza dough
+      - yeast dough
+      - rising dough
+      - sourdough starter
+      - raw bread dough
+      - homemade dough
+      - proofed dough
+
