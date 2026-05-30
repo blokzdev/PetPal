@@ -5,7 +5,9 @@ import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:petpal/data/db/database.dart';
 import 'package:petpal/data/repos/wiki_repo.dart';
+import 'package:petpal/data/wiki_io.dart';
 import 'package:petpal/data/wiki_io_fs.dart';
+import 'package:petpal/harness/vision/photo_extractor.dart';
 
 void main() {
   late Directory tempRoot;
@@ -420,4 +422,423 @@ void main() {
       expect(p, isNull);
     });
   });
+
+  group('writeFoodEntry (Phase 8 task 8.2)', () {
+    test('happy path: full extraction lands the file + entries row + '
+        'FTS5 index + composed frontmatter with structural keys '
+        'first, then extraction keys', () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like dry kibble',
+        identifiedItems: ['chicken', 'carrot'],
+        portionEstimate: 'appears to be about a half cup',
+        prepNotes: 'looks dry, no visible sauce',
+        freeformCaption: 'A bowl of kibble.',
+      );
+      final ts = DateTime(2026, 5, 30, 18, 30);
+      final fedAt = DateTime(2026, 5, 30, 18, 30);
+
+      final id = await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: fedAt,
+        body: 'A bowl of kibble.',
+      );
+
+      // File path follows the entryPath template with food_type-derived
+      // slug.
+      const expectedPath =
+          'wiki/$petId/food/2026-05-30-looks-like-dry-kibble.md';
+      final fileBody = await wiki.read(expectedPath);
+
+      // Frontmatter contains all structural + extraction keys, in
+      // the locked order (structural first).
+      final lines = fileBody.split('\n');
+      final fmLines = lines
+          .takeWhile((l) => l.trim() != '---' || lines.indexOf(l) == 0)
+          .toList();
+      // structural keys — `ts` and `fed_at` are YAML-quoted because
+      // ISO timestamps contain colons (serializeSoul's _shouldQuote
+      // rule). This is YAML-correct and the yaml parser round-trips
+      // both quoted + unquoted forms.
+      expect(fileBody, contains('type: food'));
+      expect(fileBody, contains("ts: '2026-05-30T18:30:00'"));
+      expect(fileBody, contains('meal_phase: loggedAfter'));
+      expect(fileBody, contains("fed_at: '2026-05-30T18:30:00'"));
+      // extraction keys (drop-empty: all five present)
+      expect(fileBody, contains('food_type:'));
+      expect(fileBody, contains('items: [chicken, carrot]'));
+      expect(fileBody, contains('portion:'));
+      expect(fileBody, contains('prep_notes:'));
+      // body
+      expect(fileBody, contains('A bowl of kibble.'));
+      // structural order: type before ts before meal_phase before fed_at
+      // before food_type (assert via index ordering in the joined string).
+      final fmText = fmLines.join('\n');
+      expect(fmText.indexOf('type:'),
+          lessThan(fmText.indexOf('ts:')));
+      expect(fmText.indexOf('ts:'),
+          lessThan(fmText.indexOf('meal_phase:')));
+      expect(fmText.indexOf('meal_phase:'),
+          lessThan(fmText.indexOf('fed_at:')));
+
+      // entries row
+      final row = await (db.select(db.entries)
+            ..where((e) => e.id.equals(id)))
+          .getSingle();
+      expect(row.path, expectedPath);
+      expect(row.type, 'food');
+      expect(row.title, 'looks like dry kibble');
+
+      // FTS5 indexed
+      final hits = await db.customSelect(
+        '''SELECT rowid FROM entries_fts5 WHERE entries_fts5 MATCH 'kibble*' ''',
+      ).get();
+      expect(hits.map((r) => r.read<int>('rowid')).toList(), contains(id));
+    });
+
+    test('drop-empty: extraction with all empty fields produces a '
+        'frontmatter with only the structural keys (mirrors the '
+        'PhotoExtraction.toFrontmatterPatch posture)', () async {
+      const extraction = FoodExtraction(
+        foodType: '',
+        identifiedItems: [],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30, 12);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+      );
+
+      // Title defaults to 'Meal' when food_type is empty.
+      const expectedPath = 'wiki/$petId/food/2026-05-30-meal.md';
+      final fileBody = await wiki.read(expectedPath);
+
+      // Structural keys present.
+      expect(fileBody, contains('type: food'));
+      expect(fileBody, contains('meal_phase: loggedAfter'));
+      // Extraction keys absent (dropped because empty).
+      expect(fileBody, isNot(contains('food_type:')));
+      expect(fileBody, isNot(contains('items:')));
+      expect(fileBody, isNot(contains('portion:')));
+      expect(fileBody, isNot(contains('prep_notes:')));
+    });
+
+    test('fed_at distinct from ts: pre-feeding check writes ts=now + '
+        'fed_at=future, supporting the row 99 pre-feeding logging '
+        'use case', () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like a chocolate truffle',
+        identifiedItems: ['chocolate'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: 'About to give as a treat — is this OK?',
+      );
+      final writeTs = DateTime(2026, 5, 30, 14);
+      final scheduledFeed = DateTime(2026, 5, 30, 18, 30);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.checkedBefore,
+        ts: writeTs,
+        fedAt: scheduledFeed,
+      );
+
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-a-chocolate-truffle.md',
+      );
+      expect(fileBody, contains("ts: '2026-05-30T14:00:00'"));
+      expect(fileBody, contains("fed_at: '2026-05-30T18:30:00'"));
+      expect(fileBody, contains('meal_phase: checkedBefore'));
+    });
+
+    test('items list renders as a YAML inline list (the format the '
+        '8.3 hazard screener will parse)', () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like dinner mix',
+        identifiedItems: ['chicken', 'rice', 'green bean'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+      );
+
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-dinner-mix.md',
+      );
+      expect(fileBody, contains('items: [chicken, rice, green bean]'));
+    });
+
+    test('special chars in food_type get YAML-quoted by serializeSoul '
+        '(apostrophes doubled, colons trigger quoting)', () async {
+      const extraction = FoodExtraction(
+        // Contains an apostrophe + a colon — both trigger quoting in
+        // serializeSoul's _shouldQuote rules. The slug derivation
+        // strips the special chars; only the frontmatter value gets
+        // the quote treatment.
+        foodType: "looks like dad's leftover: pasta",
+        identifiedItems: [],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+      );
+
+      // Slug derivation (slugify) strips colons + apostrophes.
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-dads-leftover-pasta.md',
+      );
+      // The apostrophe in the food_type value should be doubled by
+      // _escapeQuoted and the whole value wrapped in single quotes.
+      expect(fileBody,
+          contains("food_type: 'looks like dad''s leftover: pasta'"));
+    });
+
+    test('empty body parameter writes an only-frontmatter file '
+        '(extraction-derived structural data is the whole entry)',
+        () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like kibble',
+        identifiedItems: ['chicken'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+      );
+
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-kibble.md',
+      );
+      // File should end at the closing `---\n` + an empty body line.
+      // No prose follows the frontmatter.
+      final parts = fileBody.split('---\n');
+      expect(parts.length, greaterThanOrEqualTo(3),
+          reason: 'opening + closing --- markers must be present');
+      // The body after the second '---\n' is empty (just a leading \n).
+      final body = parts.last;
+      expect(body.trim(), isEmpty);
+    });
+
+    test('user-finalized body parameter lands as the entry body '
+        'AFTER the frontmatter', () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like wet food',
+        identifiedItems: ['salmon pate'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: 'Salmon pate dinner.',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+        body: 'Loki loved this. Half the can. Will repeat.',
+      );
+
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-wet-food.md',
+      );
+      // Frontmatter present, body after.
+      expect(fileBody, contains('Loki loved this. Half the can.'));
+      expect(fileBody.indexOf('Loki loved this'),
+          greaterThan(fileBody.lastIndexOf('---')));
+    });
+
+    test('overwriting same path updates the row and FTS5 in place '
+        '(same atomicity contract as writeEntry)', () async {
+      const first = FoodExtraction(
+        foodType: 'looks like kibble',
+        identifiedItems: ['chicken'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      const second = FoodExtraction(
+        foodType: 'looks like kibble',  // same slug → same path
+        identifiedItems: ['chicken', 'rice'],  // updated content
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      final firstId = await repo.writeFoodEntry(
+        petId: petId,
+        extraction: first,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+        body: 'First write.',
+      );
+      final secondId = await repo.writeFoodEntry(
+        petId: petId,
+        extraction: second,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+        body: 'Second write.',
+      );
+
+      expect(secondId, firstId,
+          reason: 'same path → same entries row id (updated in place)');
+
+      final fileBody = await wiki.read(
+        'wiki/$petId/food/2026-05-30-looks-like-kibble.md',
+      );
+      expect(fileBody, contains('items: [chicken, rice]'));
+      expect(fileBody, contains('Second write.'));
+      expect(fileBody, isNot(contains('First write.')));
+    });
+
+    test('FTS5 indexes the body — text search by user caption finds '
+        'the food entry', () async {
+      const extraction = FoodExtraction(
+        foodType: 'looks like kibble',
+        identifiedItems: ['chicken'],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      final id = await repo.writeFoodEntry(
+        petId: petId,
+        extraction: extraction,
+        mealPhase: MealPhase.loggedAfter,
+        ts: ts,
+        fedAt: ts,
+        body: 'Loki devoured the breakfast portion in under a minute.',
+      );
+
+      final hits = await db.customSelect(
+        '''SELECT rowid FROM entries_fts5 WHERE entries_fts5 MATCH 'devour*' ''',
+      ).get();
+      expect(hits.map((r) => r.read<int>('rowid')).toList(), contains(id));
+    });
+
+    test('atomicity: a file-write failure rolls back the entries '
+        'row insert (the index never disagrees with the file)',
+        () async {
+      // Inject a wiki that throws on writeAtomic. The transaction
+      // wrapping _writeAt MUST roll the entries row insert back.
+      final failingWiki = _FailingWiki(realWiki: wiki);
+      final failingRepo = WikiRepo(db: db, wiki: failingWiki);
+
+      const extraction = FoodExtraction(
+        foodType: 'looks like kibble',
+        identifiedItems: [],
+        portionEstimate: '',
+        prepNotes: '',
+        freeformCaption: '',
+      );
+      final ts = DateTime(2026, 5, 30);
+
+      await expectLater(
+        () => failingRepo.writeFoodEntry(
+          petId: petId,
+          extraction: extraction,
+          mealPhase: MealPhase.loggedAfter,
+          ts: ts,
+          fedAt: ts,
+        ),
+        throwsA(isA<StateError>()),
+      );
+
+      // No entries row should exist for this path.
+      final rows = await (db.select(db.entries)
+            ..where((e) => e.path.equals(
+                  'wiki/$petId/food/2026-05-30-looks-like-kibble.md',
+                )))
+          .get();
+      expect(rows, isEmpty,
+          reason: 'file-write throw must roll back the entries insert');
+    });
+
+    test('MealPhase enum names are stable as YAML strings — drift '
+        'guard for the row 99 frontmatter contract', () {
+      expect(MealPhase.checkedBefore.name, 'checkedBefore');
+      expect(MealPhase.loggedAfter.name, 'loggedAfter');
+      // The enum order matters for switch-exhaustiveness checks on
+      // the caller side (Phase 8.4).
+      expect(MealPhase.values, [
+        MealPhase.checkedBefore,
+        MealPhase.loggedAfter,
+      ]);
+    });
+  });
+}
+
+/// Wiki I/O wrapper that proxies to a real WikiIoFs for reads but
+/// throws on every `writeAtomic`. Used to exercise the atomicity
+/// rollback contract on `writeFoodEntry` — a thrown file write must
+/// roll back the entries row insert inside the same Drift
+/// transaction.
+class _FailingWiki extends WikiIo {
+  _FailingWiki({required this.realWiki});
+  final WikiIoFs realWiki;
+
+  @override
+  Future<void> writeAtomic(String relPath, String body) {
+    throw StateError('injected wiki write failure');
+  }
+
+  @override
+  Future<void> writeBytesAtomic(String relPath, Uint8List bytes) =>
+      realWiki.writeBytesAtomic(relPath, bytes);
+
+  @override
+  Future<String> read(String relPath) => realWiki.read(relPath);
+
+  @override
+  Future<Uint8List> readBytes(String relPath) => realWiki.readBytes(relPath);
+
+  @override
+  Future<List<String>> listForPet(int petId) => realWiki.listForPet(petId);
+
+  @override
+  Future<int> bytesForPet(int petId) => realWiki.bytesForPet(petId);
+
+  @override
+  Future<void> deleteIfExists(String relPath) =>
+      realWiki.deleteIfExists(relPath);
+
+  @override
+  Future<void> deleteAll() => realWiki.deleteAll();
 }

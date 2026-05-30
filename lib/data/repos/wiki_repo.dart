@@ -4,8 +4,10 @@ import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 
 import '../../harness/retrieval/embedding_worker.dart';
+import '../../harness/vision/photo_extractor.dart';
 import '../db/database.dart';
 import '../photo_id.dart';
+import '../soul_file.dart';
 import '../wiki_io.dart';
 import '../wiki_slug.dart';
 
@@ -247,6 +249,74 @@ class WikiRepo {
       warningBytes: warning,
     );
   }
+
+  /// Phase 8 task 8.2 — write a structured food entry. Pairs with
+  /// the Phase 8.0 router's [IntakeIntent] (the caller maps the
+  /// resolved intent to a [mealPhase]) and the Phase 8.1
+  /// [FoodExtraction] (the structured frontmatter patch comes from
+  /// `extraction.toFrontmatterPatch()`).
+  ///
+  /// Composed frontmatter:
+  ///   - structural keys (always present): `type: food`, `ts`,
+  ///     `meal_phase`, `fed_at`
+  ///   - extraction keys (only non-empty are emitted, matching the
+  ///     PhotoExtraction.toFrontmatterPatch drop-empty posture):
+  ///     `food_type`, `items`, `portion`, `prep_notes`
+  ///
+  /// **`ts` vs `fed_at`**: `ts` is when the entry was written
+  /// (index time); `fed_at` is when the meal happened. For a
+  /// log-after entry they're typically equal; for a check-before
+  /// entry the caller may pass a future [fedAt] (the scheduled
+  /// feed time).
+  ///
+  /// Path: `wiki/<petId>/food/<YYYY-MM-DD>-<slug>.md` via
+  /// [entryPath]. The slug derives from `extraction.foodType` when
+  /// non-empty, else `'Meal'`. Title in the index follows the same
+  /// rule.
+  ///
+  /// [body] is the user-finalized freeform caption (typically the
+  /// 8.4 form preview's editable version of
+  /// `extraction.freeformCaption`). Empty body is allowed —
+  /// produces an entry with only frontmatter.
+  ///
+  /// Atomicity: file write + entries-row insert/update + FTS5
+  /// index all commit under a single Drift transaction via
+  /// [_writeAt], matching [writeEntry] / [writePhoto].
+  ///
+  /// Backward-compatible: existing freeform `wiki/<petId>/food/*.md`
+  /// entries written via [writeEntry] (type=`food`) stay valid
+  /// memory. This writer creates new entries at new path slugs; no
+  /// existing entries are migrated or rewritten.
+  Future<int> writeFoodEntry({
+    required int petId,
+    required FoodExtraction extraction,
+    required MealPhase mealPhase,
+    required DateTime ts,
+    required DateTime fedAt,
+    String body = '',
+  }) async {
+    final title = extraction.foodType.isNotEmpty
+        ? extraction.foodType
+        : 'Meal';
+    final path = entryPath(petId: petId, type: 'food', title: title, ts: ts);
+
+    final sidecar = _composeFoodSidecar(
+      extraction: extraction,
+      mealPhase: mealPhase,
+      ts: ts,
+      fedAt: fedAt,
+      body: body,
+    );
+
+    return _writeAt(
+      path: path,
+      petId: petId,
+      type: 'food',
+      title: title,
+      body: sidecar,
+      ts: ts,
+    );
+  }
 }
 
 String _hash(String body) =>
@@ -309,6 +379,56 @@ String _extForMimeType(String mime) {
       // to jpeg before they reach disk.
       return 'jpg';
   }
+}
+
+/// ISO-8601 second-precision timestamp without timezone (matches
+/// the inline format `_composePhotoSidecar` uses for `ts`). Used by
+/// [_composeFoodSidecar] for `ts` + `fed_at`.
+String _isoTimestamp(DateTime ts) =>
+    '${ts.year.toString().padLeft(4, '0')}-'
+    '${ts.month.toString().padLeft(2, '0')}-'
+    '${ts.day.toString().padLeft(2, '0')}T'
+    '${ts.hour.toString().padLeft(2, '0')}:'
+    '${ts.minute.toString().padLeft(2, '0')}:'
+    '${ts.second.toString().padLeft(2, '0')}';
+
+/// Phase 8 task 8.2 — compose a food sidecar body from the
+/// extraction + meal_phase + timestamps + body. Delegates to
+/// [serializeSoul] (the same YAML emitter SOUL.md uses — handles
+/// list values, string-quoting for special chars, key ordering).
+///
+/// Key order is **structural keys first** (type, ts, meal_phase,
+/// fed_at) so the most-important-for-retrieval fields are
+/// top-of-file; then the extraction-derived keys (food_type, items,
+/// portion, prep_notes) in the schema's natural order.
+String _composeFoodSidecar({
+  required FoodExtraction extraction,
+  required MealPhase mealPhase,
+  required DateTime ts,
+  required DateTime fedAt,
+  required String body,
+}) {
+  final frontmatter = <String, Object?>{
+    'type': 'food',
+    'ts': _isoTimestamp(ts),
+    'meal_phase': mealPhase.name,
+    'fed_at': _isoTimestamp(fedAt),
+    ...extraction.toFrontmatterPatch(),
+  };
+  return serializeSoul(
+    frontmatter: frontmatter,
+    body: body,
+    keyOrder: const [
+      'type',
+      'ts',
+      'meal_phase',
+      'fed_at',
+      'food_type',
+      'items',
+      'portion',
+      'prep_notes',
+    ],
+  );
 }
 
 /// Compose a photo sidecar body from its 6.1-minimum frontmatter +
@@ -403,6 +523,35 @@ enum PhotoSaveError {
   /// Pre-write check rejected: pet's bytes-used + incoming bytes
   /// would exceed [photoStorageHardLimitBytes].
   storageFull,
+}
+
+/// Phase 8 task 8.2 — meal-phase enum for structured food entries.
+/// Pairs with the Phase 8.0 router's [IntakeIntent]: the 8.4 capture
+/// flow maps `IntakeIntent.logMealAfter` → [MealPhase.loggedAfter]
+/// and `IntakeIntent.checkMealBefore` → [MealPhase.checkedBefore]
+/// before calling [WikiRepo.writeFoodEntry]. `IntakeIntent.generalMemory`
+/// does not map to a meal phase — those entries route through
+/// [WikiRepo.writePhoto] instead.
+///
+/// Enum names land verbatim as YAML `meal_phase` values in the
+/// food entry frontmatter (`meal_phase: loggedAfter`).
+///
+/// Per DECISIONS row 99, the internal names ("checked"/"logged") are
+/// intentionally distinct from owner-facing English ("before"/
+/// "after"): "checked before" describes a pre-feeding hazard check;
+/// "logged after" describes a post-feeding memory. A code reader
+/// cracking open `meal_phase` doesn't have to context-switch on what
+/// "before" means in isolation.
+enum MealPhase {
+  /// Pre-feeding entry — the owner photographed food before giving
+  /// it (often paired with a hazard check). `fed_at` may equal `ts`
+  /// (just-now check) or be in the future (scheduled feed).
+  checkedBefore,
+
+  /// Post-feeding entry — the owner photographed a meal after
+  /// serving or while the pet was eating. `fed_at` is typically
+  /// equal to or just before `ts`.
+  loggedAfter,
 }
 
 /// Parsed view of an entry path: `wiki/<petId>/<type>/<YYYY-MM-DD>-<slug>.md`.
