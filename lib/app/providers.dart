@@ -28,6 +28,7 @@ import 'entitlement/entitlement.dart';
 import 'entitlement/entitlement_notifier.dart';
 import '../harness/agent/tool_dispatcher.dart';
 import '../harness/guardrails/red_flag_screener.dart';
+import '../harness/intake/intent_router.dart';
 import '../harness/retrieval/embedding_provider.dart';
 import '../harness/retrieval/embedding_worker.dart';
 import '../harness/retrieval/hybrid_retriever.dart';
@@ -268,6 +269,22 @@ final photoExtractorProvider = Provider<PhotoExtractor>((ref) {
   final llm = ref.watch(llmClientProvider);
   final gate = ref.watch(visionGateProvider);
   return PhotoExtractor(llm: llm, gate: gate);
+});
+
+/// Phase 8 task 8.0 — intake intent router. Resolves a snapped
+/// photo (+ optional caption + optional explicit hint) to an
+/// [IntakeIntent] so future lenses (food first) branch the capture
+/// flow without reinventing classification. Hybrid resolution per
+/// DECISIONS row 98 — explicit hint authoritative when present, a
+/// lightweight Haiku classifier handles soft cases. Wired against
+/// [haikuLlmClientProvider] per DECISIONS row 41 (f) precedent
+/// (Sonnet for extraction, Haiku for lightweight classification).
+/// Routes through [visionGateProvider] for entitlement-path
+/// uniformity even though intake is FREE per row 102.
+final intakeIntentRouterProvider = Provider<IntakeIntentRouter>((ref) {
+  final llm = ref.watch(haikuLlmClientProvider);
+  final gate = ref.watch(visionGateProvider);
+  return IntakeIntentRouter(llm: llm, gate: gate);
 });
 
 /// Phase 6 task 6.8 — Haiku-tuned LLM client for the affective
