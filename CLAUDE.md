@@ -45,6 +45,21 @@ The same agent loop, the same retrieval, the same red-flag screener serves a par
 
 ---
 
+## 3.5 Intake dimensions: router + lens pattern
+
+A **lens** is how a husbandry dimension lands in the wiki. Each lens bundles five things: an **extraction schema** (what we read from the input), **structured frontmatter** (what we store), **deterministic rules** (what we screen for), **synthesis signals** (what we surface), and a **reminder kind** (what we can schedule).
+
+The **intake intent router** sits on top of the existing photo-intake surface and resolves user input to an intent before the lens fires. Same photo gesture, different intents — e.g. `logMealAfter`, `checkMealBefore`, `generalMemory`. Resolution is hybrid:
+
+- explicit toggle present → authoritative
+- explicit toggle absent → light LLM classification, soft cases only
+
+Food is lens #1 (Phase 8). Grooming, enclosure/environment, activity/enrichment, body-condition-over-time are downstream candidates. **The pattern is the durable part; the food feature is how we earn it.** Future lenses drop into the same five slots and reuse the same router.
+
+The router lives in `lib/harness/intake/`. Each lens threads the existing harness modules — extractor → `vision/`, screener → `guardrails/`, frontmatter → `wiki_io.dart`, signal → `synthesis/`, reminder kind → `scheduling/` — rather than introducing parallel infrastructure.
+
+---
+
 ## 4. Architecture diagram
 
 ```
@@ -235,6 +250,14 @@ This copy is mirrored in VOICE.md §6 example 10. The agent then offers to log t
 
 Every red-flag category ships with **≥30 positive phrasings + ≥20 negative phrasings** in `test/harness/guardrails/red_flags_fixture.dart`. New patterns require new fixtures in the same commit. The defense-in-depth model (code primary, prompt backup, user-visible audit) is locked in DECISIONS row 29.
 
+### Food hazard gate (Phase 8.3)
+
+`FoodHazardScreener` is a sibling to `RedFlagScreener` — same posture (deterministic, code-not-prompt, false-positive-tolerant per row 29), same coral badge surface, different input domain. It matches the photo extractor's `identified_items` against a bundled toxin list (`assets/hazards/food_toxins.yaml`) and fires the coral medical-attention register on a hit. **Known toxins only** — we do not opine on nutritional quality, adequacy, or portion correctness; DECISIONS row 25 holds unchanged.
+
+**Escalation copy on hit:** "This may be hazardous — contact your vet or animal poison control now." US locale appends ASPCA APCC (888) 426-4435 + Pet Poison Helpline (canonical number verified at implementation, never trusted from memory); other locales show the generic "contact your vet now." Numbers live in `assets/hazards/escalation.yaml`, never in any prompt — same code/config rule as the locked vet-escalation copy above (DECISIONS row 101).
+
+**Fixture floor:** ≥10 phrasings per toxin category in `test/harness/guardrails/food_hazards_fixture.dart`, mirroring the 6.7 vision-cadence floor for red flags. New toxin entries require new fixtures in the same commit (mirror the row 29 rule).
+
 ---
 
 ## 11. MVP screen list (delivered by end of Phase 2) vs shipped v1
@@ -390,7 +413,7 @@ The release build is meaningfully smaller than `flutter build apk --debug` (R8 m
 
 ## 15. Phased build plan
 
-See `ROADMAP.md`. Eight phases: Phase 0 (scaffold) → Phase 8 (Play Store). MVP architecture at end of Phase 2; shipped v1 at end of Phase 6 (including the Phase 5 design system + Phase 6 feature depth); paywall + sync in Phase 7. The original plan was six phases — DECISIONS row 34 captures the post-Phase-4 restructure that inserted Phase 5 (Product Polish & Visual Identity) and Phase 6 (Feature Depth & AI Capabilities) before the original monetization phase (now Phase 7). Row 36 captures the Phase-7 monetization-model overhaul: unlimited free local memory (no cap), cost-bounded Pro quotas (200 msg/mo free funded by a PetPal-hosted LLM proxy; unmetered text + 30 vision/mo + sync on Pro), BYOK as a free-tier modifier, photo credit packs for vision overage, dropped lifetime tier.
+See `ROADMAP.md`. **Twelve build phases**: Phase 0 (scaffold) → Phase 12 (Play Store). MVP architecture at end of Phase 2; shipped v1 at end of Phase 6 (including the Phase 5 design system + Phase 6 feature depth); paywall + sync in Phase 7. The original plan was six phases — DECISIONS row 34 captures the post-Phase-4 restructure that inserted Phase 5 (Product Polish & Visual Identity) and Phase 6 (Feature Depth & AI Capabilities) before the original monetization phase (now Phase 7). Row 36 captures the Phase-7 monetization-model overhaul: unlimited free local memory (no cap), cost-bounded Pro quotas (200 msg/mo free funded by a PetPal-hosted LLM proxy; unmetered text + 30 vision/mo + sync on Pro), BYOK as a free-tier modifier, photo credit packs for vision overage, dropped lifetime tier. **DECISIONS row 97 captures the Phase-8 restructure that inserted Phases 8–11 (feeding intake → scheduling → trends → synthesis) ahead of the launch phase (renumbered 8 → 12); the post-launch on-device inference placeholder renumbers from former Phase 9 to Phase 13 (V1X-deferred / scoping-only per row 85, posture unchanged).**
 
 ---
 

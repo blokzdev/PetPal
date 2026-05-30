@@ -373,7 +373,7 @@ Each entry uses the same shape:
 
 ## v1.x (no specific window)
 
-### Phase 9 — Post-launch on-device inference + per-message provider switching
+### Phase 13 — Post-launch on-device inference + per-message provider switching
 
 - **Source:** Scoped during Phase 7 verification round (pre-H.1
   kickoff session, 2026-05-03).
@@ -389,7 +389,7 @@ Each entry uses the same shape:
   `DirectTransport` and `ProxyTransport`.
 - **Trigger to revisit:** ~4–8 weeks post-launch when usage data
   accumulates; OR earlier if proxy costs prove unsustainable
-  (survival-feature angle — Phase 9 priority rises if Anthropic
+  (survival-feature angle — Phase 13 priority rises if Anthropic
   spend per free-tier user runs hot).
 - **Notes:**
 
@@ -397,13 +397,13 @@ Each entry uses the same shape:
   re-litigate these):
 
     1. **Three-tier LLM provider model.** Local Inference (new,
-       Phase 9) + Cloud Proxy (existing, Phase 7) + BYOK
+       Phase 13) + Cloud Proxy (existing, Phase 7) + BYOK
        (existing, Phase 7). The seam is the existing
        `LlmTransport` abstraction.
     2. **Onboarding default = Option A** — device-capability
        diagnostic determines the default suggestion. Capable
        devices (~8 GB+ RAM + recent SoC class, quality bar set
-       via Phase 9 empirical benchmarking) default to Local.
+       via Phase 13 empirical benchmarking) default to Local.
        Below-bar but functional: default to Cloud Proxy with
        Local opt-in + warning. Genuinely unsupported: Cloud
        Proxy only, Local grayed.
@@ -411,9 +411,9 @@ Each entry uses the same shape:
        Local opt-in** (per VOICE.md §2 disclosure principles).
        Three surfaces: opt-in moment, Settings provider
        switcher tier indicator, first-run quality test.
-    4. **Per-message provider switching is Phase 9 sub-scope,
-       not separate phase.** Phase 10 fallback if scope expansion
-       proves untenable when Phase 9 kickoff scoping happens.
+    4. **Per-message provider switching is Phase 13 sub-scope,
+       not separate phase.** Phase 14 fallback if scope expansion
+       proves untenable when Phase 13 kickoff scoping happens.
     5. **Five design discipline anchors for per-message
        switching:** (a) default invisible (picker hidden by
        default; long-press / advanced toggle to surface);
@@ -429,7 +429,7 @@ Each entry uses the same shape:
        (provider indicators small/muted/between turns; "AI in
        service" not "AI tool you operate").
 
-  **Phase 9 kickoff scoping questions** (open, not pre-decided):
+  **Phase 13 kickoff scoping questions** (open, not pre-decided):
 
     - **Quality bar empirical determination** — benchmarking
       matrix of candidate models × device tiers × harness-
@@ -455,7 +455,7 @@ Each entry uses the same shape:
       likely download with cached model registry, but model
       versioning + update UX needs scoping.
 
-  **Candidate model families** (final picks set at Phase 9
+  **Candidate model families** (final picks set at Phase 13
   kickoff, informed by then-current model landscape):
   SmolLM2/3, Gemma 3 nano (E2B/E4B), Gemma 4, Phi-3/4 mini,
   Qwen 2.5 small, MiniCPM.
@@ -471,7 +471,7 @@ Each entry uses the same shape:
       and storage (DECISIONS row 1).
     - **Survival-feature angle** — if proxy economics prove
       uncomfortable post-launch (high spend per free-tier user,
-      low Pro conversion), Phase 9 prioritization shifts up;
+      low Pro conversion), Phase 13 prioritization shifts up;
       Local Inference becomes a cost-relief lever as well as a
       privacy/offline lever.
 
@@ -491,7 +491,7 @@ Each entry uses the same shape:
 
   **Why v1.x and not v1.1 / v1.2:** v1.1 is small fixes /
   real-user signal absorption; this is full-phase scope.
-  v1.2 candidate locks at ~6 months post-launch; Phase 9 may
+  v1.2 candidate locks at ~6 months post-launch; Phase 13 may
   happen sooner if proxy economics force it. Cleanest fit is
   v1.x with an explicit "trigger to revisit" tied to launch
   data signals.

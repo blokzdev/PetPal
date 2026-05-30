@@ -1,10 +1,10 @@
 # PetPal Roadmap
 
-Eight phases. Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
+Twelve build phases (plus a post-launch Phase 13 placeholder). Tasks are sized to ≤30 min of agent work. Every phase ends with a deliverable I can verify on a real Android device, and a hard stop. The agent does not auto-advance.
 
-The original plan was six phases (Phase 0 scaffold → Phase 5 monetization → Phase 6 launch). After Phase 4 we restructured: the harness is past MVP-grade (873 tests, three-layer memory, scheduling, 11-category guardrails, species-aware skills), but the app's experiential surface is still MVP-quality. Monetizing barebones UI on top of world-class architecture inverts the value perception. So we inserted **Phase 5 (Product Polish & Visual Identity)** and **Phase 6 (Feature Depth & AI Capabilities)** before monetization. The original Phase 5 became Phase 7; the original Phase 6 became Phase 8. See DECISIONS row 34 for the rationale.
+The original plan was six phases (Phase 0 scaffold → Phase 5 monetization → Phase 6 launch). After Phase 4 we restructured to insert **Phase 5 (Product Polish & Visual Identity)** and **Phase 6 (Feature Depth & AI Capabilities)** before monetization — DECISIONS row 34. The latest restructure (DECISIONS row 97) inserts **Phases 8–11 (feeding intake → scheduling → trends → synthesis)** ahead of launch — feeding is the highest-frequency owner interaction and earns the harness's intake-router + lens primitives (CLAUDE.md §3.5). The launch phase that was Phase 8 becomes Phase 12; the post-launch on-device-inference placeholder that was Phase 9 becomes Phase 13 (V1X-deferred / scoping-only, row 85 posture unchanged).
 
-**Current phase: Phase 7 — code-complete. ONE remaining gate before Phase 8 starts: the two-device on-device verification of sync, paywall, BYOK, account-delete (REQUIRED human action, not codeable). H.2.b accessibility audit closed at DECISIONS row 89; H.1.d follow-up sub-pieces (daily-cron hard-purge + cancel-account-delete + local Drift/wiki-files wipe) closed at DECISIONS row 90. Phase 8 (Play Store Prep & Launch) does not auto-start.**
+**Current phase: Phase 7 — code-complete. ONE remaining gate before Phase 8 (Feeding intake) starts: the two-device on-device verification of sync, paywall, BYOK, account-delete (REQUIRED human action, not codeable). H.2.b accessibility audit closed at DECISIONS row 89; H.1.d follow-up sub-pieces (daily-cron hard-purge + cancel-account-delete + local Drift/wiki-files wipe) closed at DECISIONS row 90. Phase 8 (Feeding intake) does not auto-start.**
 
 ---
 
@@ -384,7 +384,8 @@ home / journal entry / weekly summary / pet profile, and system-wide
 coral wiring as the medical-warning register (resolves the
 `[INTENT-INFERRED]` flag from DESIGN.md). **Last visual phase before
 launch** (DECISIONS row to land in this prep): Phase 7 is monetization
-+ cloud sync + multi-pet UI; Phase 8 is launch ops; no further polish
++ cloud sync + multi-pet UI; Phases 8–11 are the feeding-intake feature
+sequence (DECISIONS row 97) and Phase 12 is launch ops; no further polish
 phases land before ship. Hard scope wall — no additions mid-phase.
 
 **Goal of phase boundary:** "I'd hand my phone to a friend and say
@@ -623,32 +624,89 @@ Lays the seam every other group consumes. Decision-then-implementation.
 ### Group H — Account, Settings, Pre-Launch (Medium, 3 tasks)
 
 - [x] 7.H.1 **Settings refresh — sign-in/out, account delete, data export, privacy info** — sign-in/out via magic-link per row 70 (free users may stay signed-out; Pro requires sign-in). Account-delete flow per row 77: modal Export prompt → Sync purge confirmation → Soft delete + 30-day recovery window → hard purge of wiki blobs + entitlement + counters + proxy logs + auth row. **Deletion-completed audit trail** (risk mitigation lock): user-visible in-app notification on hard-purge day; backend `deleted_accounts_log` table records hash of user ID + deletion date + retention-end for GDPR/CCPA audit. Privacy-info screen copy refreshed for the proxy-default + BYOK + Supabase-Auth + E2EE story (replaces the original "your key, your calls" framing). **Sub-tasks shipped: H.1.a (supabase_flutter adoption + auth scaffold), H.1.b (SupabaseSyncBackend + cloudSyncAdapterProvider), H.1.c.1 (sign-in UI + Settings tiles + VOICE.md §6 ex 16-20), H.1.c.2 (auth-aware EntitlementNotifier + ProxyTransport wiring + chat banner flip), H.1.d (account delete cascade + Edge Function), H.1.e (privacy copy refresh in onboarding + About). H.1.d follow-up sub-pieces (DECISIONS row 90) shipped in 5 commits: migration 0003 + account-delete writes user_id + Deno test; daily-reconciliation-cron Edge Function with 11 invariants pinned; cancel-account-delete + post-sign-in undo notifier + AppShell snackbar wire; WikiIo.deleteAll + LocalDataWipe orchestrator + delete-screen wire; A2-deployment.md cron-registration steps.**
-- [x] 7.H.2 **Accessibility pass + opt-in crash analytics with sk-ant- redaction** — contrast, screen reader labels, text scaling, touch-target sizes (audit every Phase 6.6 + Phase 7 surface). Lightweight crash analytics, opt-in + off by default. **`sk-ant-` pattern redaction layer** (risk mitigation lock): every analytics payload + crash report scrubs anything matching `sk-ant-[a-zA-Z0-9_-]{20,}` before send so a BYOK user's key can never leak through telemetry. **Sub-tasks shipped: H.2.a (analytics scaffold + sk-ant- redaction layer + Settings toggle, opt-in off-by-default; concrete provider deferred to Phase 8+ per DECISIONS row 88). H.2.b (DECISIONS row 89) shipped in 5 commits across 5 axes — Pass A (Semantics labels on chat send + onboarding image + pet-switcher), Pass B (WCAG AA contrast assertions on both schemes), Pass C (text-scaling resilience on shared chassis), Pass D (48dp tap-target regression fix on Compare-plans link), Pass E (`SemanticsService.announce` on `appSnackBar`). TalkBack manual verification + chat composer 2.0× scale check defer to the on-device verification gate.**
+- [x] 7.H.2 **Accessibility pass + opt-in crash analytics with sk-ant- redaction** — contrast, screen reader labels, text scaling, touch-target sizes (audit every Phase 6.6 + Phase 7 surface). Lightweight crash analytics, opt-in + off by default. **`sk-ant-` pattern redaction layer** (risk mitigation lock): every analytics payload + crash report scrubs anything matching `sk-ant-[a-zA-Z0-9_-]{20,}` before send so a BYOK user's key can never leak through telemetry. **Sub-tasks shipped: H.2.a (analytics scaffold + sk-ant- redaction layer + Settings toggle, opt-in off-by-default; concrete provider deferred to Phase 12+ per DECISIONS row 88). H.2.b (DECISIONS row 89) shipped in 5 commits across 5 axes — Pass A (Semantics labels on chat send + onboarding image + pet-switcher), Pass B (WCAG AA contrast assertions on both schemes), Pass C (text-scaling resilience on shared chassis), Pass D (48dp tap-target regression fix on Compare-plans link), Pass E (`SemanticsService.announce` on `appSnackBar`). TalkBack manual verification + chat composer 2.0× scale check defer to the on-device verification gate.**
 - [x] 7.H.3 **Phase 7 wrap-up commit + summary; on-device verification REQUIRED ACROSS TWO DEVICES.** Sync needs cross-device validation; one-device verification is insufficient. **Code-complete; ONE remaining deferral — the two-device on-device verification (REQUIRED, human action — not codeable). H.2.b accessibility audit closed at DECISIONS row 89; H.1.d follow-up sub-pieces (daily-cron hard-purge + cancel-account-delete + local Drift/wiki-files wipe) closed at DECISIONS row 90.**
 
 **On-device verification (REQUIRED, two devices):** sign in via magic-link on device A → subscribe with Play tester account → install on device B → sign in with same email → enter passphrase → confirm wiki syncs end-to-end with no plaintext on backend (proxy log inspection); add a second pet and confirm pet switcher works; trigger a sync conflict via offline writes on both devices and confirm `.conflict.md` is created with deterministic loser content; chat 200+ messages on a fresh free tester account and confirm the hard-wall fires with both Upgrade + BYOK CTAs; flip BYOK and confirm calls bypass the backend (verify via proxy logs); buy a photo credit pack and confirm balance rolls over to next month; buy the care pack and confirm Pro-gated skill loads after purchase; trigger account deletion + verify export prompt + sync purge confirmation + 30-day soft-delete window + hard-purge on the recovery-window expiration date.
 
-**STOP.** Phase 8 (Play Store Prep & Launch) does NOT auto-start.
+**STOP.** Phase 8 (Feeding intake: intent router + food lens + hazard gate) does NOT auto-start.
 
 ---
 
-## Phase 8 — Play Store Prep & Launch
+## Phase 8 — Feeding intake: intent router + food lens + hazard gate
+
+**Goal:** a food photo becomes a structured, hazard-screened feeding memory. Intake is safe the moment it exists — the hazard gate ships in the same phase as logging, not after. Per DECISIONS row 97, this phase earns two durable primitives the harness keeps: an **intake intent router** (lib/harness/intake/) and the **lens pattern** documented in CLAUDE.md §3.5. Food is lens #1; future husbandry dimensions (grooming, environment, activity, body-condition-over-time) drop into the same five slots.
+
+**Two product walls** (DECISIONS rows 100 + 103): we **detect hazards, never treat** (deterministic toxin screener routes to vet/poison-control; no LLM treatment advice ever) and we **surface patterns, never predict** (synthesis describes the journal; no diet-driven health-outcome forecasts). Free/Pro split per row 102: intake + hazard gate are FREE; safety can never sit behind a paywall.
+
+- [ ] 8.0 **Intake intent router (new harness primitive).** New `lib/harness/intake/intent_router.dart`. Defines `IntakeIntent` enum (`logMealAfter`, `checkMealBefore`, `generalMemory`; lens-extensible). Resolution contract per DECISIONS row 98: explicit toggle is authoritative when present; otherwise lightweight LLM classification (Claude transport, short prompt) handles the soft cases ("is this a meal at all / what kind"). Pure unit-testable dispatcher, no UI. Designed for future lenses (grooming, enclosure, activity).
+- [ ] 8.1 **Food-mode extractor.** Sibling to `lib/harness/vision/photo_extractor.dart` (food-mode flag on the existing extractor preferred — keep one entry point). Locked schema per DECISIONS row 99: `{food_type, identified_items: [], portion_estimate (hedged, optional), prep_notes, meal_phase, freeform_caption, fed_at}`. Sonnet-backed (matches the 6.5 extractor). **Hedged language only** ("looks like kibble with what may be chicken") — never confident nutritional claims. Routes through `VisionGate` (free per row 102, but the routing keeps the entitlement/BYOK/quota path uniform).
+- [ ] 8.2 **Structured food frontmatter + `WikiRepo.writeFoodEntry`.** Adds optional structured frontmatter on `wiki/<pet>/food/*.md`: `food_type`, `items`, `portion`, `meal_phase` (`MealPhase.checkedBefore` / `MealPhase.loggedAfter`), `fed_at` (distinct from the entry's index `ts` — supports pre-feeding logging where write-time ≠ meal-time). **Backward-compatible** — existing freeform food entries stay valid memory. Atomic write, mirrors the weight/vet writer pattern.
+- [ ] 8.3 **`FoodHazardScreener` (safety-critical, the highest-risk task block).** New `lib/harness/guardrails/food_hazard_screener.dart`, deterministic sibling to `RedFlagScreener`. **Not an LLM call**, not an overload of the symptom screener. Matches extractor `identified_items` (+ `freeform_caption` as a secondary source — same posture as the row 64 / Phase 6.7 vision extension on `RedFlagScreener`) against bundled `assets/hazards/food_toxins.yaml` (species-filtered toxin list: chocolate, xylitol incl. "birch sugar", grapes/raisins, alliums — onion/garlic/chives/leeks/shallots — macadamia, excessive salt, alcohol, caffeine, yeast/bread dough, cannabis/edibles, …). On hit: existing coral `RedFlagBadge` + escalation surface ("This may be hazardous — contact your vet or animal poison control now"). US locale appends ASPCA APCC (888) 426-4435 + Pet Poison Helpline (**verify the canonical number at implementation, not from memory** — it's safety-critical); other locales show the generic "contact your vet now." Numbers in `assets/hazards/escalation.yaml`, never in any prompt (DECISIONS row 101). Over-warn posture per row 29 (false-positive-tolerant). **Fixture floor: ≥10 phrasings per toxin category** in `test/harness/guardrails/food_hazards_fixture.dart`, mirroring the 6.7 vision-screener floor. Badge persists as a historical record per CLAUDE.md §10 (read-only, never invalidated).
+- [ ] 8.4 **Capture-flow branching.** Wire the router into the existing `/photos/capture` flow (`lib/app/photos/photo_capture_screen.dart`) and add a Feeding tile to `_QuickCaptureRow` (`lib/app/home/home_screen.dart`). Form preview gains a before/after toggle (the authoritative input for the router); "after" → log meal memory via 8.2 writer; "before" → hazard screen + placeholder hook for "schedule this" (the schedule action itself lands in Phase 9). Reuse the Phase 5 design system + primitives; **no new design tokens** (DESIGN.md note covers this). `PhotoCapturePrefill` (the Phase 6.9 chat-to-capture handoff) extends with a `MealPhase? mealPhase` field.
+- [ ] 8.5 **Phase 8 wrap-up commit + summary; on-device verification REQUIRED.** §14 self-verification: `flutter analyze --fatal-infos` exit 0; `flutter test --reporter expanded` exit 0; APK builds via the CI release-apk job on the planning branch. **On-device gate (hazard verification is mandatory):** photograph a known toxin from the food_toxins.yaml list → coral escalation fires on form preview AND persists on the saved entry; photograph plain kibble → no false alarm (within the over-warn tolerance window). Verify on at least one Android device.
+
+**STOP.** Phase 9 (Feeding scheduling) does NOT auto-start.
+
+---
+
+## Phase 9 — Feeding scheduling
+
+**Goal:** "feed this later" → a deterministic reminder. Reuses the Phase 4 scheduling stack; no new infrastructure.
+
+- [ ] 9.0 `ReminderKind.feeding` enum case + label in `lib/harness/scheduling/reminder_kinds.dart`. Add `defaultCadenceFor` entry returning `Duration(days: 1)` for daily-feeding default (cadence is built-in via the kind — no new recurring infrastructure required; the existing Phase 4 design covers it). Single small mechanical PR — high confidence.
+- [ ] 9.1 `assets/reminders/feeding.yaml` template mirroring `vet_followup.yaml`. Owner-facing copy follows VOICE.md cadence (Phase 9 adds a new §6 example for the feeding reminder fire).
+- [ ] 9.2 **"Before" intent → schedule path.** Plug into the Phase 8.4 placeholder hook. Form preview gains a "Remind me to feed at [time]" affordance that calls `ReminderRepo.add` with `ReminderKind.feeding` + `ScheduleMode.notification`. Recurring (daily) is the default via the kind's built-in cadence; no per-call configuration required.
+- [ ] 9.3 Feeding reminders surfaced on the Home reminders section + `/reminders` screen. Reuses the existing reminder card; no new widget.
+- [ ] 9.4 **Phase 9 wrap-up commit + summary; on-device verification REQUIRED.** §14 self-verification. **On-device gate:** schedule a feeding reminder for 60 seconds out; confirm the notification fires; confirm tapping the notification opens the right pet's home; confirm the next-day recurrence appears in `/reminders`.
+
+**STOP.** Phase 10 (Feeding trends + signals) does NOT auto-start.
+
+---
+
+## Phase 10 — Feeding trends + signals
+
+**Goal:** descriptive feeding patterns visible on the pet profile. Pet-isolated, frontmatter-parsing — no new schema beyond Phase 8.2.
+
+- [ ] 10.0 `TrendsRepo` extension (`lib/data/repos/trends_repo.dart`). New methods: `feedingFrequency(petId, window)`, `itemVariety(petId, window)`, `mealPhaseCounts(petId, window)`, `tableScrapRate(petId, window)`, `hazardFlagCount(petId, window)`. Mirrors the existing `weightHistory` / `symptomFrequencies` shape: query entries by `petId + type='food'`, parse the Phase 8.2 structured frontmatter, return per-window observations. **Pet-isolation invariant holds** — the `trends_repo_test` discipline (one pet's data never bleeds into another's) carries over verbatim.
+- [ ] 10.1 SOUL profile feeding chart using `fl_chart`, reusing the Phase 6.12 chart pattern + empty states. Visualizes frequency + variety over a 30-day window; hazard-flag count surfaced as a small coral-tinted callout (consistent with the medical-attention register), not a chart axis.
+- [ ] 10.2 **Phase 10 wrap-up commit + summary; on-device verification REQUIRED.** §14 self-verification. **On-device gate:** log 5+ feeding entries across 3+ different food types over a few days of fixtures; confirm the chart renders correctly; confirm empty-state copy appears for pets with no feeding entries; confirm one pet's feeding chart is independent of another's (multi-pet integrity check).
+
+**STOP.** Phase 11 (Feeding-aware synthesis) does NOT auto-start.
+
+---
+
+## Phase 11 — Feeding-aware synthesis (Pro)
+
+**Goal:** weekly/monthly reports surface feeding patterns — **descriptive, never predictive** (DECISIONS row 103, reinforces row 25). Pro-gated via the existing Phase 7 entitlement seam (no new gate).
+
+- [ ] 11.0 Weekly digest runner extension in `lib/harness/synthesis/weekly_digest.dart`. New feeding-signal branch in `_buildTrendBlock()` alongside weight-delta + symptom-count (the Phase 6.13 enrichment pattern). Surfaces feeding frequency, variety, table-scrap rate, hazard count over the 7-day window — pulled from Phase 10's `TrendsRepo` methods.
+- [ ] 11.1 Monthly report runner extension in `lib/harness/synthesis/monthly_report.dart` (`_buildMonthlyTrendBlock`). 30-day window. Same signal vocabulary as 11.0.
+- [ ] 11.2 **System-prompt boundary** (weekly + monthly runners): append the sentence "Describe feeding patterns from the journal; never forecast diet-driven health outcomes." after the existing "You are not a vet — flag escalation, do not diagnose" line. Reinforces DECISIONS row 25. Assertion tests on the rendered prompt string (the boundary must appear verbatim — same defense-in-depth posture as the red-flag screener's escalation copy).
+- [ ] 11.3 **Pro gate verification.** Runner respects the entitlement gate wired in Phase 7 task 7.10 (no new code, just a regression test). Tests confirm feeding signals are present when entitlement state is `proMonthly`/`proAnnual` and absent when state is `free`/`byok`/`freeAnonymous`.
+- [ ] 11.4 **Phase 11 wrap-up commit + summary; on-device verification REQUIRED.** §14 self-verification. **On-device gate (Pro account):** trigger a weekly digest on a Pro tester account with feeding entries; confirm the feeding-signal block appears in the digest entry under `wiki/<pet>/digest/`; confirm the boundary sentence appears in the digest prompt (log inspection); confirm a free-tier account doesn't see feeding signals in any digest output.
+
+**STOP.** Phase 12 (Play Store Prep & Launch) does NOT auto-start.
+
+---
+
+## Phase 12 — Play Store Prep & Launch
 
 **Goal:** signed AAB on internal testing track, store listing approved.
 **Definition of done:** install via Play internal track on a fresh device; sandboxed billing flow works end-to-end.
 
-- [ ] 8.0 **Server-side IAP receipt verification (`play-billing-verify` Edge Function) — pre-monetization launch gate.** Group C (7.C.1–C.3) shipped Play Billing in *optimistic-emit* mode: `BillingService` grants Pro / photo credits / care-pack skills client-side on the `purchased` event and treats that as the source of truth, with server verification stubbed "until the `play-billing-verify` Edge Function ships in a later task" — that task was never added to the plan. Optimistic-only entitlement is unshippable for paid subs (a tampered client can self-grant Pro). Build the deferred Edge Function: verify the Play purchase token against the Google Play Developer API, write the verified entitlement to the Supabase `entitlements` table as canonical state (DECISIONS row 81), reconcile against the optimistic emit (emit becomes a latency-hiding cache, overwritten on the next reconciliation). Wire `BillingService` / `EntitlementNotifier` to treat the server result as authoritative. **Naming:** this is the artifact DECISIONS rows 82 + 90 listed as `play-billing-webhook`; 11 code/doc sites (`billing_service.dart`, `providers.dart`, `tables.dart`, `docs/SETUP.md`) call it `play-billing-verify` — **`play-billing-verify` is canonical** (DECISIONS row 92). Must land before 8.6 (`build appbundle`) / 8.7 (upload). Deployment requires user hand-on (Edge Function deploy + Google Play Developer API service-account credential as a Supabase secret).
-- [ ] 8.1 Verify Phase 5 adaptive icon + splash meet Play Store asset requirements (sizes, safe-zones, dark-mode preview); regenerate any missing densities
-- [ ] 8.2 Privacy policy hosted; Data Safety form drafted (LLM calls leaving the device disclosed)
-- [ ] 8.3 Store listing copy + 1 phone + 1 7" tablet screenshot set
-- [ ] 8.4 Release keystore generated; Play App Signing enrolled (replaces the debug-signing fallback from DECISIONS row 22)
-- [ ] 8.4b **Target SDK + permissions audit — pre-AAB-build hygiene gate.** Verify `android/app/build.gradle.kts` `targetSdkVersion` meets the current Play Store annual minimum (Play enforces this on upload, not on build — 8.6 produces a valid AAB against an out-of-date target, then 8.7 fails at Play Console). Sweep `android/app/src/main/AndroidManifest.xml` for deprecated permissions (`WRITE_EXTERNAL_STORAGE` on modern Android scoped-storage, `READ_EXTERNAL_STORAGE` ditto, any `MANAGE_EXTERNAL_STORAGE` accidents). Re-run the **DECISIONS row 33 plugin-bump checklist** against every plugin added since the row landed (`in_app_purchase`, `supabase_flutter`, `crypto`, …) — diff each plugin's `example/android/app/src/main/AndroidManifest.xml` from `~/.pub-cache/hosted/pub.dev/<pkg>-<ver>/` against ours; patch any missing services/receivers/providers; update `test/platform/android_manifest_test.dart` invariants. Gates 8.7 (upload AAB).
-- [ ] 8.5 R8/ProGuard rules verified for Drift, Anthropic SDK, and the Phase 4 scheduling stack
-- [ ] 8.6 `flutter build appbundle --release`
-- [ ] 8.7 Upload AAB to internal testing track
-- [ ] 8.8 Triage Play pre-launch report
-- [ ] 8.9 Closed testing checklist + invite list
-- [ ] 8.10 Phase wrap-up commit + summary
+- [ ] 12.0 **Server-side IAP receipt verification (`play-billing-verify` Edge Function) — pre-monetization launch gate.** Group C (7.C.1–C.3) shipped Play Billing in *optimistic-emit* mode: `BillingService` grants Pro / photo credits / care-pack skills client-side on the `purchased` event and treats that as the source of truth, with server verification stubbed "until the `play-billing-verify` Edge Function ships in a later task" — that task was never added to the plan. Optimistic-only entitlement is unshippable for paid subs (a tampered client can self-grant Pro). Build the deferred Edge Function: verify the Play purchase token against the Google Play Developer API, write the verified entitlement to the Supabase `entitlements` table as canonical state (DECISIONS row 81), reconcile against the optimistic emit (emit becomes a latency-hiding cache, overwritten on the next reconciliation). Wire `BillingService` / `EntitlementNotifier` to treat the server result as authoritative. **Naming:** this is the artifact DECISIONS rows 82 + 90 listed as `play-billing-webhook`; 11 code/doc sites (`billing_service.dart`, `providers.dart`, `tables.dart`, `docs/SETUP.md`) call it `play-billing-verify` — **`play-billing-verify` is canonical** (DECISIONS row 92). Must land before 12.6 (`build appbundle`) / 12.7 (upload). Deployment requires user hand-on (Edge Function deploy + Google Play Developer API service-account credential as a Supabase secret).
+- [ ] 12.1 Verify Phase 5 adaptive icon + splash meet Play Store asset requirements (sizes, safe-zones, dark-mode preview); regenerate any missing densities
+- [ ] 12.2 Privacy policy hosted; Data Safety form drafted (LLM calls leaving the device disclosed)
+- [ ] 12.3 Store listing copy + 1 phone + 1 7" tablet screenshot set
+- [ ] 12.4 Release keystore generated; Play App Signing enrolled (replaces the debug-signing fallback from DECISIONS row 22)
+- [ ] 12.4b **Target SDK + permissions audit — pre-AAB-build hygiene gate.** Verify `android/app/build.gradle.kts` `targetSdkVersion` meets the current Play Store annual minimum (Play enforces this on upload, not on build — 12.6 produces a valid AAB against an out-of-date target, then 12.7 fails at Play Console). Sweep `android/app/src/main/AndroidManifest.xml` for deprecated permissions (`WRITE_EXTERNAL_STORAGE` on modern Android scoped-storage, `READ_EXTERNAL_STORAGE` ditto, any `MANAGE_EXTERNAL_STORAGE` accidents). Re-run the **DECISIONS row 33 plugin-bump checklist** against every plugin added since the row landed (`in_app_purchase`, `supabase_flutter`, `crypto`, …) — diff each plugin's `example/android/app/src/main/AndroidManifest.xml` from `~/.pub-cache/hosted/pub.dev/<pkg>-<ver>/` against ours; patch any missing services/receivers/providers; update `test/platform/android_manifest_test.dart` invariants. Gates 12.7 (upload AAB).
+- [ ] 12.5 R8/ProGuard rules verified for Drift, Anthropic SDK, and the Phase 4 scheduling stack
+- [ ] 12.6 `flutter build appbundle --release`
+- [ ] 12.7 Upload AAB to internal testing track
+- [ ] 12.8 Triage Play pre-launch report
+- [ ] 12.9 Closed testing checklist + invite list
+- [ ] 12.10 Phase wrap-up commit + summary
 
 **On-device verification:** install via Play internal track on a fresh device, run sandboxed billing flow.
 
@@ -656,14 +714,16 @@ Lays the seam every other group consumes. Decision-then-implementation.
 
 ---
 
-## Phase 9 (post-launch) — On-device inference + per-message provider switching
+## Phase 13 (post-launch) — On-device inference + per-message provider switching
 
-**Status:** Scoped post-launch. Triggers on real device-distribution and proxy-cost data accumulating ~4–8 weeks after Phase 8 ships, OR earlier if proxy economics prove unsustainable. Not a pre-committed task plan — Phase 9 kickoff scoping happens at trigger time.
+**Renumbered from Phase 9** per DECISIONS row 97 (the Phase-8 restructure that inserted Phases 8–11 ahead of launch). V1X-deferred / scoping-only posture unchanged — see row 85.
+
+**Status:** Scoped post-launch. Triggers on real device-distribution and proxy-cost data accumulating ~4–8 weeks after Phase 12 ships, OR earlier if proxy economics prove unsustainable. Not a pre-committed task plan — Phase 13 kickoff scoping happens at trigger time.
 
 **Locked decisions:** see DECISIONS row 85.
 
-**Detailed scope, kickoff scoping questions, candidate model families, candidate inference frameworks:** see `V1X_BACKLOG.md` — *Phase 9 — Post-launch on-device inference + per-message provider switching* under v1.x.
+**Detailed scope, kickoff scoping questions, candidate model families, candidate inference frameworks:** see `V1X_BACKLOG.md` — *Phase 13 — Post-launch on-device inference + per-message provider switching* under v1.x.
 
-**One-line summary:** Adds Local Inference as a third `LlmTransport` alongside `DirectTransport` (BYOK) and `ProxyTransport` (Cloud); device-capability diagnostic determines onboarding default; per-message provider switching is Phase 9 sub-scope (Phase 10 fallback).
+**One-line summary:** Adds Local Inference as a third `LlmTransport` alongside `DirectTransport` (BYOK) and `ProxyTransport` (Cloud); device-capability diagnostic determines onboarding default; per-message provider switching is Phase 13 sub-scope (Phase 14 fallback).
 
-**STOP. Phase 9 task plan is post-launch work, not pre-committed.**
+**STOP. Phase 13 task plan is post-launch work, not pre-committed.**
