@@ -1,0 +1,32 @@
+# Phase 8.3 escalation resources per DECISIONS row 101.
+#
+# US-first. Non-US locales show the generic "Contact your vet now."
+# Numbers VERIFIED at implementation, NOT from memory — each contact
+# carries verified_at + source for audit/refresh cadence.
+#
+# canonical_copy is the locked DECISIONS row 100 / VOICE.md medical-
+# attention phrasing — the screener-rendered widget shows this text
+# verbatim. Never paraphrased by the LLM (numbers in a prompt are a
+# hallucination surface; row 101 lock).
+
+canonical_copy: "This may be hazardous — contact your vet or animal poison control now."
+
+generic_suffix: "Contact your vet now."
+
+locales:
+  US:
+    contacts:
+      - name: "ASPCA Animal Poison Control Center"
+        phone: "(888) 426-4435"
+        notes: "Available 24/7. A consultation fee may apply."
+        verified_at: "2026-05-30"
+        source: "https://www.aspca.org/pet-care/animal-poison-control"
+
+      - name: "Pet Poison Helpline"
+        phone: "(855) 764-7661"
+        notes: "Available 24/7. $89 per-incident fee includes follow-up consultations."
+        verified_at: "2026-05-30"
+        source: "https://www.petpoisonhelpline.com/"
+
+  default:
+    contacts: []

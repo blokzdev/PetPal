@@ -27,6 +27,8 @@ import '../platform/billing/iap_platform.dart';
 import 'entitlement/entitlement.dart';
 import 'entitlement/entitlement_notifier.dart';
 import '../harness/agent/tool_dispatcher.dart';
+import '../harness/guardrails/food_hazard_escalation.dart';
+import '../harness/guardrails/food_hazard_screener.dart';
 import '../harness/guardrails/red_flag_screener.dart';
 import '../harness/intake/intent_router.dart';
 import '../harness/retrieval/embedding_provider.dart';
@@ -285,6 +287,35 @@ final intakeIntentRouterProvider = Provider<IntakeIntentRouter>((ref) {
   final llm = ref.watch(haikuLlmClientProvider);
   final gate = ref.watch(visionGateProvider);
   return IntakeIntentRouter(llm: llm, gate: gate);
+});
+
+/// Phase 8 task 8.3 — food-hazard screener. Deterministic phrase
+/// matcher over the food extractor's `identified_items` +
+/// `freeform_caption`. Loads the toxin list from
+/// `assets/hazards/food_toxins.yaml` at first read; cached for the
+/// app lifetime via Riverpod's `FutureProvider` semantics.
+///
+/// Not LLM-backed — pure regex sweep. The 8.4 capture flow does
+/// `ref.watch(foodHazardScreenerProvider).whenData(screen)` and the
+/// match drives the coral `RedFlagBadge` + escalation surface.
+final foodHazardScreenerProvider =
+    FutureProvider<FoodHazardScreener>((ref) async {
+  const source = AssetFoodHazardCategorySource();
+  final categories = await source.load();
+  return FoodHazardScreener(categories: categories);
+});
+
+/// Phase 8 task 8.3 — poison-control escalation resources. Loads
+/// `assets/hazards/escalation.yaml` at first read; cached. Surfaces
+/// the locked canonical_copy ("This may be hazardous — contact your
+/// vet or animal poison control now.") + US locale contacts (ASPCA
+/// APCC + Pet Poison Helpline, both verified live from canonical
+/// sources at implementation time per DECISIONS row 101). Non-US
+/// locales degrade to the generic_suffix copy.
+final escalationResourcesProvider =
+    FutureProvider<EscalationResources>((ref) async {
+  const source = AssetEscalationResourceSource();
+  return source.load();
 });
 
 /// Phase 6 task 6.8 — Haiku-tuned LLM client for the affective
